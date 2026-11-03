@@ -57,6 +57,18 @@ if [ -d data/nexus-core ]; then
   ok "nexus-core.tar.gz ($(du -h "$DEST/nexus-core.tar.gz" | cut -f1))"
 fi
 
+if [ -d data/nexus-bridge ]; then
+  info "    + nexus-bridge (mémoire commune Claude / ChatGPT / Gemini)"
+  if docker compose ps --status running -q nexus-bridge 2>/dev/null | grep -q . \
+     && [ -f data/nexus-bridge/bridge.db ]; then
+    docker compose exec -T nexus-bridge python -c "import sqlite3; s=sqlite3.connect('/data/bridge.db'); d=sqlite3.connect('/data/bridge-sauvegarde.db'); s.backup(d); d.close(); s.close()" \
+      || avert "Copie à chaud de la mémoire commune impossible : copie brute du fichier."
+  fi
+  tar -C data -czf "$DEST/nexus-bridge.tar.gz" nexus-bridge
+  rm -f data/nexus-bridge/bridge-sauvegarde.db
+  ok "nexus-bridge.tar.gz ($(du -h "$DEST/nexus-bridge.tar.gz" | cut -f1))"
+fi
+
 info "2/3 — Bases PostgreSQL et workflows n8n (mode complet)"
 if docker compose ps --status running -q postgres 2>/dev/null | grep -q .; then
   for base in nexus n8n; do
