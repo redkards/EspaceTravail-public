@@ -25,7 +25,7 @@ from sqlalchemy import func, select
 from . import cyber, gate, ledger, sentinel
 from .config import cfg
 from .db import session_scope
-from .models import Decision, Etape, Lecon, Mission, maintenant
+from .models import Avis, Decision, Etape, Lecon, Mission, maintenant
 
 log = logging.getLogger("nexus.lecons")
 TEXTE_MAX = 200
@@ -69,7 +69,7 @@ def type_de(texte: str) -> str:
                             "secret present", "retirez", "invente", "ne citez pas", "mauvaise marque")):
         return "interdit"
     if any(m in t for m in ("mention obligatoire", "inacheve", "absent", "manque", "obligatoire", "ajoutez",
-                            "incomplet", "completez")):
+                            "incomplet", "completez", "oubli", "il faut", "doit contenir", "preciser")):
         return "obligation"
     return "methode"
 
@@ -108,9 +108,11 @@ def signaux(mid: int) -> list[tuple[str, str]]:
             res.append(("directeur", "Consigne à préciser : " + m.message.split("Suggestion du directeur :", 1)[1].strip()))
         if m.relance_auto:
             res.append(("directeur", "Relance automatique demandée par le directeur après refus répétés du contrôle."))
-        avis = sentinel.lire(f"avis:{mid}")
-        if avis.startswith("negatif:"):
-            res.append(("decideur", "Avis négatif du Décideur : " + avis.split(":", 1)[1]))
+        a = s.execute(select(Avis).where(Avis.mission_id == mid, Avis.valeur == "negatif")).scalar_one_or_none()
+        if a:
+            from .avis import MOTIFS
+            res.append(("decideur", f"Avis négatif du Décideur : {MOTIFS.get(a.motif, a.motif)}"
+                                    + (f" — {a.texte}" if a.texte else "")))
     return res
 
 

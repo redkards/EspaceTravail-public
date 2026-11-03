@@ -23,6 +23,8 @@ from .routes import creer_routeur
 from .routes_decideur import api as decideur_api
 from .routes_decideur import page as decideur_page
 from .pwa import router as pwa_router
+from .routes_memoire import cockpit as memoire_cockpit
+from .routes_memoire import lecture as memoire_lecture
 from .securite import garde_cockpit
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s : %(message)s")
@@ -33,6 +35,11 @@ PERIODE_FOND_S = 600  # tâche de fond toutes les 10 minutes
 
 def maintenance() -> None:
     """Expiration des décisions N3 et reprise de la file N3 (plafond journalier)."""
+    try:
+        from . import lecons
+        lecons.verifier_regressions()
+    except Exception:
+        log.exception("Erreur pendant le contrôle de régression des leçons")
     try:
         n = pipeline.expirer_decisions()
         f = pipeline.traiter_file_n3()
@@ -54,6 +61,11 @@ def tick_decideur() -> None:
         decideur.tick()
     except Exception:
         log.exception("Erreur pendant la tâche des sessions de décision")
+    try:
+        from . import lecons
+        lecons.revue_hebdo()
+    except Exception:
+        log.exception("Erreur pendant la revue hebdomadaire des leçons")
     try:
         resume.tick()
     except Exception:
@@ -134,6 +146,9 @@ def sante_publique():
 
 
 app.include_router(creer_routeur(), prefix="/api", dependencies=[Depends(verifier_cle)])
+app.include_router(memoire_lecture(), prefix="/api", dependencies=[Depends(verifier_cle)])
+app.include_router(memoire_lecture(), prefix="/cockpit/api")
+app.include_router(memoire_cockpit)  # décisions sur les leçons, effacement : cockpit uniquement
 app.include_router(creer_routeur(cockpit=True), prefix="/cockpit/api")
 app.include_router(decideur_api)  # /cockpit/api/decideur/* : même garde que tout /cockpit/api
 app.include_router(decideur_page)

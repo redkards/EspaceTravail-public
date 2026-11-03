@@ -50,6 +50,12 @@ class FauxCore:
             return httpx.Response(200, json=[{"titre": "Pitch", "source": "contexte/redkards.md#2", "auteur": "import",
                                               "version": 1, "date": "2026-11-03T20:00:00",
                                               "contenu": f"Résultat pour « {q} » " + "x" * 2000}])
+        if req.method == "GET" and req.url.path == "/api/memoire/recherche":
+            return httpx.Response(200, json={"connaissances": [{"titre": "Pitch", "source": "x"}], "lecons": [],
+                                             "exemples": [], "archive": [{"seq": 1, "mission_id": 3}]})
+        if req.method == "GET" and req.url.path == "/api/memoire/lecons":
+            return httpx.Response(200, json=[{"id": 1, "texte": "Nommer un responsable", "type": "obligation",
+                                              "statut": req.url.params.get("statut"), "occurrences": 4}])
         if req.method == "GET" and req.url.path == "/api/projets":
             if not self.projets_disponible:
                 return httpx.Response(404, json={"detail": "Not Found"})

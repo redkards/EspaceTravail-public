@@ -9,7 +9,7 @@ OUTILS_ATTENDUS = {
     "tache_creer", "tache_lister", "tache_prendre", "tache_mettre_a_jour",
     "message_envoyer", "messages_lire", "passation_ecrire", "passation_derniere",
     "projets_lister", "mothership_mission", "mothership_statut", "mothership_decisions_en_attente",
-    "journal_lister", "projet_connaissances",
+    "journal_lister", "projet_connaissances", "memoire_collective_rechercher", "lecons_lister",
 }
 
 
@@ -371,6 +371,20 @@ def test_projet_connaissances(session, faux_core):
     assert all(r.method == "GET" for r in faux_core.requetes if "/connaissances" in r.url.path)
     noms = {o["name"] for o in session().rpc("tools/list").json()["result"]["tools"]}
     assert not any("connaissance" in n and n != "projet_connaissances" for n in noms)
+
+
+def test_memoire_collective_lecture_seule(session, faux_core):
+    res, d = session("gemini").outil("memoire_collective_rechercher", q="pitch", projet="redkards")
+    assert not res["isError"] and d["connaissances"][0]["titre"] == "Pitch" and d["archive"][0]["seq"] == 1
+    req = faux_core.requetes[-1]
+    assert req.url.path == "/api/memoire/recherche" and req.url.params["projet"] == "redkards"
+    _, l = session("claude").outil("lecons_lister")
+    assert l["nombre"] == 1 and faux_core.requetes[-1].url.params["statut"] == "acceptee"
+    res, _ = session().outil("lecons_lister", statut="supprimee")
+    assert res["isError"]
+    assert all(r.method == "GET" for r in faux_core.requetes if "/memoire" in r.url.path)
+    noms = {o["name"] for o in session().rpc("tools/list").json()["result"]["tools"]}
+    assert not any(x in n for n in noms for x in ("accepter", "rejeter", "effacer", "lecon_"))
 
 
 def test_mothership_injoignable_ou_cle_refusee(session, monkeypatch):

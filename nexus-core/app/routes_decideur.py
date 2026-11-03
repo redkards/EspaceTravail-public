@@ -71,7 +71,29 @@ def _controles(d: Decision, corps: Preparation) -> None:
 
 @api.get("/etat")
 def etat():
-    return decideur.etat_decideur()
+    from . import avis, lecons
+    return {**decideur.etat_decideur(), "a_noter": avis.a_noter(), "lecons_proposees": lecons.lister("proposee"),
+            "motifs_avis": avis.MOTIFS}
+
+
+class NouvelAvis(BaseModel):
+    valeur: Literal["positif", "negatif"]
+    motif: str | None = Field(default=None, max_length=20)
+    texte: str | None = Field(default=None, max_length=120)
+
+
+@api.post("/avis/{mid}")
+def noter(mid: int, corps: NouvelAvis, request: Request):
+    """Note en un geste (cockpit uniquement, anti-CSRF)."""
+    from . import avis
+    try:
+        return avis.enregistrer(mid, corps.valeur, corps.motif, corps.texte, utilisateur(request))
+    except LookupError as e:
+        raise HTTPException(404, str(e))
+    except PermissionError as e:
+        raise HTTPException(409, str(e))
+    except ValueError as e:
+        raise HTTPException(422, str(e))
 
 
 @api.post("/decisions/{did}/preparer")

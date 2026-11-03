@@ -565,6 +565,55 @@ def projet_connaissances(auteur: str, a: dict) -> dict:
 
 
 @outil(
+    "memoire_collective_rechercher", "Mémoire collective (recherche)",
+    "Cherche en une fois dans la mémoire collective du Mothership : connaissances des projets, leçons "
+    "apprises acceptées, exemples validés et archive des missions. Lecture seule.",
+    _objet({
+        "q": _texte("Mots-clés de recherche.", 300, 2),
+        "projet": _projet("Optionnel : limiter à un projet."),
+        "service": {"type": "string", "maxLength": 80, "description": "Optionnel : limiter à un service (ex. CONTENT-ARENA/redaction)."},
+        "limite": {"type": "integer", "minimum": 1, "maximum": 10, "default": 5},
+    }, ["q"]),
+)
+def memoire_collective_rechercher(auteur: str, a: dict) -> dict:
+    params = {"q": a["q"], "limite": a.get("limite") or 5}
+    for cle in ("projet", "service"):
+        if a.get(cle):
+            params[cle] = a[cle]
+    rep = _appel_core("GET", "/api/memoire/recherche", params=params)
+    if rep.status_code != 200:
+        raise OutilErreur(f"nexus-core a répondu HTTP {rep.status_code} : {_detail(rep)}")
+    d = rep.json()
+    return {"q": a["q"], "connaissances": d.get("connaissances", []), "lecons": d.get("lecons", []),
+            "exemples": d.get("exemples", []), "archive": d.get("archive", []),
+            "note": "Lecture seule. Les leçons ne s'activent qu'avec la validation du propriétaire."}
+
+
+@outil(
+    "lecons_lister", "Leçons apprises",
+    "Liste les leçons apprises par le Mothership (par défaut celles acceptées par le propriétaire, donc "
+    "appliquées par les agents). Lecture seule : accepter ou rejeter se fait uniquement dans le cockpit.",
+    _objet({
+        "statut": {"type": "string", "enum": ["acceptee", "proposee", "candidate", "suspendue", "rejetee"],
+                   "default": "acceptee"},
+        "projet": _projet("Optionnel : limiter à un projet."),
+        "service": {"type": "string", "maxLength": 80, "description": "Optionnel : limiter à un service."},
+    }, []),
+)
+def lecons_lister(auteur: str, a: dict) -> dict:
+    params = {"statut": a.get("statut") or "acceptee"}
+    for cle in ("projet", "service"):
+        if a.get(cle):
+            params[cle] = a[cle]
+    rep = _appel_core("GET", "/api/memoire/lecons", params=params)
+    if rep.status_code != 200:
+        raise OutilErreur(f"nexus-core a répondu HTTP {rep.status_code} : {_detail(rep)}")
+    lecons = [{k: l.get(k) for k in ("id", "texte", "type", "service", "projet", "statut", "occurrences")}
+              for l in rep.json()][:50]
+    return {"statut": params["statut"], "nombre": len(lecons), "lecons": lecons}
+
+
+@outil(
     "mothership_mission", "Confier une mission au Mothership",
     "Envoie une mission aux agents du Mini NEXUS MOTHERSHIP (nexus-core) et renvoie son id. "
     "Le Mothership classe la mission (N0 à N3) ; tout ce qui engage (argent, publication, envoi, "

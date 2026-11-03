@@ -196,3 +196,19 @@ class Lecon(Base):
     semaine_activation: Mapped[str | None] = mapped_column(String(10), nullable=True)
     suspendue_le: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     motif: Mapped[str | None] = mapped_column(Text, nullable=True)  # motif de rejet / suspension
+
+
+class Avis(Base):
+    """Note du Décideur en un geste (👍 / 👎 + motif) ; une par mission."""
+    __tablename__ = "avis"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    mission_id: Mapped[int] = mapped_column(Integer, unique=True, index=True)
+    valeur: Mapped[str] = mapped_column(String(10))  # positif | negatif
+    motif: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    texte: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    utilisateur: Mapped[str] = mapped_column(String(40))
+    service: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    projet: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    modele: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    fonctionnement: Mapped[str | None] = mapped_column(String(2), nullable=True)
+    cree_le: Mapped[datetime] = mapped_column(DateTime, default=maintenant)
