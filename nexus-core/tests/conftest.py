@@ -17,7 +17,7 @@ def environnement(tmp_path, monkeypatch):
     monkeypatch.setenv("LLM_PROVIDER", "fake")
     monkeypatch.setenv("NEXUS_API_KEY", CLE)
     monkeypatch.setenv("NEXUS_TACHES_FOND", "0")
-    monkeypatch.setenv("BUDGET_TASK_TOKENS", "6000")
+    monkeypatch.setenv("BUDGET_TASK_TOKENS", "20000")
     for v in ("NTFY_URL", "NTFY_TOPIC", "ANTHROPIC_API_KEY"):
         monkeypatch.delenv(v, raising=False)
     from app import db

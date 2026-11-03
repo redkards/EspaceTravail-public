@@ -55,8 +55,13 @@ def test_devis_decision_refuser_et_reviser(client, entetes):
                           json={"titre": "Contrat", "consigne": "Prépare le contrat"}).json()["id"]
         did = client.get("/api/decisions?statut=en_attente", headers=entetes).json()[0]["id"]
         r = client.post(f"/cockpit/api/decisions/{did}/{choix}", json={"commentaire": "non"})
-        assert r.status_code == 200
-        assert client.get(f"/api/missions/{mid}", headers=entetes).json()["statut"] == statut
+        assert r.status_code == 200 and r.json()["statut"] == statut
+        m = client.get(f"/api/missions/{mid}", headers=entetes).json()
+        # Une révision relance la mission ; « contrat » la ramène en N3 avec une nouvelle fiche.
+        assert m["statut"] == ("refusee" if choix == "refuser" else "en_attente_n3")
+        if choix == "reviser":
+            client.post(f"/api/decisions/{client.get('/api/decisions?statut=en_attente', headers=entetes).json()[0]['id']}/refuser",
+                        headers=entetes)
 
 
 def test_killswitch_api(client, entetes):
@@ -76,6 +81,6 @@ def test_ledger_budget_agents(client, entetes):
     assert len(client.get("/api/ledger?limit=5", headers=entetes).json()) == 5
     assert len(client.get("/api/agents", headers=entetes).json()) == 40
     b = client.get("/api/budget", headers=entetes).json()
-    assert b["tokens"] > 0 and b["budget_tache_tokens"] == 6000
+    assert b["tokens"] > 0 and b["budget_tache_tokens"] == 20000
     # Aucune route de modification/suppression du ledger.
     assert client.delete("/api/ledger", headers=entetes).status_code == 405

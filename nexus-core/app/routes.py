@@ -153,9 +153,13 @@ def creer_routeur() -> APIRouter:
         return [{**p, "missions": missions.get(c, 0), "missions_en_cours": en_cours.get(c, 0),
                  "decisions_en_attente": attente.get(c, 0)} for c, p in reg_projets.items()]
 
-    def _decider(did: int, choix: str, corps: Commentaire | None):
+    def _decider(did: int, choix: str, corps: Commentaire | None, taches: BackgroundTasks | None = None):
+        commentaire = corps.commentaire if corps else None
         try:
-            return pipeline.decider(did, choix, corps.commentaire if corps else None)
+            res = pipeline.decider(did, choix, commentaire)
+            if res.get("relance") and taches is not None:
+                taches.add_task(pipeline.relancer_revision, res["mission_id"], commentaire)
+            return res
         except LookupError as e:
             raise HTTPException(404, str(e))
         except PermissionError as e:
@@ -170,8 +174,8 @@ def creer_routeur() -> APIRouter:
         return _decider(did, "refuser", corps)
 
     @r.post("/decisions/{did}/reviser")
-    def reviser(did: int, corps: Commentaire | None = None):
-        return _decider(did, "reviser", corps)
+    def reviser(did: int, taches: BackgroundTasks, corps: Commentaire | None = None):
+        return _decider(did, "reviser", corps, taches)
 
     @r.post("/killswitch")
     def killswitch(corps: KillSwitch):

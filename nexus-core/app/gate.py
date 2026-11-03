@@ -34,7 +34,9 @@ MOTS_N3 = [
 ]
 # Verbes d'envoi pour lesquels un destinataire « moi / nous » n'engage personne d'extérieur.
 VERBES_ENVOI = r"(?:envoyer|envoyez|envoie|envoyons|enverra|envoi|envois)"
-DESTINATAIRE_INTERNE = r"(?:-?\s*moi|\s+me|\s+nous|\s+a\s+moi|\s+au\s+proprietaire)"
+DESTINATAIRE_INTERNE = r"(?:-?\s*(?:moi|nous)|\s+a\s+(?:moi|nous)|\s+au\s+proprietaire)"
+# Pronom placé avant le verbe : « m'envoyer », « me envoyer », « nous envoyer ».
+PRONOM_INTERNE = r"(?:m'\s*|me\s+|nous\s+)"
 
 # Mots-clés N2 : publication selon la charte, production de code.
 MOTS_N2 = [
@@ -65,7 +67,8 @@ def _contient(texte: str, motifs: list[str]) -> str | None:
 
 def _sans_envois_internes(texte: str) -> str:
     """Neutralise « envoyez-moi », « envoie-nous », « envoyer à moi »… (envoi au propriétaire)."""
-    return re.sub(rf"(?<![a-z0-9]){VERBES_ENVOI}{DESTINATAIRE_INTERNE}(?![a-z0-9])", " ", texte)
+    texte = re.sub(rf"(?<![a-z0-9]){VERBES_ENVOI}{DESTINATAIRE_INTERNE}(?![a-z0-9])", " ", texte)
+    return re.sub(rf"(?<![a-z0-9]){PRONOM_INTERNE}{VERBES_ENVOI}(?![a-z0-9])", " ", texte)
 
 
 def _n3_texte(texte: str) -> str | None:

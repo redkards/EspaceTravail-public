@@ -382,7 +382,9 @@ assurer_env NEXUS_MODEL_CHECKER "" && ajoute=1
 # Version gratuite : budget payant à 0 (aucune dépense possible)
 assurer_env BUDGET_MONTHLY_EUR 0 && ajoute=1
 assurer_env LLM_EUR_PAR_1K_TOKENS 0 && ajoute=1
-assurer_env BUDGET_TASK_TOKENS 6000 && ajoute=1
+assurer_env BUDGET_TASK_TOKENS 20000 && ajoute=1
+assurer_env LLM_MAX_CHARS 12000 && ajoute=1
+assurer_env OLLAMA_NUM_CTX 8192 && ajoute=1
 assurer_env N3_TIMEOUT_HOURS 24 && ajoute=1
 assurer_env N3_DAILY_CAP 15 && ajoute=1
 assurer_env NTFY_URL "http://ntfy" && ajoute=1

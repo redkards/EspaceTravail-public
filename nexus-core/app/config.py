@@ -48,6 +48,7 @@ class Config:
     taches_fond: bool
     llm_timeout_s: float
     llm_max_chars: int
+    ollama_num_ctx: int
 
 
 def cfg() -> Config:
@@ -90,6 +91,7 @@ def cfg() -> Config:
         llm_timeout_s=_float("LLM_TIMEOUT_S", 180.0),
         # Taille maximale (caractères) du message utilisateur envoyé au LLM.
         llm_max_chars=max(1000, _int("LLM_MAX_CHARS", 12000)),
+        ollama_num_ctx=_int("OLLAMA_NUM_CTX", 8192),
     )
 
 

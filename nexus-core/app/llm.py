@@ -60,7 +60,8 @@ def _ollama_chat(base_url: str, modele: str, systeme: str, utilisateur: str, rol
         "options": {"temperature": temperature},
     }
     if local:
-        corps["options"]["num_ctx"] = 4096  # empreinte mémoire maîtrisée sur le VPS
+        # Contexte assez grand pour LLM_MAX_CHARS (≈ 12 000 caractères ≈ 4 000 tokens) + réponse.
+        corps["options"]["num_ctx"] = cfg().ollama_num_ctx
     if role == "checker":
         corps["format"] = "json"  # sortie contrainte en JSON
     r = httpx.post(f"{base_url}/api/chat", json=corps, headers=en_tetes or {}, timeout=cfg().llm_timeout_s)

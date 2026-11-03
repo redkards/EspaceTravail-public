@@ -22,7 +22,8 @@ from .models import Decision, Etape, Mission, maintenant
 log = logging.getLogger("nexus.pipeline")
 
 MAX_BOUCLES_CHECKER = 2   # refus → retour ANALYST, 2 boucles au plus (3 verdicts)
-TAILLE_MAX_ENTREE = 3000  # caractères transmis au modèle (petit contexte)
+MAX_REVISIONS = 2         # « Demander une révision » : 2 fois au plus par mission
+MARQUE = "\n[… tronqué …]\n"
 
 # Classement PRIME par mots-clés (texte normalisé, sans accents).
 MOTS_SERVICES = {
@@ -34,6 +35,43 @@ MOTS_SERVICES = {
     "R&D-PARADOX/veille": ["veille", "synthese", "tendance", "etat de l'art", "resume"],
     "AGENT-FACTORY/evaluation": ["evalue", "evaluation", "qualite de la sortie", "agent"],
 }
+
+
+# --- Assemblage des messages (limite LLM_MAX_CHARS) ---------------------------------
+
+def _couper(texte: str, n: int, mode: str) -> str:
+    """Réduit un texte à n caractères : début seul, ou début + fin (« tete_queue »)."""
+    if len(texte) <= n:
+        return texte
+    if n <= len(MARQUE) + 20:
+        return texte[:max(0, n)]
+    if mode == "tete_queue":
+        reste = n - len(MARQUE)
+        tete = reste // 3
+        return texte[:tete] + MARQUE + texte[len(texte) - (reste - tete):]
+    return texte[:n - len(MARQUE)] + MARQUE
+
+
+def assembler(sections: list[tuple[str, str, int, str]], limite: int | None = None) -> str:
+    """Construit le message utilisateur sans dépasser `limite` caractères.
+
+    sections : (intitulé, texte, priorité, mode). La place est attribuée par priorité
+    décroissante : les sections les moins prioritaires (ex. la consigne pour le CHECKER)
+    sont tronquées en premier ; le livrable, prioritaire, reste entier tant qu'il tient.
+    """
+    limite = limite or cfg().llm_max_chars
+    entetes = [f"{t} :\n" if t else "" for t, _, _, _ in sections]
+    dispo = limite - sum(len(e) for e in entetes) - 2 * max(0, len(sections) - 1)
+    tailles = [0] * len(sections)
+    for i in sorted(range(len(sections)), key=lambda k: -sections[k][2]):
+        tailles[i] = max(0, min(len(sections[i][1]), dispo))
+        dispo -= tailles[i]
+    blocs = []
+    for (titre, texte, _, mode), e, n in zip(sections, entetes, tailles):
+        if n == 0 and texte:
+            continue  # plus de place : section omise
+        blocs.append(e + _couper(texte, n, mode))
+    return "\n\n".join(blocs)[:limite]
 
 
 class MissionArretee(Exception):
@@ -87,7 +125,8 @@ class Contexte:
         except budget.BudgetDepasse as e:
             raise MissionArretee("echouee", str(e))
         try:
-            r = self.llm.appeler(a["consignes"], entree[:TAILLE_MAX_ENTREE], role=a["role"],
+            # L'entrée est déjà assemblée sous la limite ; garde-fou au cas où.
+            r = self.llm.appeler(a["consignes"], entree[:cfg().llm_max_chars], role=a["role"],
                                  temperature=temperature, modele=a.get("modele"))
         except ErreurLLM as e:
             # Étape marquée en erreur, puis arrêt de la mission.
@@ -119,13 +158,17 @@ def choisir_service(ctx: Contexte) -> str:
     if ctx.service in services:
         return ctx.service
     texte = gate.normaliser(f"{ctx.titre} {ctx.consigne}")
-    scores = {s: sum(1 for m in mots if m in texte) for s, mots in MOTS_SERVICES.items()}
+    # Mots entiers uniquement (« argent » ne contient pas « agent », « rapide » pas « api »).
+    scores = {s: sum(1 for m in mots if gate.contient_mot(texte, re.escape(m)))
+              for s, mots in MOTS_SERVICES.items()}
     meilleur = max(scores, key=scores.get)
     if scores[meilleur] > 0:
         return meilleur
     prime = reg.par_role("prime")["id"]
     liste = "\n".join(f"- {s}" for s in services)
-    rep = ctx.appel(prime, f"Services possibles :\n{liste}\n\nMission : {ctx.titre}\n{ctx.consigne}")
+    rep = ctx.appel(prime, assembler([("Services possibles", liste, 3, "debut"),
+                                      ("Mission", ctx.titre, 3, "debut"),
+                                      ("Consigne", ctx.consigne, 1, "debut")]))
     for s in services:
         if s.lower() in rep.lower():
             return s
@@ -172,15 +215,36 @@ def _executer(ctx: Contexte) -> None:
         raise MissionArretee("suspendue", f"Arrêt d'urgence actif ({cle}).")
 
     # 3. COLLECTOR
-    elements = ctx.appel(srv["collector"], f"Mission : {ctx.titre}\nConsigne : {ctx.consigne}")
+    elements = ctx.appel(srv["collector"], assembler([("Mission", ctx.titre, 3, "debut"),
+                                                      ("Consigne", ctx.consigne, 2, "debut")]))
 
-    # 4-5. ANALYST ⇄ CHECKER
-    base_analyst = f"Mission : {ctx.titre}\nConsigne : {ctx.consigne}\n\nÉléments :\n{elements}"
-    livrable = ctx.appel(srv["analyst"], base_analyst)
+    # 4-5. ANALYST ⇄ CHECKER, puis 6-8. GATE et suite
+    livrable = ctx.appel(srv["analyst"], _message_analyst(ctx, elements))
+    _boucle_qualite(ctx, srv, livrable, elements)
+
+
+def _message_analyst(ctx: Contexte, elements: str, precedent: str | None = None,
+                     problemes: str | None = None, commentaire: str | None = None) -> str:
+    sections = [("Mission", ctx.titre, 5, "debut"), ("Consigne", ctx.consigne, 2, "debut"),
+                ("Éléments", elements, 1, "debut")]
+    if precedent is not None:
+        sections.append(("Version précédente", precedent, 3, "tete_queue"))
+    if commentaire:
+        sections.append(("Révision demandée par le propriétaire (prioritaire)", commentaire, 4, "debut"))
+    if problemes:
+        sections.append(("Corrige ces problèmes", problemes, 4, "debut"))
+    return assembler(sections)
+
+
+def _boucle_qualite(ctx: Contexte, srv: dict, livrable: str, elements: str) -> None:
+    """CHECKER (2 boucles de correction au plus), escalade au directeur, GATE, N3 ou EXECUTOR."""
+    mid = ctx.mid
     verdict = {"ok": False, "problemes": []}
     for boucle in range(MAX_BOUCLES_CHECKER + 1):
-        rep = ctx.appel(srv["checker"],
-                        f"Consigne : {ctx.consigne}\n\nLivrable à vérifier :\n{livrable}", temperature=0.0)
+        # Le CHECKER reçoit toujours le livrable complet ; la consigne est tronquée en premier.
+        rep = ctx.appel(srv["checker"], assembler([("Consigne", ctx.consigne, 1, "debut"),
+                                                   ("Livrable à vérifier", livrable, 3, "tete_queue")]),
+                        temperature=0.0)
         verdict = parser_verdict(rep)
         _etape(mid, srv["checker"], "checker", "verdict", json.dumps(verdict, ensure_ascii=False),
                "ok" if verdict["ok"] else "refus", 0)
@@ -188,24 +252,21 @@ def _executer(ctx: Contexte) -> None:
         if verdict["ok"]:
             break
         if boucle == MAX_BOUCLES_CHECKER:
-            # Échec après 2 boucles : escalade N2 vers le directeur.
-            _maj_mission(mid, statut="echouee", niveau="N2", livrable_texte=livrable,
-                         message="Refusé 3 fois par le CHECKER : escalade N2 au directeur. "
-                                 + "; ".join(verdict["problemes"])[:500])
-            ledger.journaliser(ctx.directeur or "NEXUS-PRIME", "escalade_n2", mid,
-                               problemes=verdict["problemes"])
+            escalader(ctx, srv, livrable, verdict)
             return
         probs = "\n".join(f"- {p}" for p in verdict["problemes"]) or "- livrable insuffisant"
-        livrable = ctx.appel(srv["analyst"], f"{base_analyst}\n\nVersion précédente :\n{livrable}\n\n"
-                                             f"Corrige ces problèmes :\n{probs}")
+        livrable = ctx.appel(srv["analyst"], _message_analyst(ctx, elements, livrable, probs))
     _maj_mission(mid, livrable_texte=livrable)
 
-    # 6. GATE : règles déterministes, l'avis LLM ne peut que monter le niveau
+    # 6. GATE : règles déterministes sur la consigne ET le livrable ; l'avis LLM ne peut que monter
     gate_id = reg.par_role("gate")["id"]
-    avis = ctx.appel(gate_id, f"Mission : {ctx.titre}\nConsigne : {ctx.consigne}\n"
-                              f"Montant : {ctx.montant} €\nAction : {ctx.action or 'aucune'}", temperature=0.0)
+    avis = ctx.appel(gate_id, assembler([
+        ("Mission", ctx.titre, 5, "debut"),
+        ("Montant et action", f"{ctx.montant} € ; action : {ctx.action or 'aucune'}", 5, "debut"),
+        ("Consigne", ctx.consigne, 2, "debut"),
+        ("Livrable final", livrable, 3, "tete_queue")]), temperature=0.0)
     niveau, motif = gate.classer(ctx.titre, ctx.consigne, ctx.service, ctx.montant, ctx.action,
-                                 parser_niveau(avis))
+                                 parser_niveau(avis), livrable=livrable)
     _maj_mission(mid, niveau=niveau)
     ledger.journaliser(gate_id, "classement", mid, niveau=niveau, motif=motif)
 
@@ -215,6 +276,55 @@ def _executer(ctx: Contexte) -> None:
         creer_decision_si_possible(mid, verdict, motif)
     else:
         executer_livrable(mid, srv["executor"])
+
+
+def escalader(ctx: Contexte, srv: dict, livrable: str, verdict: dict) -> None:
+    """3 refus du CHECKER : le directeur de la direction donne son avis, puis la mission échoue."""
+    mid = ctx.mid
+    directeur = srv["directeur"]
+    probs = "\n".join(f"- {p}" for p in verdict["problemes"]) or "- livrable jugé insuffisant"
+    avis = ctx.appel(directeur, assembler([
+        ("Mission", ctx.titre, 5, "debut"), ("Service", ctx.service or "", 5, "debut"),
+        ("Problèmes relevés par le contrôle qualité (3 refus)", probs, 4, "debut"),
+        ("Consigne", ctx.consigne, 2, "debut"), ("Dernier livrable", livrable, 3, "tete_queue")]))
+    m = re.search(r"DECISION\s*:\s*([A-ZÉ]+)", avis or "", re.I)
+    decision = (m.group(1).upper() if m else "REFORMULER")
+    c = re.search(r"CONSIGNE\s*:\s*(.+)", avis or "", re.I)
+    recommandation = f"{decision}" + (f" — {c.group(1).strip()}" if c else "")
+    _maj_mission(mid, statut="echouee", niveau="N2", livrable_texte=livrable,
+                 message=(f"Refusé 3 fois par le CHECKER, escalade N2 à {directeur}. "
+                          f"Recommandation : {recommandation}")[:1000])
+    ledger.journaliser(directeur, "escalade_n2", mid, problemes=verdict["problemes"],
+                       recommandation=recommandation)
+
+
+def relancer_revision(mid: int, commentaire: str | None) -> None:
+    """Révision demandée : nouvel ANALYST avec le commentaire, puis CHECKER et GATE."""
+    with session_scope() as s:
+        m = s.get(Mission, mid)
+        if m is None:
+            return
+        ctx = Contexte(m)
+        precedent = m.livrable_texte or ""
+    try:
+        cle = sentinel.bloque()
+        if cle:
+            raise MissionArretee("suspendue", f"Arrêt d'urgence actif ({cle}).")
+        ctx.service = ctx.service if ctx.service in reg.services() else choisir_service(ctx)
+        srv = reg.services()[ctx.service]
+        ctx.directeur = srv["directeur"]
+        _maj_mission(mid, statut="en_cours", message=f"Révision en cours : {commentaire or '(sans commentaire)'}")
+        ledger.journaliser("NEXUS-PRIME", "revision_lancee", mid, commentaire=commentaire)
+        livrable = ctx.appel(srv["analyst"], _message_analyst(
+            ctx, "", precedent, None, commentaire or "Améliore le livrable."))
+        _boucle_qualite(ctx, srv, livrable, "")
+    except MissionArretee as e:
+        _maj_mission(mid, statut=e.statut, message=e.message)
+        ledger.journaliser("NEXUS-PRIME", f"mission_{e.statut}", mid, motif=e.message)
+    except Exception as e:
+        log.exception("Erreur inattendue pendant la révision de la mission %s", mid)
+        _maj_mission(mid, statut="echouee", message=f"Erreur interne : {e}")
+        ledger.journaliser("NEXUS-PRIME", "mission_echouee", mid, motif=str(e))
 
 
 # --- Décisions N3 ------------------------------------------------------------------
@@ -315,6 +425,12 @@ def decider(did: int, choix: str, commentaire: str | None) -> dict:
             raise LookupError("décision introuvable")
         if d.statut != "en_attente":
             raise PermissionError(f"décision déjà traitée ({d.statut})")
+        if choix == "reviser":
+            deja = s.execute(select(func.count(Decision.id)).where(Decision.mission_id == d.mission_id)
+                             .where(Decision.statut == "revision")).scalar_one()
+            if deja >= MAX_REVISIONS:
+                raise PermissionError(f"Limite de {MAX_REVISIONS} révisions atteinte pour cette mission : "
+                                      "valider ou refuser.")
         d.statut = statuts[choix]
         d.decide_le = maintenant()
         d.commentaire = commentaire
@@ -323,14 +439,15 @@ def decider(did: int, choix: str, commentaire: str | None) -> dict:
         m.statut = statuts[choix]
         if choix == "reviser":
             m.message = f"Révision demandée : {commentaire or '(sans commentaire)'}"
-            m.consigne = f"{m.consigne}\n\nRévision demandée par le décideur : {commentaire or ''}".strip()
         service = m.service
     ledger.journaliser("DECIDEUR", f"decision_{statuts[choix]}", mid, decision_id=did,
                        commentaire=commentaire)
     if choix == "valider":
         executor = reg.services().get(service, {}).get("executor", "NEXUS-PRIME")
         executer_livrable(mid, executor, statut_final="validee")
-    return {"decision_id": did, "mission_id": mid, "statut": statuts[choix]}
+    # La relance d'une révision est lancée par l'appelant (tâche de fond) : relancer_revision().
+    return {"decision_id": did, "mission_id": mid, "statut": statuts[choix],
+            "relance": choix == "reviser"}
 
 
 # --- EXECUTOR (aucune action externe) -------------------------------------------
