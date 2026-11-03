@@ -1151,7 +1151,8 @@ class Collecteur:
                                                           else MAX_RESUME)))
         expire = None
         auteur = str(el.get("auteur") or "").lower().lstrip("@")
-        institutionnel = bool(auteur) and auteur in {a.lower().lstrip("@") for a in autorises}
+        institutionnel = bool(s.get("compte_institutionnel")) or (
+            bool(auteur) and auteur in {a.lower().lstrip("@") for a in autorises})
         if canal == "social":
             # Social listening (recommandations CNIL) : extrait court anonymisé, aucun identifiant de personne,
             # lien vers la page du SUJET (pas du profil) sauf compte institutionnel, rétention courte.

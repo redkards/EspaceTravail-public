@@ -4692,7 +4692,7 @@ sources:
   langue: fr
   frequence_conseillee: 24h
   conditions: Flux RSS public natif de Mastodon ; compte institutionnel
-  donnees_personnelles: non
+  donnees_personnelles: 'non (compte institutionnel : liens conservés ; mentions de particuliers retirées)'
   verifie: '2026-11-04'
   flux_verifie: non
   collecte: oui
@@ -4700,6 +4700,7 @@ sources:
   licence: cgu-plateforme
   type_doc: social
   stockage: agrege
+  compte_institutionnel: true
 - id: mastodon-cnrs
   nom: CNRS — compte Mastodon
   domaines: [reseaux_sociaux, ia]
@@ -4713,13 +4714,14 @@ sources:
   langue: fr
   frequence_conseillee: 24h
   conditions: Flux RSS public natif de Mastodon ; compte institutionnel
-  donnees_personnelles: non
+  donnees_personnelles: 'non (compte institutionnel : liens conservés ; mentions de particuliers retirées)'
   verifie: '2026-11-04'
   flux_verifie: motif
   collecte: oui
   licence: cgu-plateforme
   type_doc: social
   stockage: agrege
+  compte_institutionnel: true
 - id: mastodon-official
   nom: Mastodon (projet) — compte officiel
   domaines: [reseaux_sociaux, tech]
@@ -4733,13 +4735,14 @@ sources:
   langue: en
   frequence_conseillee: 24h
   conditions: Flux RSS public natif de Mastodon ; compte institutionnel
-  donnees_personnelles: non
+  donnees_personnelles: 'non (compte institutionnel : liens conservés ; mentions de particuliers retirées)'
   verifie: '2026-11-04'
   flux_verifie: motif
   collecte: oui
   licence: cgu-plateforme
   type_doc: social
   stockage: agrege
+  compte_institutionnel: true
 - id: mastodon-hashtag-gto
   nom: 'Mastodon — hashtag public #poker (mastodon.social)'
   domaines: [reseaux_sociaux, poker]

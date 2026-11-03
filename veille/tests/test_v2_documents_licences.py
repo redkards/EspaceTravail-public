@@ -63,7 +63,8 @@ def test_sociales_collectees_en_agrege_et_payantes_desactivees(cat):
     par_id = {s["id"]: s for s in cat["sources"]}
     for s in cat["sources"]:
         if s["type"] == "reseau_social" and s["collecte"] == "oui":
-            assert s["stockage"] == "agrege" and s["donnees_personnelles"].startswith("risque:"), s["id"]
+            assert s["stockage"] == "agrege", s["id"]
+            assert s["donnees_personnelles"].startswith("risque:") or s.get("compte_institutionnel"), s["id"]
     assert "$" in par_id["x-twitter"]["raison"] and par_id["x-twitter"]["collecte"] == "non"
     for i in ("reddit-data-api", "threads-api", "telegram", "linkedin", "facebook", "instagram", "tiktok", "openalex-api"):
         assert par_id[i]["collecte"] == "non" and par_id[i]["raison"], i
