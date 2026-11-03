@@ -781,6 +781,26 @@ else
   info "Sauvegarde automatique non planifiée. Pour l'ajouter : relancez install.sh et répondez « o »."
 fi
 
+# Exercice de restauration mensuel sur P2 (1er dimanche du mois, 04:47).
+# Attention : en cron, « 47 4 1-7 * 0 » voudrait dire « jours 1 à 7 OU chaque dimanche » ;
+# on planifie donc les jours 1 à 7 et la commande ne s'exécute que le dimanche (%u = 7).
+CRON_EXERCICE="/etc/cron.d/nexus-exercice-restauration"
+if [ ! -f "$KIT_DIR/exercice-restauration.sh" ]; then
+  info "Exercice de restauration : script absent, étape ignorée."
+elif [ -f "$CRON_EXERCICE" ]; then
+  ok "Exercice de restauration mensuel déjà planifié ($CRON_EXERCICE)"
+elif demander "Planifier un exercice de restauration chaque mois (1er dimanche, 4 h 47, partition P2) ?" n; then
+  if ! mountpoint -q /srv/p2; then
+    avert "/srv/p2 n'est pas montée : l'exercice échouera proprement tant que P2 manque (partitions.sh)."
+  fi
+  printf '%s\n' "# Exercice de restauration mensuel du Mini NEXUS MOTHERSHIP (créé par install.sh)" \
+    "47 4 1-7 * * root [ \"\$(date +\%u)\" = 7 ] && /bin/bash $KIT_DIR/exercice-restauration.sh >> $KIT_DIR/backups/exercice-restauration.log 2>&1" > "$CRON_EXERCICE"
+  chmod 644 "$CRON_EXERCICE"
+  ok "Exercice de restauration planifié (rapport dans backups/exercices, alerte ntfy)"
+else
+  info "Exercice de restauration non planifié. Pour l'ajouter : relancez install.sh et répondez « o »."
+fi
+
 # Veille cyber hebdomadaire (dimanche 03:17) : missions CYBER-FORTRESS veille + audit
 CRON_CYBER="/etc/cron.d/nexus-veille-cyber"
 SCRIPT_CYBER="$KIT_DIR/automatisations/veille-cyber.sh"

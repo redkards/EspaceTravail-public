@@ -11,6 +11,7 @@ install.sh              # installation en une commande (agent INFRA)
 uninstall.sh            # arrêt + suppression des conteneurs (garde les volumes sauf --purge)
 backup.sh               # copies SQLite cohérentes, dumps PostgreSQL, export n8n, .env chiffré -> ./backups/ (7 gardées, --hors-serveur rclone)
 restore.sh              # restauration d'une sauvegarde datée (vérif, arrêt, UID 10001, redémarrage, /api/sante)
+exercice-restauration.sh # exercice mensuel : dernière sauvegarde restaurée sur P2 (projet p2-exercice, réseau interne, aucun port, IA factice, 512 Mo), vérifs missions/LEDGER/HMAC/gpg, nettoyage par trap, rapport backups/exercices/, ntfy générique ; codes 0 OK · 1 config · 2 échec · 3 P2 non montée · 4 déjà en cours
 docker-compose.yml      # agent INFRA (MVP par défaut ; profils local / complet)
 docker-compose.complet.yml # agent INFRA (surcouche du mode complet)
 Caddyfile.mvp           # agent INFRA (cockpit seul, 80/443)

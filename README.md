@@ -44,7 +44,7 @@ L'IA utilise **Ollama Cloud** (offre gratuite), avec l'IA locale du VPS en secou
 10. [Problèmes fréquents](#10-problèmes-fréquents)
 11. [Désinstaller](#11-désinstaller)
 12. [Passerelle Claude · ChatGPT · Gemini](#12-passerelle-claude--chatgpt--gemini)
-13. [Entretien au téléphone](#13-entretien-au-téléphone) : mettre à jour, restaurer, changer un mot de passe ou une clé, décideur mobile, mémoire par projet, veille cyber
+13. [Entretien au téléphone](#13-entretien-au-téléphone) : mettre à jour, restaurer, changer un mot de passe ou une clé, décideur mobile, mémoire par projet, exercice de restauration, veille cyber
 
 ---
 
@@ -472,6 +472,11 @@ grep COCKPIT_PASSWORD= .env            # nouveau mot de passe
 - Les fiches `projets/*.md` et `tests-poker/contexte/` sont lues (lecture seule) au démarrage ; les livrables validés sont résumés automatiquement (`NEXUS_MEMOIRE_AUTO=1`, mettez `0` pour arrêter).
 - Les agents reçoivent les 3 passages les plus utiles du projet ; les IA y accèdent par l'outil `projet_connaissances`. Aucun secret n'y est conservé (filtre automatique).
 - Pour ajouter une connaissance durable : complétez la fiche `projets/<projet>.md`, puis `docker compose restart nexus-core`.
+
+### Exercice de restauration mensuel
+- Une sauvegarde n'a de valeur que si elle se restaure : `bash exercice-restauration.sh` restaure la **dernière** sauvegarde dans une copie jetable sur la partition **P2** (`/srv/p2/exercice-restauration`), sans toucher P1 : aucun port ouvert, pas de Caddy ni d'IA (IA factice), 512 Mo maximum.
+- Il vérifie : l'API répond, mêmes nombres de missions et d'entrées LEDGER que la sauvegarde, chaîne LEDGER (HMAC) valide, `.env` sauvegardé déchiffrable avec `BACKUP_PASSPHRASE`, passerelle qui démarre. Puis il efface tout, écrit un rapport dans `backups/exercices/` et envoie l'alerte « Restauration testée : OK » (ou « ÉCHEC exercice de restauration »).
+- `install.sh` propose de le planifier le 1er dimanche du mois à 4 h 47 (`/etc/cron.d/nexus-exercice-restauration`). Si P2 n'est pas montée, l'exercice s'arrête proprement (code 3) et vous prévient.
 
 ### Veille cyber hebdo
 - `install.sh` propose de la planifier (dimanche 3 h 17, `/etc/cron.d/nexus-veille-cyber`) : elle collecte la configuration du kit **sans aucun secret**, lance deux missions CYBER-FORTRESS (veille des failles de la pile, audit de configuration) en F3, puis envoie l'alerte ntfy « Rapport cyber hebdo prêt ».
