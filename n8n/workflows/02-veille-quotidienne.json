@@ -1,0 +1,81 @@
+{
+  "id": "NexusVeille00002",
+  "name": "NEXUS — Veille quotidienne",
+  "active": false,
+  "nodes": [
+    {
+      "id": "43c70e4c-8b1d-48a4-87e1-f095ab2662d3",
+      "name": "Chaque jour 08:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 8 * * *"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "ddad2595-7e73-41e8-afa5-049325e18e8e",
+      "name": "Mission de veille",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        260,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://nexus-core:8000/api/missions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Nexus-Key",
+              "value": "={{ $env.NEXUS_API_KEY }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ titre: 'Veille quotidienne du ' + $now.setZone('Europe/Paris').toFormat('dd/LL/yyyy'), consigne: 'Synthétise la veille du jour à partir des textes fournis ci-dessous (aucun accès web). Liste ce qui manque. Textes : (à compléter dans n8n)', service: 'R&D-PARADOX/veille' }) }}",
+        "options": {
+          "timeout": 30000
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Chaque jour 08:00": {
+      "main": [
+        [
+          {
+            "node": "Mission de veille",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Europe/Paris",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": null,
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "tags": []
+}

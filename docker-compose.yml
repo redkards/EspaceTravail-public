@@ -1,0 +1,288 @@
+# =============================================================================
+#  Mini NEXUS MOTHERSHIP — pile Docker Compose (partition P1 du VPS KVM 2)
+#
+#  MODES (choisis par install.sh, enregistrés dans .env via COMPOSE_PROFILES) :
+#   - MVP (par défaut) : caddy + nexus-core (SQLite) uniquement.
+#   - profil « local » : + ollama (IA locale). Actif si LLM_PROVIDER=ollama, ou
+#       si Ollama Cloud est utilisé avec un repli local (LLM_FALLBACK=ollama).
+#       Sans ce profil (Ollama Cloud seul), le MVP consomme environ 0,5 Go de RAM.
+#   - profil « complet » : + postgres, redis, n8n, uptime-kuma, ntfy
+#       et le fichier docker-compose.complet.yml (ports 8443-8445, PostgreSQL,
+#       limites rééquilibrées). install.sh --complet écrit dans .env :
+#         COMPOSE_PROFILES=complet
+#         COMPOSE_FILE=docker-compose.yml:docker-compose.complet.yml
+#       et les commandes « docker compose ... » suivent alors automatiquement.
+#
+#  - Emplacement prévu : /srv/p1/nexus-mothership (partition P1, voir partitions.sh)
+#  - Toutes les données persistantes sont dans ./data/<service> (bind mounts),
+#    donc physiquement DANS la partition P1. Aucun volume nommé Docker.
+#  - Budget P1 : total <= 5 Go de RAM et <= 1,5 vCPU (voir tableau en bas).
+#  - Seul « caddy » publie des ports. Les secrets viennent de .env (install.sh).
+# =============================================================================
+name: p1-nexus
+
+# Paramètres communs : redémarrage automatique + journaux limités en taille
+x-commun: &commun
+  restart: unless-stopped
+  networks: [p1-nexus-net]
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "3"
+
+services:
+
+  # --------------------------------------------------------------------------
+  # Caddy : reverse proxy + HTTPS automatique (Let's Encrypt)
+  # --------------------------------------------------------------------------
+  caddy:
+    <<: *commun
+    image: caddy:2.8
+    mem_limit: 64m
+    cpus: 0.1
+    # MVP : 80 (Let's Encrypt) et 443 (cockpit) seulement.
+    # Les ports 8443-8445 sont ajoutés par docker-compose.complet.yml.
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      NEXUS_HOST: ${NEXUS_HOST:?NEXUS_HOST manquant dans .env}
+      ACME_EMAIL: ${ACME_EMAIL:?ACME_EMAIL manquant dans .env}
+      COCKPIT_USER: ${COCKPIT_USER:-decideur}
+      # Hash bcrypt écrit entre apostrophes dans .env : les « $ » restent intacts
+      COCKPIT_PASSWORD_HASH: ${COCKPIT_PASSWORD_HASH:?COCKPIT_PASSWORD_HASH manquant}
+      N8N_BASIC_USER: ${N8N_BASIC_USER:-admin}
+      N8N_BASIC_PASSWORD_HASH: ${N8N_BASIC_PASSWORD_HASH:-}
+    volumes:
+      # MVP : un seul site (cockpit). Remplacé par Caddyfile.complet en mode complet.
+      - ./Caddyfile.mvp:/etc/caddy/Caddyfile:ro
+      - ./data/caddy/data:/data
+      - ./data/caddy/config:/config
+    depends_on:
+      nexus-core:
+        condition: service_started
+
+  # --------------------------------------------------------------------------
+  # PostgreSQL 16 + pgvector : bases « nexus » et « n8n »
+  # --------------------------------------------------------------------------
+  postgres:
+    <<: *commun
+    profiles: ["complet"]
+    image: pgvector/pgvector:pg16
+    mem_limit: 640m
+    cpus: 0.2
+    shm_size: 128m
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-nexus}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-}
+      POSTGRES_DB: ${POSTGRES_DB:-nexus}
+      TZ: Europe/Paris
+    command: ["postgres", "-c", "shared_buffers=160MB", "-c", "max_connections=50"]
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+      # Scripts exécutés une seule fois, au premier démarrage (dossier vide)
+      - ./postgres/initdb:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  # --------------------------------------------------------------------------
+  # Redis : file de tâches légère pour nexus-core
+  # --------------------------------------------------------------------------
+  redis:
+    <<: *commun
+    profiles: ["complet"]
+    image: redis:7-alpine
+    mem_limit: 128m
+    cpus: 0.05
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory", "96mb", "--maxmemory-policy", "noeviction"]
+    volumes:
+      - ./data/redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # --------------------------------------------------------------------------
+  # Ollama : modèle de langage local (gratuit, sans clé API)
+  # --------------------------------------------------------------------------
+  ollama:
+    <<: *commun
+    profiles: ["local"]
+    image: ollama/ollama:0.3.14
+    mem_limit: 3584m
+    cpus: 1.2
+    environment:
+      OLLAMA_KEEP_ALIVE: "10m"
+      OLLAMA_NUM_PARALLEL: "1"
+      OLLAMA_MAX_LOADED_MODELS: "1"
+    volumes:
+      - ./data/ollama:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # --------------------------------------------------------------------------
+  # nexus-core : cerveau du Mothership (construit par l'agent CORE)
+  # --------------------------------------------------------------------------
+  nexus-core:
+    <<: *commun
+    build: ./nexus-core
+    image: p1-nexus/nexus-core:local
+    mem_limit: 384m
+    cpus: 0.2
+    environment:
+      TZ: Europe/Paris
+      NEXUS_HOST: ${NEXUS_HOST}
+      # MVP : SQLite dans ./data/nexus-core/nexus.db. Valeurs fixées ici (et non lues
+      # dans .env) : docker-compose.complet.yml les remplace par PostgreSQL / Redis / ntfy.
+      DATABASE_URL: sqlite:////data/nexus.db
+      REDIS_URL: ""
+      NEXUS_API_KEY: ${NEXUS_API_KEY:?NEXUS_API_KEY manquant}
+      # Fournisseur : ollama (local) | ollama_cloud | anthropic
+      LLM_PROVIDER: ${LLM_PROVIDER:-ollama}
+      NEXUS_MODEL: ${NEXUS_MODEL:-qwen2.5:3b}
+      NEXUS_MODEL_CHECKER: ${NEXUS_MODEL_CHECKER:-}
+      OLLAMA_URL: ${OLLAMA_URL:-http://ollama:11434}
+      # Ollama Cloud (https://ollama.com/api/chat, en-tête Authorization: Bearer)
+      OLLAMA_API_KEY: ${OLLAMA_API_KEY:-}
+      OLLAMA_CLOUD_URL: ${OLLAMA_CLOUD_URL:-https://ollama.com}
+      # Repli si le fournisseur principal échoue : ollama (local) | aucun
+      LLM_FALLBACK: ${LLM_FALLBACK:-aucun}
+      NEXUS_MODEL_LOCAL: ${NEXUS_MODEL_LOCAL:-qwen2.5:3b}
+      # Coût estimé par 1000 tokens : 0 (offres gratuites uniquement)
+      LLM_EUR_PAR_1K_TOKENS: ${LLM_EUR_PAR_1K_TOKENS:-0}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      ANTHROPIC_MODEL: ${ANTHROPIC_MODEL:-}
+      BUDGET_MONTHLY_EUR: ${BUDGET_MONTHLY_EUR:-0}
+      BUDGET_TASK_TOKENS: ${BUDGET_TASK_TOKENS:-6000}
+      N3_TIMEOUT_HOURS: ${N3_TIMEOUT_HOURS:-24}
+      N3_DAILY_CAP: ${N3_DAILY_CAP:-15}
+      # Vides en MVP : nexus-core n'envoie alors aucune notification
+      NTFY_URL: ""
+      NTFY_TOPIC: ""
+    volumes:
+      # Livrables (/data/livrables/<id>.md) et autres fichiers de nexus-core
+      - ./data/nexus-core:/data
+    # MVP : dépend seulement d'ollama, et seulement si le profil « local » est actif
+    # (required: false). postgres/redis sont ajoutés en mode complet.
+    depends_on:
+      ollama:
+        condition: service_healthy
+        required: false
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request as u; u.urlopen('http://127.0.0.1:8000/api/sante', timeout=5)"
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # --------------------------------------------------------------------------
+  # n8n : automatisations (workflows), stockées dans PostgreSQL (base « n8n »)
+  # --------------------------------------------------------------------------
+  n8n:
+    <<: *commun
+    profiles: ["complet"]
+    image: n8nio/n8n:1.64.3
+    mem_limit: 640m
+    cpus: 0.15
+    environment:
+      DB_TYPE: postgresdb
+      DB_POSTGRESDB_HOST: postgres
+      DB_POSTGRESDB_PORT: "5432"
+      DB_POSTGRESDB_DATABASE: n8n
+      DB_POSTGRESDB_USER: ${POSTGRES_USER:-nexus}
+      DB_POSTGRESDB_PASSWORD: ${POSTGRES_PASSWORD:-}
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY:-}
+      GENERIC_TIMEZONE: Europe/Paris
+      TZ: Europe/Paris
+      N8N_HOST: ${NEXUS_HOST}
+      N8N_PORT: "5678"
+      N8N_PROTOCOL: https
+      N8N_PROXY_HOPS: "1"
+      WEBHOOK_URL: https://${NEXUS_HOST}:8443/
+      N8N_EDITOR_BASE_URL: https://${NEXUS_HOST}:8443/
+      N8N_BLOCK_ENV_ACCESS_IN_NODE: "false"
+      N8N_DIAGNOSTICS_ENABLED: "false"
+      N8N_PERSONALIZATION_ENABLED: "false"
+      N8N_HIRING_BANNER_ENABLED: "false"
+      EXECUTIONS_DATA_PRUNE: "true"
+      EXECUTIONS_DATA_MAX_AGE: "336"
+      NODE_OPTIONS: "--max-old-space-size=512"
+      # Variables lues par les workflows via $env
+      NEXUS_API_KEY: ${NEXUS_API_KEY}
+      NTFY_TOPIC: ${NTFY_TOPIC:-}
+      NEXUS_HOST: ${NEXUS_HOST}
+    volumes:
+      - ./data/n8n:/home/node/.n8n
+      - ./n8n/workflows:/workflows:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:5678/healthz || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+
+  # --------------------------------------------------------------------------
+  # Uptime Kuma : surveillance des services
+  # --------------------------------------------------------------------------
+  uptime-kuma:
+    <<: *commun
+    profiles: ["complet"]
+    image: louislam/uptime-kuma:1
+    mem_limit: 128m
+    cpus: 0.03
+    volumes:
+      - ./data/uptime-kuma:/app/data
+
+  # --------------------------------------------------------------------------
+  # ntfy : notifications push vers le téléphone Android (appli « ntfy »)
+  # --------------------------------------------------------------------------
+  ntfy:
+    <<: *commun
+    profiles: ["complet"]
+    image: binwiederhier/ntfy:v2.11.0
+    mem_limit: 48m
+    cpus: 0.02
+    command: ["serve"]
+    environment:
+      TZ: Europe/Paris
+      NTFY_BASE_URL: https://${NEXUS_HOST}:8445
+      NTFY_BEHIND_PROXY: "true"
+      NTFY_CACHE_FILE: /var/cache/ntfy/cache.db
+      NTFY_CACHE_DURATION: "72h"
+    volumes:
+      - ./data/ntfy:/var/cache/ntfy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1:80/v1/health | grep -q true || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
+# Réseau unique et nommé de la partition P1 (NON « internal » : nexus-core doit
+# pouvoir joindre https://ollama.com). Aucun service autre que caddy ne publie de port.
+networks:
+  p1-nexus-net:
+    name: p1-nexus-net
+
+# -----------------------------------------------------------------------------
+#  Budget de ressources P1 (plafond : 5 Go RAM / 1,5 vCPU)
+#  MVP cloud seul   : nexus-core 384m/0.20 · caddy 64m/0.10 = 448 Mo, 0,30 vCPU
+#  MVP + « local »  : + ollama 3584m/1.20                 = 4032 Mo, 1,50 vCPU
+#  COMPLET : voir docker-compose.complet.yml (TOTAL = 5104 Mo et 1,50 vCPU)
+# -----------------------------------------------------------------------------

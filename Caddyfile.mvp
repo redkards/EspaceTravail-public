@@ -1,0 +1,28 @@
+# =============================================================================
+#  Caddyfile.mvp — Mini NEXUS MOTHERSHIP, MODE MVP
+#  Un seul site : le cockpit et l'API de nexus-core, en HTTPS (Let's Encrypt).
+#  Le port 80 sert uniquement à obtenir le certificat (puis redirige vers 443).
+#  En mode complet, c'est Caddyfile.complet qui est utilisé.
+# =============================================================================
+{
+	email {$ACME_EMAIL}
+}
+
+{$NEXUS_HOST} {
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+	encode gzip
+
+	# Cockpit protégé par mot de passe (basic auth).
+	# L'API /api/* passe sans mot de passe Caddy : nexus-core exige l'en-tête X-Nexus-Key.
+	@cockpit path /cockpit /cockpit/*
+	basic_auth @cockpit {
+		{$COCKPIT_USER} {$COCKPIT_PASSWORD_HASH}
+	}
+
+	reverse_proxy nexus-core:8000
+}

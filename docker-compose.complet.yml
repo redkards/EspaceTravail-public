@@ -1,0 +1,55 @@
+# =============================================================================
+#  docker-compose.complet.yml — compléments du MODE COMPLET
+#  Fusionné avec docker-compose.yml quand .env contient :
+#     COMPOSE_FILE=docker-compose.yml:docker-compose.complet.yml
+#     COMPOSE_PROFILES=complet
+#  (install.sh --complet s'en charge.)
+#
+#  Budget P1 en mode complet (<= 5 Go / 1,5 vCPU) :
+#    ollama 3072m/0.90 · postgres 640m/0.20 · n8n 640m/0.15 · nexus-core 384m/0.10
+#    redis 128m/0.05 · uptime-kuma 128m/0.03 · caddy 64m/0.05 · ntfy 48m/0.02
+#    TOTAL = 5104 Mo et 1,50 vCPU
+# =============================================================================
+services:
+
+  caddy:
+    cpus: 0.05
+    # Ports ajoutés à 80 et 443 : n8n, Uptime Kuma, ntfy
+    ports:
+      - "8443:8443"
+      - "8444:8444"
+      - "8445:8445"
+    volumes:
+      # Même cible que dans docker-compose.yml : remplace Caddyfile.mvp
+      - ./Caddyfile.complet:/etc/caddy/Caddyfile:ro
+    environment:
+      N8N_BASIC_PASSWORD_HASH: ${N8N_BASIC_PASSWORD_HASH:?N8N_BASIC_PASSWORD_HASH manquant}
+    depends_on:
+      n8n:
+        condition: service_started
+      uptime-kuma:
+        condition: service_started
+      ntfy:
+        condition: service_started
+
+  ollama:
+    mem_limit: 3g
+    cpus: 0.9
+
+  nexus-core:
+    cpus: 0.1
+    environment:
+      # Mode complet : PostgreSQL à la place de SQLite
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-nexus}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD manquant}@postgres:5432/${POSTGRES_DB:-nexus}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+      NTFY_URL: ${NTFY_URL:-http://ntfy}
+      NTFY_TOPIC: ${NTFY_TOPIC:?NTFY_TOPIC manquant}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  n8n:
+    environment:
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY:?N8N_ENCRYPTION_KEY manquant}

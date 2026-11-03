@@ -1,0 +1,201 @@
+{
+  "id": "NexusRapport0003",
+  "name": "NEXUS — Rapport du soir",
+  "active": false,
+  "nodes": [
+    {
+      "id": "b86da372-55e7-4f1c-9434-65e2f1946806",
+      "name": "Chaque soir 19:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 19 * * *"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "022885a8-a644-4182-8f7c-9acc2825b523",
+      "name": "Décisions en attente",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        240,
+        0
+      ],
+      "alwaysOutputData": true,
+      "parameters": {
+        "method": "GET",
+        "url": "http://nexus-core:8000/api/decisions",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "statut",
+              "value": "en_attente"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Nexus-Key",
+              "value": "={{ $env.NEXUS_API_KEY }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000
+        }
+      }
+    },
+    {
+      "id": "f7839fd6-dd8e-432f-bc9a-4419d4ad4fd8",
+      "name": "Missions",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        480,
+        0
+      ],
+      "alwaysOutputData": true,
+      "executeOnce": true,
+      "parameters": {
+        "method": "GET",
+        "url": "http://nexus-core:8000/api/missions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Nexus-Key",
+              "value": "={{ $env.NEXUS_API_KEY }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000
+        }
+      }
+    },
+    {
+      "id": "e7f41c9a-f9e7-42b3-ae68-17663b33a022",
+      "name": "Préparer le récapitulatif",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Assemble le récapitulatif (accepte une liste JSON ou un objet contenant une liste)\nfunction liste(nom) {\n  const items = $(nom).all().map(i => i.json);\n  if (items.length === 1) {\n    const j = items[0];\n    if (Array.isArray(j)) return j;\n    const tab = Object.values(j || {}).find(v => Array.isArray(v));\n    if (tab) return tab;\n    if (!j || Object.keys(j).length === 0) return [];\n  }\n  return items;\n}\nconst decisions = liste('Décisions en attente');\nconst missions = liste('Missions');\nconst parStatut = {};\nfor (const m of missions) { const s = m.statut || 'inconnu'; parStatut[s] = (parStatut[s] || 0) + 1; }\nlet txt = `Décisions N3 en attente : ${decisions.length}\\n`;\nfor (const d of decisions.slice(0, 5)) txt += `- #${d.id} ${(d.resume || '').toString().slice(0, 80)}\\n`;\ntxt += `\\nMissions (${missions.length}) : ` + (Object.entries(parStatut).map(([s, n]) => `${s}=${n}`).join(', ') || 'aucune');\ntxt += `\\n\\nOuvrir le cockpit : https://${$env.NEXUS_HOST || ''}/cockpit`;\nreturn [{ json: { message: txt, en_attente: decisions.length } }];"
+      }
+    },
+    {
+      "id": "9320f010-0a13-4e1f-be3f-26973f4db25f",
+      "name": "Envoyer sur ntfy",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        960,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "=http://ntfy/{{ $env.NTFY_TOPIC }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Title",
+              "value": "NEXUS - Rapport du soir"
+            },
+            {
+              "name": "Tags",
+              "value": "crescent_moon"
+            },
+            {
+              "name": "Priority",
+              "value": "={{ $json.en_attente > 0 ? 'high' : 'default' }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "text/plain; charset=utf-8",
+        "body": "={{ $json.message }}",
+        "options": {
+          "timeout": 15000
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Chaque soir 19:00": {
+      "main": [
+        [
+          {
+            "node": "Décisions en attente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Décisions en attente": {
+      "main": [
+        [
+          {
+            "node": "Missions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Missions": {
+      "main": [
+        [
+          {
+            "node": "Préparer le récapitulatif",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Préparer le récapitulatif": {
+      "main": [
+        [
+          {
+            "node": "Envoyer sur ntfy",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Europe/Paris",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": null,
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "tags": []
+}

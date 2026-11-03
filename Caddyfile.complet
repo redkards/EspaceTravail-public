@@ -1,0 +1,62 @@
+# =============================================================================
+#  Caddyfile.complet — Mini NEXUS MOTHERSHIP, MODE COMPLET (cockpit + n8n + Kuma + ntfy)
+#  Les valeurs {$...} viennent des variables d'environnement du conteneur caddy
+#  (elles-mêmes lues dans .env par docker compose).
+#  HTTPS automatique Let's Encrypt sur le nom d'hôte du VPS.
+# =============================================================================
+{
+	email {$ACME_EMAIL}
+}
+
+# En-têtes de sécurité communs
+(securite) {
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+}
+
+# --- Cockpit + API nexus-core (port 443) ------------------------------------
+{$NEXUS_HOST} {
+	import securite
+	encode gzip
+
+	# Le cockpit est protégé par mot de passe (basic auth).
+	# L'API /api/* n'est PAS protégée ici : nexus-core exige l'en-tête X-Nexus-Key.
+	@cockpit path /cockpit /cockpit/*
+	basic_auth @cockpit {
+		{$COCKPIT_USER} {$COCKPIT_PASSWORD_HASH}
+	}
+
+	reverse_proxy nexus-core:8000
+}
+
+# --- n8n (port 8443) : mot de passe Caddy EN PLUS du compte n8n -------------
+# Les webhooks (/webhook/...) demandent aussi ce mot de passe :
+#   curl -u UTILISATEUR:MOT_DE_PASSE https://HOTE:8443/webhook/nexus-mission ...
+{$NEXUS_HOST}:8443 {
+	import securite
+	basic_auth {
+		{$N8N_BASIC_USER} {$N8N_BASIC_PASSWORD_HASH}
+	}
+	reverse_proxy n8n:5678
+}
+
+# --- Uptime Kuma (port 8444) ------------------------------------------------
+# Protégé par les identifiants du cockpit (évite qu'un inconnu crée le compte admin).
+{$NEXUS_HOST}:8444 {
+	import securite
+	basic_auth {
+		{$COCKPIT_USER} {$COCKPIT_PASSWORD_HASH}
+	}
+	reverse_proxy uptime-kuma:3001
+}
+
+# --- ntfy (port 8445) : notifications ---------------------------------------
+# Pas de mot de passe : le nom du topic (aléatoire) fait office de secret.
+{$NEXUS_HOST}:8445 {
+	import securite
+	reverse_proxy ntfy:80
+}

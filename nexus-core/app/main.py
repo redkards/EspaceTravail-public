@@ -1,0 +1,96 @@
+"""Point d'entrée FastAPI de nexus-core.
+
+- /api/*         : API protégée par l'en-tête X-Nexus-Key (NEXUS_API_KEY).
+- /cockpit       : page HTML ; /cockpit/api/* : mêmes routes sans clé (basic auth Caddy).
+- /              : redirige vers /cockpit.
+"""
+import asyncio
+import hmac
+import logging
+from contextlib import asynccontextmanager
+
+from fastapi import Depends, FastAPI, Header, HTTPException
+from fastapi.responses import RedirectResponse
+
+from . import agents as reg
+from . import ledger, pipeline
+from .cockpit import router as cockpit_router
+from .config import cfg
+from .db import init_db
+from .routes import creer_routeur
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s : %(message)s")
+log = logging.getLogger("nexus")
+
+PERIODE_FOND_S = 600  # tâche de fond toutes les 10 minutes
+
+
+def maintenance() -> None:
+    """Expiration des décisions N3 et reprise de la file N3 (plafond journalier)."""
+    try:
+        n = pipeline.expirer_decisions()
+        f = pipeline.traiter_file_n3()
+        if n or f:
+            log.info("Maintenance : %s décision(s) expirée(s), %s fiche(s) N3 créée(s).", n, f)
+    except Exception:
+        log.exception("Erreur pendant la maintenance")
+
+
+async def _boucle_fond() -> None:
+    while True:
+        await asyncio.sleep(PERIODE_FOND_S)
+        await asyncio.to_thread(maintenance)
+
+
+@asynccontextmanager
+async def cycle_de_vie(app: FastAPI):
+    # Dossier des livrables (NEXUS_DATA_DIR/livrables), monté depuis l'hôte.
+    dossier = cfg().data_dir / "livrables"
+    try:
+        dossier.mkdir(parents=True, exist_ok=True)
+    except OSError as e:
+        log.warning("Impossible de créer %s (%s) : vérifier les droits du montage (UID 10001).", dossier, e)
+    init_db()
+    reg.charger()
+    ledger.journaliser("NEXUS-PRIME", "demarrage", None, agents=len(reg.charger()))
+    # Garde-fou « tout gratuit » : refus d'Anthropic sans budget, message clair au démarrage.
+    from .llm import info, refus_anthropic
+    if cfg().llm_provider == "anthropic" and refus_anthropic():
+        log.error(refus_anthropic())
+        ledger.journaliser("NEXUS-BUDGET", "fournisseur_refuse", None, demande="anthropic",
+                           actif=info()["fournisseur"], motif=refus_anthropic())
+    log.info("LLM actif : %s", info())
+    if not cfg().api_key:
+        log.warning("NEXUS_API_KEY vide : l'API /api refusera toutes les requêtes (sauf /api/sante).")
+    tache = asyncio.create_task(_boucle_fond()) if cfg().taches_fond else None
+    yield
+    if tache:
+        tache.cancel()
+
+
+def verifier_cle(x_nexus_key: str | None = Header(default=None)) -> None:
+    """Exige X-Nexus-Key égale à NEXUS_API_KEY (comparaison à temps constant)."""
+    attendu = cfg().api_key
+    if not attendu or not x_nexus_key or not hmac.compare_digest(x_nexus_key, attendu):
+        raise HTTPException(status_code=401, detail="Clé API absente ou invalide (en-tête X-Nexus-Key).")
+
+
+app = FastAPI(title="NEXUS Mothership — nexus-core", version="1.0.0", lifespan=cycle_de_vie,
+              docs_url=None, redoc_url=None, openapi_url=None)
+
+
+# /api/sante reste accessible sans clé pour les sondes (Docker, Uptime Kuma).
+@app.get("/api/sante", include_in_schema=False)
+def sante_publique():
+    from .llm import info
+    return {"statut": "ok", "service": "nexus-core", "llm": info()}
+
+
+app.include_router(creer_routeur(), prefix="/api", dependencies=[Depends(verifier_cle)])
+app.include_router(creer_routeur(), prefix="/cockpit/api")
+app.include_router(cockpit_router)
+
+
+@app.get("/", include_in_schema=False)
+def racine():
+    return RedirectResponse("/cockpit")

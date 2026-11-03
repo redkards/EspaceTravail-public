@@ -1,0 +1,111 @@
+{
+  "id": "NexusMission0001",
+  "name": "NEXUS — Mission par webhook",
+  "active": false,
+  "nodes": [
+    {
+      "id": "040b0579-0d51-4d8b-aa0b-0be83a2528c4",
+      "name": "Webhook mission",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "a87f1fe1-f0cd-4fa1-aa77-b08a44f966c6",
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "nexus-mission",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "notes": "POST JSON {titre, consigne, service?, montant_eur?, action?}"
+    },
+    {
+      "id": "c6533ec4-095b-465e-a0b6-db1c5d1dcc3b",
+      "name": "Créer la mission",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        260,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://nexus-core:8000/api/missions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Nexus-Key",
+              "value": "={{ $env.NEXUS_API_KEY }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.body) }}",
+        "options": {
+          "timeout": 30000,
+          "response": {
+            "response": {
+              "neverError": true,
+              "fullResponse": false
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "8a576687-ca17-4fe2-80e1-1db6e40781a3",
+      "name": "Répondre",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        520,
+        0
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Webhook mission": {
+      "main": [
+        [
+          {
+            "node": "Créer la mission",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Créer la mission": {
+      "main": [
+        [
+          {
+            "node": "Répondre",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Europe/Paris",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": null,
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "tags": []
+}
