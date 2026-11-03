@@ -47,6 +47,18 @@ MOTS_N3 = [
     r"publish", r"publishes", r"published", r"publishing",
     r"deploy", r"deploys", r"deployed", r"deploying", r"deployment",
 ]
+# Verbes engageants par RACINE (lemmes) : toutes les formes conjuguées et impératives courantes
+# (texte normalisé sans accents). « paie », « vire », « efface », « deploie », « mets en ligne »…
+_TERMINAISONS = r"(?:e|es|ent|er|ez|ons|ions|iez|era|eras|erai|erait|eraient|erons|erez|eront|ait|aient|ee|ees)"
+_RACINES_N3 = [
+    r"pa[yi]", r"vir", r"supprim", r"effac", r"deplo[yi]", r"publi", r"envo[yi]", r"resili", r"transfer",
+    r"rembours", r"expedi", r"achet", r"diffus", r"liquid", r"detrui", r"detruis",
+]
+MOTS_N3 += [rf"{r}{_TERMINAISONS}" for r in _RACINES_N3] + [
+    r"enverr\w*", r"vers(?:e|ent|er|ez|ons|era\w*)", r"sign(?:e|ent|er|ez|ons|era\w*)",
+    r"(?:mets|met|mettez|mettons|mettent|mettre|mettra\w*|mis|mise|mettrai\w*) en (?:ligne|production)",
+    r"detruire", r"detruisez", r"effacement", r"reglez? (?:la |les |cette )?(?:facture|somme|note)s?",
+]
 # Expressions à neutraliser avant la recherche (faux positifs : « ligne de commande »…).
 NEUTRES = [
     r"lignes? de commandes?", r"invites? de commandes?",
