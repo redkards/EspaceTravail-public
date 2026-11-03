@@ -44,8 +44,8 @@ services:
     # MVP : 80 (Let's Encrypt) et 443 (cockpit) seulement.
     # Les ports 8443-8445 sont ajoutés par docker-compose.complet.yml.
     ports:
-      - "80:80"
-      - "443:443"
+      - "${NEXUS_BIND_IP:-0.0.0.0}:80:80"
+      - "${NEXUS_BIND_IP:-0.0.0.0}:443:443"
     environment:
       NEXUS_HOST: ${NEXUS_HOST:?NEXUS_HOST manquant dans .env}
       ACME_EMAIL: ${ACME_EMAIL:?ACME_EMAIL manquant dans .env}

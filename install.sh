@@ -250,9 +250,19 @@ etape "Vérification des ports ${PORTS_PUBLICS[*]} (mode $MODE)"
 # =============================================================================
 # Si notre propre Caddy tourne déjà (réinstallation), les ports sont normalement pris par lui.
 notre_caddy=$(docker ps -q --filter "label=com.docker.compose.project=p1-nexus" --filter "label=com.docker.compose.service=caddy" 2>/dev/null || true)
+# Adresse IPv4 publique sur laquelle Caddy écoute (évite les conflits avec Tailscale,
+# qui écoute sur sa propre adresse 100.x). Surchargeable par NEXUS_BIND_IP dans .env.
+BIND_IP="$(lire_env NEXUS_BIND_IP)"
+if [ -z "$BIND_IP" ]; then
+  BIND_IP="$(ip -4 route get 1.1.1.1 2>/dev/null | awk '{for(i=1;i<NF;i++) if($i=="src"){print $(i+1); exit}}')"
+  [ -n "$BIND_IP" ] || BIND_IP="0.0.0.0"
+fi
+ok "Caddy écoutera sur l'adresse $BIND_IP"
 ports_occupes=()
 for p in "${PORTS_PUBLICS[@]}"; do
-  if ss -H -ltn "sport = :$p" 2>/dev/null | grep -q .; then
+  # Seules les écoutes sur l'adresse publique ou sur toutes les adresses gênent Caddy
+  if ss -H -ltn "sport = :$p" 2>/dev/null | awk '{print $4}' \
+     | grep -Eq "^(${BIND_IP//./\\.}|0\.0\.0\.0|\*|\[::\]):$p\$"; then
     ports_occupes+=("$p")
   fi
 done
@@ -381,6 +391,9 @@ assurer_env NTFY_TOPIC "nexus-$(secret 6)" && ajoute=1
 # En MVP, nexus-core utilise SQLite (sqlite:////data/nexus.db, fixé dans docker-compose.yml).
 assurer_env DATABASE_URL "postgresql+psycopg://nexus:$(lire_env POSTGRES_PASSWORD)@postgres:5432/nexus" && ajoute=1
 if [ "$ajoute" -eq 1 ]; then ok "Variables manquantes ajoutées au .env"; else ok ".env complet"; fi
+
+# =============================================================================
+assurer_env NEXUS_BIND_IP "$BIND_IP" || true
 
 # =============================================================================
 etape "Choix de l'IA (gratuit : Ollama Cloud + IA locale de secours)"
