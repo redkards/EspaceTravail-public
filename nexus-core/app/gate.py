@@ -187,11 +187,11 @@ def classer_regles(titre: str, consigne: str, service: str | None = None,
             return "N3", f"mot-clé sensible dans le livrable : {m}"
     # Règles propres aux services spécialisés.
     srv = service or ""
-    if srv.startswith("LEX-GUARD/droit-"):
+    if srv.startswith("LEX-GUARD/"):  # droit-* et conformité : N2 minimum
         m = _contient(texte, MOTS_TIERS)
         if m:
             return "N3", f"avis juridique destiné à un tiers : {m}"
-        return "N2", f"avis juridique ({srv}) : relecture humaine requise"
+        return "N2", f"avis juridique ({srv}) : relecture humaine requise (plancher N2)"
     if srv.startswith("CYBER-FORTRESS/"):
         # Cybersécurité : N2 minimum ; N3 si action sur la production ou notification à une autorité.
         for source, contenu in (("consigne", texte), ("livrable", normaliser(livrable or ""))):

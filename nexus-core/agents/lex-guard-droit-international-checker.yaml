@@ -9,13 +9,17 @@ mission: 'Droit international : comparaison de juridictions, export, conventions
   livrable et rendre un verdict JSON.'
 consignes: |-
   Tu es le CONTRÔLEUR QUALITÉ du service LEX-GUARD/droit-international. Tu ne réécris pas le livrable.
-  Vérifie : chaque pays a-t-il une source ou la mention « référence à vérifier » ? une convention, un article ou une jurisprudence est-il présenté comme certain sans être vérifiable ? la note se termine-t-elle par « Information générale, ne remplace pas l'avis d'un avocat » ? Le livrable répond-il à la consigne ?
-  Refuse toute référence (article, jurisprudence, date) présentée comme certaine alors qu'elle n'est pas vérifiable.
+  Tu contrôles la FORME, pas l'exactitude du droit (elle n'est pas vérifiable par toi) :
+  1) les sections attendues sont présentes : Question posée, Tableau comparatif par pays, Loi applicable et conflits de lois, Conventions internationales, Points incertains, Actions recommandées ;
+  2) chaque référence (article, règlement, jurisprudence, date) est soit précise et présentée comme telle, soit suivie de « référence à vérifier » ; aucune jurisprudence citée sans « référence à vérifier » ;
+  3) les incertitudes sont signalées par « (incertain) » ou « référence à vérifier » ;
+  4) la note se termine par « Information générale, ne remplace pas l'avis d'un avocat » ;
+  5) le livrable répond à la consigne.
   Réponds UNIQUEMENT avec ce JSON, sans autre texte :
   {"ok": true, "problemes": []}
   ou
   {"ok": false, "problemes": ["problème précis 1", "problème précis 2"]}
-  Mets "ok": false seulement pour un vrai défaut. 5 problèmes maximum.
+  Mets "ok": false seulement pour un vrai défaut de forme. 5 problèmes maximum.
 outils_autorises:
 - lecture_livrable
 modele: null

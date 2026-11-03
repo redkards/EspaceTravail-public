@@ -22,7 +22,7 @@
 #     --sans-partition  test rapide sans partition P1 : kit dans /opt/nexus-mothership
 #
 #  Autres options :
-#     --host NOM     nom d'hôte public (défaut : hostname -f, sinon srv2113898.hstgr.cloud)
+#     --host NOM     nom d'hôte public, ex. srvXXXX.hstgr.cloud (défaut : hostname -f, sinon demandé)
 #     --email ADR    e-mail pour les certificats Let's Encrypt
 #     --model NOM    modèle principal (cloud : défaut gemma4:31b ; local : qwen2.5:3b)
 #     --yes          répond « oui » aux questions (mode non interactif)
@@ -34,13 +34,14 @@
 #
 #  Idempotent : relançable sans risque. Si .env existe, les secrets ne sont PAS
 #  régénérés (seules les variables manquantes sont ajoutées).
+#  Aucun secret n'est affiché ni écrit dans install.log : le récapitulatif indique
+#  la commande « grep … .env » à taper pour les revoir.
 #  Ce script ne modifie JAMAIS le pare-feu (ufw ou Hostinger) : il vérifie et
 #  affiche les commandes à lancer si besoin.
 # =============================================================================
 set -euo pipefail
 
 # --- Constantes ------------------------------------------------------------------
-HOTE_PAR_DEFAUT="srv2113898.hstgr.cloud"
 DOSSIER_P1="/srv/p1/nexus-mothership"
 DOSSIER_SANS_PARTITION="/opt/nexus-mothership"
 POINT_P1="/srv/p1"
@@ -48,7 +49,7 @@ IMAGE_CADDY="caddy:2.8"
 KIT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ENV_FILE="$KIT_DIR/.env"
 LOG_FILE="$KIT_DIR/install.log"
-TOTAL_ETAPES=12
+TOTAL_ETAPES=13
 
 ARG_HOST=""
 ARG_EMAIL=""
@@ -70,16 +71,18 @@ ok()    { printf '\033[1;32m[OK]\033[0m %s\n' "$*"; }
 avert() { printf '\033[1;33m[!]\033[0m %s\n' "$*"; }
 erreur(){ printf '\033[1;31m[ERREUR]\033[0m %s\n' "$*" >&2; exit 1; }
 
-# Question oui/non. Retourne 0 pour oui. Avec --yes : réponse par défaut ($2).
+# Question oui/non. Retourne 0 pour oui. Avec --yes ou sans terminal : réponse par défaut ($2).
 demander() {
-  local question="$1" defaut="${2:-n}" rep
+  local question="$1" defaut="${2:-n}" rep invite="[o/N]"
   if [ "$OUI" -eq 1 ]; then [ "$defaut" = "o" ]; return; fi
   if [ ! -t 0 ]; then [ "$defaut" = "o" ]; return; fi
-  read -r -p "$question [o/N] " rep || rep=""
+  [ "$defaut" = "o" ] && invite="[O/n]"
+  read -r -p "$question $invite " rep || rep=""
+  [ -n "$rep" ] || { [ "$defaut" = "o" ]; return; }
   case "$rep" in o|O|oui|OUI|y|Y) return 0 ;; *) return 1 ;; esac
 }
 
-aide() { sed -n '2,41p' "$0" | sed 's/^# \{0,1\}//'; exit 0; }
+aide() { sed -n '2,40p' "$0" | sed 's/^# \{0,1\}//'; exit 0; }
 
 # --- Arguments ---------------------------------------------------------------------
 while [ $# -gt 0 ]; do
@@ -107,11 +110,11 @@ done
 if [ "$COMPLET" -eq 1 ]; then
   MODE="complet"
   PORTS_PUBLICS=(80 443 8443 8444 8445)
-  TOTAL_ETAPES=13
+  TOTAL_ETAPES=14
 else
   MODE="MVP"
   PORTS_PUBLICS=(80 443)
-  TOTAL_ETAPES=12
+  TOTAL_ETAPES=13
 fi
 if [ "$SANS_PARTITION" -eq 1 ]; then
   DOSSIER_ATTENDU="$DOSSIER_SANS_PARTITION"
@@ -119,7 +122,36 @@ else
   DOSSIER_ATTENDU="$DOSSIER_P1"
 fi
 
-# --- Journal : tout est copié dans install.log ----------------------------------------
+# --- Ancien journal : purge des secrets écrits par les versions précédentes -------------
+# Les anciennes versions affichaient mots de passe et clé API dans le récapitulatif, donc
+# dans install.log. On repère ces lignes (libellés connus + valeurs secrètes du .env)
+# et on propose de réécrire le journal sans elles. Les secrets ne sont jamais affichés.
+purger_journal() {
+  [ -s "$LOG_FILE" ] || return 0
+  local motifs tmp regex
+  regex='mot de passe +: [0-9a-f]|Clé API \(X-Nexus-Key\): *[0-9a-f]|1re barrière +: .* / [0-9a-f]|Notifications ntfy +: https?://|> topic nexus-'
+  motifs="$(mktemp)"; chmod 600 "$motifs"
+  if [ -f "$ENV_FILE" ]; then
+    { grep -E '^(COCKPIT_PASSWORD|NEXUS_API_KEY|N8N_BASIC_PASSWORD|N8N_ENCRYPTION_KEY|POSTGRES_PASSWORD|OLLAMA_API_KEY|BRIDGE_TOKEN_[A-Z]+|NTFY_TOPIC|NTFY_PASSWORD|COCKPIT_INTERNAL|LEDGER_HMAC_KEY|BACKUP_PASSPHRASE)=' "$ENV_FILE" || true; } \
+      | cut -d= -f2- | sed "s/^'//; s/'\$//" | awk 'length($0) >= 8' > "$motifs"
+  fi
+  if grep -qE "$regex" "$LOG_FILE" || { [ -s "$motifs" ] && grep -qF -f "$motifs" "$LOG_FILE"; }; then
+    avert "install.log contient des secrets écrits par une ancienne version du script."
+    if demander "Réécrire install.log sans ces lignes (recommandé) ?" o; then
+      tmp="$(mktemp)"; chmod 600 "$tmp"
+      { grep -vE "$regex" "$LOG_FILE" || true; } \
+        | { if [ -s "$motifs" ]; then grep -vF -f "$motifs" || true; else cat; fi; } > "$tmp"
+      cat "$tmp" > "$LOG_FILE"; rm -f "$tmp"
+      ok "install.log réécrit sans les lignes sensibles"
+    else
+      avert "install.log conservé tel quel : supprimez-le vous-même (rm $LOG_FILE)."
+    fi
+  fi
+  rm -f "$motifs"
+}
+purger_journal
+
+# --- Journal : tout est copié dans install.log (AUCUN secret n'y est écrit) -----------
 touch "$LOG_FILE" && chmod 600 "$LOG_FILE"
 exec > >(tee -a "$LOG_FILE") 2>&1
 echo
@@ -313,12 +345,14 @@ else
   NEXUS_HOST="$(hostname -f 2>/dev/null || true)"
   case "$NEXUS_HOST" in
     *.*) ;;                                   # c'est bien un nom complet (FQDN)
-    *) NEXUS_HOST="$HOTE_PAR_DEFAUT" ;;
+    *) NEXUS_HOST="" ;;
   esac
   if [ "$OUI" -eq 0 ] && [ -t 0 ]; then
-    read -r -p "Nom d'hôte public du VPS [$NEXUS_HOST] : " rep || rep=""
+    echo "    Nom d'hôte : hPanel > VPS > Vue d'ensemble (ex. srvXXXX.hstgr.cloud)."
+    read -r -p "Nom d'hôte public du VPS [${NEXUS_HOST:-à saisir}] : " rep || rep=""
     [ -n "$rep" ] && NEXUS_HOST="$rep"
   fi
+  [ -n "$NEXUS_HOST" ] || erreur "Nom d'hôte introuvable : relancez avec --host srvXXXX.hstgr.cloud"
 fi
 [[ "$NEXUS_HOST" =~ ^[A-Za-z0-9.-]+\.[A-Za-z]{2,}$ ]] || erreur "Nom d'hôte invalide : « $NEXUS_HOST »"
 ok "Nom d'hôte : $NEXUS_HOST"
@@ -387,8 +421,27 @@ assurer_env LLM_MAX_CHARS 12000 && ajoute=1
 assurer_env OLLAMA_NUM_CTX 8192 && ajoute=1
 assurer_env N3_TIMEOUT_HOURS 24 && ajoute=1
 assurer_env N3_DAILY_CAP 15 && ajoute=1
-assurer_env NTFY_URL "http://ntfy" && ajoute=1
-assurer_env NTFY_TOPIC "nexus-$(secret 6)" && ajoute=1
+assurer_env NEXUS_FONCTIONNEMENT_DEFAUT F2 && ajoute=1
+assurer_env EUR_PAR_USD 0.92 && ajoute=1
+# Vide = nombre de missions parallèles choisi automatiquement par nexus-core
+assurer_env NEXUS_MAX_MISSIONS "" && ajoute=1
+# Secret interne Caddy -> nexus-core (en-tête X-Cockpit-Auth) et clé HMAC du LEDGER
+assurer_env COCKPIT_INTERNAL "$(secret 32)" && ajoute=1
+assurer_env LEDGER_HMAC_KEY "$(secret 32)" && ajoute=1
+# Alertes N3 sur le téléphone (gratuit). MVP : service public ntfy.sh ; mode complet :
+# serveur ntfy du kit (docker-compose.complet.yml force alors http://ntfy).
+assurer_env NTFY_URL "https://ntfy.sh" && ajoute=1
+case "$(lire_env NTFY_URL)" in
+  ""|http://ntfy|http://ntfy/) remplacer_env NTFY_URL "https://ntfy.sh"; ajoute=1 ;;
+esac
+assurer_env NTFY_TOPIC "nexus-$(secret 8)" && ajoute=1
+[ -n "$(lire_env NTFY_TOPIC)" ] || { remplacer_env NTFY_TOPIC "nexus-$(secret 8)"; ajoute=1; }
+assurer_env NTFY_USER proprietaire && ajoute=1
+assurer_env NTFY_PASSWORD "$(secret 12)" && ajoute=1
+# Sauvegardes : phrase secrète gpg pour chiffrer env.sauvegarde ; remote rclone facultatif
+assurer_env BACKUP_PASSPHRASE "$(secret 16)" && ajoute=1
+assurer_env BACKUP_AGE_RECIPIENT "" && ajoute=1
+assurer_env NEXUS_RCLONE_REMOTE gdrive && ajoute=1
 # Passerelle nexus-bridge : un jeton par IA (64 caractères hexadécimaux). Ajoutés
 # seulement s'ils manquent : un jeton existant n'est jamais remplacé.
 for ia in CLAUDE CHATGPT GEMINI PROPRIETAIRE; do
@@ -543,6 +596,9 @@ for d in caddy/data caddy/config ollama nexus-core/livrables nexus-bridge postgr
   mkdir -p "$KIT_DIR/data/$d"
 done
 chmod 700 "$KIT_DIR/data"
+# Dossier des sauvegardes (backup.sh / restore.sh), lisible par root seulement
+mkdir -p "$KIT_DIR/backups"
+chmod 700 "$KIT_DIR/backups"
 chown -R 1000:1000 "$KIT_DIR/data/n8n"     # n8n tourne avec l'utilisateur « node » (uid 1000)
 chmod +x "$KIT_DIR/postgres/initdb/"*.sh 2>/dev/null || true
 ok "Données stockées dans $KIT_DIR/data/<service>"
@@ -595,6 +651,51 @@ fi
 fi
 
 # =============================================================================
+etape "Alertes N3 sur le téléphone et sauvegarde quotidienne"
+# =============================================================================
+TOPIC="$(lire_env NTFY_TOPIC)"
+if [ "$COMPLET" -eq 1 ]; then
+  # Serveur ntfy du kit en accès « deny-all » : on ouvre UNIQUEMENT le sujet secret,
+  # en écriture anonyme (nexus-core, n8n) et en lecture pour le compte NTFY_USER.
+  NTFY_USER="$(lire_env NTFY_USER)"; NTFY_USER="${NTFY_USER:-proprietaire}"
+  ntfy_ok=1
+  for _ in $(seq 1 12); do
+    docker compose exec -T ntfy ntfy user list >/dev/null 2>&1 && break
+    sleep 5
+  done
+  if docker compose exec -T ntfy ntfy user list 2>/dev/null | grep -q "user $NTFY_USER "; then
+    ok "Compte ntfy « $NTFY_USER » déjà présent (mot de passe inchangé)"
+  else
+    # Mot de passe transmis par l'entrée standard (jamais dans la ligne de commande)
+    printf '%s\n' "$(lire_env NTFY_PASSWORD)" \
+      | docker compose exec -T ntfy sh -c 'read -r NTFY_PASSWORD; export NTFY_PASSWORD; exec ntfy user add "$1"' sh "$NTFY_USER" >/dev/null \
+      || ntfy_ok=0
+  fi
+  docker compose exec -T ntfy ntfy access "$NTFY_USER" "$TOPIC" read-only >/dev/null 2>&1 || ntfy_ok=0
+  docker compose exec -T ntfy ntfy access everyone "$TOPIC" write-only >/dev/null 2>&1 || ntfy_ok=0
+  if [ "$ntfy_ok" -eq 1 ]; then
+    ok "ntfy : accès refusé par défaut, sujet ouvert en lecture pour « $NTFY_USER » seulement"
+  else
+    avert "Réglage des droits ntfy incomplet. Relancez « bash install.sh --complet » plus tard."
+  fi
+else
+  ok "Alertes N3 via le service gratuit ntfy.sh (sujet secret : voir « grep NTFY_TOPIC .env »)"
+fi
+
+# Sauvegarde quotidienne à 03:30 (fichier /etc/cron.d, facile à retirer)
+CRON_FILE="/etc/cron.d/nexus-mothership-sauvegarde"
+if [ -f "$CRON_FILE" ]; then
+  ok "Sauvegarde quotidienne déjà planifiée ($CRON_FILE)"
+elif demander "Planifier une sauvegarde automatique chaque nuit à 3 h 30 ?" n; then
+  printf '%s\n' "# Sauvegarde quotidienne du Mini NEXUS MOTHERSHIP (créé par install.sh)" \
+    "30 3 * * * root /bin/bash $KIT_DIR/backup.sh >> $KIT_DIR/backups/backup.log 2>&1" > "$CRON_FILE"
+  chmod 644 "$CRON_FILE"
+  ok "Sauvegarde quotidienne planifiée (7 dernières conservées dans $KIT_DIR/backups)"
+else
+  info "Sauvegarde automatique non planifiée. Pour l'ajouter : relancez install.sh et répondez « o »."
+fi
+
+# =============================================================================
 etape "Mission de test"
 # =============================================================================
 MARQUEUR="$KIT_DIR/data/.mission-test-envoyee"
@@ -620,9 +721,8 @@ else
 fi
 
 # =============================================================================
-#  Récapitulatif
+#  Récapitulatif — AUCUN secret affiché (ni écrit dans install.log)
 # =============================================================================
-TOPIC="$(lire_env NTFY_TOPIC)"
 if [ "$SANS_PARTITION" -eq 1 ]; then EMPLACEMENT="test sans partition"; else EMPLACEMENT="partition P1"; fi
 cat <<EOF
 
@@ -630,11 +730,14 @@ cat <<EOF
 ║        NEXUS MOTHERSHIP — INSTALLATION TERMINÉE
 ║        mode $MODE · $EMPLACEMENT
 ╚══════════════════════════════════════════════════════════════════════════╝
+  Les secrets ne sont jamais affichés ici. Pour les voir, dans ce dossier :
+      cd $KIT_DIR
+
   Cockpit (décisions)  : https://$NEXUS_HOST/cockpit
       identifiant      : $(lire_env COCKPIT_USER)
-      mot de passe     : $(lire_env COCKPIT_PASSWORD)
+      mot de passe     : voir « grep COCKPIT_PASSWORD .env »
   Santé de l'API       : https://$NEXUS_HOST/api/sante
-  Clé API (X-Nexus-Key): $(lire_env NEXUS_API_KEY)
+  Clé API (X-Nexus-Key): voir « grep NEXUS_API_KEY .env »
   IA                   : $(if [ "$cloud_ok" -eq 1 ]; then echo "Ollama Cloud (gratuit) — $NEXUS_MODEL"; else echo "locale — $NEXUS_MODEL"; fi)
   Repli local          : $(if [ "$REPLI" -eq 1 ] && [ "$cloud_ok" -eq 1 ]; then echo "oui ($MODELE_LOCAL)"; else echo "non"; fi)
 EOF
@@ -642,16 +745,18 @@ if [ "$COMPLET" -eq 1 ]; then
 cat <<EOF
 
   n8n (automatisations): https://$NEXUS_HOST:8443
-      1re barrière     : $(lire_env N8N_BASIC_USER) / $(lire_env N8N_BASIC_PASSWORD)
+      1re barrière     : $(lire_env N8N_BASIC_USER) / voir « grep N8N_BASIC_PASSWORD .env »
       puis créez votre compte propriétaire n8n à la première visite
   Uptime Kuma (suivi)  : https://$NEXUS_HOST:8444   (mêmes identifiants que le cockpit)
-  Notifications ntfy   : https://$NEXUS_HOST:8445/$TOPIC
-      appli Android « ntfy » > + > serveur https://$NEXUS_HOST:8445 > topic $TOPIC
+  Alertes N3 (ntfy)    : appli Android « ntfy » > + > autre serveur https://$NEXUS_HOST:8445
+      sujet, compte et mot de passe : voir « grep NTFY_ .env »
 EOF
 else
 cat <<EOF
 
-  Version complète (n8n, surveillance, notifications) : bash install.sh --complet
+  Alertes N3 (ntfy)    : appli Android « ntfy » > + > sujet : voir « grep NTFY_TOPIC .env »
+      (serveur ntfy.sh, gratuit ; le sujet est secret)
+  Version complète (n8n, surveillance, ntfy privé) : bash install.sh --complet
 EOF
 fi
 cat <<EOF
@@ -659,10 +764,11 @@ cat <<EOF
   Passerelle Claude · ChatGPT · Gemini :
       suivi (lecture)  : https://$NEXUS_HOST/bridge   (identifiants du cockpit)
       URL à coller     : bash $KIT_DIR/bridge-connecteurs.sh
-      jetons (secrets) : grep BRIDGE_TOKEN $ENV_FILE
+      jetons (secrets) : voir « grep BRIDGE_TOKEN .env »
 
-  Revoir ces identifiants : cat $ENV_FILE
-  Journal d'installation   : $LOG_FILE
+  Sauvegarde           : bash backup.sh   ·   restauration : bash restore.sh
+      phrase de chiffrement (à noter hors du VPS) : voir « grep BACKUP_PASSPHRASE .env »
+  Journal d'installation (sans secrets) : $LOG_FILE
   Rappel pare-feu Hostinger : ouvrir TCP ${PORTS_PUBLICS[*]}
   (le premier certificat HTTPS peut prendre 1 à 2 minutes)
 ════════════════════════════════════════════════════════════════════════════

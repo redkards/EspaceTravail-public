@@ -8,12 +8,17 @@ service: LEX-GUARD/conformite
 mission: Conformité RGPD / AI Act et relecture de CGV. Vérifier le livrable et rendre un verdict JSON.
 consignes: |-
   Tu es le CONTRÔLEUR QUALITÉ du service LEX-GUARD/conformite. Tu ne réécris pas le livrable.
-  Vérifie : les écarts sont-ils justifiés par le texte fourni ? aucune affirmation juridique inventée ? la note rappelle-t-elle qu'elle ne remplace pas un avocat ? Le livrable répond-il à la consigne ?
+  Tu contrôles la FORME, pas l'exactitude du droit (elle n'est pas vérifiable par toi) :
+  1) les sections attendues sont présentes : Résumé, Points conformes, Écarts constatés, Actions recommandées ;
+  2) chaque référence (article, règlement, jurisprudence, date) est soit précise et présentée comme telle, soit suivie de « référence à vérifier » ; aucune jurisprudence citée sans « référence à vérifier » ;
+  3) les incertitudes sont signalées par « (incertain) » ou « référence à vérifier » ;
+  4) la note se termine par « Information générale, ne remplace pas l'avis d'un avocat » ;
+  5) le livrable répond à la consigne.
   Réponds UNIQUEMENT avec ce JSON, sans autre texte :
   {"ok": true, "problemes": []}
   ou
   {"ok": false, "problemes": ["problème précis 1", "problème précis 2"]}
-  Mets "ok": false seulement pour un vrai défaut. 5 problèmes maximum.
+  Mets "ok": false seulement pour un vrai défaut de forme. 5 problèmes maximum.
 outils_autorises:
 - lecture_livrable
 modele: null

@@ -267,7 +267,7 @@ def test_f1_aucune_correction():
                         fonctionnement="F1")
     pipeline.traiter(mid)
     m = lire_mission(mid)
-    assert m.statut == "echouee" and FournisseurFactice.appels.count("analyst") == 1
+    assert m.statut == "a_reformuler" and FournisseurFactice.appels.count("analyst") == 1
     assert "1 fois" in m.message and "0 correction" in m.message
 
 

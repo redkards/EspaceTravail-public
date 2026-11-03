@@ -5,6 +5,10 @@
 #  Principe : on NE touche PAS au disque système. On crée 4 fichiers image ext4
 #  de taille fixe (/srv/images/p1.img … p4.img), montés en « loop » sur
 #  /srv/p1 … /srv/p4, et déclarés dans /etc/fstab (remontés au redémarrage).
+#  Au démarrage, Docker attend que les partitions soient montées
+#  (fstab « x-systemd.before=docker.service » + règle systemd RequiresMountsFor) :
+#  si une partition manque, Docker ne démarre pas, au lieu de lancer les services
+#  sur un dossier vide (certificats et bases « perdus »).
 #
 #  Usage :
 #    sudo bash partitions.sh                 # 4 × 20 Go (par défaut)
@@ -13,8 +17,9 @@
 #
 #  Idempotent : une image déjà créée n'est jamais reformatée ; une ligne fstab
 #  déjà présente n'est pas dupliquée ; un montage existant est conservé.
+#  Une ligne fstab d'une ancienne version (sans x-systemd.before) est mise à jour.
 #  Variables de test (facultatives) : NEXUS_PART_BASE (défaut /srv),
-#  NEXUS_FSTAB (défaut /etc/fstab).
+#  NEXUS_FSTAB (défaut /etc/fstab), NEXUS_SYSTEMD_DIR (défaut /etc/systemd/system).
 # =============================================================================
 set -euo pipefail
 
@@ -23,7 +28,11 @@ SIMULATION=0
 NB=4
 BASE="${NEXUS_PART_BASE:-/srv}"
 FSTAB="${NEXUS_FSTAB:-/etc/fstab}"
+SYSTEMD_DIR="${NEXUS_SYSTEMD_DIR:-/etc/systemd/system}"
 IMAGES="$BASE/images"
+# nofail : le VPS démarre même si une image est absente ; x-systemd.before : montage
+# AVANT Docker (voir aussi la règle RequiresMountsFor, étape 3 bis).
+OPTIONS_FSTAB="loop,nofail,x-systemd.before=docker.service"
 
 # --- Affichage ---------------------------------------------------------------
 info()  { printf '\033[1;34m[i]\033[0m %s\n' "$*"; }
@@ -113,19 +122,39 @@ done
 # --- 3. /etc/fstab ---------------------------------------------------------------
 info "Étape 3/4 — Déclaration dans $FSTAB (remontage automatique au démarrage)"
 a_ajouter=()
+a_mettre_a_jour=0
 for i in $(seq 1 "$NB"); do
   img="$IMAGES/p$i.img"
   # Doublon ? on cherche une ligne active qui monte déjà cette image
   if [ -f "$FSTAB" ] && awk -v img="$img" '$1 == img && $0 !~ /^[[:space:]]*#/ {found=1} END {exit !found}' "$FSTAB"; then
-    ok "p$i : déjà présent dans $FSTAB"
+    if awk -v img="$img" '$1 == img && $0 !~ /^[[:space:]]*#/ && $4 !~ /x-systemd\.before=docker\.service/ {found=1} END {exit !found}' "$FSTAB"; then
+      info "p$i : ligne fstab d'une ancienne version, options mises à jour ($OPTIONS_FSTAB)"
+      a_mettre_a_jour=1
+    else
+      ok "p$i : déjà présent dans $FSTAB"
+    fi
   else
-    a_ajouter+=("$img $BASE/p$i ext4 loop,nofail,defaults 0 2")
+    a_ajouter+=("$img $BASE/p$i ext4 $OPTIONS_FSTAB 0 2")
   fi
 done
-if [ "${#a_ajouter[@]}" -gt 0 ]; then
+if [ "${#a_ajouter[@]}" -gt 0 ] || [ "$a_mettre_a_jour" -eq 1 ]; then
   sauvegarde="$FSTAB.bak-$(date +%Y%m%d-%H%M%S)"
   info "Sauvegarde de $FSTAB vers $sauvegarde"
-  faire cp -a "$FSTAB" "$sauvegarde"
+  [ -f "$FSTAB" ] && faire cp -a "$FSTAB" "$sauvegarde"
+fi
+if [ "$a_mettre_a_jour" -eq 1 ]; then
+  if [ "$SIMULATION" -eq 1 ]; then
+    printf '   (simulation) options des lignes p1..p%s remplacées par %s\n' "$NB" "$OPTIONS_FSTAB"
+  else
+    tmp="$(mktemp)"
+    awk -v base="$IMAGES/p" -v opts="$OPTIONS_FSTAB" '
+      $0 !~ /^[[:space:]]*#/ && index($1, base) == 1 && $1 ~ /p[0-9]+\.img$/ && $4 !~ /x-systemd\.before=docker\.service/ { $4 = opts }
+      { print }' "$FSTAB" > "$tmp"
+    cat "$tmp" > "$FSTAB" && rm -f "$tmp"
+    ok "Options fstab mises à jour"
+  fi
+fi
+if [ "${#a_ajouter[@]}" -gt 0 ]; then
   for ligne in "${a_ajouter[@]}"; do
     if [ "$SIMULATION" -eq 1 ]; then
       printf '   (simulation) ajout dans %s : %s\n' "$FSTAB" "$ligne"
@@ -134,6 +163,27 @@ if [ "${#a_ajouter[@]}" -gt 0 ]; then
     fi
   done
   [ "$SIMULATION" -eq 1 ] || ok "${#a_ajouter[@]} ligne(s) ajoutée(s) à $FSTAB"
+fi
+
+# --- 3 bis. Docker attend les partitions -------------------------------------------
+# Règle systemd : docker.service exige que /srv/p1 … /srv/pN soient montés.
+DROPIN_DIR="$SYSTEMD_DIR/docker.service.d"
+DROPIN="$DROPIN_DIR/nexus-partitions.conf"
+points_requis=""
+for i in $(seq 1 "$NB"); do points_requis="$points_requis $BASE/p$i"; done
+contenu_dropin="$(printf '%s\n' "# Créé par partitions.sh (NEXUS) : Docker attend le montage des partitions" \
+  "[Unit]" "RequiresMountsFor=${points_requis# }")"
+if [ -f "$DROPIN" ] && [ "$(cat "$DROPIN")" = "$contenu_dropin" ]; then
+  ok "Règle systemd déjà en place : $DROPIN"
+elif [ "$SIMULATION" -eq 1 ]; then
+  printf '   (simulation) création de %s (RequiresMountsFor=%s)\n' "$DROPIN" "${points_requis# }"
+else
+  mkdir -p "$DROPIN_DIR"
+  printf '%s\n' "$contenu_dropin" > "$DROPIN"
+  if command -v systemctl >/dev/null 2>&1 && [ -d /run/systemd/system ] && [ "$SYSTEMD_DIR" = "/etc/systemd/system" ]; then
+    systemctl daemon-reload || avert "systemctl daemon-reload a échoué (la règle s'appliquera au prochain démarrage)."
+  fi
+  ok "Docker attendra le montage des partitions au démarrage ($DROPIN)"
 fi
 
 # --- 4. Montage ------------------------------------------------------------------

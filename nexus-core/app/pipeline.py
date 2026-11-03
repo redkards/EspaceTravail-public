@@ -105,8 +105,8 @@ def _priorite(service: str) -> int:
 
 
 def garantir_mention_juridique(service: str | None, livrable: str) -> str:
-    """Services LEX-GUARD/droit-* : la mention finale est ajoutée si le modèle l'a oubliée."""
-    if not (service or "").startswith("LEX-GUARD/droit-"):
+    """Tout service LEX-GUARD/ (conformité incluse) : la mention finale est ajoutée si le modèle l'a oubliée."""
+    if not (service or "").startswith("LEX-GUARD/"):
         return livrable
     if gate.normaliser(MENTION_AVOCAT) in gate.normaliser(livrable):
         return livrable
@@ -219,6 +219,7 @@ class Contexte:
         self.revisions = 0
         self.debut = _horloge()
         self.livrable_partiel: str | None = mission.livrable_texte
+        self.relancer = False  # positionné par escalader() : relance automatique demandée
         self.f = fct.niveau(mission.fonctionnement or fct.defaut())
         self._instancier()
 
@@ -428,6 +429,8 @@ def traiter(mid: int) -> None:
         m = s.get(Mission, mid)
         ctx = Contexte(m)
     _executer_protege(ctx, _executer)
+    if ctx.relancer:  # décision RELANCER du directeur : nouvelle exécution, dans la même place de file
+        traiter(mid)
 
 
 def _verifier_f4_au_lancement(ctx: Contexte) -> None:
@@ -596,7 +599,11 @@ def _boucle_qualite(ctx: Contexte, srv: dict, livrable: str, elements: str) -> N
 
 
 def escalader(ctx: Contexte, srv: dict, livrable: str, verdict: dict, refus: int = 0) -> None:
-    """Refus au-delà des corrections permises : le directeur donne son avis, puis la mission échoue."""
+    """Refus au-delà des corrections permises : le directeur décide.
+
+    RELANCER → une seule relance automatique (niveau de fonctionnement +1 si possible, jamais F4
+    sans accord) ; REFORMULER → statut « a_reformuler » avec sa suggestion ; sinon → échouée.
+    """
     mid = ctx.mid
     directeur = srv["directeur"]
     probs = "\n".join(f"- {p}" for p in verdict["problemes"]) or "- livrable jugé insuffisant"
@@ -605,15 +612,41 @@ def escalader(ctx: Contexte, srv: dict, livrable: str, verdict: dict, refus: int
         (f"Problèmes relevés par le contrôle qualité ({refus} refus)", probs, 4, "debut"),
         ("Consigne", ctx.consigne, 2, "debut"), ("Dernier livrable", livrable, 3, "tete_queue")], ctx.max_chars))
     m = re.search(r"DECISION\s*:\s*([A-ZÉ]+)", avis or "", re.I)
-    decision = (m.group(1).upper() if m else "REFORMULER")
+    decision = m.group(1).upper() if m else "INCONNUE"
     c = re.search(r"CONSIGNE\s*:\s*(.+)", avis or "", re.I)
-    recommandation = f"{decision}" + (f" — {c.group(1).strip()}" if c else "")
-    _maj_mission(mid, statut="echouee", niveau="N2", livrable_texte=livrable,
-                 message=(f"Refusé {refus} fois par le CHECKER (niveau {ctx.f.code} : "
-                          f"{ctx.f.revisions_max} correction(s) permise(s)), escalade N2 à {directeur}. "
-                          f"Recommandation : {recommandation}")[:1000])
-    ledger.journaliser(directeur, "escalade_n2", mid, problemes=verdict["problemes"],
-                       recommandation=recommandation)
+    suggestion = c.group(1).strip()[:500] if c else ""
+    recommandation = decision + (f" — {suggestion}" if suggestion else "")
+    entete = (f"Refusé {refus} fois par le CHECKER (niveau {ctx.f.code} : {ctx.f.revisions_max} correction(s) "
+              f"permise(s)), escalade N2 à {directeur}. ")
+    ledger.journaliser(directeur, "escalade_n2", mid, problemes=verdict["problemes"], recommandation=recommandation)
+    with session_scope() as s:
+        deja_relancee = bool(s.get(Mission, mid).relance_auto)
+    if decision == "RELANCER" and not deja_relancee:
+        sup = fct.suivant(ctx.f.code)
+        cible = sup if sup in ("F2", "F3") else ctx.f.code  # F4 payant : jamais sans accord du propriétaire
+        if cible != ctx.f.code:
+            ctx.relever(cible, f"relance automatique demandée par {directeur}")
+        with session_scope() as s:
+            mm = s.get(Mission, mid)
+            if suggestion:
+                mm.consigne = f"{mm.consigne}\n\nIndication du directeur pour la relance : {suggestion}"
+            mm.relance_auto = 1
+            mm.niveau = None
+            mm.livrable_texte = livrable
+        transition(mid, ("en_cours",), "recue",
+                   message=(entete + f"Relance automatique unique en {cible}" +
+                            (f" avec l'indication : {suggestion}" if suggestion else "") + ".")[:1000])
+        ledger.journaliser(directeur, "relance_automatique", mid, fonctionnement=cible, indication=suggestion)
+        ctx.relancer = True
+        return
+    if decision == "RELANCER":
+        statut, fin = "echouee", "Relance automatique déjà effectuée : mission échouée, à reprendre manuellement."
+    elif decision == "REFORMULER":
+        statut, fin = "a_reformuler", ("À reformuler. Suggestion du directeur : "
+                                       f"{suggestion or 'préciser la consigne et les éléments fournis'}.")
+    else:
+        statut, fin = "echouee", f"Décision du directeur : {recommandation}."
+    _maj_mission(mid, statut=statut, niveau="N2", livrable_texte=livrable, message=(entete + fin)[:1000])
 
 
 def relancer_revision(mid: int, commentaire: str | None) -> None:
@@ -628,6 +661,8 @@ def relancer_revision(mid: int, commentaire: str | None) -> None:
         ctx = Contexte(m)
         precedent = m.livrable_texte or ""
     _executer_protege(ctx, _reviser, precedent, commentaire)
+    if ctx.relancer:
+        traiter(mid)
 
 
 def _reviser(ctx: Contexte, precedent: str, commentaire: str | None) -> None:

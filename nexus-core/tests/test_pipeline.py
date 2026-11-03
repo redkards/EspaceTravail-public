@@ -32,7 +32,7 @@ def test_trois_refus_echouee():
                         fonctionnement="F3")
     pipeline.traiter(mid)
     m = lire_mission(mid)
-    assert m.statut == "echouee"
+    assert m.statut == "a_reformuler"  # directeur (factice) : REFORMULER
     assert m.niveau == "N2"  # escalade N2
     assert FournisseurFactice.appels.count("checker") == 3
     assert "gate" not in FournisseurFactice.appels

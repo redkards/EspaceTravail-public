@@ -47,6 +47,8 @@ class Mission(Base):
     revisions: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
     # Attente particulière (ex. « lancement_f4 » : la mission attend l'accord avant de démarrer).
     attente: Mapped[str | None] = mapped_column(String(30), nullable=True)
+    # Relance automatique décidée par le directeur (une seule par mission).
+    relance_auto: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
 
 
 class Etape(Base):

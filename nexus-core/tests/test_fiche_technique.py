@@ -181,7 +181,7 @@ def test_trois_refus_appel_reel_du_directeur():
     mid = creer_mission(titre="Checklist", consigne="Liste les étapes", service="OPS-CORE/projets")
     pipeline.traiter(mid)
     m = lire_mission(mid)
-    assert m.statut == "echouee" and m.niveau == "N2"
+    assert m.statut == "a_reformuler" and m.niveau == "N2"
     assert "directeur" in FournisseurFactice.appels
     assert "exemple de défaut" in _entrees("directeur")[0]
     with session_scope() as s:
@@ -189,6 +189,6 @@ def test_trois_refus_appel_reel_du_directeur():
         dir_etape = [e for e in etapes if e.role == "directeur"]
         assert len(dir_etape) == 1 and dir_etape[0].agent_id == "DIR-OPERATIONS"
         assert "DECISION" in dir_etape[0].sortie
-    assert "REFORMULER" in m.message and "DIR-OPERATIONS" in m.message
+    assert "À reformuler" in m.message and "DIR-OPERATIONS" in m.message
     esc = [e for e in ledger.lister(100) if e["action"] == "escalade_n2"]
     assert esc and esc[0]["acteur"] == "DIR-OPERATIONS" and esc[0]["details"]["recommandation"]

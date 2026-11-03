@@ -137,3 +137,25 @@ def test_organigramme_api_expose_la_nouvelle_direction(client, cockpit):
     assert "IMPACT" in directions
     services = {a["service"] for a in agents if a["service"]}
     assert set(NOUVEAUX) <= services
+
+
+# --- Audit 6 : tout LEX-GUARD/ (conformité incluse) ---------------------------------
+
+def test_conformite_plancher_n2_et_mention():
+    assert gate.classer("Synthèse", "Fais une synthèse interne", service="LEX-GUARD/conformite")[0] == "N2"
+    assert gate.classer("CGV", "Relis les CGV du site", service="LEX-GUARD/conformite")[0] == "N3"
+    FournisseurFactice.script["analyst"].append("BROUILLON — à valider\n## Résumé\nRGPD : registre à tenir.")
+    mid = creer_mission(titre="RGPD", consigne="Fais une synthèse interne RGPD", service="LEX-GUARD/conformite")
+    pipeline.traiter(mid)
+    m = lire_mission(mid)
+    assert m.niveau == "N2" and m.livrable_texte.rstrip().endswith(AVOCAT + ".")
+
+
+def test_checkers_juridiques_controle_de_forme():
+    for f in ("LEX-GUARD-CHECKER", "LEX-GUARD-DROIT-FRANCE-CHECKER", "LEX-GUARD-DROIT-EUROPE-CHECKER",
+              "LEX-GUARD-DROIT-INTERNATIONAL-CHECKER"):
+        c = reg.agent(f)["consignes"]
+        assert "FORME" in c and "sections attendues" in c and "référence à vérifier" in c and AVOCAT in c
+        assert "est-elle exacte" not in c and "exactitude du droit" in c
+    analyste = reg.agent("LEX-GUARD-ANALYST")["consignes"]
+    assert AVOCAT in analyste and "N'invente JAMAIS de jurisprudence" in analyste

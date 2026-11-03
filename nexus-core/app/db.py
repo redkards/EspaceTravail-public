@@ -78,6 +78,7 @@ COLONNES_AJOUTEES = [
     ("missions", "duree_s", "FLOAT NOT NULL DEFAULT 0"),
     ("missions", "revisions", "INTEGER NOT NULL DEFAULT 0"),
     ("missions", "attente", "VARCHAR(30)"),
+    ("missions", "relance_auto", "INTEGER NOT NULL DEFAULT 0"),
     ("decisions", "objet", "VARCHAR(20) NOT NULL DEFAULT 'livrable'"),
 ]
 

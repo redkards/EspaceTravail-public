@@ -158,7 +158,7 @@ def test_secret_persistant_jamais_stocke():
                         fonctionnement="F3")
     pipeline.traiter(mid)
     m = lire_mission(mid)
-    assert m.statut == "echouee" and CLE_API not in m.livrable_texte and cyber.MASQUE in m.livrable_texte
+    assert m.statut == "a_reformuler" and CLE_API not in m.livrable_texte and cyber.MASQUE in m.livrable_texte
 
 
 def test_projets_services_cyber():
