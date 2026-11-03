@@ -434,6 +434,14 @@ assurer_env NEXUS_MAX_MISSIONS "" && ajoute=1
 # Secret interne Caddy -> nexus-core (en-tête X-Cockpit-Auth) et clé HMAC du LEDGER
 assurer_env COCKPIT_INTERNAL "$(secret 32)" && ajoute=1
 assurer_env LEDGER_HMAC_KEY "$(secret 32)" && ajoute=1
+# Décideur mobile : code à 6 chiffres, généré UNE fois (jamais régénéré s'il existe)
+if ! grep -qE '^COCKPIT_CODE_DECIDEUR=[0-9]{6}$' "$ENV_FILE"; then
+  remplacer_env COCKPIT_CODE_DECIDEUR "$(printf '%06d' $(( $(od -An -N4 -tu4 /dev/urandom) % 1000000 )))"
+  rm -f "$KIT_DIR/data/.code-decideur-affiche"
+  ajoute=1
+fi
+assurer_env NEXUS_SESSIONS_N3 "12:30,19:00" && ajoute=1
+assurer_env NEXUS_MEMOIRE_AUTO 1 && ajoute=1
 # Alertes N3 sur le téléphone (gratuit). MVP : service public ntfy.sh ; mode complet :
 # serveur ntfy du kit (docker-compose.complet.yml force alors http://ntfy).
 assurer_env NTFY_URL "https://ntfy.sh" && ajoute=1
@@ -773,6 +781,31 @@ else
   info "Sauvegarde automatique non planifiée. Pour l'ajouter : relancez install.sh et répondez « o »."
 fi
 
+# Veille cyber hebdomadaire (dimanche 03:17) : missions CYBER-FORTRESS veille + audit
+CRON_CYBER="/etc/cron.d/nexus-veille-cyber"
+SCRIPT_CYBER="$KIT_DIR/automatisations/veille-cyber.sh"
+if [ ! -f "$SCRIPT_CYBER" ]; then
+  info "Veille cyber : script $SCRIPT_CYBER absent (kit ancien), étape ignorée."
+elif [ -f "$CRON_CYBER" ]; then
+  ok "Veille cyber hebdomadaire déjà planifiée ($CRON_CYBER)"
+elif demander "Planifier la veille cyber automatique chaque dimanche à 3 h 17 ?" n; then
+  manquants_cyber=()
+  for outil in curl python3 flock; do command -v "$outil" >/dev/null 2>&1 || manquants_cyber+=("$outil"); done
+  if [ "${#manquants_cyber[@]}" -gt 0 ]; then
+    avert "Veille cyber non planifiée : outils manquants (${manquants_cyber[*]}). apt-get install -y curl python3 util-linux"
+  else
+    # Sur le VPS lui-même, le nom d'hôte peut pointer vers 127.0.1.1 : on force l'adresse
+    # où Caddy écoute (BIND_IP, ou 127.0.0.1 s'il écoute sur toutes les adresses).
+    ip_cyber="$BIND_IP"; [ "$ip_cyber" = "0.0.0.0" ] && ip_cyber="127.0.0.1"
+    printf '%s\n' "# Veille cyber hebdomadaire du Mini NEXUS MOTHERSHIP (créé par install.sh)" \
+      "17 3 * * 0 root NEXUS_RESOLVE=$NEXUS_HOST:443:$ip_cyber /bin/bash $SCRIPT_CYBER >/dev/null 2>&1" > "$CRON_CYBER"
+    chmod 644 "$CRON_CYBER"
+    ok "Veille cyber planifiée (rapport dans le cockpit, alerte ntfy « Rapport cyber hebdo prêt »)"
+  fi
+else
+  info "Veille cyber non planifiée. Pour l'ajouter : relancez install.sh et répondez « o »."
+fi
+
 # =============================================================================
 etape "Mission de test"
 # =============================================================================
@@ -814,6 +847,8 @@ cat <<EOF
   Cockpit (décisions)  : https://$NEXUS_HOST/cockpit
       identifiant      : $(lire_env COCKPIT_USER)
       mot de passe     : voir « grep COCKPIT_PASSWORD .env »
+  Décideur mobile      : https://$NEXUS_HOST/cockpit/decideur
+      code à 6 chiffres: voir « grep COCKPIT_CODE_DECIDEUR .env »
   Santé de l'API       : https://$NEXUS_HOST/api/sante
   Clé API (X-Nexus-Key): voir « grep NEXUS_API_KEY .env »
   IA                   : $(if [ "$cloud_ok" -eq 1 ]; then echo "Ollama Cloud (gratuit) — $NEXUS_MODEL"; else echo "locale — $NEXUS_MODEL"; fi)
@@ -851,3 +886,14 @@ cat <<EOF
   (le premier certificat HTTPS peut prendre 1 à 2 minutes)
 ════════════════════════════════════════════════════════════════════════════
 EOF
+
+# Code Décideur : affiché UNE seule fois, directement sur l'écran (/dev/tty), donc
+# jamais copié dans install.log. Ensuite : grep COCKPIT_CODE_DECIDEUR .env
+MARQUE_CODE="$KIT_DIR/data/.code-decideur-affiche"
+if [ ! -f "$MARQUE_CODE" ] && { : > /dev/tty; } 2>/dev/null; then
+  {
+    printf '\n  \033[1;33mCode Décideur (à noter MAINTENANT, il ne sera plus affiché) : %s\033[0m\n' "$(lire_env COCKPIT_CODE_DECIDEUR)"
+    printf '  Il est demandé pour valider une décision à risque élevé sur /cockpit/decideur.\n\n'
+  } > /dev/tty
+  touch "$MARQUE_CODE"; chmod 600 "$MARQUE_CODE"
+fi

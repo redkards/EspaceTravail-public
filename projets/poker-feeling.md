@@ -14,7 +14,7 @@ Les agents aident à la réécriture commerciale du manuscrit et préparent le l
 | Évaluation qualité d'un chapitre (grille 6 critères) | AGENT-FACTORY/evaluation | PF-6 | après chaque PF-1 ou réécriture humaine | N1 | Choisit les corrections à appliquer |
 | Quatrième de couverture (par format : PDF, EPUB, papier) | CONTENT-ARENA/redaction | PF-2 | ponctuelle (1 par format) | N2 | Choisit la version et l'accroche |
 | Plan de lancement (semaines, jalons, page du livre sur Poker Winners) | OPS-CORE/projets | PF-3 | 1 fois, puis mise à jour mensuelle | N1 | Valide jalons, canaux et points de contrôle |
-| Conformité ANJ / jeu responsable d'un message | LEX-GUARD/conformite | PF-4 | **avant chaque** message promotionnel | N1 | Valide la version corrigée |
+| Conformité ANJ / jeu responsable d'un message | LEX-GUARD/conformite | PF-4 | **avant chaque** message promotionnel | N2 | Valide la version corrigée |
 | Proposition de collaboration (librairie, club, créateur) | REVENUE-CORE/propositions (+ action `envoyer_client`) | PF-5 | à la demande | **N3** | Fiche de décision : rien n'est transmis sans « Valider » ; l'envoi reste manuel |
 
 ## Circuit type d'un message de lancement

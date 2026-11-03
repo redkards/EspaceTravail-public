@@ -60,9 +60,10 @@
 	import journal
 	encode gzip
 
-	# Un en-tête X-Cockpit-Auth envoyé par un visiteur est TOUJOURS supprimé :
-	# seul Caddy l'ajoute, après le mot de passe, sur les routes /cockpit*.
+	# Les en-têtes X-Cockpit-Auth et X-Cockpit-Utilisateur envoyés par un visiteur sont
+	# TOUJOURS supprimés : seul Caddy les ajoute, après le mot de passe, sur /cockpit*.
 	request_header -X-Cockpit-Auth
+	request_header -X-Cockpit-Utilisateur
 
 	# Passerelle MCP Claude · ChatGPT · Gemini (nexus-bridge) : SANS basic auth,
 	# protégée par un jeton secret par IA (/mcp/<jeton> ou « Authorization: Bearer »).
@@ -91,7 +92,10 @@
 			{$COCKPIT_USER} {$COCKPIT_PASSWORD_HASH}
 		}
 		request_header X-Cockpit-Auth {env.COCKPIT_INTERNAL}
-		reverse_proxy nexus-core:8000
+		reverse_proxy nexus-core:8000 {
+			# Identifiant validé par le basic auth (journal des décisions)
+			header_up X-Cockpit-Utilisateur {http.auth.user.id}
+		}
 	}
 
 	# API /api/* : sans mot de passe Caddy, nexus-core exige l'en-tête X-Nexus-Key.

@@ -11,7 +11,7 @@ Le site est en bêta privée (pilote PARADOXX). Les agents relisent, contrôlent
 | Tâche | Service NEXUS | Modèle | Fréquence | Niveau | Ce que le propriétaire valide dans le cockpit |
 |---|---|---|---|---|---|
 | Revue de code d'un fichier ou d'une modification (Symfony / Angular) | CODE-CORE/revue | PW-1 | à chaque modification significative avant fusion | N2 | Décide des corrections ; la fusion et le déploiement restent manuels |
-| Conformité RGPD et jeu responsable d'une page (CGU, confidentialité, Premium) | LEX-GUARD/conformite | PW-2 | à chaque nouvelle page légale, puis 1 fois avant la v1.0 | N1 | Complète les champs « À COMPLÉTER » et valide les textes |
+| Conformité RGPD et jeu responsable d'une page (CGU, confidentialité, Premium) | LEX-GUARD/conformite | PW-2 | à chaque nouvelle page légale, puis 1 fois avant la v1.0 | N2 | Complète les champs « À COMPLÉTER » et valide les textes |
 | Checklist de bêta d'une version / d'un parcours | OPS-CORE/projets | PW-3 | à chaque version (0.8.x → 1.0.0) | N3 (« suppression » de compte RGPD) | Exécute la checklist et trie les anomalies |
 | Contenu d'une leçon + quiz + SEO | CONTENT-ARENA/redaction | PW-4 | 1 à 3 par semaine | N2 | Relit avant intégration dans le back-office |
 | Proposition de partenariat (club, association, créateur) | REVENUE-CORE/propositions (+ action `envoyer_client`) | PW-5 | à la demande | **N3** | Fiche de décision ; aucun envoi automatique |

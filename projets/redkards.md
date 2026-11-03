@@ -15,7 +15,7 @@ Les agents préparent : synopsis, contrôles et plans. Le propriétaire garde la
 | Post de promotion d'un épisode | CONTENT-ARENA/redaction (+ action `publier`) | RK-3 | 1 à 2 par semaine une fois la diffusion lancée | **N3** | Fiche de décision : Valider / Refuser / Demander une révision. La publication reste manuelle |
 | Plan de production (dessin E02–E20) | OPS-CORE/projets | RK-4 | 1 par mois, ou à chaque changement de capacité | N1 | Valide le calendrier et les priorités |
 | Crédibilité poker d'une main | R&D-PARADOX/veille | RK-5 | pour chaque épisode contenant une main clé | N1 | Choisit entre la version d'origine et la version corrigée |
-| Conformité d'un épisode (marques, mineurs, jeu responsable) | LEX-GUARD/conformite | RK-6 | avant toute diffusion d'un épisode | N1 | Tranche les points de gravité élevée |
+| Conformité d'un épisode (marques, mineurs, jeu responsable) | LEX-GUARD/conformite | RK-6 | avant toute diffusion d'un épisode | N2 | Tranche les points de gravité élevée |
 
 ## Circuit type d'un épisode
 1. RK-1 synopsis → 2. RK-5 main clé → 3. RK-2 cohérence → 4. storyboard / dessin (humain) → 5. RK-6 conformité → 6. RK-3 post de promotion (N3, décision dans le cockpit).

@@ -161,6 +161,13 @@ services:
       LEDGER_HMAC_KEY: ${LEDGER_HMAC_KEY:?LEDGER_HMAC_KEY manquant dans .env - relancez bash install.sh}
       # Missions traitées en parallèle (vide = automatique)
       NEXUS_MAX_MISSIONS: ${NEXUS_MAX_MISSIONS:-}
+      # Décideur mobile (/cockpit/decideur) : code à 6 chiffres exigé pour valider une
+      # décision à risque élevé ; sessions de présentation des décisions N3.
+      COCKPIT_CODE_DECIDEUR: ${COCKPIT_CODE_DECIDEUR:-}
+      NEXUS_SESSIONS_N3: ${NEXUS_SESSIONS_N3:-12:30,19:00}
+      # Mémoire par projet : résumé automatique + dossiers de connaissances (lecture seule)
+      NEXUS_MEMOIRE_AUTO: ${NEXUS_MEMOIRE_AUTO:-1}
+      NEXUS_CONNAISSANCES_DIR: /connaissances
       # Registre des projets monté en lecture seule (modifiable sans reconstruire l'image)
       NEXUS_PROJETS_FILE: /config/projets.yaml
       # Fournisseur : ollama (local) | ollama_cloud | anthropic
@@ -202,6 +209,9 @@ services:
       # Livrables (/data/livrables/<id>.md) et autres fichiers de nexus-core
       - ./data/nexus-core:/data
       - ./nexus-core/projets.yaml:/config/projets.yaml:ro
+      # Connaissances par projet (fiches projets/*.md, contexte des tests), lecture seule
+      - ./projets:/connaissances/projets:ro
+      - ./tests-poker/contexte:/connaissances/contexte:ro
     # MVP : dépend seulement d'ollama, et seulement si le profil « local » est actif
     # (required: false). postgres/redis sont ajoutés en mode complet.
     depends_on:

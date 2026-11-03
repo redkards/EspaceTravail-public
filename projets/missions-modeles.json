@@ -88,7 +88,7 @@
       "titre": "REDKARDS — contrôle de conformité d'un épisode ({{episode}})",
       "consigne": "Contrôle la conformité du texte de l'épisode {{episode}} de REDKARDS pour un public d'adolescents âgés et d'adultes.\nPoints : aucune marque, compétition, joueur ou casino réel ; aucune glorification de la ruine ni du jeu d'argent ; bankroll distincte du budget de vie ; pas de représentation incitative envers les mineurs ; droit des marques et droit à l'image.\nTexte :\n{{texte}}\nLivre : liste des points à corriger (gravité faible / moyenne / élevée) et formulation de remplacement.",
       "service": "LEX-GUARD/conformite",
-      "niveau_attendu": "N1",
+      "niveau_attendu": "N2",
       "criteres_reussite": [
         "Chaque point cite le passage et sa gravité",
         "Une formulation de remplacement est proposée",
@@ -145,7 +145,7 @@
       "titre": "Poker Feeling — conformité ANJ d'un message ({{support}})",
       "consigne": "Contrôle la conformité du message ci-dessous (support : {{support}}) au regard des règles françaises d'encadrement des communications liées au poker et aux jeux d'argent (ANJ) et des règles éditoriales du livre.\nPoints : aucune promesse de gain ou de résultat, aucune incitation excessive, pas de cible mineure, mention « Réservé aux majeurs » + Joueurs Info Service 09 74 75 13 13, pas de lien vers un opérateur.\nMessage :\n{{texte}}\nLivre : verdict conforme / à corriger, liste des écarts et version corrigée.",
       "service": "LEX-GUARD/conformite",
-      "niveau_attendu": "N1",
+      "niveau_attendu": "N2",
       "criteres_reussite": [
         "Verdict clair conforme / à corriger",
         "Chaque écart est justifié",
@@ -202,7 +202,7 @@
       "titre": "Poker Winners — conformité RGPD et ANJ de la page {{page}}",
       "consigne": "Contrôle la page {{page}} du site Poker Winners (site éducatif, aucun jeu d'argent réel, aucun lien vers un opérateur).\nRGPD : base légale, information des membres, consentements, durée de conservation, droits d'accès, d'export et d'effacement.\nJeu responsable : mention « interdit aux moins de 18 ans » + Joueurs Info Service 09 74 75 13 13, aucune promesse de gain, pas d'incitation.\nTexte de la page :\n{{texte}}\nLivre : liste des écarts (gravité), texte de remplacement proposé, points À COMPLÉTER par le propriétaire.",
       "service": "LEX-GUARD/conformite",
-      "niveau_attendu": "N1",
+      "niveau_attendu": "N2",
       "criteres_reussite": [
         "Écarts classés par gravité",
         "Texte de remplacement proposé",

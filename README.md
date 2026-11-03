@@ -44,7 +44,7 @@ L'IA utilise **Ollama Cloud** (offre gratuite), avec l'IA locale du VPS en secou
 10. [Problèmes fréquents](#10-problèmes-fréquents)
 11. [Désinstaller](#11-désinstaller)
 12. [Passerelle Claude · ChatGPT · Gemini](#12-passerelle-claude--chatgpt--gemini)
-13. [Entretien au téléphone](#13-entretien-au-téléphone) : mettre à jour, restaurer, changer un mot de passe ou une clé, vérifier que tout va bien
+13. [Entretien au téléphone](#13-entretien-au-téléphone) : mettre à jour, restaurer, changer un mot de passe ou une clé, décideur mobile, mémoire par projet, veille cyber
 
 ---
 
@@ -58,16 +58,28 @@ Ollama Cloud fait tourner de gros modèles (par défaut `gemma4:31b`) sur les se
    Le script teste la clé, affiche les modèles disponibles et propose `gemma4:31b` (ou le premier de la liste).
 4. Suivez votre consommation sur **https://ollama.com/settings/usage**.
 
+### Ajouter la clé Ollama au téléphone
+La clé n'est enregistrée qu'après un **vrai appel authentifié** à Ollama : une clé refusée (ou un texte de moins de 20 caractères) ne change rien et le Mothership reste sur l'IA locale. Espaces, retours à la ligne et guillemets collés par erreur sont retirés.
+- **Méthode 1, collage** : `bash install.sh --cloud`, puis appui long > Coller à « Clé Ollama Cloud » et Entrée (rien ne s'affiche, c'est normal).
+- **Méthode 2, fichier (plus fiable dans la console web)** :
+  ```bash
+  nano /root/cle-ollama.txt          # collez la clé, puis Ctrl+O, Entrée, Ctrl+X
+  bash install.sh --cloud --cle-fichier /root/cle-ollama.txt
+  ```
+  Le script propose ensuite d'effacer le fichier (répondez **o**).
+- Si la clé déjà enregistrée est refusée, `bash install.sh --cloud` propose de la remplacer.
+
 À savoir :
 - **Offre gratuite** : Ollama ne publie pas les limites exactes de l'offre gratuite. Si elles sont atteintes, les appels sont refusés et le Mothership bascule automatiquement sur l'**IA locale** (`qwen2.5:3b`).
 - **Aucune dépense** n'est possible tant que vous ne passez pas vous-même à une offre payante sur ollama.com. Le kit ne le propose jamais.
 - La clé est saisie **par vous**. Elle n'est jamais affichée ni écrite dans `install.log`. Elle est stockée uniquement dans `.env`, lisible par root seulement.
-- Pour changer de clé : supprimez la ligne `OLLAMA_API_KEY=` dans `.env`, puis relancez `bash install.sh`.
+- Pour changer de clé : `bash install.sh --cloud --cle-fichier /root/cle-ollama.txt` (voir ci-dessus).
 
 | Option d'install.sh | Effet |
 |---|---|
 | *(aucune)* | Ollama Cloud si vous fournissez une clé, **+ IA locale de secours** ; sans clé : IA locale seule |
-| `--cloud` | ne pose pas la question « Utiliser Ollama Cloud ? » |
+| `--cloud` | ne pose pas la question « Utiliser Ollama Cloud ? » ; propose de remplacer une clé refusée |
+| `--cle-fichier CHEMIN` | lit la clé dans un fichier (au lieu du collage), puis propose de l'effacer |
 | `--sans-repli` | Ollama Cloud **sans** IA locale : le MVP n'utilise plus qu'environ 0,5 Go de RAM |
 | `--local` | IA locale seule, sans Ollama Cloud |
 | `--model NOM` | choisit le modèle (doit figurer dans la liste affichée) |
@@ -396,8 +408,8 @@ Puis ouvrez **https://srvXXXX.hstgr.cloud/bridge** (identifiants du cockpit) : p
 - **Fin de session** : « écris une passation pour `poker-winners` ».
 - Codes projets : `paradoxx`, `nexus`, `poker-winners`, `poker-feeling`, `redkards`, `top-solver`, `youtube-poker-winner`, `freelance-ia`, `esct-boxe`, `turf`, `divers` (outil `projets_lister`).
 
-### Outils disponibles (17)
-`memoire_ecrire`, `memoire_chercher`, `memoire_lire`, `memoire_oublier` · `tache_creer`, `tache_lister`, `tache_prendre`, `tache_mettre_a_jour` · `message_envoyer`, `messages_lire` · `passation_ecrire`, `passation_derniere` · `projets_lister`, `mothership_mission`, `mothership_statut`, `mothership_decisions_en_attente` · `journal_lister`.
+### Outils disponibles (18)
+`projet_connaissances` (lit la mémoire du projet tenue par le Mothership) · `memoire_ecrire`, `memoire_chercher`, `memoire_lire`, `memoire_oublier` · `tache_creer`, `tache_lister`, `tache_prendre`, `tache_mettre_a_jour` · `message_envoyer`, `messages_lire` · `passation_ecrire`, `passation_derniere` · `projets_lister`, `mothership_mission`, `mothership_statut`, `mothership_decisions_en_attente` · `journal_lister`.
 
 ### Sécurité
 - **Aucun secret dans la mémoire** : un texte qui ressemble à une clé API, un mot de passe ou un numéro de carte est **refusé** avec une explication. Notez plutôt *où* est rangé le secret.
@@ -439,7 +451,7 @@ grep COCKPIT_PASSWORD= .env            # nouveau mot de passe
 ### Changer une clé / un jeton de passerelle
 - Jeton d'une IA (adresse divulguée) : `sed -i '/^BRIDGE_TOKEN_CHATGPT=/d' .env` (ou `_CLAUDE`, `_GEMINI`, `_PROPRIETAIRE`), `bash install.sh`, puis `bash bridge-connecteurs.sh chatgpt` et recollez l'adresse dans l'IA.
 - Clé API (`NEXUS_API_KEY`), secret interne (`COCKPIT_INTERNAL`) ou sujet ntfy (`NTFY_TOPIC`, à ressaisir dans l'appli) : même méthode, supprimez la ligne puis `bash install.sh`.
-- Clé Ollama Cloud : supprimez la ligne `OLLAMA_API_KEY=` puis `bash install.sh` (saisie masquée).
+- Clé Ollama Cloud : `bash install.sh --cloud --cle-fichier /root/cle-ollama.txt` ([détails](#ajouter-la-clé-ollama-au-téléphone)).
 - Ne supprimez **pas** `LEDGER_HMAC_KEY` : le journal existant ne serait plus vérifiable.
 
 ### Recevoir les alertes N3 sur le téléphone
@@ -450,6 +462,20 @@ grep COCKPIT_PASSWORD= .env            # nouveau mot de passe
 - `https://srvXXXX.hstgr.cloud/api/sante` : `ledger_hmac` doit valoir `true` ; la liste `avertissements` doit être vide (sinon, elle dit quoi corriger).
 - Intégrité du journal LEDGER : `grep '^NEXUS_API_KEY=' .env | sed 's/^NEXUS_API_KEY=/X-Nexus-Key: /' | curl -s -H @- https://srvXXXX.hstgr.cloud/api/ledger/verifier` (la clé passe par l'entrée standard, jamais dans la ligne de commande).
 - `ls backups/` : une sauvegarde de moins de 24 h.
+
+### Décideur mobile (/cockpit/decideur, code à 6 chiffres)
+- Ouvrez `https://srvXXXX.hstgr.cloud/cockpit/decideur` (identifiants du cockpit) et ajoutez-la à l'écran d'accueil : une décision N3 par écran, risque expliqué, résumé court.
+- Les décisions sont regroupées en **sessions** (12 h 30 et 19 h, `NEXUS_SESSIONS_N3`) avec une seule alerte ntfy par session, et un rappel 2 h avant le refus automatique.
+- Valider une décision à **risque élevé** demande le **code Décideur** à 6 chiffres, affiché une seule fois à la fin de l'installation, puis : `grep COCKPIT_CODE_DECIDEUR .env`. 5 erreurs = verrou de 15 minutes. Pour en changer : `sed -i '/^COCKPIT_CODE_DECIDEUR=/d' .env && bash install.sh`.
+
+### Mémoire par projet
+- Les fiches `projets/*.md` et `tests-poker/contexte/` sont lues (lecture seule) au démarrage ; les livrables validés sont résumés automatiquement (`NEXUS_MEMOIRE_AUTO=1`, mettez `0` pour arrêter).
+- Les agents reçoivent les 3 passages les plus utiles du projet ; les IA y accèdent par l'outil `projet_connaissances`. Aucun secret n'y est conservé (filtre automatique).
+- Pour ajouter une connaissance durable : complétez la fiche `projets/<projet>.md`, puis `docker compose restart nexus-core`.
+
+### Veille cyber hebdo
+- `install.sh` propose de la planifier (dimanche 3 h 17, `/etc/cron.d/nexus-veille-cyber`) : elle collecte la configuration du kit **sans aucun secret**, lance deux missions CYBER-FORTRESS (veille des failles de la pile, audit de configuration) en F3, puis envoie l'alerte ntfy « Rapport cyber hebdo prêt ».
+- Lancer à la main : `bash automatisations/veille-cyber.sh` ; voir ce qui est collecté : `bash automatisations/veille-cyber.sh --collecte`. Les agents proposent, vous décidez : rien n'est modifié sur le serveur.
 
 ### Statuts d'une mission
 | Statut | Sens |
