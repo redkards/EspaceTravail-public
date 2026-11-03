@@ -156,7 +156,11 @@ function toast(msg) { const t = $("#toast"); t.textContent = msg; t.style.displa
   clearTimeout(toast.h); toast.h = setTimeout(() => t.style.display = "none", 3500); }
 
 async function api(chemin, options = {}) {
-  const r = await fetch(API + chemin, { headers: { "Content-Type": "application/json" }, ...options });
+  // X-Cockpit : marque les requêtes du cockpit (contrôle anti-CSRF côté serveur) ; toujours du JSON.
+  const methode = (options.method || "GET").toUpperCase();
+  const corps = methode === "GET" ? undefined : (options.body || "{}");
+  const r = await fetch(API + chemin, { ...options, body: corps, credentials: "same-origin",
+    headers: { "Content-Type": "application/json", "X-Cockpit": "1" } });
   const d = await r.json().catch(() => ({}));
   if (!r.ok) throw new Error(d.detail ? (typeof d.detail === "string" ? d.detail : JSON.stringify(d.detail)) : "Erreur " + r.status);
   return d;

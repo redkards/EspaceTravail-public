@@ -1,7 +1,8 @@
 """Point d'entrée FastAPI de nexus-core.
 
 - /api/*         : API protégée par l'en-tête X-Nexus-Key (NEXUS_API_KEY).
-- /cockpit       : page HTML ; /cockpit/api/* : mêmes routes sans clé (basic auth Caddy).
+- /cockpit       : page HTML ; /cockpit/api/* : mêmes routes sans clé X-Nexus-Key, protégées par
+                   basic auth Caddy + en-tête interne X-Cockpit-Auth et contrôles anti-CSRF (securite.py).
 - /              : redirige vers /cockpit.
 """
 import asyncio
@@ -19,6 +20,7 @@ from .cockpit import router as cockpit_router
 from .config import cfg
 from .db import init_db
 from .routes import creer_routeur
+from .securite import garde_cockpit
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s : %(message)s")
 log = logging.getLogger("nexus")
@@ -93,7 +95,7 @@ def sante_publique():
 
 
 app.include_router(creer_routeur(), prefix="/api", dependencies=[Depends(verifier_cle)])
-app.include_router(creer_routeur(), prefix="/cockpit/api")
+app.include_router(creer_routeur(), prefix="/cockpit/api", dependencies=[Depends(garde_cockpit)])
 app.include_router(cockpit_router)
 
 

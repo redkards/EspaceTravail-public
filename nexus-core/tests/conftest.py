@@ -8,6 +8,9 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 CLE = "cle-de-test"
+COCKPIT_INTERNE = "secret-interne-caddy-de-test"
+# En-têtes posés par Caddy (X-Cockpit-Auth) et par le JavaScript du cockpit (X-Cockpit).
+ENTETES_COCKPIT = {"X-Cockpit-Auth": COCKPIT_INTERNE, "X-Cockpit": "1"}
 
 
 @pytest.fixture(autouse=True)
@@ -17,6 +20,8 @@ def environnement(tmp_path, monkeypatch):
     monkeypatch.setenv("LLM_PROVIDER", "fake")
     monkeypatch.setenv("NEXUS_API_KEY", CLE)
     monkeypatch.setenv("NEXUS_TACHES_FOND", "0")
+    monkeypatch.setenv("COCKPIT_INTERNAL", COCKPIT_INTERNE)
+    monkeypatch.setenv("NEXUS_HOST", "nexus.exemple.fr")
     monkeypatch.setenv("BUDGET_TASK_TOKENS", "20000")
     for v in ("NTFY_URL", "NTFY_TOPIC", "ANTHROPIC_API_KEY", "NEXUS_FONCTIONNEMENT_DEFAUT", "EUR_PAR_USD",
               "NEXUS_FONCTIONNEMENT_FILE", "BUDGET_MONTHLY_EUR"):
@@ -38,6 +43,11 @@ def client():
     from app.main import app
     with TestClient(app) as c:
         yield c
+
+
+@pytest.fixture
+def cockpit():
+    return dict(ENTETES_COCKPIT)
 
 
 @pytest.fixture
