@@ -24,37 +24,73 @@
       }
     },
     {
+      "id": "6a1f3d2b-8c4e-4f90-ab32-d5e6f7080902",
+      "name": "Paramètres",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        220,
+        0
+      ],
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6a1f3d2b-8c4e-4f90-ab32-d5e6f7080901",
+              "name": "nexus_core_url",
+              "value": "http://nexus-core:8000",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": false,
+        "options": {}
+      },
+      "notes": "Valeurs NON secrètes à adapter : remplacez srvXXXX / nexus-XXXX par les vôtres (grep -E 'NEXUS_HOST|NTFY_TOPIC' .env). La clé API est dans l'identifiant n8n « NEXUS API » (Header Auth), jamais ici."
+    },
+    {
       "id": "ddad2595-7e73-41e8-afa5-049325e18e8e",
       "name": "Mission de veille",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        260,
+        440,
         0
       ],
       "parameters": {
         "method": "POST",
-        "url": "http://nexus-core:8000/api/missions",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "X-Nexus-Key",
-              "value": "={{ $env.NEXUS_API_KEY }}"
-            }
-          ]
-        },
+        "url": "={{ $('Paramètres').first().json.nexus_core_url }}/api/missions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ titre: 'Veille quotidienne du ' + $now.setZone('Europe/Paris').toFormat('dd/LL/yyyy'), consigne: 'Synthétise la veille du jour à partir des textes fournis ci-dessous (aucun accès web). Liste ce qui manque. Textes : (à compléter dans n8n)', service: 'R&D-PARADOX/veille' }) }}",
         "options": {
           "timeout": 30000
         }
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "NexusApiCred0001",
+          "name": "NEXUS API"
+        }
       }
     }
   ],
   "connections": {
     "Chaque jour 08:00": {
+      "main": [
+        [
+          {
+            "node": "Paramètres",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Paramètres": {
       "main": [
         [
           {
@@ -75,7 +111,7 @@
   "staticData": null,
   "pinData": {},
   "meta": {
-    "templateCredsSetupCompleted": true
+    "templateCredsSetupCompleted": false
   },
   "tags": []
 }

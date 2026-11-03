@@ -269,7 +269,10 @@ Le rapport du soir (19 h) existe seulement en version complète, si vous l'activ
 
 Trois workflows sont importés automatiquement. Ils sont **désactivés** par défaut : activez-les dans n8n avec l'interrupteur *Active*.
 
-> **Sécurité** : n8n est épinglé sur une version corrigée (2.45.6) avec `N8N_BLOCK_ENV_ACCESS_IN_NODE=true` : les workflows **ne peuvent plus lire `$env`** (clés, mots de passe). Avant d'activer un workflow, créez dans n8n un identifiant *Header Auth* (nom `X-Nexus-Key`, valeur : `grep NEXUS_API_KEY .env`) et choisissez-le dans ses nœuds *HTTP Request* à la place de `{{ $env.NEXUS_API_KEY }}` ; remplacez de même `$env.NTFY_TOPIC` et `$env.NEXUS_HOST` par leur valeur. Faites `bash backup.sh` avant de passer d'une ancienne version (1.64) à celle-ci.
+> **Avant d'activer un workflow** (n8n 2.45.6, `N8N_BLOCK_ENV_ACCESS_IN_NODE=true` : les workflows ne lisent jamais les variables du serveur) :
+> 1. n8n > **Credentials** > *Add credential* > **Header Auth**, nom exact **`NEXUS API`**, *Name* `X-Nexus-Key`, *Value* : la clé de `grep NEXUS_API_KEY .env`. Les 3 workflows utilisent cet identifiant (s'il n'est pas relié tout seul, choisissez-le dans chaque nœud *HTTP Request*).
+> 2. Dans le nœud **Paramètres** (2ᵉ nœud de chaque workflow), remplacez `srvXXXX.hstgr.cloud` et `nexus-XXXX` par vos valeurs (`grep -E 'NEXUS_HOST|NTFY_TOPIC' .env`). Ces valeurs ne sont pas des secrets ; la clé, elle, reste dans l'identifiant chiffré par n8n.
+> Faites `bash backup.sh` avant de passer d'une ancienne version (1.64) de n8n à celle-ci.
 
 | Workflow | Fonction |
 |---|---|

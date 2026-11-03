@@ -22,29 +22,48 @@
       "notes": "POST JSON {titre, consigne, service?, montant_eur?, action?}"
     },
     {
+      "id": "5f0e2c1a-7b3d-4e8f-9a21-c4d5e6f70801",
+      "name": "Paramètres",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        220,
+        0
+      ],
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5f0e2c1a-7b3d-4e8f-9a21-c4d5e6f70801",
+              "name": "nexus_core_url",
+              "value": "http://nexus-core:8000",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": false,
+        "options": {}
+      },
+      "notes": "Valeurs NON secrètes à adapter : remplacez srvXXXX / nexus-XXXX par les vôtres (grep -E 'NEXUS_HOST|NTFY_TOPIC' .env). La clé API est dans l'identifiant n8n « NEXUS API » (Header Auth), jamais ici."
+    },
+    {
       "id": "c6533ec4-095b-465e-a0b6-db1c5d1dcc3b",
       "name": "Créer la mission",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        260,
+        440,
         0
       ],
       "parameters": {
         "method": "POST",
-        "url": "http://nexus-core:8000/api/missions",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "X-Nexus-Key",
-              "value": "={{ $env.NEXUS_API_KEY }}"
-            }
-          ]
-        },
+        "url": "={{ $('Paramètres').first().json.nexus_core_url }}/api/missions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify($json.body) }}",
+        "jsonBody": "={{ JSON.stringify($('Webhook mission').first().json.body) }}",
         "options": {
           "timeout": 30000,
           "response": {
@@ -54,6 +73,12 @@
             }
           }
         }
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "NexusApiCred0001",
+          "name": "NEXUS API"
+        }
       }
     },
     {
@@ -62,7 +87,7 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
-        520,
+        660,
         0
       ],
       "parameters": {
@@ -74,6 +99,17 @@
   ],
   "connections": {
     "Webhook mission": {
+      "main": [
+        [
+          {
+            "node": "Paramètres",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Paramètres": {
       "main": [
         [
           {
@@ -105,7 +141,7 @@
   "staticData": null,
   "pinData": {},
   "meta": {
-    "templateCredsSetupCompleted": true
+    "templateCredsSetupCompleted": false
   },
   "tags": []
 }
