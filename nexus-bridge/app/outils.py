@@ -318,11 +318,11 @@ def tache_prendre(auteur: str, a: dict) -> dict:
         r = con.execute("SELECT * FROM taches WHERE id=?", (a["id"],)).fetchone()
         if not r:
             raise OutilErreur(f"Tâche {a['id']} introuvable.")
+        if r["statut"] == "fait":
+            raise OutilErreur(f"Refusé : la tâche {r['id']} est déjà terminée.")
         if r["pris_par"] and r["pris_par"] != auteur:
             raise OutilErreur(f"Refusé : la tâche {r['id']} est déjà prise par {r['pris_par']} "
                               f"(statut {r['statut']}). Envoyez-lui un message si besoin.")
-        if r["statut"] == "fait":
-            raise OutilErreur(f"Refusé : la tâche {r['id']} est déjà terminée.")
         # Mise à jour conditionnelle : protège contre deux prises simultanées.
         cur = con.execute("UPDATE taches SET pris_par=?, statut='en_cours', maj_le=? "
                           "WHERE id=? AND (pris_par IS NULL OR pris_par=?)", (auteur, db.maintenant(), r["id"], auteur))

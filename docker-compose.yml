@@ -2,7 +2,7 @@
 #  Mini NEXUS MOTHERSHIP — pile Docker Compose (partition P1 du VPS KVM 2)
 #
 #  MODES (choisis par install.sh, enregistrés dans .env via COMPOSE_PROFILES) :
-#   - MVP (par défaut) : caddy + nexus-core (SQLite) uniquement.
+#   - MVP (par défaut) : caddy + nexus-core (SQLite) + nexus-bridge (passerelle MCP).
 #   - profil « local » : + ollama (IA locale). Actif si LLM_PROVIDER=ollama, ou
 #       si Ollama Cloud est utilisé avec un repli local (LLM_FALLBACK=ollama).
 #       Sans ce profil (Ollama Cloud seul), le MVP consomme environ 0,5 Go de RAM.
@@ -62,6 +62,8 @@ services:
     depends_on:
       nexus-core:
         condition: service_started
+      nexus-bridge:
+        condition: service_started
 
   # --------------------------------------------------------------------------
   # PostgreSQL 16 + pgvector : bases « nexus » et « n8n »
@@ -116,7 +118,8 @@ services:
     profiles: ["local"]
     image: ollama/ollama:0.3.14
     mem_limit: 3584m
-    cpus: 1.2
+    # 1,1 (et non 1,2) : laisse 0,1 vCPU à nexus-bridge dans le plafond P1 de 1,5
+    cpus: 1.1
     environment:
       OLLAMA_KEEP_ALIVE: "10m"
       OLLAMA_NUM_PARALLEL: "1"
@@ -190,6 +193,46 @@ services:
       timeout: 10s
       retries: 5
       start_period: 60s
+
+  # --------------------------------------------------------------------------
+  # nexus-bridge : passerelle MCP Claude · ChatGPT · Gemini (mémoire commune,
+  # tâches, messages, passations). SQLite dans ./data/nexus-bridge/bridge.db.
+  # Routes Caddy : /mcp (jeton par IA, sans mot de passe) et /bridge (mot de passe cockpit).
+  # --------------------------------------------------------------------------
+  nexus-bridge:
+    <<: *commun
+    build: ./nexus-bridge
+    image: p1-nexus/nexus-bridge:local
+    mem_limit: 128m
+    cpus: 0.1
+    environment:
+      TZ: Europe/Paris
+      NEXUS_HOST: ${NEXUS_HOST}
+      BRIDGE_DB: /data/bridge.db
+      # Un jeton secret par IA (générés par install.sh ; voir bridge-connecteurs.sh)
+      BRIDGE_TOKEN_CLAUDE: ${BRIDGE_TOKEN_CLAUDE:-}
+      BRIDGE_TOKEN_CHATGPT: ${BRIDGE_TOKEN_CHATGPT:-}
+      BRIDGE_TOKEN_GEMINI: ${BRIDGE_TOKEN_GEMINI:-}
+      BRIDGE_TOKEN_PROPRIETAIRE: ${BRIDGE_TOKEN_PROPRIETAIRE:-}
+      BRIDGE_LIMITE_PAR_MINUTE: ${BRIDGE_LIMITE_PAR_MINUTE:-60}
+      # Liaison au Mothership (lecture + création de missions, jamais de validation)
+      NEXUS_CORE_URL: http://nexus-core:8000
+      NEXUS_API_KEY: ${NEXUS_API_KEY:?NEXUS_API_KEY manquant}
+    volumes:
+      - ./data/nexus-bridge:/data
+    depends_on:
+      nexus-core:
+        condition: service_started
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request as u; u.urlopen('http://127.0.0.1:8000/sante', timeout=5)"
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
 
   # --------------------------------------------------------------------------
   # n8n : automatisations (workflows), stockées dans PostgreSQL (base « n8n »)
@@ -284,7 +327,8 @@ networks:
 
 # -----------------------------------------------------------------------------
 #  Budget de ressources P1 (plafond : 5 Go RAM / 1,5 vCPU)
-#  MVP cloud seul   : nexus-core 384m/0.20 · caddy 64m/0.10 = 448 Mo, 0,30 vCPU
-#  MVP + « local »  : + ollama 3584m/1.20                 = 4032 Mo, 1,50 vCPU
+#  MVP cloud seul   : nexus-core 384m/0.20 · caddy 64m/0.10 · nexus-bridge 128m/0.10
+#                     = 576 Mo, 0,40 vCPU
+#  MVP + « local »  : + ollama 3584m/1.10                 = 4160 Mo, 1,50 vCPU
 #  COMPLET : voir docker-compose.complet.yml (TOTAL = 5104 Mo et 1,50 vCPU)
 # -----------------------------------------------------------------------------

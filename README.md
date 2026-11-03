@@ -43,6 +43,7 @@ L'IA utilise **Ollama Cloud** (offre gratuite), avec l'IA locale du VPS en secou
 9. [Commandes utiles](#9-commandes-utiles)
 10. [Problèmes fréquents](#10-problèmes-fréquents)
 11. [Désinstaller](#11-désinstaller)
+12. [Passerelle Claude · ChatGPT · Gemini](#12-passerelle-claude--chatgpt--gemini)
 
 ---
 
@@ -90,17 +91,19 @@ Internet ──► Caddy (HTTPS automatique, ports 80/443)
 |---|---|---|---|
 | caddy | HTTPS + mot de passe du cockpit | 64 Mo | 0,10 |
 | nexus-core | les 40 agents + cockpit (SQLite) | 384 Mo | 0,20 |
-| ollama | IA locale de secours (`qwen2.5:3b`) ; absente avec `--sans-repli` | 3,5 Go | 1,20 |
-| **Total** | | **≈ 4 Go** (0,5 Go sans repli) | **1,5 vCPU** |
+| nexus-bridge | passerelle Claude · ChatGPT · Gemini (mémoire commune) | 128 Mo | 0,10 |
+| ollama | IA locale de secours (`qwen2.5:3b`) ; absente avec `--sans-repli` | 3,5 Go | 1,10 |
+| **Total** | | **≈ 4,1 Go** (0,6 Go sans repli) | **1,5 vCPU** |
 
 **Version complète (`--complet`)**
 
 | Service | Rôle | RAM max | CPU max |
 |---|---|---|---|
-| ollama | IA locale (si repli) | 3 Go | 0,90 |
+| ollama | IA locale (si repli) | 2,9 Go | 0,80 |
 | postgres | base de données (missions, décisions, journal, n8n) | 640 Mo | 0,20 |
 | n8n | automatisations | 640 Mo | 0,15 |
 | nexus-core | les 40 agents + cockpit | 384 Mo | 0,10 |
+| nexus-bridge | passerelle Claude · ChatGPT · Gemini | 128 Mo | 0,10 |
 | redis | file de tâches | 128 Mo | 0,05 |
 | uptime-kuma | surveillance | 128 Mo | 0,03 |
 | caddy | HTTPS + mots de passe | 64 Mo | 0,05 |
@@ -283,6 +286,8 @@ Toujours depuis `/srv/p1/nexus-mothership` :
 | changer de modèle | `bash install.sh --model NOM` (cloud) ; en local : `docker compose exec ollama ollama pull NOM`, puis `NEXUS_MODEL_LOCAL=NOM` dans `.env` et `docker compose up -d` |
 | passer en version complète | `bash install.sh --complet` |
 | revoir les identifiants | `cat .env` |
+| URL des connecteurs IA (passerelle) | `bash bridge-connecteurs.sh` |
+| voir les jetons de la passerelle | `grep BRIDGE_TOKEN /srv/p1/nexus-mothership/.env` |
 | espace des partitions | `df -h /srv/p*` |
 
 ---
@@ -298,6 +303,7 @@ Toujours depuis `/srv/p1/nexus-mothership` :
 | réponses de l'IA lentes | avec l'IA locale, c'est normal sur 2 vCPU (de 10 à 60 s par étape) : utilisez Ollama Cloud, ou un modèle local plus petit (`qwen2.5:1.5b`) |
 | `Clé Ollama Cloud refusée` | vérifiez la clé sur ollama.com/settings/keys, supprimez la ligne `OLLAMA_API_KEY` de `.env`, puis relancez `install.sh` |
 | un service « unhealthy » | `docker compose logs NOM_DU_SERVICE`, puis `docker compose up -d` |
+| une IA ne voit pas la passerelle | `docker compose logs nexus-bridge` ; vérifiez l'adresse avec `bash bridge-connecteurs.sh` (section 12) |
 | après un redémarrage du VPS | les partitions se remontent seules (fstab) et les services redémarrent seuls |
 
 ---
@@ -310,3 +316,57 @@ bash uninstall.sh            # supprime les conteneurs, GARDE les données (./da
 bash uninstall.sh --purge    # supprime AUSSI toutes les données (demande de taper SUPPRIMER)
 ```
 Les partitions `/srv/p1` à `/srv/p4` ne sont jamais supprimées par ce script.
+
+---
+
+## 12. Passerelle Claude · ChatGPT · Gemini
+
+**À quoi ça sert ?** Claude, ChatGPT et Gemini partagent un même carnet, rangé sur votre VPS :
+- une **mémoire commune** (faits, décisions, vos préférences) ;
+- des **tâches** (« Gemini : écris le script de la vidéo 3 ») ;
+- des **messages** entre IA ;
+- des **passations** : la dernière IA qui a travaillé sur un projet laisse un résumé, la suivante reprend sans tout réexpliquer ;
+- un lien avec le Mothership : une IA peut lui **confier une mission** et suivre son statut, mais **ne peut jamais valider** une décision N3 : ça reste dans le cockpit, pour vous seul.
+
+C'est gratuit et open source (service `nexus-bridge`, installé avec le MVP). Chaque IA a sa **propre adresse secrète** : on sait toujours qui a écrit quoi.
+
+### Étape 1 — Récupérer les adresses (terminal web hPanel)
+
+```bash
+cd /srv/p1/nexus-mothership
+bash bridge-connecteurs.sh
+```
+Le script affiche une adresse par IA, du type `https://srv2113898.hstgr.cloud/mcp/<jeton>`, et les étapes à suivre. **Cette adresse est un mot de passe** : ne la collez que dans l'IA concernée. Astuce téléphone : appui long sur l'adresse dans le terminal > Copier, puis collez-la dans l'autre application.
+
+### Étape 2 — Brancher chaque IA
+
+| IA | Où | Comment |
+|---|---|---|
+| **Claude** | claude.ai dans le **navigateur** (Chrome en mode « Version pour ordinateur » sur Android), ou l'appli de bureau | Paramètres > Connecteurs > **Ajouter un connecteur personnalisé** > nom « NEXUS Passerelle » + adresse Claude. Ensuite il fonctionne aussi dans l'appli Android : « + » > Connecteurs > activer. |
+| **ChatGPT** | chatgpt.com dans le **navigateur** | Paramètres > Applications (ex-Connecteurs) > Paramètres avancés > **Mode développeur** activé > Créer une application / ajouter un serveur MCP > adresse ChatGPT, authentification « Aucune ». |
+| **Gemini** | **Gemini CLI** (ordinateur, ou Termux sur Android) | Dans `~/.gemini/settings.json`, clé `mcpServers` : `"nexus": { "httpUrl": "<adresse Gemini>" }`, puis `/mcp` dans Gemini pour vérifier. |
+| **Gemini (appli)** | appli Gemini / gemini.google.com | Pas de serveur MCP personnel possible : gardez la **méthode miroir Google Doc** déjà en place (Claude ou ChatGPT recopient passations et tâches dans le Google Doc que Gemini lit, et reportent ce que Gemini y note). |
+
+> **À savoir :** ces menus changent souvent de nom ou de place ; si vous ne les trouvez pas, cherchez « Connecteurs », « Applications » ou « MCP » dans les paramètres. **Certaines offres limitent les connecteurs personnalisés** : chez Claude, l'offre gratuite n'en autorise qu'**un seul** et, en Team/Enterprise, seul un administrateur peut l'ajouter ; chez ChatGPT, le mode développeur est réservé aux **offres payantes** (Plus, Pro, Business, Enterprise, Edu) et ne s'active que sur le web. L'ajout se fait depuis un navigateur ; l'usage marche ensuite sur téléphone selon l'application.
+
+### Étape 3 — Premier essai
+
+Dans chaque IA : *« Utilise la passerelle NEXUS : lis tes messages, puis écris en mémoire que la passerelle fonctionne pour toi. »*
+Puis ouvrez **https://srv2113898.hstgr.cloud/bridge** (identifiants du cockpit) : page en lecture seule, lisible sur téléphone, avec les dernières mémoires, tâches, messages, passations et le journal.
+
+### Bonnes habitudes à donner aux IA
+- **Début de session** : « lis tes messages, la dernière passation du projet `poker-winners` et les tâches ouvertes ».
+- **Fin de session** : « écris une passation pour `poker-winners` ».
+- Codes projets : `paradoxx`, `nexus`, `poker-winners`, `poker-feeling`, `redkards`, `top-solver`, `youtube-poker-winner`, `freelance-ia`, `esct-boxe`, `turf`, `divers` (outil `projets_lister`).
+
+### Outils disponibles (17)
+`memoire_ecrire`, `memoire_chercher`, `memoire_lire`, `memoire_oublier` · `tache_creer`, `tache_lister`, `tache_prendre`, `tache_mettre_a_jour` · `message_envoyer`, `messages_lire` · `passation_ecrire`, `passation_derniere` · `projets_lister`, `mothership_mission`, `mothership_statut`, `mothership_decisions_en_attente` · `journal_lister`.
+
+### Sécurité
+- **Aucun secret dans la mémoire** : un texte qui ressemble à une clé API, un mot de passe ou un numéro de carte est **refusé** avec une explication. Notez plutôt *où* est rangé le secret.
+- 8 Ko maximum par texte, 60 appels par minute et par IA.
+- Rien n'est jamais effacé : une correction crée une nouvelle version ; « oublier » archive (seuls l'IA autrice ou vous, avec votre jeton propriétaire, peuvent le faire).
+- Les jetons ne sont jamais écrits dans les journaux. **Voir les jetons :** `grep BRIDGE_TOKEN /srv/p1/nexus-mothership/.env`.
+- **Changer un jeton** (adresse divulguée) : supprimez sa ligne `BRIDGE_TOKEN_...` dans `.env`, relancez `bash install.sh`, puis recollez la nouvelle adresse dans l'IA.
+- Les données sont dans `./data/nexus-bridge/bridge.db` (sauvegarde : copiez ce dossier, ou `docker compose exec nexus-bridge python -c "import sqlite3; s=sqlite3.connect('/data/bridge.db'); d=sqlite3.connect('/data/bridge-sauvegarde.db'); s.backup(d)"`).
+

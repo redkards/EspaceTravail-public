@@ -33,7 +33,7 @@ README.md               # agent INFRA (guide FR)
 | uptime-kuma | louislam/uptime-kuma:1 | interne (via caddy :8444) |
 | ntfy | binwiederhier/ntfy:v2.11.0 | interne (via caddy :8445) ; topic `${NTFY_TOPIC}` |
 
-Limites (mem_limit / cpus, partition P1 ≤ 5 Go et ≤ 1,5 vCPU) : ollama 3g/0.9, postgres 640m/0.2, n8n 640m/0.15, nexus-core 384m/0.1, redis 128m/0.05, uptime-kuma 128m/0.03, caddy 64m/0.05, ntfy 48m/0.02 (total 5104 Mo, 1,5 vCPU). Projet compose `p1-nexus`, réseau `p1-nexus-net`. Données persistantes en bind mounts `./data/<service>` (aucun volume nommé).
+Limites (mem_limit / cpus, partition P1 ≤ 5 Go et ≤ 1,5 vCPU) : ollama 2944m/0.8, postgres 640m/0.2, n8n 640m/0.15, nexus-core 384m/0.1, nexus-bridge 128m/0.1, redis 128m/0.05, uptime-kuma 128m/0.03, caddy 64m/0.05, ntfy 48m/0.02 (total 5104 Mo, 1,5 vCPU). Projet compose `p1-nexus`, réseau `p1-nexus-net`. Données persistantes en bind mounts `./data/<service>` (aucun volume nommé).
 Cockpit (:443) protégé par basic auth Caddy (`COCKPIT_USER` / hash de `COCKPIT_PASSWORD`). nexus-core exige aussi l'en-tête `X-Nexus-Key: ${NEXUS_API_KEY}` pour l'API (le cockpit servi par nexus-core l'injecte côté serveur : les routes `/cockpit/*` sont protégées par Caddy, l'API `/api/*` par la clé).
 
 ## Variables d'environnement (.env)
@@ -115,8 +115,17 @@ VPS réel : Ubuntu 24.04, `srv2113898.hstgr.cloud`, 2 vCPU / 8 Go / 100 Go (~95 
 nexus-core : les livrables sont écrits dans /data/livrables (bind mount ./data/nexus-core). Le conteneur tourne en non-root : install.sh donne le dossier à l'uid/gid de l'image.
 
 ## Modes MVP / complet et IA gratuite (agent INFRA)
-- **MVP (défaut)** : caddy + nexus-core (SQLite `sqlite:////data/nexus.db`), ports 80/443, Caddyfile.mvp. Profil `local` = ollama (repli). Limites : ollama 3584m/1.2, nexus-core 384m/0.2, caddy 64m/0.1 (4032 Mo, 1,5 vCPU ; 448 Mo sans repli).
+- **MVP (défaut)** : caddy + nexus-core (SQLite `sqlite:////data/nexus.db`), ports 80/443, Caddyfile.mvp. Profil `local` = ollama (repli). Limites : ollama 3584m/1.1, nexus-core 384m/0.2, nexus-bridge 128m/0.1, caddy 64m/0.1 (4160 Mo, 1,5 vCPU ; 576 Mo sans repli).
 - **Complet** (`install.sh --complet`) : `COMPOSE_PROFILES=complet[,local]` + `COMPOSE_FILE=docker-compose.yml:docker-compose.complet.yml` (PostgreSQL, Redis, n8n, Uptime Kuma, ntfy, Caddyfile.complet, ports 8443–8445 ; 5104 Mo / 1,5 vCPU).
 - **IA, tout gratuit** : par défaut Ollama Cloud (`LLM_PROVIDER=ollama_cloud`, `NEXUS_MODEL=gemma4:31b`, `OLLAMA_CLOUD_URL=https://ollama.com`, clé `OLLAMA_API_KEY` saisie par `read -rs`, testée sur /api/tags) + repli local `LLM_FALLBACK=ollama`, `NEXUS_MODEL_LOCAL=qwen2.5:3b` (profil `local`). `--sans-repli` → `LLM_FALLBACK=aucun`, pas d'ollama. Sans clé ou clé refusée → `LLM_PROVIDER=ollama`, `NEXUS_MODEL=qwen2.5:3b`. `--local` force le local. `BUDGET_MONTHLY_EUR=0`, `LLM_EUR_PAR_1K_TOKENS=0`. Anthropic : payant, jamais proposé (variables vides).
 - `--sans-partition` : installation de test dans /opt/nexus-mothership. Réseau `p1-nexus-net` non interne (sortie HTTPS vers ollama.com). `/api/sante` public (healthcheck sans clé). Données nexus-core : chown 10001:10001.
 - Démarrage : `git clone -b nexus-mothership-kit --depth 1 https://github.com/redkards/espacetravail-public /srv/p1/nexus-mothership` (kit à la racine de la branche), puis `bash partitions.sh` (qui replace le contenu existant de /srv/p1 dans la partition) et `bash install.sh`.
+
+## nexus-bridge — passerelle Claude · ChatGPT · Gemini (agent BRIDGE)
+Serveur MCP « Streamable HTTP » (spécification 2025-06-18, réponses JSON, sans session ni SSE ; GET/DELETE → 405), Python 3.12 + FastAPI, JSON-RPC implémenté à la main (initialize, notifications/*, ping, tools/list, tools/call ; lots acceptés). Image python:3.12-slim, UID 10001, 1 worker, 128m/0.1, données `./data/nexus-bridge/bridge.db` (SQLite WAL + FTS5).
+- Authentification : un jeton par identité `BRIDGE_TOKEN_CLAUDE|CHATGPT|GEMINI|PROPRIETAIRE` (≥ 32 caractères, générés par install.sh) via `Authorization: Bearer` ou chemin `/mcp/<jeton>` ; comparaison à temps constant ; le jeton fixe l'auteur de chaque écriture ; jamais journalisé (`/mcp/***`, journal d'accès uvicorn désactivé).
+- Outils : memoire_ecrire/chercher/lire/oublier (versionnée, archivage par l'auteur ou le propriétaire), tache_creer/lister/prendre (verrou)/mettre_a_jour, message_envoyer/messages_lire (lus par destinataire), passation_ecrire/derniere, projets_lister (GET /api/projets, repli liste fixe), mothership_mission (POST /api/missions avec `projet`) / mothership_statut / mothership_decisions_en_attente (lecture seule, aucune validation N3), journal_lister (append-only, sans contenu).
+- Codes projets : paradoxx, nexus, poker-winners, poker-feeling, redkards, top-solver, youtube-poker-winner, freelance-ia, esct-boxe, turf, divers.
+- Garde-fous : 8 Ko par champ, 60 appels/min par jeton (429 + Retry-After), refus des contenus ressemblant à des secrets (clés API, mots de passe, cartes — Luhn —, jetons du Mothership).
+- Caddy : `/mcp*` → nexus-bridge sans basic auth ; `/bridge*` → page HTML lecture seule avec le basic auth du cockpit. `bridge-connecteurs.sh` affiche les URL à coller dans chaque IA.
+

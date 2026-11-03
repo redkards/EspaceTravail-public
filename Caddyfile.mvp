@@ -1,6 +1,7 @@
 # =============================================================================
 #  Caddyfile.mvp — Mini NEXUS MOTHERSHIP, MODE MVP
-#  Un seul site : le cockpit et l'API de nexus-core, en HTTPS (Let's Encrypt).
+#  Un seul site : le cockpit, l'API de nexus-core et la passerelle MCP
+#  (nexus-bridge : /mcp et /bridge), en HTTPS (Let's Encrypt).
 #  Le port 80 sert uniquement à obtenir le certificat (puis redirige vers 443).
 #  En mode complet, c'est Caddyfile.complet qui est utilisé.
 # =============================================================================
@@ -17,12 +18,31 @@
 	}
 	encode gzip
 
-	# Cockpit protégé par mot de passe (basic auth).
+	# Cockpit ET page /bridge protégés par mot de passe (basic auth).
 	# L'API /api/* passe sans mot de passe Caddy : nexus-core exige l'en-tête X-Nexus-Key.
-	@cockpit path /cockpit /cockpit/*
-	basic_auth @cockpit {
+	@protege path /cockpit /cockpit/* /bridge /bridge/*
+	basic_auth @protege {
 		{$COCKPIT_USER} {$COCKPIT_PASSWORD_HASH}
 	}
 
-	reverse_proxy nexus-core:8000
+	# Passerelle MCP Claude · ChatGPT · Gemini (nexus-bridge) : SANS basic auth,
+	# protégée par un jeton secret par IA (/mcp/<jeton> ou « Authorization: Bearer »).
+	# Aucun journal d'accès Caddy n'est activé : le jeton du chemin n'est pas enregistré.
+	@mcp path /mcp /mcp/*
+	handle @mcp {
+		request_body {
+			max_size 128KB
+		}
+		reverse_proxy nexus-bridge:8000
+	}
+
+	# Page de suivi de la passerelle (lecture seule, mot de passe du cockpit)
+	@bridge path /bridge /bridge/*
+	handle @bridge {
+		reverse_proxy nexus-bridge:8000
+	}
+
+	handle {
+		reverse_proxy nexus-core:8000
+	}
 }

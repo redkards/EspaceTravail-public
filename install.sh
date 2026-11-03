@@ -389,6 +389,12 @@ assurer_env N3_TIMEOUT_HOURS 24 && ajoute=1
 assurer_env N3_DAILY_CAP 15 && ajoute=1
 assurer_env NTFY_URL "http://ntfy" && ajoute=1
 assurer_env NTFY_TOPIC "nexus-$(secret 6)" && ajoute=1
+# Passerelle nexus-bridge : un jeton par IA (64 caractères hexadécimaux). Ajoutés
+# seulement s'ils manquent : un jeton existant n'est jamais remplacé.
+for ia in CLAUDE CHATGPT GEMINI PROPRIETAIRE; do
+  assurer_env "BRIDGE_TOKEN_$ia" "$(secret 32)" && ajoute=1
+done
+assurer_env BRIDGE_LIMITE_PAR_MINUTE 60 && ajoute=1
 # Pour information : utilisée seulement en mode complet (docker-compose.complet.yml).
 # En MVP, nexus-core utilise SQLite (sqlite:////data/nexus.db, fixé dans docker-compose.yml).
 assurer_env DATABASE_URL "postgresql+psycopg://nexus:$(lire_env POSTGRES_PASSWORD)@postgres:5432/nexus" && ajoute=1
@@ -533,7 +539,7 @@ ok "Configuration Docker Compose valide"
 # =============================================================================
 etape "Préparation des dossiers de données ($KIT_DIR/data)"
 # =============================================================================
-for d in caddy/data caddy/config ollama nexus-core/livrables postgres redis n8n uptime-kuma ntfy; do
+for d in caddy/data caddy/config ollama nexus-core/livrables nexus-bridge postgres redis n8n uptime-kuma ntfy; do
   mkdir -p "$KIT_DIR/data/$d"
 done
 chmod 700 "$KIT_DIR/data"
@@ -544,9 +550,11 @@ ok "Données stockées dans $KIT_DIR/data/<service>"
 # =============================================================================
 etape "Construction et démarrage des services (5 à 15 minutes la première fois)"
 # =============================================================================
-docker compose build nexus-core
+docker compose build nexus-core nexus-bridge
 # nexus-core tourne avec l'utilisateur non root « nexus » (UID/GID 10001)
 chown -R 10001:10001 "$KIT_DIR/data/nexus-core"
+# nexus-bridge tourne aussi avec l'UID/GID 10001 (base SQLite bridge.db)
+chown -R 10001:10001 "$KIT_DIR/data/nexus-bridge"
 docker compose up -d
 info "Attente que les services soient prêts…"
 pret=0
@@ -647,6 +655,11 @@ cat <<EOF
 EOF
 fi
 cat <<EOF
+
+  Passerelle Claude · ChatGPT · Gemini :
+      suivi (lecture)  : https://$NEXUS_HOST/bridge   (identifiants du cockpit)
+      URL à coller     : bash $KIT_DIR/bridge-connecteurs.sh
+      jetons (secrets) : grep BRIDGE_TOKEN $ENV_FILE
 
   Revoir ces identifiants : cat $ENV_FILE
   Journal d'installation   : $LOG_FILE
