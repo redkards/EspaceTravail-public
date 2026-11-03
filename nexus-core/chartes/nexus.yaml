@@ -1,0 +1,22 @@
+# Charte — NEXUS MOTHERSHIP / SYFER (organisation d'agents IA ; un seul humain valide)
+# Sources : projets/tous-les-projets.md, SPEC du kit.
+projet: nexus
+marque:
+  nom: NEXUS MOTHERSHIP
+  contexte: "kit Mini NEXUS MOTHERSHIP et projet SYFER (agents IA, cockpit, passerelle)"
+marques_interdites:
+  - nom: Poker Winners
+    variantes: ["poker winners"]
+    contexte: "projet distinct"
+    gravite: avertissement
+  - nom: Red Cards
+    variantes: ["redkards", "red cards"]
+    contexte: "BD REDKARDS, projet distinct"
+    gravite: avertissement
+termes_interdits:
+  - {terme: "mise en production automatique", gravite: bloquant, motif: "aucune action externe sans validation humaine"}
+  - {terme: "sans validation", gravite: avertissement, motif: "tout ce qui engage passe par le Décideur"}
+  - {terme: "desactiver le gate", gravite: bloquant, motif: "le GATE ne se contourne pas"}
+ton:
+  vouvoiement: true
+  gravite: avertissement

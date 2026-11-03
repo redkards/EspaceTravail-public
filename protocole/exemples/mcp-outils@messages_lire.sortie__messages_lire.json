@@ -1,0 +1,14 @@
+{
+ "nombre": 1,
+ "messages": [
+  {
+   "id": 1,
+   "de": "chatgpt",
+   "a": "tous",
+   "sujet": "Point",
+   "contenu": "README relu.",
+   "cree_le": "2026-11-03T22:50:25.907231+00:00",
+   "deja_lu": false
+  }
+ ]
+}

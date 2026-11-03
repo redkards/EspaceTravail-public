@@ -44,12 +44,59 @@ class ErreurLLM(Exception):
 
 # --- Ollama (local et cloud : même API /api/chat) ------------------------------
 
-def modele_pour(role: str, modele: str | None = None) -> str:
-    """Modèle de la fiche agent, sinon NEXUS_MODEL_CHECKER pour le CHECKER, sinon NEXUS_MODEL."""
+ROLES_LLM = ("prime", "collector", "analyst", "checker", "gate", "directeur")
+MODELES_CLOUD_DEFAUT = "gemma4:31b,gpt-oss:120b"
+
+
+def modeles_roles(fournisseur_nom: str | None = None) -> dict[str, str]:
+    """NEXUS_MODELES_ROLES : « role=modele » (tous fournisseurs) ou « role@fournisseur=modele ».
+
+    Exemple : collector=gemma4:31b,analyst=gemma4:31b,checker@ollama_cloud=gpt-oss:120b.
+    Une entrée propre au fournisseur l'emporte sur l'entrée générale.
+    """
+    general, specifique = {}, {}
+    for entree in os.environ.get("NEXUS_MODELES_ROLES", "").split(","):
+        if "=" not in entree:
+            continue
+        cle, modele = (x.strip() for x in entree.split("=", 1))
+        role, _, four = cle.partition("@")
+        role = role.strip().lower()
+        if role not in ROLES_LLM or not modele:
+            continue
+        if four:
+            if four.strip().lower() == (fournisseur_nom or ""):
+                specifique[role] = modele
+        else:
+            general[role] = modele
+    return {**general, **specifique}
+
+
+def modeles_cloud() -> list[str]:
+    brut = os.environ.get("NEXUS_MODELES_CLOUD", "").strip() or MODELES_CLOUD_DEFAUT
+    return [m.strip() for m in brut.split(",") if m.strip()]
+
+
+def modele_pour(role: str, modele: str | None = None, fournisseur_nom: str | None = None) -> str:
+    """Modèle d'un rôle : fiche agent > NEXUS_MODELES_ROLES > NEXUS_MODEL_CHECKER > diversité > NEXUS_MODEL.
+
+    Diversité du contrôle (fournisseur cloud) : sans réglage explicite, le CHECKER prend le premier
+    modèle de NEXUS_MODELES_CLOUD différent de celui de l'ANALYST.
+    """
     c = cfg()
     if modele:
         return modele
-    return c.modele_checker if role == "checker" else c.modele
+    conf = modeles_roles(fournisseur_nom)
+    if role in conf:
+        return conf[role]
+    if role == "checker":
+        if os.environ.get("NEXUS_MODEL_CHECKER", "").strip():
+            return c.modele_checker
+        if fournisseur_nom == "ollama_cloud":
+            analyste = modele_pour("analyst", None, fournisseur_nom)
+            autre = next((m for m in modeles_cloud() if m != analyste), None)
+            if autre:
+                return autre
+    return c.modele
 
 
 def _masquer(texte: str) -> str:
@@ -98,7 +145,7 @@ class FournisseurOllama:
 
     def appeler(self, systeme: str, utilisateur: str, role: str = "", temperature: float = 0.3,
                 modele: str | None = None, timeout: float | None = None) -> Reponse:
-        m = self.modele_force or modele_pour(role, modele)
+        m = self.modele_force or modele_pour(role, modele, self.nom)
         try:
             d = _ollama_chat(cfg().ollama_url, m, systeme, utilisateur, role, temperature,
                              num_ctx=self.num_ctx, timeout=timeout)
@@ -140,17 +187,24 @@ class FournisseurOllamaCloud:
     def appeler(self, systeme: str, utilisateur: str, role: str = "", temperature: float = 0.3,
                 modele: str | None = None, timeout: float | None = None) -> Reponse:
         c = cfg()
-        m = self.modele_force or modele_pour(role, modele)
+        m = self.modele_force or modele_pour(role, modele, self.nom)
         en_tetes = {"Authorization": f"Bearer {c.ollama_api_key}"}
-        motif = ""
+        motif, bascule_modele = "", None
         for _ in range(self.ESSAIS):
             try:
                 d = _ollama_chat(c.ollama_cloud_url, m, systeme, utilisateur, role, temperature,
                                  en_tetes, local=False, timeout=timeout)
-                return _reponse(d, systeme, utilisateur, self.nom, m)
+                r = _reponse(d, systeme, utilisateur, self.nom, m)
+                r.bascule = bascule_modele
+                return r
             except Exception as e:
                 motif = _motif(e)
                 log.warning("Ollama Cloud en erreur (%s) sur le modèle %s", motif, m)
+                # Modèle de rôle inconnu du serveur : repli sur le modèle de base, une fois.
+                if (isinstance(e, httpx.HTTPStatusError) and e.response.status_code == 404
+                        and m != c.modele and not bascule_modele):
+                    bascule_modele = f"modèle {m} indisponible : repli sur {c.modele}"
+                    m = c.modele
         if c.llm_fallback == "ollama" and ollama_local_joignable():
             r = FournisseurOllama(c.modele_local, self.num_ctx).appeler(systeme, utilisateur, role, temperature,
                                                                         timeout=timeout)
@@ -326,11 +380,14 @@ def info() -> dict:
     c = cfg()
     f = fournisseur()
     force = getattr(f, "modele_force", None)
+    roles = {r: (force or modele_pour(r, None, f.nom)) for r in ROLES_LLM}
     return {
         "fournisseur": f.nom,
         "fournisseur_demande": c.llm_provider,
         "modele": force or c.modele,
-        "modele_checker": force or c.modele_checker,
+        "modele_checker": roles["checker"],
+        "modeles_roles": roles,
+        "controle_diversifie": roles["checker"] != roles["analyst"],
         "repli": c.llm_fallback if f.nom == "ollama_cloud" else "aucun",
     }
 

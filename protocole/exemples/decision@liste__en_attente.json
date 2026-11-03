@@ -1,0 +1,38 @@
+[
+ {
+  "id": 2,
+  "mission_id": 3,
+  "mission_titre": "Analyse experte",
+  "projet": "paradoxx",
+  "niveau": "N3",
+  "objet": "lancement_f4",
+  "resume": "Lancer en F4 — coût estimé 0.29 €\nAnalyse experte\nPlafonds : 80000 tokens, 0.50 €, 1800 s.",
+  "recommandation": "Valider pour lancer la mission avec les modèles Anthropic (payant). Refuser pour l'abandonner ; relancer en F3 (gratuit) si besoin.",
+  "cout_estime_eur": 0.2944,
+  "risque": "moyen",
+  "sources": "Estimation : 80000 tokens au tarif du modèle le plus cher, 1 $ = 0.92 € (fonctionnement.yaml).",
+  "avis_checker": "Sans objet (mission non encore exécutée).",
+  "statut": "en_attente",
+  "cree_le": "2026-11-03T22:50:25.380407",
+  "decide_le": null,
+  "commentaire": null
+ },
+ {
+  "id": 1,
+  "mission_id": 2,
+  "mission_titre": "Devis site vitrine",
+  "projet": "divers",
+  "niveau": "N3",
+  "objet": "livrable",
+  "resume": "Devis site vitrine\nLivrable (brouillon)\nPoint 1",
+  "recommandation": "Relire le brouillon puis réaliser l'action manuellement ou via n8n. Motif du classement : montant engagé : 900.0 €",
+  "cout_estime_eur": 900.0,
+  "risque": "moyen",
+  "sources": "Éléments fournis dans la consigne (pas d'accès web en mini-version).",
+  "avis_checker": "Conforme",
+  "statut": "en_attente",
+  "cree_le": "2026-11-03T22:50:25.370363",
+  "decide_le": null,
+  "commentaire": null
+ }
+]

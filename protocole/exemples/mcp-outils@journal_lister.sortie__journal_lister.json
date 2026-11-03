@@ -1,0 +1,85 @@
+{
+ "nombre": 10,
+ "journal": [
+  {
+   "id": 10,
+   "horodatage": "2026-11-03T22:50:25.923459+00:00",
+   "auteur": "chatgpt",
+   "outil": "mothership_mission",
+   "objet": "mission:1",
+   "resultat": "ok"
+  },
+  {
+   "id": 9,
+   "horodatage": "2026-11-03T22:50:25.912923+00:00",
+   "auteur": "chatgpt",
+   "outil": "passation_ecrire",
+   "objet": "passation:1:nexus",
+   "resultat": "ok"
+  },
+  {
+   "id": 8,
+   "horodatage": "2026-11-03T22:50:25.910144+00:00",
+   "auteur": "gemini",
+   "outil": "messages_lire",
+   "objet": "1 message(s)",
+   "resultat": "ok"
+  },
+  {
+   "id": 7,
+   "horodatage": "2026-11-03T22:50:25.907255+00:00",
+   "auteur": "chatgpt",
+   "outil": "message_envoyer",
+   "objet": "message:1→tous",
+   "resultat": "ok"
+  },
+  {
+   "id": 6,
+   "horodatage": "2026-11-03T22:50:25.904406+00:00",
+   "auteur": "gemini",
+   "outil": "tache_mettre_a_jour",
+   "objet": "tache:1",
+   "resultat": "a_valider"
+  },
+  {
+   "id": 5,
+   "horodatage": "2026-11-03T22:50:25.901543+00:00",
+   "auteur": "gemini",
+   "outil": "tache_prendre",
+   "objet": "tache:1",
+   "resultat": "ok"
+  },
+  {
+   "id": 4,
+   "horodatage": "2026-11-03T22:50:25.896812+00:00",
+   "auteur": "chatgpt",
+   "outil": "tache_creer",
+   "objet": "tache:1",
+   "resultat": "ok"
+  },
+  {
+   "id": 3,
+   "horodatage": "2026-11-03T22:50:25.893620+00:00",
+   "auteur": "chatgpt",
+   "outil": "memoire_oublier",
+   "objet": "memoire:1",
+   "resultat": "ok"
+  },
+  {
+   "id": 2,
+   "horodatage": "2026-11-03T22:50:25.884576+00:00",
+   "auteur": "chatgpt",
+   "outil": "memoire_ecrire",
+   "objet": "memoire:2",
+   "resultat": "ok"
+  },
+  {
+   "id": 1,
+   "horodatage": "2026-11-03T22:50:25.879040+00:00",
+   "auteur": "chatgpt",
+   "outil": "memoire_ecrire",
+   "objet": "memoire:1",
+   "resultat": "ok"
+  }
+ ]
+}

@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://protocole.nexus.redkards.local/v1/etape.schema.json",
+  "title": "Étape de mission",
+  "description": "Une étape du pipeline (agent, rôle, entrée, sortie, verdict).",
+  "type": "object",
+  "required": [
+    "id",
+    "agent_id",
+    "role",
+    "tokens",
+    "cree_le"
+  ],
+  "properties": {
+    "id": {
+      "$ref": "commun.schema.json#/$defs/identifiant"
+    },
+    "agent_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 60
+    },
+    "role": {
+      "type": "string",
+      "pattern": "^[a-z_]+$",
+      "description": "Rôle de l'agent ou étape technique (checker_local, prepare, erreur…)."
+    },
+    "entree": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "sortie": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "verdict": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "tokens": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "cree_le": {
+      "$ref": "commun.schema.json#/$defs/horodatage"
+    }
+  }
+}

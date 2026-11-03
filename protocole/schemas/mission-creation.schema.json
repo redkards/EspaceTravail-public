@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://protocole.nexus.redkards.local/v1/mission-creation.schema.json",
+  "title": "Création de mission (requête)",
+  "description": "Corps de POST /api/missions (nexus-core). Champs inconnus ignorés par le serveur.",
+  "type": "object",
+  "required": [
+    "titre",
+    "consigne"
+  ],
+  "properties": {
+    "titre": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "consigne": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 20000
+    },
+    "service": {
+      "anyOf": [
+        {
+          "$ref": "commun.schema.json#/$defs/service"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "montant_eur": {
+      "anyOf": [
+        {
+          "type": "number",
+          "minimum": 0
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "action": {
+      "anyOf": [
+        {
+          "type": "string",
+          "maxLength": 40,
+          "pattern": "^[a-z_]+$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "projet": {
+      "anyOf": [
+        {
+          "type": "string",
+          "maxLength": 60,
+          "description": "Code ou alias de projet."
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "fonctionnement": {
+      "anyOf": [
+        {
+          "$ref": "commun.schema.json#/$defs/fonctionnement"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "repli_f3": {
+      "type": "boolean",
+      "default": true
+    }
+  }
+}

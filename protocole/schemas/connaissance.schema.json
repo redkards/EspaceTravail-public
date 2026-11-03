@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://protocole.nexus.redkards.local/v1/connaissance.schema.json",
+  "title": "Connaissance (mémoire projet)",
+  "description": "Élément de GET /api/projets/{code}/connaissances (score présent pour une recherche plein texte).",
+  "type": "object",
+  "required": [
+    "id",
+    "projet",
+    "titre",
+    "contenu",
+    "source",
+    "auteur",
+    "version",
+    "origine"
+  ],
+  "properties": {
+    "id": {
+      "$ref": "commun.schema.json#/$defs/identifiant"
+    },
+    "projet": {
+      "$ref": "commun.schema.json#/$defs/codeProjet"
+    },
+    "titre": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "contenu": {
+      "type": "string"
+    },
+    "source": {
+      "type": "string",
+      "maxLength": 300
+    },
+    "date": {
+      "anyOf": [
+        {
+          "$ref": "commun.schema.json#/$defs/horodatage"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "auteur": {
+      "type": "string",
+      "maxLength": 60
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "origine": {
+      "type": "string",
+      "enum": [
+        "manuel",
+        "import",
+        "auto"
+      ]
+    },
+    "score": {
+      "type": [
+        "number",
+        "null"
+      ]
+    }
+  },
+  "$defs": {
+    "liste": {
+      "type": "array",
+      "items": {
+        "$ref": "#"
+      }
+    },
+    "ajout": {
+      "title": "Ajout de connaissance (requête)",
+      "description": "Corps de POST /api/projets/{code}/connaissances. Un secret est refusé (422).",
+      "type": "object",
+      "required": [
+        "titre",
+        "contenu"
+      ],
+      "properties": {
+        "titre": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "contenu": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 20000
+        },
+        "source": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 300
+        }
+      }
+    },
+    "ajoutReponse": {
+      "title": "Ajout de connaissance (réponse 201)",
+      "type": "object",
+      "required": [
+        "id",
+        "etat",
+        "version"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "commun.schema.json#/$defs/identifiant"
+        },
+        "etat": {
+          "type": "string",
+          "enum": [
+            "ajoutee",
+            "mise_a_jour",
+            "inchangee"
+          ]
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    }
+  }
+}

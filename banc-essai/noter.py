@@ -259,7 +259,7 @@ def noter_mission(definition, resultat):
             raisons.append("sections absentes : " + ", ".join(absentes))
 
     brute = oblig + inter + p_long + p_sec
-    plafonne = bool(livrable) and (sous_seuil or (sections and len(absentes) == len(sections)))
+    plafonne = bool(livrable) and bool(sous_seuil or (sections and len(absentes) == len(sections)))
     note_livrable = min(brute, PLAFOND_LIVRABLE) if (plafonne or not livrable) else brute
     if plafonne and brute > PLAFOND_LIVRABLE:
         raisons.insert(0, f"plafonnée à {PLAFOND_LIVRABLE} (livrable quasi vide ou sans aucune section attendue)")

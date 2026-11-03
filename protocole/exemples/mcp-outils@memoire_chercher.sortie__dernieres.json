@@ -1,0 +1,18 @@
+{
+ "nombre": 1,
+ "resultats": [
+  {
+   "id": 2,
+   "sujet": "Ton des vidéos",
+   "extrait": "Ton direct, sans jargon.",
+   "etiquettes": [
+    "preference"
+   ],
+   "projet": "youtube-poker-winner",
+   "auteur": "chatgpt",
+   "cree_le": "2026-11-03T22:50:25.884420+00:00",
+   "version": 2
+  }
+ ],
+ "conseil": "Lisez une entrée complète avec memoire_lire {id}."
+}

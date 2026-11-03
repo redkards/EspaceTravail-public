@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://protocole.nexus.redkards.local/v1/commun.schema.json",
+  "title": "Protocole NEXUS v1 — définitions communes",
+  "description": "Types partagés par tous les schémas. Règle de lecture : un champ inconnu est ignoré.",
+  "$defs": {
+    "versionProtocole": {
+      "type": "string",
+      "pattern": "^1\\.\\d+\\.\\d+$",
+      "description": "Version SemVer du protocole (majeure 1)."
+    },
+    "horodatage": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}",
+      "description": "ISO 8601. nexus-core : UTC sans fuseau ; nexus-bridge : UTC avec +00:00."
+    },
+    "identifiant": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "codeProjet": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]{0,39}$",
+      "description": "Code du registre projets.yaml (« divers » par défaut)."
+    },
+    "service": {
+      "type": "string",
+      "pattern": "^[A-Z0-9&-]+/[a-z0-9-]+$",
+      "maxLength": 80,
+      "description": "Service DIRECTION/sous-service, ex. CODE-CORE/revue."
+    },
+    "niveauDecision": {
+      "type": "string",
+      "enum": [
+        "N0",
+        "N1",
+        "N2",
+        "N3"
+      ]
+    },
+    "fonctionnement": {
+      "type": "string",
+      "enum": [
+        "F1",
+        "F2",
+        "F3",
+        "F4"
+      ]
+    },
+    "statutMission": {
+      "type": "string",
+      "pattern": "^[a-z0-9_]+$",
+      "x-valeurs-connues": [
+        "recue",
+        "en_cours",
+        "en_attente_place",
+        "en_attente_n3",
+        "en_attente_decision",
+        "validee",
+        "refusee",
+        "revision",
+        "terminee",
+        "echouee",
+        "suspendue",
+        "plafond_atteint",
+        "a_reformuler"
+      ],
+      "description": "Statut de mission. Ouvert : un client v1 doit tolérer une valeur inconnue (la traiter comme « en cours »)."
+    },
+    "risque": {
+      "type": "string",
+      "enum": [
+        "faible",
+        "moyen",
+        "eleve"
+      ]
+    },
+    "identite": {
+      "type": "string",
+      "enum": [
+        "claude",
+        "chatgpt",
+        "gemini",
+        "proprietaire"
+      ]
+    },
+    "empreinte": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  }
+}

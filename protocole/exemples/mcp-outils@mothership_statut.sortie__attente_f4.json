@@ -1,0 +1,21 @@
+{
+ "id": 3,
+ "titre": "Analyse experte",
+ "service": null,
+ "directeur": null,
+ "statut": "en_attente_n3",
+ "niveau": null,
+ "message": null,
+ "cree_le": "2026-11-03T22:50:25.377781",
+ "maj_le": "2026-11-03T22:50:25.377784",
+ "projet": "paradoxx",
+ "fonctionnement_demande": "F4",
+ "fonctionnement": "F4",
+ "fonctionnement_raison": null,
+ "tokens": 0,
+ "cout_eur": 0.0,
+ "duree_s": 0.0,
+ "livrable": null,
+ "etapes": [],
+ "rappel": "Les décisions N3 se valident UNIQUEMENT par le propriétaire, dans le cockpit (https://nexus.exemple.fr/cockpit). Aucun outil de la passerelle ne peut valider, refuser ou réviser."
+}

@@ -1,0 +1,10 @@
+{
+ "id": 1,
+ "agent_id": "OPS-CORE-COLLECTOR",
+ "role": "collector",
+ "entree": "Mission :\nChecklist de démarrage\n\nConsigne :\nRédige une checklist de démarrage",
+ "sortie": "ELEMENTS:\n- consigne reçue\nMANQUE:\n- aucun élément bloquant",
+ "verdict": null,
+ "tokens": 159,
+ "cree_le": "2026-11-03T22:50:25.312290"
+}

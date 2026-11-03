@@ -1,0 +1,165 @@
+# Intégration continue SYFER — aucune clé, aucun secret, aucun appel à un LLM réel.
+# Tests : nexus-core et nexus-bridge (LLM factice), banc d'essai, automatisations, Protocole NEXUS v1 ;
+# scripts : bash -n + shellcheck ; YAML/JSON ; docker compose config (.env factice) ; caddy validate.
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHONDONTWRITEBYTECODE: "1"
+  PIP_DISABLE_PIP_VERSION_CHECK: "1"
+
+jobs:
+  tests:
+    name: Tests ${{ matrix.suite }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - suite: nexus-core
+            dossier: nexus-core
+            cible: ""
+          - suite: nexus-bridge
+            dossier: nexus-bridge
+            cible: ""
+          - suite: banc-essai
+            dossier: banc-essai
+            cible: tests
+          - suite: automatisations
+            dossier: automatisations
+            cible: tests
+          - suite: protocole
+            dossier: protocole
+            cible: ""
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            nexus-core/requirements.txt
+            nexus-bridge/requirements.txt
+      - name: Dépendances
+        # nexus-core/requirements.txt couvre aussi nexus-bridge ; jsonschema = 2e moteur du protocole.
+        run: |
+          python -m pip install -r nexus-core/requirements.txt -r nexus-bridge/requirements.txt "jsonschema>=4.18"
+          sudo apt-get install -y --no-install-recommends jq >/dev/null || true
+      - name: pytest (${{ matrix.suite }})
+        working-directory: ${{ matrix.dossier }}
+        env:
+          LLM_PROVIDER: fake
+        run: python -m pytest -q -p no:cacheprovider ${{ matrix.cible }}
+
+  protocole-sans-dependance:
+    name: Protocole (moteur interne, Python standard)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Schémas et instantané d'exemples sans aucune bibliothèque
+        working-directory: protocole
+        run: |
+          python valider.py --verifier-schemas --moteur interne
+          for f in exemples/*.json; do
+            b="$(basename "$f" .json)"; c="${b%%__*}"
+            [[ "$c" == _* ]] && continue
+            python valider.py --moteur interne "${c//@/#}" "$f" >/dev/null || { python valider.py --moteur interne "${c//@/#}" "$f"; exit 1; }
+          done
+          echo "Instantané conforme (moteur interne)."
+
+  scripts:
+    name: Scripts shell (bash -n, shellcheck)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: bash -n
+        run: |
+          mapfile -t scripts < <(git ls-files '*.sh')
+          for s in "${scripts[@]}"; do bash -n "$s" || exit 1; done
+          echo "${#scripts[@]} script(s) syntaxiquement corrects."
+      - name: shellcheck
+        # shellcheck est préinstallé sur les images ubuntu de GitHub.
+        # Bloquant : erreurs partout, avertissements sur les scripts nouveaux (B5, séparation, CI).
+        # Non bloquant : avertissements des scripts historiques (rapport dans le journal).
+        run: |
+          shellcheck --version | head -2
+          mapfile -t scripts < <(git ls-files '*.sh')
+          shellcheck -S error "${scripts[@]}"
+          shellcheck -S warning banc-essai/hebdo.sh outils-depots/separer.sh .github/scripts/env-factice.sh
+          shellcheck -S warning -f gcc "${scripts[@]}" || echo "::notice::avertissements shellcheck (non bloquants) sur les scripts historiques"
+
+  configuration:
+    name: YAML, JSON, compose, Caddy
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: YAML et JSON
+        run: |
+          python -m pip install pyyaml==6.0.3
+          python - <<'EOF'
+          import json, pathlib, subprocess, sys, yaml
+          fichiers = subprocess.run(["git", "ls-files"], capture_output=True, text=True, check=True).stdout.split()
+          ko = 0
+          for f in fichiers:
+              p = pathlib.Path(f)
+              try:
+                  if p.suffix in (".yml", ".yaml"):
+                      list(yaml.safe_load_all(p.read_text(encoding="utf-8")))
+                  elif p.suffix == ".json":
+                      json.loads(p.read_text(encoding="utf-8"))
+              except Exception as e:
+                  ko += 1
+                  print(f"::error file={f}::{e}")
+          print(f"{len(fichiers)} fichier(s) suivis, {ko} invalide(s).")
+          sys.exit(1 if ko else 0)
+          EOF
+      - name: Fiches agents conformes au protocole
+        run: python protocole/valider.py --agents nexus-core/agents --moteur interne
+      - name: docker compose config (.env factice)
+        run: |
+          bash .github/scripts/env-factice.sh .env.example > "$RUNNER_TEMP/ci.env"
+          for profil in local cloud; do
+            COMPOSE_PROFILES=$profil docker compose --env-file "$RUNNER_TEMP/ci.env" -f docker-compose.yml config -q
+            echo "MVP ($profil) : OK"
+          done
+          COMPOSE_PROFILES=complet docker compose --env-file "$RUNNER_TEMP/ci.env" \
+            -f docker-compose.yml -f docker-compose.complet.yml config -q
+          echo "Mode complet : OK"
+      - name: caddy validate (ignoré proprement si l'image est indisponible)
+        run: |
+          image="$(grep -Eo 'image: caddy:[^ ]+' docker-compose.yml | head -1 | cut -d' ' -f2)"
+          if ! docker pull -q "$image" >/dev/null 2>&1; then
+            echo "::notice::image $image indisponible : validation Caddy ignorée."
+            exit 0
+          fi
+          hash="$(docker run --rm "$image" caddy hash-password --plaintext ci-factice)"
+          for f in Caddyfile.mvp Caddyfile.complet; do
+            docker run --rm -v "$PWD/$f:/etc/caddy/Caddyfile:ro" \
+              -e NEXUS_HOST=ci.exemple.invalid -e ACME_EMAIL=ci@exemple.invalid \
+              -e COCKPIT_USER=decideur -e COCKPIT_PASSWORD_HASH="$hash" \
+              -e N8N_BASIC_USER=admin -e N8N_BASIC_PASSWORD_HASH="$hash" \
+              -e COCKPIT_INTERNAL=ci-factice-interne \
+              "$image" caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
+            echo "$f : OK"
+          done

@@ -1,0 +1,10 @@
+{
+ "id": 2,
+ "agent_id": "OPS-CORE-ANALYST",
+ "role": "analyst",
+ "entree": "Mission :\nChecklist de démarrage\n\nConsigne :\nRédige une checklist de démarrage\n\nÉléments :\nELEMENTS:\n- consigne reçue\nMANQUE:\n- aucun élément bloquant\n\nCharte du projet (obligatoire) :\nMarque : NEXUS MOTHERSHIP — kit Mini NEXUS MOTHERSHIP et projet SYFER (agents IA, cockpit, passerelle). Termes interdits : « garanti a 100 », « mise en production automatique », « desactiver le gate ». Vouvoiement.",
+ "sortie": "# Livrable (brouillon)\n\n- Point 1\n- Point 2\n- Point 3",
+ "verdict": null,
+ "tokens": 269,
+ "cree_le": "2026-11-03T22:50:25.318572"
+}

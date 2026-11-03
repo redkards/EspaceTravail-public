@@ -1,0 +1,32 @@
+# Charte — REDKARDS (BD / webtoon poker, saison 1 en bêta de lecture)
+# Sources : tests-poker/contexte/redkards.md, projets/redkards.md.
+projet: redkards
+marque:
+  nom: REDKARDS
+  contexte: "série BD poker ; héros : Red Cards / Redkards, 28 ans ; saga « La Route du Zéro »"
+marques_interdites:
+  - nom: Poker Winners
+    variantes: ["poker winners"]
+    contexte: "site communautaire (projet distinct)"
+    gravite: avertissement
+  - nom: Poker Feeling
+    variantes: ["poker feeling"]
+    contexte: "livre (projet distinct)"
+    gravite: avertissement
+  - nom: circuit ou marque réelle
+    variantes: ["wsop", "world series of poker", "pokerstars", "winamax", "ept", "unibet", "partypoker"]
+    contexte: "compétitions fictives par défaut, aucune affiliation à un circuit réel"
+    gravite: bloquant
+termes_interdits:
+  - {terme: "argent facile", gravite: bloquant, motif: "pas de gains faciles dans l'univers"}
+  - {terme: "gain garanti", gravite: bloquant, motif: "aucune certitude avant l'abattage"}
+  - {terme: "infaillible", gravite: avertissement, motif: "le héros n'est jamais infaillible"}
+  - {terme: "liste d'attente", gravite: bloquant, motif: "aucune liste d'attente n'existe"}
+mentions_obligatoires:
+  - nom: prévention du jeu excessif (communication publique)
+    types: [commercial]
+    toutes:
+      - ["09 74 75 13 13"]
+    gravite: avertissement
+ton:
+  vouvoiement: false   # dialogues de BD : le tutoiement est permis

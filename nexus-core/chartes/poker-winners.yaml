@@ -1,0 +1,36 @@
+# Charte — Poker Winners (site communautaire et pédagogique de poker, bêta privée)
+# Sources : tests-poker/contexte/poker-winners.md, projets/poker-winners.md.
+projet: poker-winners
+marque:
+  nom: Poker Winners
+  contexte: "site communautaire et pédagogique de poker en français (« La communauté poker francophone »)"
+marques_interdites:
+  - nom: Red Cards
+    variantes: ["redkards", "red cards"]
+    contexte: "personnage de la BD REDKARDS et fil rouge du livre Poker Feeling"
+    gravite: bloquant
+  - nom: Poker Feeling
+    variantes: ["poker feeling"]
+    contexte: "livre ; le site n'a pas encore de page du livre"
+    gravite: avertissement
+termes_interdits:
+  - {terme: "liste d'attente", gravite: bloquant, motif: "aucune liste d'attente n'existe"}
+  - {terme: "inscrivez-vous a la liste", gravite: bloquant, motif: "aucune liste d'attente n'existe"}
+  - {terme: "gain garanti", gravite: bloquant, motif: "site éducatif : aucune promesse de gain"}
+  - {terme: "gagnez de l'argent", gravite: bloquant, motif: "aucune promesse de gain"}
+  - {terme: "gagner de l'argent", gravite: bloquant, motif: "aucune promesse de gain"}
+  - {terme: "argent facile", gravite: bloquant, motif: "aucune promesse de gain"}
+  - {terme: "bonus de depot", gravite: bloquant, motif: "aucun lien ni avantage d'opérateur de jeu"}
+  - {terme: "code promo", gravite: avertissement, motif: "aucune offre commerciale n'est ouverte"}
+  - {terme: "premium", gravite: avertissement, motif: "le paiement Premium n'est pas encore ouvert"}
+  - {terme: "disponible maintenant", gravite: avertissement, motif: "le site est en bêta privée"}
+mentions_obligatoires:
+  - nom: prévention du jeu excessif
+    types: [publication, commercial]
+    toutes:
+      - ["09 74 75 13 13"]
+      - ["reserve aux majeurs", "interdit aux moins de 18 ans", "interdit aux mineurs"]
+    gravite: bloquant
+ton:
+  vouvoiement: true
+  gravite: avertissement

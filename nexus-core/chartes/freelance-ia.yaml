@@ -1,0 +1,26 @@
+# Charte — Freelance IA (activité de développeur d'applications et d'automatisation IA, statut : idée)
+# Sources : projets/tous-les-projets.md, registre projets.yaml.
+projet: freelance-ia
+marque:
+  nom: Freelance IA
+  contexte: "activité freelance de développement d'applications et d'automatisation IA (en préparation)"
+marques_interdites:
+  - nom: Poker Winners
+    variantes: ["poker winners"]
+    contexte: "projet personnel distinct, pas une référence client"
+    gravite: avertissement
+termes_interdits:
+  - {terme: "resultats garantis", gravite: bloquant, motif: "aucune garantie de résultat"}
+  - {terme: "garanti", gravite: avertissement, motif: "éviter toute promesse non contractuelle"}
+  - {terme: "certifie", gravite: avertissement, motif: "aucune certification à ce jour"}
+  - {terme: "nos clients", gravite: avertissement, motif: "activité au stade de l'idée : pas de références clients"}
+  - {terme: "siret", gravite: avertissement, motif: "statut non encore créé : ne pas inventer de numéro"}
+mentions_obligatoires:
+  - nom: brouillon commercial
+    types: [commercial]
+    toutes:
+      - ["brouillon"]
+    gravite: avertissement
+ton:
+  vouvoiement: true
+  gravite: avertissement

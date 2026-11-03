@@ -1,0 +1,15 @@
+{
+ "projet": "nexus",
+ "nombre": 1,
+ "connaissances": [
+  {
+   "titre": "Ton éditorial",
+   "source": "exemple protocole",
+   "date": "2026-11-03T22:50:25.416245",
+   "auteur": "api",
+   "version": 1,
+   "contenu": "Phrases courtes, tutoiement interdit, exemples concrets."
+  }
+ ],
+ "note": "Lecture seule : pour ajouter une connaissance, passez par le cockpit du propriétaire."
+}

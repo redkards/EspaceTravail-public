@@ -26,7 +26,9 @@ def environnement(tmp_path, monkeypatch):
     for v in ("NTFY_URL", "NTFY_TOPIC", "ANTHROPIC_API_KEY", "NEXUS_FONCTIONNEMENT_DEFAUT", "EUR_PAR_USD",
               "NEXUS_FONCTIONNEMENT_FILE", "BUDGET_MONTHLY_EUR", "LEDGER_HMAC_KEY", "NEXUS_MAX_MISSIONS",
               "NEXUS_PROJETS_FILE", "COCKPIT_CODE_DECIDEUR", "NEXUS_SESSIONS_N3", "NEXUS_MEMOIRE_AUTO",
-              "NEXUS_CONNAISSANCES_DIR"):
+              "NEXUS_CONNAISSANCES_DIR", "NEXUS_MODELES_ROLES", "NEXUS_MODELES_CLOUD", "NEXUS_CHARTES_DIR",
+              "NEXUS_WEBHOOK_QG", "NEXUS_WEBHOOK_SECRET", "NEXUS_RESUME_QUOTIDIEN", "NEXUS_EXEMPLES_SEUIL",
+              "NEXUS_LECONS_SEUIL", "NEXUS_BANC_RESULTATS", "NEXUS_ARCHIVE_DIR"):
         monkeypatch.delenv(v, raising=False)
     from app import fonctionnement
     fonctionnement.charger(recharger=True)

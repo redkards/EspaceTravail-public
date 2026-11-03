@@ -1,0 +1,10 @@
+{
+ "id": 7,
+ "agent_id": "REVENUE-CORE-COLLECTOR",
+ "role": "collector",
+ "entree": "Mission :\nDevis site vitrine\n\nConsigne :\nRédige un devis pour un site vitrine",
+ "sortie": "ELEMENTS:\n- consigne reçue\nMANQUE:\n- aucun élément bloquant",
+ "verdict": null,
+ "tokens": 162,
+ "cree_le": "2026-11-03T22:50:25.355204"
+}

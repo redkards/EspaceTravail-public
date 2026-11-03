@@ -1,0 +1,152 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://protocole.nexus.redkards.local/v1/mission.schema.json",
+  "title": "Mission (état)",
+  "description": "Réponse de GET /api/missions/{id} (avec « etapes ») et éléments de GET /api/missions (sans).",
+  "type": "object",
+  "required": [
+    "id",
+    "projet",
+    "titre",
+    "consigne",
+    "statut",
+    "cree_le",
+    "maj_le",
+    "tokens",
+    "cout_eur",
+    "fonctionnement_demande",
+    "fonctionnement"
+  ],
+  "properties": {
+    "id": {
+      "$ref": "commun.schema.json#/$defs/identifiant"
+    },
+    "projet": {
+      "$ref": "commun.schema.json#/$defs/codeProjet"
+    },
+    "titre": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "consigne": {
+      "type": "string"
+    },
+    "service": {
+      "anyOf": [
+        {
+          "$ref": "commun.schema.json#/$defs/service"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "directeur": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "statut": {
+      "$ref": "commun.schema.json#/$defs/statutMission"
+    },
+    "niveau": {
+      "anyOf": [
+        {
+          "$ref": "commun.schema.json#/$defs/niveauDecision"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "montant_eur": {
+      "type": "number",
+      "minimum": 0
+    },
+    "action": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "message": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "cree_le": {
+      "$ref": "commun.schema.json#/$defs/horodatage"
+    },
+    "maj_le": {
+      "$ref": "commun.schema.json#/$defs/horodatage"
+    },
+    "livrable_texte": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "tokens": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "cout_eur": {
+      "type": "number",
+      "minimum": 0
+    },
+    "fonctionnement_demande": {
+      "$ref": "commun.schema.json#/$defs/fonctionnement"
+    },
+    "fonctionnement": {
+      "$ref": "commun.schema.json#/$defs/fonctionnement"
+    },
+    "fonctionnement_raison": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "repli_f3": {
+      "type": "boolean"
+    },
+    "tokens_entree": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "tokens_sortie": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "duree_s": {
+      "type": "number",
+      "minimum": 0
+    },
+    "revisions": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "attente": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "etapes": {
+      "type": "array",
+      "items": {
+        "$ref": "etape.schema.json"
+      }
+    }
+  },
+  "$defs": {
+    "liste": {
+      "type": "array",
+      "items": {
+        "$ref": "#"
+      }
+    }
+  }
+}

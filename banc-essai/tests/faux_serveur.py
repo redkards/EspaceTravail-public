@@ -40,6 +40,7 @@ class FauxServeur:
         self.polls_avant_final = polls_avant_final
         self.cle = cle
         self.comportements = {}
+        self.fournisseur = "faux"  # « ollama_cloud » pour simuler un fournisseur cloud (hebdo.sh)
         self.missions = {}
         self.posts = []
         self.cles_recues = []
@@ -111,7 +112,7 @@ class FauxServeur:
 
             def do_GET(self):
                 if self.path == "/api/sante":
-                    return self._json(200, {"statut": "ok", "llm": {"fournisseur": "faux", "modele": "faux-3b",
+                    return self._json(200, {"statut": "ok", "llm": {"fournisseur": srv.fournisseur, "modele": "faux-3b",
                                                                    "modele_checker": "faux-3b"},
                                             "fonctionnement_defaut": "F2"})
                 if not self._auth():

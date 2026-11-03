@@ -82,6 +82,9 @@ COLONNES_AJOUTEES = [
     ("decisions", "objet", "VARCHAR(20) NOT NULL DEFAULT 'livrable'"),
     ("ledger", "algo", "VARCHAR(10) NOT NULL DEFAULT 'sha256'"),
     ("decisions", "risque_raisons", "TEXT"),
+    ("missions", "modeles_json", "TEXT"),
+    ("missions", "charte_avertissements", "TEXT"),
+    ("missions", "note", "INTEGER"),
 ]
 
 
@@ -121,6 +124,8 @@ def init_db(tentatives: int = 30, pause_s: float = 2.0) -> None:
             migrer(eng)
             from .memoire import initialiser_fts
             initialiser_fts(eng)
+            from .archive import initialiser_fts as initialiser_fts_archive
+            initialiser_fts_archive(eng)
             return
         except Exception as e:
             if i == tentatives - 1:

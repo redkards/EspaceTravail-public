@@ -1,0 +1,165 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://protocole.nexus.redkards.local/v1/decision.schema.json",
+  "title": "Décision N3",
+  "description": "Élément de GET /api/decisions. Une décision ne se valide que par un humain (cockpit ou API clé).",
+  "type": "object",
+  "required": [
+    "id",
+    "mission_id",
+    "niveau",
+    "objet",
+    "resume",
+    "recommandation",
+    "cout_estime_eur",
+    "risque",
+    "statut",
+    "cree_le"
+  ],
+  "properties": {
+    "id": {
+      "$ref": "commun.schema.json#/$defs/identifiant"
+    },
+    "mission_id": {
+      "$ref": "commun.schema.json#/$defs/identifiant"
+    },
+    "mission_titre": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "projet": {
+      "anyOf": [
+        {
+          "$ref": "commun.schema.json#/$defs/codeProjet"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "niveau": {
+      "$ref": "commun.schema.json#/$defs/niveauDecision"
+    },
+    "objet": {
+      "type": "string",
+      "pattern": "^[a-z0-9_]+$",
+      "x-valeurs-connues": [
+        "livrable",
+        "lancement_f4"
+      ]
+    },
+    "resume": {
+      "type": "string"
+    },
+    "recommandation": {
+      "type": "string"
+    },
+    "cout_estime_eur": {
+      "type": "number",
+      "minimum": 0
+    },
+    "risque": {
+      "$ref": "commun.schema.json#/$defs/risque"
+    },
+    "sources": {
+      "type": "string"
+    },
+    "avis_checker": {
+      "type": "string"
+    },
+    "statut": {
+      "type": "string",
+      "enum": [
+        "en_attente",
+        "validee",
+        "refusee",
+        "revision",
+        "expiree"
+      ]
+    },
+    "cree_le": {
+      "$ref": "commun.schema.json#/$defs/horodatage"
+    },
+    "decide_le": {
+      "anyOf": [
+        {
+          "$ref": "commun.schema.json#/$defs/horodatage"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "commentaire": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "$defs": {
+    "action": {
+      "title": "Action sur une décision (requête)",
+      "description": "Corps de POST /api/decisions/{id}/valider|refuser|reviser.",
+      "type": "object",
+      "properties": {
+        "commentaire": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 4000
+        },
+        "code": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 12,
+          "description": "Code Décideur (cockpit, risque élevé)."
+        }
+      }
+    },
+    "actionReponse": {
+      "title": "Action sur une décision (réponse)",
+      "type": "object",
+      "required": [
+        "decision_id",
+        "mission_id",
+        "statut",
+        "relance",
+        "lancer"
+      ],
+      "properties": {
+        "decision_id": {
+          "$ref": "commun.schema.json#/$defs/identifiant"
+        },
+        "mission_id": {
+          "$ref": "commun.schema.json#/$defs/identifiant"
+        },
+        "statut": {
+          "type": "string",
+          "enum": [
+            "validee",
+            "refusee",
+            "revision"
+          ]
+        },
+        "relance": {
+          "type": "boolean"
+        },
+        "lancer": {
+          "type": "boolean"
+        }
+      }
+    },
+    "liste": {
+      "type": "array",
+      "items": {
+        "$ref": "#"
+      }
+    }
+  }
+}

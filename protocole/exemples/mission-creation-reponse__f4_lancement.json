@@ -1,0 +1,10 @@
+{
+ "id": 3,
+ "statut": "en_attente_n3",
+ "projet": "paradoxx",
+ "fonctionnement_demande": "F4",
+ "fonctionnement": "F4",
+ "message": "Lancement F4 soumis à validation — coût estimé 0.29 €.",
+ "decision_id": 2,
+ "cout_estime_eur": 0.2944
+}

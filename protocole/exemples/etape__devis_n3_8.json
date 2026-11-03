@@ -1,0 +1,10 @@
+{
+ "id": 8,
+ "agent_id": "REVENUE-CORE-ANALYST",
+ "role": "analyst",
+ "entree": "Mission :\nDevis site vitrine\n\nConsigne :\nRédige un devis pour un site vitrine\n\nÉléments :\nELEMENTS:\n- consigne reçue\nMANQUE:\n- aucun élément bloquant\n\nCharte du projet (obligatoire) :\nTermes interdits : « garanti a 100 ». Texte destiné à être publié : aucun « À COMPLÉTER », aucune information inventée.",
+ "sortie": "# Livrable (brouillon)\n\n- Point 1\n- Point 2\n- Point 3",
+ "verdict": null,
+ "tokens": 268,
+ "cree_le": "2026-11-03T22:50:25.358944"
+}

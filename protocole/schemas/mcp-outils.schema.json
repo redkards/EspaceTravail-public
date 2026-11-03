@@ -1,0 +1,1539 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://protocole.nexus.redkards.local/v1/mcp-outils.schema.json",
+  "title": "Outils MCP de nexus-bridge",
+  "description": "Entrées (arguments de tools/call, additionalProperties=false : la passerelle refuse un paramètre inconnu) et sorties (structuredContent, lecture tolérante) des outils de la passerelle. Clés : « <outil>.entree » et « <outil>.sortie ». Aucun outil ne valide une décision N3.",
+  "x-outils": [
+    "journal_lister",
+    "memoire_chercher",
+    "memoire_ecrire",
+    "memoire_lire",
+    "memoire_oublier",
+    "message_envoyer",
+    "messages_lire",
+    "mothership_decisions_en_attente",
+    "mothership_mission",
+    "mothership_statut",
+    "passation_derniere",
+    "passation_ecrire",
+    "projet_connaissances",
+    "projets_lister",
+    "tache_creer",
+    "tache_lister",
+    "tache_mettre_a_jour",
+    "tache_prendre"
+  ],
+  "$defs": {
+    "memoire_ecrire.entree": {
+      "title": "Écrire dans la mémoire commune",
+      "x-ecriture": true,
+      "type": "object",
+      "properties": {
+        "sujet": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "description": "Titre court et précis (ex. « Ton des vidéos YouTube »)."
+        },
+        "contenu": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 8192,
+          "description": "Le fait, la décision ou la préférence, en phrases complètes (8 Ko max)."
+        },
+        "etiquettes": {
+          "type": "array",
+          "maxItems": 10,
+          "description": "Mots-clés (ex. [\"decision\", \"preference\"]).",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40,
+            "pattern": "^[^,]+$"
+          }
+        },
+        "projet": {
+          "$ref": "commun.schema.json#/$defs/codeProjet",
+          "description": "Code du projet concerné (voir l'outil projets_lister).",
+          "x-valeurs-dynamiques": "liste BRIDGE_PROJETS de la passerelle (projets_lister)"
+        },
+        "remplace_id": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Optionnel : id de l'entrée que cette nouvelle version remplace."
+        }
+      },
+      "required": [
+        "sujet",
+        "contenu",
+        "etiquettes"
+      ],
+      "additionalProperties": false
+    },
+    "memoire_ecrire.sortie": {
+      "title": "Écrire dans la mémoire commune — résultat (structuredContent)",
+      "type": "object",
+      "required": [
+        "id",
+        "version",
+        "auteur",
+        "message"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "commun.schema.json#/$defs/identifiant"
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "remplace_id": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "auteur": {
+          "$ref": "commun.schema.json#/$defs/identite"
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "memoire_chercher.entree": {
+      "title": "Chercher dans la mémoire commune",
+      "x-ecriture": false,
+      "type": "object",
+      "properties": {
+        "requete": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 300,
+          "description": "Mots à chercher (ex. « tarif coaching poker »), ou « * »."
+        },
+        "projet": {
+          "$ref": "commun.schema.json#/$defs/codeProjet",
+          "description": "Optionnel : limite la recherche à ce projet.",
+          "x-valeurs-dynamiques": "liste BRIDGE_PROJETS de la passerelle (projets_lister)"
+        },
+        "limite": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50,
+          "default": 10,
+          "description": "Nombre maximum de résultats (10 par défaut)."
+        }
+      },
+      "required": [
+        "requete"
+      ],
+      "additionalProperties": false
+    },
+    "memoire_chercher.sortie": {
+      "title": "Chercher dans la mémoire commune — résultat (structuredContent)",
+      "type": "object",
+      "required": [
+        "nombre",
+        "resultats"
+      ],
+      "properties": {
+        "nombre": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "conseil": {
+          "type": "string"
+        },
+        "resultats": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "sujet",
+              "extrait",
+              "auteur",
+              "cree_le",
+              "version"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "commun.schema.json#/$defs/identifiant"
+              },
+              "sujet": {
+                "type": "string"
+              },
+              "extrait": {
+                "type": "string",
+                "maxLength": 600
+              },
+              "etiquettes": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "projet": {
+                "anyOf": [
+                  {
+                    "$ref": "commun.schema.json#/$defs/codeProjet"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "auteur": {
+                "$ref": "commun.schema.json#/$defs/identite"
+              },
+              "cree_le": {
+                "$ref": "commun.schema.json#/$defs/horodatage"
+              },
+              "version": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      }
+    },
+    "memoire_lire.entree": {
+      "title": "Lire une entrée de mémoire",
+      "x-ecriture": false,
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Identifiant de l'entrée."
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "memoire_lire.sortie": {
+      "title": "Lire une entrée de mémoire — résultat (structuredContent)",
+      "allOf": [
+        {
+          "type": "object",
+          "required": [
+            "id",
+            "sujet",
+            "contenu",
+            "etiquettes",
+            "auteur",
+            "cree_le",
+            "version",
+            "statut"
+          ],
+          "properties": {
+            "id": {
+              "$ref": "commun.schema.json#/$defs/identifiant"
+            },
+            "sujet": {
+              "type": "string"
+            },
+            "contenu": {
+              "type": "string"
+            },
+            "etiquettes": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "projet": {
+              "anyOf": [
+                {
+                  "$ref": "commun.schema.json#/$defs/codeProjet"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "auteur": {
+              "$ref": "commun.schema.json#/$defs/identite"
+            },
+            "cree_le": {
+              "$ref": "commun.schema.json#/$defs/horodatage"
+            },
+            "version": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "racine_id": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "remplace_id": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "statut": {
+              "type": "string",
+              "enum": [
+                "active",
+                "remplacee",
+                "archivee"
+              ]
+            },
+            "remplacee_par": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "historique"
+          ],
+          "properties": {
+            "historique": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "version",
+                  "auteur",
+                  "cree_le",
+                  "statut"
+                ],
+                "properties": {
+                  "id": {
+                    "$ref": "commun.schema.json#/$defs/identifiant"
+                  },
+                  "version": {
+                    "type": "integer"
+                  },
+                  "auteur": {
+                    "$ref": "commun.schema.json#/$defs/identite"
+                  },
+                  "cree_le": {
+                    "$ref": "commun.schema.json#/$defs/horodatage"
+                  },
+                  "statut": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "memoire_oublier.entree": {
+      "title": "Archiver une entrée de mémoire",
+      "x-ecriture": true,
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Identifiant de l'entrée à archiver."
+        },
+        "raison": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500,
+          "description": "Pourquoi l'entrée est archivée (ex. « information périmée »)."
+        }
+      },
+      "required": [
+        "id",
+        "raison"
+      ],
+      "additionalProperties": false
+    },
+    "memoire_oublier.sortie": {
+      "title": "Archiver une entrée de mémoire — résultat (structuredContent)",
+      "type": "object",
+      "required": [
+        "id",
+        "statut",
+        "message"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "commun.schema.json#/$defs/identifiant"
+        },
+        "statut": {
+          "const": "archivee"
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "tache_creer.entree": {
+      "title": "Créer une tâche",
+      "x-ecriture": true,
+      "type": "object",
+      "properties": {
+        "titre": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "description": "Titre court de la tâche."
+        },
+        "description": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 8192,
+          "description": "Ce qu'il faut faire, le résultat attendu, les liens utiles."
+        },
+        "assigne_a": {
+          "type": "string",
+          "enum": [
+            "claude",
+            "chatgpt",
+            "gemini",
+            "proprietaire"
+          ],
+          "description": "Qui doit faire la tâche."
+        },
+        "projet": {
+          "$ref": "commun.schema.json#/$defs/codeProjet",
+          "description": "Code du projet concerné (voir l'outil projets_lister).",
+          "x-valeurs-dynamiques": "liste BRIDGE_PROJETS de la passerelle (projets_lister)"
+        },
+        "priorite": {
+          "type": "string",
+          "enum": [
+            "basse",
+            "normale",
+            "haute",
+            "urgente"
+          ],
+          "default": "normale",
+          "description": "Priorité."
+        }
+      },
+      "required": [
+        "titre",
+        "description",
+        "assigne_a"
+      ],
+      "additionalProperties": false
+    },
+    "tache_creer.sortie": {
+      "title": "Créer une tâche — résultat (structuredContent)",
+      "type": "object",
+      "required": [
+        "id",
+        "statut",
+        "assigne_a",
+        "message"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "commun.schema.json#/$defs/identifiant"
+        },
+        "statut": {
+          "const": "a_faire"
+        },
+        "assigne_a": {
+          "$ref": "commun.schema.json#/$defs/identite"
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "tache_lister.entree": {
+      "title": "Lister les tâches",
+      "x-ecriture": false,
+      "type": "object",
+      "properties": {
+        "statut": {
+          "type": "string",
+          "enum": [
+            "a_faire",
+            "en_cours",
+            "a_valider",
+            "fait"
+          ],
+          "description": "Optionnel : filtre par statut."
+        },
+        "assigne_a": {
+          "type": "string",
+          "enum": [
+            "claude",
+            "chatgpt",
+            "gemini",
+            "proprietaire"
+          ],
+          "description": "Optionnel : filtre par personne assignée."
+        },
+        "projet": {
+          "$ref": "commun.schema.json#/$defs/codeProjet",
+          "description": "Optionnel : filtre par projet.",
+          "x-valeurs-dynamiques": "liste BRIDGE_PROJETS de la passerelle (projets_lister)"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "tache_lister.sortie": {
+      "title": "Lister les tâches — résultat (structuredContent)",
+      "type": "object",
+      "required": [
+        "nombre",
+        "taches"
+      ],
+      "properties": {
+        "nombre": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "taches": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "titre",
+              "assigne_a",
+              "priorite",
+              "statut",
+              "cree_par",
+              "cree_le",
+              "maj_le"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "commun.schema.json#/$defs/identifiant"
+              },
+              "titre": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "assigne_a": {
+                "$ref": "commun.schema.json#/$defs/identite"
+              },
+              "projet": {
+                "anyOf": [
+                  {
+                    "$ref": "commun.schema.json#/$defs/codeProjet"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "priorite": {
+                "type": "string",
+                "enum": [
+                  "basse",
+                  "normale",
+                  "haute",
+                  "urgente"
+                ]
+              },
+              "statut": {
+                "type": "string",
+                "enum": [
+                  "a_faire",
+                  "en_cours",
+                  "a_valider",
+                  "fait"
+                ]
+              },
+              "cree_par": {
+                "$ref": "commun.schema.json#/$defs/identite"
+              },
+              "pris_par": {
+                "anyOf": [
+                  {
+                    "$ref": "commun.schema.json#/$defs/identite"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "cree_le": {
+                "$ref": "commun.schema.json#/$defs/horodatage"
+              },
+              "maj_le": {
+                "$ref": "commun.schema.json#/$defs/horodatage"
+              }
+            }
+          }
+        }
+      }
+    },
+    "tache_prendre.entree": {
+      "title": "Prendre une tâche",
+      "x-ecriture": true,
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Identifiant de la tâche."
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "tache_prendre.sortie": {
+      "title": "Prendre une tâche — résultat (structuredContent)",
+      "type": "object",
+      "required": [
+        "id",
+        "statut",
+        "pris_par",
+        "message"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "commun.schema.json#/$defs/identifiant"
+        },
+        "statut": {
+          "const": "en_cours"
+        },
+        "pris_par": {
+          "$ref": "commun.schema.json#/$defs/identite"
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "tache_mettre_a_jour.entree": {
+      "title": "Mettre à jour une tâche",
+      "x-ecriture": true,
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Identifiant de la tâche."
+        },
+        "statut": {
+          "type": "string",
+          "enum": [
+            "a_faire",
+            "en_cours",
+            "a_valider",
+            "fait"
+          ],
+          "description": "Nouveau statut."
+        },
+        "note": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 8192,
+          "description": "Ce qui a été fait, où trouver le résultat, ce qui bloque."
+        }
+      },
+      "required": [
+        "id",
+        "statut",
+        "note"
+      ],
+      "additionalProperties": false
+    },
+    "tache_mettre_a_jour.sortie": {
+      "title": "Mettre à jour une tâche — résultat (structuredContent)",
+      "type": "object",
+      "required": [
+        "id",
+        "statut",
+        "message"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "commun.schema.json#/$defs/identifiant"
+        },
+        "statut": {
+          "type": "string",
+          "enum": [
+            "a_faire",
+            "en_cours",
+            "a_valider",
+            "fait"
+          ]
+        },
+        "pris_par": {
+          "anyOf": [
+            {
+              "$ref": "commun.schema.json#/$defs/identite"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "message_envoyer.entree": {
+      "title": "Envoyer un message",
+      "x-ecriture": true,
+      "type": "object",
+      "properties": {
+        "destinataire": {
+          "type": "string",
+          "enum": [
+            "claude",
+            "chatgpt",
+            "gemini",
+            "proprietaire",
+            "tous"
+          ],
+          "description": "Destinataire."
+        },
+        "sujet": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "description": "Objet du message."
+        },
+        "contenu": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 8192,
+          "description": "Texte du message (8 Ko max)."
+        }
+      },
+      "required": [
+        "destinataire",
+        "sujet",
+        "contenu"
+      ],
+      "additionalProperties": false
+    },
+    "message_envoyer.sortie": {
+      "title": "Envoyer un message — résultat (structuredContent)",
+      "type": "object",
+      "required": [
+        "id",
+        "message"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "commun.schema.json#/$defs/identifiant"
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "messages_lire.entree": {
+      "title": "Lire mes messages",
+      "x-ecriture": true,
+      "type": "object",
+      "properties": {
+        "depuis": {
+          "type": "string",
+          "maxLength": 40,
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}",
+          "description": "Optionnel : horodatage ISO 8601 (ex. 2026-11-03T08:00:00+00:00) ; messages plus récents seulement."
+        },
+        "non_lus_seulement": {
+          "type": "boolean",
+          "default": true,
+          "description": "Seulement les messages non lus (oui par défaut)."
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "messages_lire.sortie": {
+      "title": "Lire mes messages — résultat (structuredContent)",
+      "type": "object",
+      "required": [
+        "nombre",
+        "messages"
+      ],
+      "properties": {
+        "nombre": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "messages": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "de",
+              "a",
+              "sujet",
+              "contenu",
+              "cree_le",
+              "deja_lu"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "commun.schema.json#/$defs/identifiant"
+              },
+              "de": {
+                "$ref": "commun.schema.json#/$defs/identite"
+              },
+              "a": {
+                "type": "string"
+              },
+              "sujet": {
+                "type": "string"
+              },
+              "contenu": {
+                "type": "string"
+              },
+              "cree_le": {
+                "$ref": "commun.schema.json#/$defs/horodatage"
+              },
+              "deja_lu": {
+                "type": "boolean"
+              }
+            }
+          }
+        }
+      }
+    },
+    "passation_ecrire.entree": {
+      "title": "Écrire une passation",
+      "x-ecriture": true,
+      "type": "object",
+      "properties": {
+        "projet": {
+          "$ref": "commun.schema.json#/$defs/codeProjet",
+          "description": "Code du projet (obligatoire).",
+          "x-valeurs-dynamiques": "liste BRIDGE_PROJETS de la passerelle (projets_lister)"
+        },
+        "resume": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 8192,
+          "description": "Ce qui a été fait pendant cette session."
+        },
+        "etat": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 8192,
+          "description": "Où en est le projet : ce qui marche, ce qui bloque, fichiers et liens."
+        },
+        "prochaines_etapes": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 8192,
+          "description": "Liste des prochaines actions, dans l'ordre."
+        }
+      },
+      "required": [
+        "projet",
+        "resume",
+        "etat",
+        "prochaines_etapes"
+      ],
+      "additionalProperties": false
+    },
+    "passation_ecrire.sortie": {
+      "title": "Écrire une passation — résultat (structuredContent)",
+      "type": "object",
+      "required": [
+        "id",
+        "projet",
+        "message"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "commun.schema.json#/$defs/identifiant"
+        },
+        "projet": {
+          "$ref": "commun.schema.json#/$defs/codeProjet"
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "passation_derniere.entree": {
+      "title": "Lire la dernière passation",
+      "x-ecriture": false,
+      "type": "object",
+      "properties": {
+        "projet": {
+          "$ref": "commun.schema.json#/$defs/codeProjet",
+          "description": "Code du projet.",
+          "x-valeurs-dynamiques": "liste BRIDGE_PROJETS de la passerelle (projets_lister)"
+        }
+      },
+      "required": [
+        "projet"
+      ],
+      "additionalProperties": false
+    },
+    "passation_derniere.sortie": {
+      "title": "Lire la dernière passation — résultat (structuredContent)",
+      "type": "object",
+      "required": [
+        "projet",
+        "passation"
+      ],
+      "properties": {
+        "projet": {
+          "$ref": "commun.schema.json#/$defs/codeProjet"
+        },
+        "message": {
+          "type": "string"
+        },
+        "passation": {
+          "anyOf": [
+            {
+              "type": "object",
+              "required": [
+                "id",
+                "projet",
+                "auteur",
+                "resume",
+                "etat",
+                "prochaines_etapes",
+                "cree_le"
+              ],
+              "properties": {
+                "id": {
+                  "$ref": "commun.schema.json#/$defs/identifiant"
+                },
+                "projet": {
+                  "$ref": "commun.schema.json#/$defs/codeProjet"
+                },
+                "auteur": {
+                  "$ref": "commun.schema.json#/$defs/identite"
+                },
+                "resume": {
+                  "type": "string"
+                },
+                "etat": {
+                  "type": "string"
+                },
+                "prochaines_etapes": {
+                  "type": "string"
+                },
+                "cree_le": {
+                  "$ref": "commun.schema.json#/$defs/horodatage"
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "projets_lister.entree": {
+      "title": "Lister les projets",
+      "x-ecriture": false,
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "projets_lister.sortie": {
+      "title": "Lister les projets — résultat (structuredContent)",
+      "type": "object",
+      "required": [
+        "source",
+        "projets"
+      ],
+      "properties": {
+        "source": {
+          "type": "string"
+        },
+        "projets": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "code"
+            ],
+            "properties": {
+              "code": {
+                "$ref": "commun.schema.json#/$defs/codeProjet"
+              },
+              "nom": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "projet_connaissances.entree": {
+      "title": "Mémoire d'un projet (lecture)",
+      "x-ecriture": false,
+      "type": "object",
+      "properties": {
+        "projet": {
+          "$ref": "commun.schema.json#/$defs/codeProjet",
+          "description": "Code du projet dont on lit la mémoire.",
+          "x-valeurs-dynamiques": "liste BRIDGE_PROJETS de la passerelle (projets_lister)"
+        },
+        "q": {
+          "type": "string",
+          "maxLength": 300,
+          "description": "Optionnel : mots-clés de recherche (plein texte)."
+        },
+        "limite": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10,
+          "default": 5,
+          "description": "Nombre maximal de résultats."
+        }
+      },
+      "required": [
+        "projet"
+      ],
+      "additionalProperties": false
+    },
+    "projet_connaissances.sortie": {
+      "title": "Mémoire d'un projet (lecture) — résultat (structuredContent)",
+      "type": "object",
+      "required": [
+        "projet",
+        "nombre",
+        "connaissances"
+      ],
+      "properties": {
+        "projet": {
+          "$ref": "commun.schema.json#/$defs/codeProjet"
+        },
+        "nombre": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "note": {
+          "type": "string"
+        },
+        "connaissances": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "titre",
+              "source",
+              "contenu"
+            ],
+            "properties": {
+              "titre": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "source": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "date": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "auteur": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "version": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "contenu": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "mothership_mission.entree": {
+      "title": "Confier une mission au Mothership",
+      "x-ecriture": true,
+      "type": "object",
+      "properties": {
+        "titre": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "description": "Titre de la mission."
+        },
+        "consigne": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 8192,
+          "description": "Consigne complète pour les agents (contexte, livrable attendu)."
+        },
+        "service": {
+          "type": "string",
+          "maxLength": 80,
+          "description": "Optionnel : service cible (ex. « CONTENT-ARENA/redaction », « OPS-CORE/projets »)."
+        },
+        "projet": {
+          "$ref": "commun.schema.json#/$defs/codeProjet",
+          "description": "Optionnel : projet concerné.",
+          "x-valeurs-dynamiques": "liste BRIDGE_PROJETS de la passerelle (projets_lister)"
+        },
+        "fonctionnement": {
+          "type": "string",
+          "enum": [
+            "F1",
+            "F2",
+            "F3",
+            "F4"
+          ],
+          "description": "Optionnel : niveau de fonctionnement (effort, tokens, coût, délai). Défaut : celui du serveur (F2)."
+        }
+      },
+      "required": [
+        "titre",
+        "consigne"
+      ],
+      "additionalProperties": false
+    },
+    "mothership_mission.sortie": {
+      "title": "Confier une mission au Mothership — résultat (structuredContent)",
+      "type": "object",
+      "required": [
+        "id",
+        "statut",
+        "message"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "commun.schema.json#/$defs/identifiant"
+        },
+        "statut": {
+          "$ref": "commun.schema.json#/$defs/statutMission"
+        },
+        "projet": {
+          "anyOf": [
+            {
+              "$ref": "commun.schema.json#/$defs/codeProjet"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "fonctionnement": {
+          "anyOf": [
+            {
+              "$ref": "commun.schema.json#/$defs/fonctionnement"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "message": {
+          "type": "string"
+        },
+        "note_mothership": {
+          "type": "string"
+        }
+      }
+    },
+    "mothership_statut.entree": {
+      "title": "Statut d'une mission",
+      "x-ecriture": false,
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Identifiant de la mission (renvoyé par mothership_mission)."
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "mothership_statut.sortie": {
+      "title": "Statut d'une mission — résultat (structuredContent)",
+      "type": "object",
+      "required": [
+        "id",
+        "statut",
+        "etapes"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "commun.schema.json#/$defs/identifiant"
+        },
+        "titre": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "service": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "directeur": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "statut": {
+          "$ref": "commun.schema.json#/$defs/statutMission"
+        },
+        "niveau": {
+          "anyOf": [
+            {
+              "$ref": "commun.schema.json#/$defs/niveauDecision"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "message": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "cree_le": {
+          "anyOf": [
+            {
+              "$ref": "commun.schema.json#/$defs/horodatage"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "maj_le": {
+          "anyOf": [
+            {
+              "$ref": "commun.schema.json#/$defs/horodatage"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "projet": {
+          "anyOf": [
+            {
+              "$ref": "commun.schema.json#/$defs/codeProjet"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "fonctionnement_demande": {
+          "anyOf": [
+            {
+              "$ref": "commun.schema.json#/$defs/fonctionnement"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "fonctionnement": {
+          "anyOf": [
+            {
+              "$ref": "commun.schema.json#/$defs/fonctionnement"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "fonctionnement_raison": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "tokens": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "cout_eur": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "duree_s": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "livrable": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "rappel": {
+          "type": "string"
+        },
+        "etapes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "agent",
+              "role"
+            ],
+            "properties": {
+              "agent": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "role": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "verdict": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "mothership_decisions_en_attente.entree": {
+      "title": "Décisions N3 en attente",
+      "x-ecriture": false,
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "mothership_decisions_en_attente.sortie": {
+      "title": "Décisions N3 en attente — résultat (structuredContent)",
+      "type": "object",
+      "required": [
+        "nombre",
+        "decisions",
+        "rappel"
+      ],
+      "properties": {
+        "nombre": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "rappel": {
+          "type": "string"
+        },
+        "decisions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "mission_id"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "commun.schema.json#/$defs/identifiant"
+              },
+              "mission_id": {
+                "$ref": "commun.schema.json#/$defs/identifiant"
+              },
+              "mission_titre": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "niveau": {
+                "anyOf": [
+                  {
+                    "$ref": "commun.schema.json#/$defs/niveauDecision"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "resume": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "recommandation": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "cout_estime_eur": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "risque": {
+                "anyOf": [
+                  {
+                    "$ref": "commun.schema.json#/$defs/risque"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "cree_le": {
+                "anyOf": [
+                  {
+                    "$ref": "commun.schema.json#/$defs/horodatage"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "journal_lister.entree": {
+      "title": "Lire le journal",
+      "x-ecriture": false,
+      "type": "object",
+      "properties": {
+        "limite": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200,
+          "default": 30,
+          "description": "Nombre de lignes (30 par défaut)."
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "journal_lister.sortie": {
+      "title": "Lire le journal — résultat (structuredContent)",
+      "type": "object",
+      "required": [
+        "nombre",
+        "journal"
+      ],
+      "properties": {
+        "nombre": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "journal": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "horodatage",
+              "auteur",
+              "outil",
+              "objet",
+              "resultat"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "commun.schema.json#/$defs/identifiant"
+              },
+              "horodatage": {
+                "$ref": "commun.schema.json#/$defs/horodatage"
+              },
+              "auteur": {
+                "type": "string"
+              },
+              "outil": {
+                "type": "string"
+              },
+              "objet": {
+                "type": "string"
+              },
+              "resultat": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "erreur": {
+      "title": "Erreur d'outil (result MCP)",
+      "type": "object",
+      "required": [
+        "content",
+        "isError"
+      ],
+      "properties": {
+        "isError": {
+          "const": true
+        },
+        "content": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "type",
+              "text"
+            ],
+            "properties": {
+              "type": {
+                "const": "text"
+              },
+              "text": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

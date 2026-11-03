@@ -1,0 +1,12 @@
+{
+ "projet": "nexus",
+ "passation": {
+  "id": 1,
+  "projet": "nexus",
+  "auteur": "chatgpt",
+  "resume": "Protocole v1.",
+  "etat": "Schémas prêts.",
+  "prochaines_etapes": "1. CI 2. Séparation des dépôts",
+  "cree_le": "2026-11-03T22:50:25.912898+00:00"
+ }
+}

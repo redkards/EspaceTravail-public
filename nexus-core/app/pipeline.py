@@ -14,7 +14,7 @@ import httpx
 from sqlalchemy import func, select, update
 
 from . import agents as reg
-from . import budget, cyber, decideur, gate, ledger, memoire, sentinel
+from . import archive, budget, charte, cyber, decideur, exemples, gate, lecons, ledger, memoire, sentinel
 from . import fonctionnement as fct
 from .config import cfg
 from .db import session_scope
@@ -222,6 +222,8 @@ class Contexte:
         self.relancer = False  # positionné par escalader() : relance automatique demandée
         self.projet = mission.projet or "divers"
         self.connaissances = ""  # extraits de la mémoire du projet (voir _charger_connaissances)
+        self.modeles: dict = json.loads(mission.modeles_json) if mission.modeles_json else {}
+        self.avertissements: list[str] = []  # avertissements de charte (non bloquants)
         self.f = fct.niveau(mission.fonctionnement or fct.defaut())
         self._instancier()
 
@@ -301,6 +303,8 @@ class Contexte:
             ledger.journaliser("NEXUS-BUDGET", "bascule_llm", self.mid, agent=agent_id,
                                de=llm.nom, vers=r.fournisseur, modele=r.modele, motif=r.bascule)
         cout = self._cout_appel(r.modele or modele, r.tokens_entree, r.tokens_sortie, r.fournisseur)
+        cle_role = a["role"] + ("_local" if controle_local else "")
+        self.modeles[cle_role] = f"{r.fournisseur}:{r.modele or modele or '?'}"
         budget.enregistrer(r.tokens, r.fournisseur, cout=cout)
         self.tokens += r.tokens
         self.entree += r.tokens_entree
@@ -324,7 +328,8 @@ class Contexte:
         return r.texte
 
     def enregistrer_compteurs(self, final: bool = False) -> None:
-        champs = dict(tokens=self.base["tokens"] + self.tokens,
+        champs = dict(modeles_json=json.dumps(self.modeles, ensure_ascii=False),
+                      tokens=self.base["tokens"] + self.tokens,
                       cout_eur=round(self.base["cout"] + self.cout, 6),
                       tokens_entree=self.base["entree"] + self.entree,
                       tokens_sortie=self.base["sortie"] + self.sortie,
@@ -385,6 +390,18 @@ def _terminer_arret(ctx: Contexte, e: MissionArretee) -> None:
                        f"mission_{e.statut}", mid, motif=e.message)
 
 
+def apprendre(mid: int, evenement: str) -> None:
+    """Mémoire collective : archive immuable puis extraction des leçons (jamais bloquant)."""
+    try:
+        archive.archiver(mid, evenement)
+    except Exception:
+        log.exception("Archivage de la mission %s impossible", mid)
+    try:
+        lecons.enregistrer_signaux(mid)
+    except Exception:
+        log.exception("Extraction des leçons de la mission %s impossible", mid)
+
+
 def _bilan(ctx: Contexte) -> None:
     """Mesures finales de l'exécution : durée, tokens, coût, révisions (mission + LEDGER)."""
     ctx.enregistrer_compteurs(final=True)
@@ -395,6 +412,7 @@ def _bilan(ctx: Contexte) -> None:
                      tokens_entree=m.tokens_entree, tokens_sortie=m.tokens_sortie,
                      cout_eur=m.cout_eur, duree_s=m.duree_s, revisions=m.revisions)
     ledger.journaliser("NEXUS-BUDGET", "mission_bilan", ctx.mid, **bilan)
+    apprendre(ctx.mid, "fin_execution")
 
 
 def _executer_protege(ctx: Contexte, fonction, *args) -> None:
@@ -521,6 +539,16 @@ def _message_analyst(ctx: Contexte, elements: str, precedent: str | None = None,
                      problemes: str | None = None, commentaire: str | None = None) -> str:
     sections = [("Mission", ctx.titre, 5, "debut"), ("Consigne", ctx.consigne, 2, "debut"),
                 ("Éléments", elements, 1, "debut")]
+    rappel = charte.consignes_courtes(ctx.projet, ctx.service, ctx.action)
+    if rappel:
+        sections.append(("Charte du projet (obligatoire)", rappel, 4, "debut"))
+    apprises = lecons.actives(ctx.service, ctx.projet)
+    if apprises:
+        sections.append(("Leçons apprises (validées par le propriétaire, à appliquer)", apprises, 4, "debut"))
+    modele = exemples.pour_analyst(ctx.service, ctx.projet)
+    if modele:
+        sections.append(("Exemple validé pour ce service (imitez la structure et le ton ; ne recopiez aucun fait)",
+                         modele, 1, "debut"))
     if precedent is not None:
         sections.append(("Version précédente", precedent, 3, "tete_queue"))
     if commentaire:
@@ -542,7 +570,26 @@ def _controler(ctx: Contexte, srv: dict, livrable: str) -> dict:
             ledger.journaliser(srv["checker"], "verdict", mid, ok=False, problemes=refus["problemes"],
                                source="garde_fou_cyber")
             return refus
+    # Charte du projet, contrôlée par du code : bloquant → retour à l'ANALYST ; avertissement → noté.
+    controle = charte.verifier(ctx.projet, ctx.service, livrable, ctx.action)
+    if controle["bloquants"]:
+        refus = {"ok": False, "problemes": [f"[charte] {b}" for b in controle["bloquants"]]}
+        _etape(mid, srv["checker"], "checker", "charte du projet", json.dumps(refus, ensure_ascii=False), "refus", 0)
+        ledger.journaliser(srv["checker"], "verdict", mid, ok=False, problemes=refus["problemes"], source="charte",
+                           projet=controle["projet"])
+        return refus
+    nouveaux = [a for a in controle["avertissements"] if a not in ctx.avertissements]
+    if nouveaux:
+        ctx.avertissements.extend(nouveaux)
+        _maj_mission(mid, charte_avertissements=json.dumps(ctx.avertissements, ensure_ascii=False))
+        ledger.journaliser("NEXUS-GATE", "charte_avertissement", mid, avertissements=nouveaux)
     sections = [("Consigne", ctx.consigne, 1, "debut"), ("Livrable à vérifier", livrable, 3, "tete_queue")]
+    apprises = lecons.actives(ctx.service, ctx.projet)
+    if apprises:
+        sections.insert(1, ("Leçons apprises à vérifier (refuser si le livrable les ignore)", apprises, 2, "debut"))
+    if controle["avertissements"]:
+        sections.insert(1, ("Avertissements de la charte du projet (à examiner)",
+                            "\n".join(f"- {a}" for a in controle["avertissements"]), 2, "debut"))
     if ctx.connaissances:
         sections.insert(1, ("Connaissances du projet : le livrable ne doit PAS les contredire (sinon ok: false en citant la source)", ctx.connaissances, 2, "debut"))
     message = assembler(sections, ctx.max_chars)
@@ -889,6 +936,7 @@ def decider(did: int, choix: str, commentaire: str | None) -> dict:
         service = s.get(Mission, mid).service
     ledger.journaliser("DECIDEUR", f"decision_{statuts[choix]}", mid, decision_id=did,
                        commentaire=commentaire, objet="lancement_f4" if lancement else "livrable")
+    apprendre(mid, f"decision_{statuts[choix]}")
     if lancement:
         # Le lancement réel est fait par l'appelant (tâche de fond) : traiter(mid).
         return {"decision_id": did, "mission_id": mid, "statut": statuts[choix], "relance": False,
@@ -896,6 +944,10 @@ def decider(did: int, choix: str, commentaire: str | None) -> dict:
     if choix == "valider":
         executor = reg.services().get(service, {}).get("executor", "NEXUS-PRIME")
         executer_livrable(mid, executor, statut_final="validee")
+        try:  # livrable N3 validé par le propriétaire → candidat exemple de son service
+            exemples.proposer(mid, "validation_n3")
+        except Exception:
+            log.exception("Exemple non retenu pour la mission %s", mid)
     # La relance d'une révision est lancée par l'appelant (tâche de fond) : relancer_revision().
     return {"decision_id": did, "mission_id": mid, "statut": statuts[choix],
             "relance": choix == "reviser", "lancer": False}
@@ -933,6 +985,11 @@ def executer_livrable(mid: int, executor_id: str, statut_final: str = "terminee"
         memoire.memoriser_livrable(mid, titre, projet_m or "divers", livrable_m)
     except Exception:
         log.exception("Mémorisation du livrable %s impossible", mid)
+    try:  # export vers le QG (webhook signé, envoyé par la tâche minute avec reprise)
+        from . import export_qg
+        export_qg.mettre_en_file(mid)
+    except Exception:
+        log.exception("Export QG de la mission %s impossible", mid)
 
 
 # --- Notification ntfy (best effort) --------------------------------------------

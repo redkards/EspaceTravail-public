@@ -6,6 +6,9 @@
 <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0b0f14" media="(prefers-color-scheme: dark)">
 <title>Décideur NEXUS</title>
+<link rel="manifest" href="/cockpit/manifest.webmanifest">
+<link rel="icon" href="/cockpit/icones/icone.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/cockpit/icones/apple-touch-icon.png">
 <style>
   /* Fort contraste (lisible en plein soleil) ; thème sombre si le téléphone le demande. */
   :root {
@@ -118,6 +121,7 @@ function rendreCarte(c) {
       <dt>Si refus</dt><dd>${esc(c.resume.si_refus)}</dd>
     </dl>
     <div class="raisons">Risque : ${c.raisons.map(esc).join(" · ")}</div>
+    ${c.avertissements && c.avertissements.length ? `<div class="alerte" style="font-weight:400">Charte : ${c.avertissements.map(esc).join("<br>")}</div>` : ""}
     <div class="infos">
       <span>${esc(c.service || "service ?")}</span><span>Projet ${esc(c.projet)}</span>
       <span>Niveau ${esc(c.fonctionnement)}</span>${cout}
@@ -220,6 +224,9 @@ $("#cartes").addEventListener("click", async (e) => {
 
 charger();
 setInterval(() => { if (!document.querySelector(".confirmer:not([hidden])")) charger(); }, 30000);
+</script>
+<script>
+if ("serviceWorker" in navigator) { navigator.serviceWorker.register("/cockpit/sw.js", { scope: "/cockpit/" }).catch(() => {}); }
 </script>
 </body>
 </html>

@@ -1,0 +1,190 @@
+[
+ {
+  "code": "paradoxx",
+  "nom": "PARADOXX SYSTÈME",
+  "description": "Structure de pilotage multi-projets et VPS Hostinger dédié.",
+  "services": [
+   "OPS-CORE/projets",
+   "PILOT-CORE/pilotage",
+   "CODE-CORE/conception",
+   "CODE-CORE/revue",
+   "GREEN-CORE/environnement",
+   "CYBER-FORTRESS/audit",
+   "CYBER-FORTRESS/veille"
+  ],
+  "alias": [],
+  "missions": 1,
+  "missions_en_cours": 0,
+  "decisions_en_attente": 1
+ },
+ {
+  "code": "nexus",
+  "nom": "NEXUS MOTHERSHIP",
+  "description": "Organisation d'agents IA en départements, un seul humain valide.",
+  "services": [
+   "AGENT-FACTORY/evaluation",
+   "CODE-CORE/conception",
+   "CODE-CORE/revue",
+   "LEX-GUARD/droit-europe",
+   "CYBER-FORTRESS/audit",
+   "CYBER-FORTRESS/veille"
+  ],
+  "alias": [
+   "syfer",
+   "nexus-mothership"
+  ],
+  "missions": 1,
+  "missions_en_cours": 0,
+  "decisions_en_attente": 0
+ },
+ {
+  "code": "poker-winners",
+  "nom": "Poker Winners",
+  "description": "Site vitrine poker et bêta privée.",
+  "services": [
+   "LEX-GUARD/droit-france",
+   "CONTENT-ARENA/redaction",
+   "DESIGN-SYSTEM/ui",
+   "CODE-CORE/revue",
+   "REVENUE-CORE/propositions",
+   "CYBER-FORTRESS/audit"
+  ],
+  "alias": [
+   "poker-vitrine",
+   "poker vitrine"
+  ],
+  "missions": 0,
+  "missions_en_cours": 0,
+  "decisions_en_attente": 0
+ },
+ {
+  "code": "poker-feeling",
+  "nom": "Poker Feeling",
+  "description": "Livre de poker « Poker Feeling ».",
+  "services": [
+   "CONTENT-ARENA/redaction",
+   "DESIGN-SYSTEM/ui",
+   "R&D-PARADOX/veille",
+   "LEX-GUARD/droit-france"
+  ],
+  "alias": [],
+  "missions": 0,
+  "missions_en_cours": 0,
+  "decisions_en_attente": 0
+ },
+ {
+  "code": "redkards",
+  "nom": "REDKARDS / Red Card",
+  "description": "Bande dessinée REDKARDS.",
+  "services": [
+   "DESIGN-SYSTEM/ui",
+   "CONTENT-ARENA/redaction",
+   "OPS-CORE/projets",
+   "LEX-GUARD/droit-france"
+  ],
+  "alias": [
+   "red-card",
+   "redcard"
+  ],
+  "missions": 0,
+  "missions_en_cours": 0,
+  "decisions_en_attente": 0
+ },
+ {
+  "code": "top-solver",
+  "nom": "Top Solver",
+  "description": "Solver GTO de poker en français, outil d'analyse de main.",
+  "services": [
+   "CODE-CORE/conception",
+   "CODE-CORE/revue",
+   "DESIGN-SYSTEM/ui",
+   "LEX-GUARD/droit-france",
+   "R&D-PARADOX/veille"
+  ],
+  "alias": [
+   "solver",
+   "pw-solver"
+  ],
+  "missions": 0,
+  "missions_en_cours": 0,
+  "decisions_en_attente": 0
+ },
+ {
+  "code": "youtube-poker-winner",
+  "nom": "Chaîne YouTube Poker Winner",
+  "description": "Chaîne YouTube de poker éducatif.",
+  "services": [
+   "CONTENT-ARENA/redaction",
+   "R&D-PARADOX/veille",
+   "PILOT-CORE/pilotage",
+   "LEX-GUARD/droit-france"
+  ],
+  "alias": [],
+  "missions": 0,
+  "missions_en_cours": 0,
+  "decisions_en_attente": 0
+ },
+ {
+  "code": "freelance-ia",
+  "nom": "Freelance IA",
+  "description": "Activité freelance de développeur d'applications et d'automatisation IA.",
+  "services": [
+   "PILOT-CORE/etudes",
+   "PILOT-CORE/pilotage",
+   "REVENUE-CORE/propositions",
+   "LEX-GUARD/droit-france",
+   "LEX-GUARD/droit-europe",
+   "CODE-CORE/conception",
+   "CYBER-FORTRESS/audit"
+  ],
+  "alias": [],
+  "missions": 0,
+  "missions_en_cours": 0,
+  "decisions_en_attente": 0
+ },
+ {
+  "code": "esct-boxe",
+  "nom": "Site ESCT Boxe",
+  "description": "Site web du club ESCT Boxe.",
+  "services": [
+   "DESIGN-SYSTEM/ui",
+   "CODE-CORE/conception",
+   "CODE-CORE/revue",
+   "CONTENT-ARENA/redaction",
+   "LEX-GUARD/droit-europe"
+  ],
+  "alias": [
+   "siteesctboxe"
+  ],
+  "missions": 0,
+  "missions_en_cours": 0,
+  "decisions_en_attente": 0
+ },
+ {
+  "code": "turf",
+  "nom": "TURF",
+  "description": "Projet TURF.",
+  "services": [
+   "R&D-PARADOX/veille",
+   "PILOT-CORE/etudes",
+   "LEX-GUARD/droit-france",
+   "OPS-CORE/projets"
+  ],
+  "alias": [],
+  "missions": 0,
+  "missions_en_cours": 0,
+  "decisions_en_attente": 0
+ },
+ {
+  "code": "divers",
+  "nom": "Divers",
+  "description": "Projet par défaut pour les missions non rattachées.",
+  "services": [
+   "OPS-CORE/projets"
+  ],
+  "alias": [],
+  "missions": 1,
+  "missions_en_cours": 0,
+  "decisions_en_attente": 0
+ }
+]

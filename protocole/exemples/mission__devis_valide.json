@@ -1,0 +1,97 @@
+{
+ "id": 2,
+ "projet": "divers",
+ "titre": "Devis site vitrine",
+ "consigne": "Rédige un devis pour un site vitrine",
+ "service": "REVENUE-CORE/propositions",
+ "directeur": "DIR-CROISSANCE",
+ "statut": "validee",
+ "niveau": "N3",
+ "montant_eur": 900.0,
+ "action": null,
+ "message": "Livrable enregistré : /tmp/protocole-core-b_dhr5a7/data/livrables/divers/2.md. Aucune action externe exécutée.",
+ "cree_le": "2026-11-03T22:50:25.339408",
+ "maj_le": "2026-11-03T22:50:25.402236",
+ "livrable_texte": "# Livrable (brouillon)\n\n- Point 1\n- Point 2\n- Point 3",
+ "tokens": 745,
+ "cout_eur": 0.0,
+ "fonctionnement_demande": "F2",
+ "fonctionnement": "F2",
+ "fonctionnement_raison": null,
+ "repli_f3": true,
+ "tokens_entree": 709,
+ "tokens_sortie": 36,
+ "duree_s": 0.031,
+ "revisions": 0,
+ "attente": null,
+ "modeles": {
+  "collector": "fake:?",
+  "analyst": "fake:?",
+  "checker": "fake:?",
+  "gate": "fake:?"
+ },
+ "charte_avertissements": [],
+ "note": null,
+ "etapes": [
+  {
+   "id": 7,
+   "agent_id": "REVENUE-CORE-COLLECTOR",
+   "role": "collector",
+   "entree": "Mission :\nDevis site vitrine\n\nConsigne :\nRédige un devis pour un site vitrine",
+   "sortie": "ELEMENTS:\n- consigne reçue\nMANQUE:\n- aucun élément bloquant",
+   "verdict": null,
+   "tokens": 162,
+   "cree_le": "2026-11-03T22:50:25.355204"
+  },
+  {
+   "id": 8,
+   "agent_id": "REVENUE-CORE-ANALYST",
+   "role": "analyst",
+   "entree": "Mission :\nDevis site vitrine\n\nConsigne :\nRédige un devis pour un site vitrine\n\nÉléments :\nELEMENTS:\n- consigne reçue\nMANQUE:\n- aucun élément bloquant\n\nCharte du projet (obligatoire) :\nTermes interdits : « garanti a 100 ». Texte destiné à être publié : aucun « À COMPLÉTER », aucune information inventée.",
+   "sortie": "# Livrable (brouillon)\n\n- Point 1\n- Point 2\n- Point 3",
+   "verdict": null,
+   "tokens": 268,
+   "cree_le": "2026-11-03T22:50:25.358944"
+  },
+  {
+   "id": 9,
+   "agent_id": "REVENUE-CORE-CHECKER",
+   "role": "checker",
+   "entree": "Consigne :\nRédige un devis pour un site vitrine\n\nLivrable à vérifier :\n# Livrable (brouillon)\n\n- Point 1\n- Point 2\n- Point 3",
+   "sortie": "{\"ok\": true, \"problemes\": []}",
+   "verdict": null,
+   "tokens": 161,
+   "cree_le": "2026-11-03T22:50:25.362189"
+  },
+  {
+   "id": 10,
+   "agent_id": "REVENUE-CORE-CHECKER",
+   "role": "checker",
+   "entree": "verdict",
+   "sortie": "{\"ok\": true, \"problemes\": []}",
+   "verdict": "ok",
+   "tokens": 0,
+   "cree_le": "2026-11-03T22:50:25.363047"
+  },
+  {
+   "id": 11,
+   "agent_id": "NEXUS-GATE",
+   "role": "gate",
+   "entree": "Mission :\nDevis site vitrine\n\nMontant et action :\n900.0 € ; action : aucune\n\nConsigne :\nRédige un devis pour un site vitrine\n\nLivrable final :\n# Livrable (brouillon)\n\n- Point 1\n- Point 2\n- Point 3",
+   "sortie": "NIVEAU: N0",
+   "verdict": null,
+   "tokens": 154,
+   "cree_le": "2026-11-03T22:50:25.365365"
+  },
+  {
+   "id": 12,
+   "agent_id": "REVENUE-CORE-EXECUTOR",
+   "role": "executor",
+   "entree": "livrable final",
+   "sortie": "/tmp/protocole-core-b_dhr5a7/data/livrables/divers/2.md",
+   "verdict": "prepare",
+   "tokens": 0,
+   "cree_le": "2026-11-03T22:50:25.401338"
+  }
+ ]
+}

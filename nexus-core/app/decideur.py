@@ -153,6 +153,7 @@ def carte(d: Decision, m: Mission, maintenant_utc: datetime | None = None) -> di
         "fonctionnement": m.fonctionnement, "restant_s": restant, "urgent": restant < URGENCE_H * 3600,
         "expire_le": expiration(d).isoformat(), "lien_livrable": f"/cockpit/api/missions/{m.id}",
         "code_requis": d.risque == "eleve",
+        "avertissements": json.loads(m.charte_avertissements) if m.charte_avertissements else [],
     }
 
 

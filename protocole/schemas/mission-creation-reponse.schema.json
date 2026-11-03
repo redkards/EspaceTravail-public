@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://protocole.nexus.redkards.local/v1/mission-creation-reponse.schema.json",
+  "title": "Création de mission (réponse 202)",
+  "description": "Réponse de POST /api/missions. decision_id et cout_estime_eur seulement pour un lancement F4.",
+  "type": "object",
+  "required": [
+    "id",
+    "statut",
+    "projet",
+    "fonctionnement_demande",
+    "fonctionnement"
+  ],
+  "properties": {
+    "id": {
+      "$ref": "commun.schema.json#/$defs/identifiant"
+    },
+    "statut": {
+      "$ref": "commun.schema.json#/$defs/statutMission"
+    },
+    "projet": {
+      "$ref": "commun.schema.json#/$defs/codeProjet"
+    },
+    "fonctionnement_demande": {
+      "$ref": "commun.schema.json#/$defs/fonctionnement"
+    },
+    "fonctionnement": {
+      "$ref": "commun.schema.json#/$defs/fonctionnement"
+    },
+    "message": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "decision_id": {
+      "$ref": "commun.schema.json#/$defs/identifiant"
+    },
+    "cout_estime_eur": {
+      "type": "number",
+      "minimum": 0
+    }
+  }
+}

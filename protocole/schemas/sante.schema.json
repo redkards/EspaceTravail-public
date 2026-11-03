@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://protocole.nexus.redkards.local/v1/sante.schema.json",
+  "title": "Réponse /api/sante",
+  "description": "État du service nexus-core (aucune clé, aucun secret). /api/sante (public, sans clé) ; /cockpit/api/sante ajoute agents et arret_urgence.",
+  "type": "object",
+  "required": [
+    "statut",
+    "service",
+    "llm"
+  ],
+  "properties": {
+    "statut": {
+      "type": "string",
+      "enum": [
+        "ok"
+      ]
+    },
+    "service": {
+      "const": "nexus-core"
+    },
+    "llm": {
+      "type": "object",
+      "required": [
+        "fournisseur",
+        "modele"
+      ],
+      "properties": {
+        "fournisseur": {
+          "type": "string"
+        },
+        "fournisseur_demande": {
+          "type": "string"
+        },
+        "modele": {
+          "type": "string"
+        },
+        "modele_checker": {
+          "type": "string"
+        },
+        "repli": {
+          "type": "string"
+        }
+      }
+    },
+    "agents": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "fonctionnement_defaut": {
+      "$ref": "commun.schema.json#/$defs/fonctionnement"
+    },
+    "ledger_hmac": {
+      "type": "boolean"
+    },
+    "avertissements": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "arret_urgence": {
+      "type": "boolean"
+    }
+  }
+}

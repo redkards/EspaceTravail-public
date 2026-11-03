@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#0f1720">
 <title>Cockpit NEXUS</title>
+<link rel="manifest" href="/cockpit/manifest.webmanifest">
+<link rel="icon" href="/cockpit/icones/icone.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/cockpit/icones/apple-touch-icon.png">
 <style>
   /* Thème : jetons de couleur, clair par défaut, sombre si le système le demande */
   :root {
@@ -227,9 +230,32 @@ $("#listeDec").addEventListener("click", async (e) => {
 
 async function voirMission(id, cible) {
   const m = await api("/missions/" + id);
+  const modeles = Object.entries(m.modeles || {}).map(([r, v]) => `${esc(r)} : ${esc(v)}`).join(" · ");
+  const valide = m.statut === "terminee" || m.statut === "validee";
   $(cible).innerHTML = `<pre>${esc(m.livrable_texte || "(pas encore de livrable)")}</pre>
-    <div class="meta">${m.etapes.length} étape(s) · ${m.tokens} tokens · ${esc(m.message || "")}</div>`;
+    <div class="meta">${m.etapes.length} étape(s) · ${m.tokens} tokens · ${esc(m.message || "")}</div>
+    ${modeles ? `<div class="meta">Modèles utilisés : ${modeles}</div>` : ""}
+    ${(m.charte_avertissements || []).length ? `<div class="meta">Charte : ${m.charte_avertissements.map(esc).join(" · ")}</div>` : ""}
+    ${valide ? `<div class="ligne" style="margin-top:6px">
+      <select data-note="${m.id}" aria-label="Note du livrable">${[5, 4, 3, 2, 1].map((n) => `<option ${m.note === n ? "selected" : ""}>${n}</option>`).join("")}</select>
+      <button type="button" data-noter="${m.id}">Noter</button>
+      <button type="button" data-exemple="${m.id}">Garder comme exemple</button></div>` : ""}`;
 }
+
+// Note et « garder comme exemple » (détail d'une mission)
+document.addEventListener("click", async (e) => {
+  const b = e.target.closest("button[data-noter], button[data-exemple]"); if (!b) return;
+  try {
+    if (b.dataset.noter) {
+      const note = Number(document.querySelector(`select[data-note="${b.dataset.noter}"]`).value);
+      const r = await api(`/missions/${b.dataset.noter}/note`, { method: "POST", body: JSON.stringify({ note }) });
+      toast(r.exemple ? "Note enregistrée : livrable retenu comme exemple." : "Note enregistrée.");
+    } else {
+      await api(`/missions/${b.dataset.exemple}/exemple`, { method: "POST", body: "{}" });
+      toast("Livrable gardé comme exemple de son service.");
+    }
+  } catch (err) { toast(err.message); }
+});
 
 async function chargerMissions() {
   const l = await api("/missions?limit=50" + filtre("&"));
@@ -436,6 +462,9 @@ try { const p = localStorage.getItem("projet");
 try { const o = localStorage.getItem("onglet"); const b = o && document.querySelector(`[data-o="${o}"]`); if (b) b.click(); else rafraichir(); }
 catch (e) { rafraichir(); }
 setInterval(rafraichir, 15000);
+</script>
+<script>
+if ("serviceWorker" in navigator) { navigator.serviceWorker.register("/cockpit/sw.js", { scope: "/cockpit/" }).catch(() => {}); }
 </script>
 </body>
 </html>

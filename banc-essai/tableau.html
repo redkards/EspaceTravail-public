@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Banc d'essai NEXUS</title>
+<style>
+  /* Page autonome : aucune ressource externe. Lit tableau.json (même dossier, sinon resultats/). */
+  :root {
+    color-scheme: light;
+    --surface-0: #f4f4f2; --surface-1: #fcfcfb; --bordure: #dcdbd6; --grille: #e9e8e4;
+    --texte-1: #0b0b0b; --texte-2: #52514e; --texte-3: #6f6e69;
+    --serie-1: #2a78d6; --serie-2: #eb6834; --repere: #8a8984;
+    --bon: #0f7b3e; --mauvais: #b42318;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --surface-0: #121211; --surface-1: #1a1a19; --bordure: #3a3a37; --grille: #2a2a28;
+      --texte-1: #f0efec; --texte-2: #c3c2b7; --texte-3: #9d9c95;
+      --serie-1: #3987e5; --serie-2: #d95926; --repere: #8a8984;
+      --bon: #4cc38a; --mauvais: #f97066;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --surface-0: #121211; --surface-1: #1a1a19; --bordure: #3a3a37; --grille: #2a2a28;
+    --texte-1: #f0efec; --texte-2: #c3c2b7; --texte-3: #9d9c95;
+    --serie-1: #3987e5; --serie-2: #d95926; --repere: #8a8984;
+    --bon: #4cc38a; --mauvais: #f97066;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--surface-0); color: var(--texte-1);
+         font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 1100px; margin: 0 auto; padding: 20px 16px 48px; }
+  h1 { font-size: 1.35rem; margin: 0 0 4px; }
+  h2 { font-size: 1rem; margin: 0 0 2px; }
+  .sous { color: var(--texte-2); margin: 0 0 18px; }
+  .barre { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 16px; }
+  button, label.fichier { font: inherit; color: var(--texte-1); background: var(--surface-1);
+         border: 1px solid var(--bordure); border-radius: 8px; padding: 6px 12px; cursor: pointer; }
+  button:focus-visible, label.fichier:focus-within, svg:focus-visible { outline: 2px solid var(--serie-1); outline-offset: 2px; }
+  label.fichier input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .tuiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 16px; }
+  .tuile { background: var(--surface-1); border: 1px solid var(--bordure); border-radius: 10px; padding: 10px 12px; }
+  .tuile .lib { color: var(--texte-2); font-size: .82rem; }
+  .tuile .val { font-size: 1.5rem; font-weight: 650; font-variant-numeric: tabular-nums; }
+  .tuile .delta { font-size: .82rem; color: var(--texte-3); }
+  .tuile .delta.bon { color: var(--bon); } .tuile .delta.mauvais { color: var(--mauvais); }
+  .grille { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 12px; }
+  .carte { background: var(--surface-1); border: 1px solid var(--bordure); border-radius: 10px; padding: 12px; position: relative; }
+  .carte p.aide { margin: 0 0 6px; color: var(--texte-2); font-size: .82rem; }
+  .legende { display: flex; gap: 14px; font-size: .82rem; color: var(--texte-2); margin: 0 0 4px; }
+  .legende span::before { content: ""; display: inline-block; width: 14px; height: 2px; vertical-align: middle;
+                          margin-right: 6px; background: var(--c); }
+  svg { display: block; width: 100%; height: auto; overflow: visible; }
+  svg text { fill: var(--texte-3); font-size: 11px; font-variant-numeric: tabular-nums; }
+  .info { position: absolute; pointer-events: none; background: var(--surface-1); border: 1px solid var(--bordure);
+          border-radius: 8px; padding: 6px 9px; font-size: .82rem; box-shadow: 0 2px 8px rgb(0 0 0 / .15);
+          white-space: nowrap; display: none; z-index: 2; }
+  .info b { font-variant-numeric: tabular-nums; }
+  .info .s { color: var(--texte-2); }
+  table { width: 100%; border-collapse: collapse; font-size: .85rem; font-variant-numeric: tabular-nums; }
+  th, td { text-align: right; padding: 6px 8px; border-bottom: 1px solid var(--grille); white-space: nowrap; }
+  th:first-child, td:first-child, th:last-child, td:last-child { text-align: left; }
+  th { color: var(--texte-2); font-weight: 600; }
+  .tableau-wrap { overflow-x: auto; background: var(--surface-1); border: 1px solid var(--bordure); border-radius: 10px; margin-top: 16px; }
+  .message { background: var(--surface-1); border: 1px solid var(--bordure); border-radius: 10px; padding: 14px; }
+  .alerte { color: var(--mauvais); }
+  @media (forced-colors: active) { .legende span::before { background: CanvasText; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>Banc d'essai NEXUS — suivi hebdomadaire</h1>
+  <p class="sous" id="sous">Chargement de tableau.json…</p>
+  <div class="barre">
+    <button type="button" id="recharger">Recharger</button>
+    <label class="fichier">Ouvrir un tableau.json…<input type="file" id="fichier" accept="application/json,.json"></label>
+    <button type="button" id="theme" aria-pressed="false">Thème : auto</button>
+  </div>
+  <section id="tuiles" class="tuiles" aria-label="Dernière semaine"></section>
+  <section id="graphiques" class="grille" aria-label="Tendances"></section>
+  <div class="tableau-wrap"><table id="tableau" aria-label="Historique semaine par semaine"></table></div>
+</main>
+<script>
+"use strict";
+const SVGNS = "http://www.w3.org/2000/svg";
+const nf = (v, d = 1) => v === null || v === undefined || Number.isNaN(v) ? "—"
+  : Number(v).toLocaleString("fr-FR", { maximumFractionDigits: d });
+
+/* Indicateurs : un graphique par grandeur (jamais deux échelles sur un même axe). */
+const INDICATEURS = [
+  { id: "notes", titre: "Notes moyennes (/100)", aide: "Plus haut = mieux.", min: 0, max: 100, sens: 1,
+    series: [{ cle: "note_livrable", nom: "Livrable", c: "--serie-1" }, { cle: "note_systeme", nom: "Système", c: "--serie-2" }] },
+  { id: "pieges", titre: "Pièges de sécurité réussis (%)", aide: "Plus haut = mieux.", min: 0, max: 100, sens: 1,
+    series: [{ cle: s => s.pieges && s.pieges.taux, nom: "Pièges", c: "--serie-1", unite: " %" }] },
+  { id: "tokens", titre: "Tokens moyens par mission", aide: "Plus bas = plus économe.", min: 0, sens: -1,
+    series: [{ cle: "tokens_moyens", nom: "Tokens", c: "--serie-1", d: 0 }] },
+  { id: "duree", titre: "Durée médiane par mission (s)", aide: "Plus bas = plus rapide.", min: 0, sens: -1,
+    series: [{ cle: "duree_mediane_s", nom: "Durée", c: "--serie-1", unite: " s" }] },
+  { id: "n3", titre: "Missions arrêtées pour validation N3 (%)", aide: "Doit suivre les missions qui engagent ; une dérive est à examiner.", min: 0, max: 100, sens: 0,
+    series: [{ cle: "taux_n3", nom: "Taux N3", c: "--serie-1", unite: " %" }] },
+];
+const val = (s, cle) => { const v = typeof cle === "function" ? cle(s) : s[cle]; return typeof v === "number" ? v : null; };
+
+function el(tag, attrs = {}, texte) {
+  const e = tag.startsWith("svg:") ? document.createElementNS(SVGNS, tag.slice(4)) : document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+  if (texte !== undefined) e.textContent = texte;
+  return e;
+}
+function arrondiMax(v) {
+  if (!(v > 0)) return 1;
+  const p = Math.pow(10, Math.floor(Math.log10(v))); const n = v / p;
+  return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10) * p;
+}
+
+function graphique(ind, semaines) {
+  const carte = el("article", { class: "carte" });
+  carte.append(el("h2", {}, ind.titre), el("p", { class: "aide" }, ind.aide));
+  if (ind.series.length > 1) {
+    const lg = el("div", { class: "legende", "aria-hidden": "true" });
+    ind.series.forEach(s => { const sp = el("span", {}, s.nom); sp.style.setProperty("--c", `var(${s.c})`); lg.append(sp); });
+    carte.append(lg);
+  }
+  const W = 480, H = 200, g = 44, d = 14, h = 12, b = 28;
+  const n = semaines.length;
+  const toutes = ind.series.flatMap(s => semaines.map(x => val(x, s.cle))).filter(v => v !== null);
+  const ymax = ind.max ?? arrondiMax(Math.max(...toutes, 0) * 1.1);
+  const X = i => n === 1 ? (g + W - d) / 2 : g + i * (W - g - d) / (n - 1);
+  const Y = v => H - b - (v - ind.min) / (ymax - ind.min) * (H - b - h);
+  const dernier = semaines[n - 1];
+  const resume = ind.series.map(s => `${s.nom} ${nf(val(dernier, s.cle), s.d ?? 1)}${s.unite || ""}`).join(", ");
+  const svg = el("svg:svg", { viewBox: `0 0 ${W} ${H}`, role: "img", tabindex: "0",
+    "aria-label": `${ind.titre} sur ${n} semaine(s). Dernière semaine ${dernier.semaine} : ${resume}. Détail dans le tableau ci-dessous.` });
+  // Grille et axe Y (4 graduations)
+  for (let k = 0; k <= 4; k++) {
+    const v = ind.min + (ymax - ind.min) * k / 4, y = Y(v);
+    svg.append(el("svg:line", { x1: g, x2: W - d, y1: y, y2: y, stroke: k === 0 ? "var(--bordure)" : "var(--grille)", "stroke-width": 1 }));
+    svg.append(el("svg:text", { x: g - 6, y: y + 4, "text-anchor": "end" }, nf(v, 0)));
+  }
+  // Axe X : au plus ~6 étiquettes
+  const pas = Math.max(1, Math.ceil(n / 6));
+  semaines.forEach((s, i) => { if (i % pas === 0 || i === n - 1)
+    svg.append(el("svg:text", { x: X(i), y: H - 8, "text-anchor": "middle" }, s.semaine.replace(/^\d{4}-/, ""))); });
+  // Changement de modèle ou de niveau : repère vertical pointillé
+  semaines.forEach((s, i) => { if (i > 0 && (s.modele !== semaines[i - 1].modele || s.fonctionnement !== semaines[i - 1].fonctionnement)) {
+    svg.append(el("svg:line", { x1: X(i), x2: X(i), y1: h, y2: H - b, stroke: "var(--repere)", "stroke-dasharray": "3 3", "stroke-width": 1 }));
+    svg.append(el("svg:text", { x: X(i) + 3, y: h + 9 }, "modèle/niveau changé"));
+  } });
+  // Séries
+  ind.series.forEach(s => {
+    let chemin = "", ouvert = false;
+    semaines.forEach((x, i) => { const v = val(x, s.cle);
+      if (v === null) { ouvert = false; return; }
+      chemin += `${ouvert ? "L" : "M"}${X(i).toFixed(1)},${Y(v).toFixed(1)}`; ouvert = true; });
+    svg.append(el("svg:path", { d: chemin, fill: "none", stroke: `var(${s.c})`, "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }));
+    semaines.forEach((x, i) => { const v = val(x, s.cle); if (v === null) return;
+      svg.append(el("svg:circle", { cx: X(i), cy: Y(v), r: n > 20 ? 2.5 : 4, fill: `var(${s.c})`, stroke: "var(--surface-1)", "stroke-width": 2 })); });
+    // Étiquette directe sur le dernier point (texte en couleur de texte, pas de série)
+    const v = val(dernier, s.cle);
+    if (v !== null && ind.series.length > 1)
+      svg.append(el("svg:text", { x: X(n - 1) - 6, y: Y(v) - 8, "text-anchor": "end" }, `${s.nom} ${nf(v)}`));
+  });
+  // Couche de survol : réticule + info-bulle (toutes les séries à la semaine visée)
+  const reticule = el("svg:line", { y1: h, y2: H - b, stroke: "var(--texte-3)", "stroke-width": 1, visibility: "hidden" });
+  svg.append(reticule);
+  const info = el("div", { class: "info", role: "status", "aria-live": "polite" });
+  carte.append(svg, info);
+  let courant = n - 1;
+  function montrer(i) {
+    courant = Math.max(0, Math.min(n - 1, i));
+    const s = semaines[courant];
+    reticule.setAttribute("x1", X(courant)); reticule.setAttribute("x2", X(courant)); reticule.setAttribute("visibility", "visible");
+    info.replaceChildren(el("div", { class: "s" }, `${s.semaine} · ${s.fonctionnement || "?"} · ${s.modele || "?"}`));
+    ind.series.forEach(se => { const l = el("div"); l.append(el("b", {}, `${nf(val(s, se.cle), se.d ?? 1)}${se.unite || ""}`), document.createTextNode(` ${se.nom}`)); info.append(l); });
+    info.style.display = "block";
+    const r = svg.getBoundingClientRect(), rc = carte.getBoundingClientRect();
+    const px = r.left - rc.left + X(courant) / W * r.width;
+    info.style.left = `${Math.min(Math.max(8, px + 10), rc.width - info.offsetWidth - 8)}px`;
+    info.style.top = `${r.top - rc.top + 8}px`;
+  }
+  function cacher() { reticule.setAttribute("visibility", "hidden"); info.style.display = "none"; }
+  svg.addEventListener("pointermove", ev => {
+    const r = svg.getBoundingClientRect(), x = (ev.clientX - r.left) / r.width * W;
+    montrer(n === 1 ? 0 : Math.round((x - g) / (W - g - d) * (n - 1)));
+  });
+  svg.addEventListener("pointerleave", cacher);
+  svg.addEventListener("focus", () => montrer(courant));
+  svg.addEventListener("blur", cacher);
+  svg.addEventListener("keydown", ev => {
+    if (ev.key === "ArrowLeft") { montrer(courant - 1); ev.preventDefault(); }
+    if (ev.key === "ArrowRight") { montrer(courant + 1); ev.preventDefault(); }
+    if (ev.key === "Escape") cacher();
+  });
+  return carte;
+}
+
+function tuile(lib, v, avant, unite, sens, d = 1) {
+  const t = el("div", { class: "tuile" });
+  t.append(el("div", { class: "lib" }, lib), el("div", { class: "val" }, `${nf(v, d)}${v === null ? "" : unite}`));
+  if (v !== null && avant !== null && avant !== undefined) {
+    const delta = v - avant, mieux = sens === 0 || delta === 0 ? null : (delta * sens > 0);
+    const cl = mieux === null ? "delta" : mieux ? "delta bon" : "delta mauvais";
+    t.append(el("div", { class: cl }, `${delta >= 0 ? "+" : "−"}${nf(Math.abs(delta), d)}${unite} vs semaine précédente${mieux === null ? "" : mieux ? " (mieux)" : " (moins bien)"}`));
+  }
+  return t;
+}
+
+function afficher(donnees, source) {
+  const semaines = (donnees && Array.isArray(donnees.semaines) ? donnees.semaines : [])
+    .filter(s => s && typeof s.semaine === "string").sort((a, b) => a.semaine.localeCompare(b.semaine));
+  const tuiles = document.getElementById("tuiles"), graph = document.getElementById("graphiques"), tab = document.getElementById("tableau");
+  tuiles.replaceChildren(); graph.replaceChildren(); tab.replaceChildren();
+  const sous = document.getElementById("sous");
+  if (!semaines.length) { sous.textContent = "Aucune semaine mesurée pour l'instant : lancez banc-essai/hebdo.sh."; return; }
+  const d = semaines[semaines.length - 1], p = semaines.length > 1 ? semaines[semaines.length - 2] : {};
+  sous.textContent = `${semaines.length} semaine(s) · dernière : ${d.semaine} (${d.fonctionnement || "?"}, ${d.modele || "modèle ?"}) · source : ${source}` +
+    (donnees.mis_a_jour ? ` · mis à jour le ${donnees.mis_a_jour}` : "");
+  if (d.llm_factice) sous.append(el("span", { class: "alerte" }, " · LLM factice : notes non représentatives."));
+  tuiles.append(
+    tuile("Note livrable", val(d, "note_livrable"), val(p, "note_livrable"), "", 1),
+    tuile("Note système", val(d, "note_systeme"), val(p, "note_systeme"), "", 1),
+    tuile("Pièges réussis", val(d, s => s.pieges && s.pieges.taux), val(p, s => s.pieges && s.pieges.taux), " %", 1),
+    tuile("Tokens moyens", val(d, "tokens_moyens"), val(p, "tokens_moyens"), "", -1, 0),
+    tuile("Durée médiane", val(d, "duree_mediane_s"), val(p, "duree_mediane_s"), " s", -1),
+    tuile("Arrêts N3", val(d, "taux_n3"), val(p, "taux_n3"), " %", 0));
+  INDICATEURS.forEach(ind => graph.append(graphique(ind, semaines)));
+  const cols = [["Semaine", s => s.semaine], ["F", s => s.fonctionnement || "—"], ["Missions", s => `${nf(s.executees, 0)}/${nf(s.missions, 0)}`],
+    ["Livrable", s => nf(val(s, "note_livrable"))], ["Système", s => nf(val(s, "note_systeme"))],
+    ["Pièges", s => s.pieges ? `${nf(s.pieges.reussis, 0)}/${nf(s.pieges.evalues, 0)}` : "—"],
+    ["Tokens", s => nf(val(s, "tokens_moyens"), 0)], ["Durée méd. (s)", s => nf(val(s, "duree_mediane_s"))],
+    ["N3 (%)", s => nf(val(s, "taux_n3"))], ["Modèle", s => s.modele || "—"]];
+  const tr = el("tr"); cols.forEach(([t]) => tr.append(el("th", { scope: "col" }, t)));
+  const thead = el("thead"); thead.append(tr); tab.append(thead);
+  const tb = el("tbody");
+  semaines.slice().reverse().forEach(s => { const l = el("tr"); cols.forEach(([, f]) => l.append(el("td", {}, String(f(s))))); tb.append(l); });
+  tab.append(tb);
+}
+
+async function charger() {
+  for (const url of ["tableau.json", "resultats/tableau.json"]) {
+    try {
+      const r = await fetch(url, { cache: "no-store" });
+      if (r.ok) { afficher(await r.json(), url); return; }
+    } catch (e) { /* file:// ou absent : essai suivant */ }
+  }
+  document.getElementById("sous").textContent =
+    "tableau.json introuvable ici (ou page ouverte en file://). Utilisez « Ouvrir un tableau.json… ».";
+}
+document.getElementById("recharger").addEventListener("click", charger);
+document.getElementById("fichier").addEventListener("change", ev => {
+  const f = ev.target.files && ev.target.files[0]; if (!f) return;
+  f.text().then(t => afficher(JSON.parse(t), f.name)).catch(() => {
+    document.getElementById("sous").textContent = "Fichier illisible : ce n'est pas un tableau.json valide."; });
+});
+const THEMES = ["auto", "light", "dark"], NOMS = { auto: "auto", light: "clair", dark: "sombre" };
+let theme = 0;
+try { theme = Math.max(0, THEMES.indexOf(localStorage.getItem("banc-theme") || "auto")); } catch (e) {}
+function appliquerTheme() {
+  const t = THEMES[theme], b = document.getElementById("theme");
+  if (t === "auto") document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme", t);
+  b.textContent = `Thème : ${NOMS[t]}`; b.setAttribute("aria-pressed", String(t !== "auto"));
+}
+document.getElementById("theme").addEventListener("click", () => {
+  theme = (theme + 1) % THEMES.length; appliquerTheme();
+  try { localStorage.setItem("banc-theme", THEMES[theme]); } catch (e) {}
+});
+appliquerTheme();
+charger();
+</script>
+</body>
+</html>

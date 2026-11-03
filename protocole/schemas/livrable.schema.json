@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://protocole.nexus.redkards.local/v1/livrable.schema.json",
+  "title": "Livrable",
+  "description": "Vue normalisée d'un livrable. En v1 il n'a pas de route propre : il est porté par Mission (livrable_texte) et par l'outil MCP mothership_statut (livrable) ; protocole/valider.py fournit livrable_depuis_mission().",
+  "type": "object",
+  "required": [
+    "mission_id",
+    "projet",
+    "statut",
+    "texte",
+    "valide_par_humain"
+  ],
+  "properties": {
+    "mission_id": {
+      "$ref": "commun.schema.json#/$defs/identifiant"
+    },
+    "projet": {
+      "$ref": "commun.schema.json#/$defs/codeProjet"
+    },
+    "service": {
+      "anyOf": [
+        {
+          "$ref": "commun.schema.json#/$defs/service"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "niveau": {
+      "anyOf": [
+        {
+          "$ref": "commun.schema.json#/$defs/niveauDecision"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "statut": {
+      "$ref": "commun.schema.json#/$defs/statutMission"
+    },
+    "fonctionnement": {
+      "$ref": "commun.schema.json#/$defs/fonctionnement"
+    },
+    "texte": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Markdown ; null tant que rien n'est produit."
+    },
+    "valide_par_humain": {
+      "type": "boolean",
+      "description": "true seulement si statut = validee (N3)."
+    },
+    "tokens": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "cout_eur": {
+      "type": "number",
+      "minimum": 0
+    },
+    "duree_s": {
+      "type": "number",
+      "minimum": 0
+    }
+  }
+}

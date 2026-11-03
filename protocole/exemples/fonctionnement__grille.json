@@ -1,0 +1,124 @@
+{
+ "defaut": "F2",
+ "niveaux": [
+  {
+   "code": "F1",
+   "nom": "Éclair",
+   "effort": "Réponse rapide, modèle local, aucune correction.",
+   "fournisseur": "ollama_local",
+   "budget_tokens": 6000,
+   "revisions_max": 0,
+   "double_controle": false,
+   "llm_max_chars": 4000,
+   "num_ctx": 4096,
+   "delai_max_s": 180.0,
+   "cout_max_eur": 0.0,
+   "modeles": {}
+  },
+  {
+   "code": "F2",
+   "nom": "Standard",
+   "effort": "Fournisseur courant (Ollama Cloud si configuré, repli local), 1 correction.",
+   "fournisseur": "courant",
+   "budget_tokens": 20000,
+   "revisions_max": 1,
+   "double_controle": false,
+   "llm_max_chars": 12000,
+   "num_ctx": 8192,
+   "delai_max_s": 600.0,
+   "cout_max_eur": 0.0,
+   "modeles": {}
+  },
+  {
+   "code": "F3",
+   "nom": "Renforcé",
+   "effort": "Fournisseur courant, 2 corrections et double contrôle par le modèle local.",
+   "fournisseur": "courant",
+   "budget_tokens": 40000,
+   "revisions_max": 2,
+   "double_controle": true,
+   "llm_max_chars": 16000,
+   "num_ctx": 8192,
+   "delai_max_s": 1200.0,
+   "cout_max_eur": 0.0,
+   "modeles": {}
+  },
+  {
+   "code": "F4",
+   "nom": "Expert",
+   "effort": "Modèles Anthropic par rôle, 3 corrections, double contrôle ; lancement soumis à validation.",
+   "fournisseur": "anthropic",
+   "budget_tokens": 80000,
+   "revisions_max": 3,
+   "double_controle": true,
+   "llm_max_chars": 24000,
+   "num_ctx": 8192,
+   "delai_max_s": 1800.0,
+   "cout_max_eur": 0.5,
+   "modeles": {
+    "analyst": "claude-sonnet-5-5",
+    "checker": "claude-sonnet-5-5",
+    "collector": "claude-haiku-5-5",
+    "executor": "claude-haiku-5-5",
+    "defaut": "claude-haiku-5-5"
+   }
+  }
+ ],
+ "tarifs_usd_par_mtok": {
+  "claude-haiku-5-5": {
+   "entree": 0.1,
+   "sortie": 0.5
+  },
+  "claude-sonnet-5-5": {
+   "entree": 2.0,
+   "sortie": 10.0
+  }
+ },
+ "eur_par_usd": 0.92,
+ "estimation_f4": {
+  "tokens_prevus": 80000,
+  "cout_estime_eur": 0.2944,
+  "cout_max_eur": 0.5,
+  "eur_par_usd": 0.92
+ },
+ "f4_indisponible": null,
+ "mois": "2026-11",
+ "consommation": [
+  {
+   "code": "F1",
+   "missions": 0,
+   "tokens": 0,
+   "tokens_entree": 0,
+   "tokens_sortie": 0,
+   "cout_eur": 0.0,
+   "duree_moyenne_s": null
+  },
+  {
+   "code": "F2",
+   "missions": 0,
+   "tokens": 0,
+   "tokens_entree": 0,
+   "tokens_sortie": 0,
+   "cout_eur": 0.0,
+   "duree_moyenne_s": null
+  },
+  {
+   "code": "F3",
+   "missions": 0,
+   "tokens": 0,
+   "tokens_entree": 0,
+   "tokens_sortie": 0,
+   "cout_eur": 0.0,
+   "duree_moyenne_s": null
+  },
+  {
+   "code": "F4",
+   "missions": 0,
+   "tokens": 0,
+   "tokens_entree": 0,
+   "tokens_sortie": 0,
+   "cout_eur": 0.0,
+   "duree_moyenne_s": null
+  }
+ ]
+}

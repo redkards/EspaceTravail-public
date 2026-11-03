@@ -1,0 +1,164 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://protocole.nexus.redkards.local/v1/agent.schema.json",
+  "title": "Fiche agent (YAML)",
+  "description": "Fiche nexus-core/agents/*.yaml (bibliothèque nexus-agents), lue en YAML puis validée comme objet JSON.",
+  "type": "object",
+  "required": [
+    "id",
+    "nom",
+    "role",
+    "direction",
+    "departement",
+    "service",
+    "mission",
+    "consignes",
+    "outils_autorises"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Z0-9&-]+$",
+      "maxLength": 60
+    },
+    "nom": {
+      "type": "string",
+      "minLength": 1
+    },
+    "role": {
+      "type": "string",
+      "enum": [
+        "prime",
+        "gate",
+        "sentinel",
+        "ledger",
+        "budget",
+        "directeur",
+        "collector",
+        "analyst",
+        "checker",
+        "executor"
+      ]
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "llm",
+        "deterministe"
+      ],
+      "default": "llm"
+    },
+    "direction": {
+      "type": "string",
+      "pattern": "^[A-Z0-9&-]+$"
+    },
+    "departement": {
+      "type": "string",
+      "minLength": 1
+    },
+    "service": {
+      "anyOf": [
+        {
+          "$ref": "commun.schema.json#/$defs/service"
+        },
+        {
+          "const": ""
+        }
+      ],
+      "description": "Vide pour le noyau et les directeurs."
+    },
+    "mission": {
+      "type": "string",
+      "minLength": 1
+    },
+    "consignes": {
+      "type": "string",
+      "minLength": 1
+    },
+    "outils_autorises": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9_]+$"
+      }
+    },
+    "modele": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Modèle imposé ; null = celui du niveau F."
+    }
+  },
+  "$defs": {
+    "publique": {
+      "title": "Agent (GET /api/agents)",
+      "type": "object",
+      "required": [
+        "id",
+        "nom",
+        "role",
+        "direction",
+        "departement",
+        "service",
+        "mission",
+        "outils_autorises",
+        "type",
+        "appelle_llm",
+        "statut"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "nom": {
+          "type": "string"
+        },
+        "role": {
+          "type": "string"
+        },
+        "direction": {
+          "type": "string"
+        },
+        "departement": {
+          "type": "string"
+        },
+        "service": {
+          "type": "string"
+        },
+        "mission": {
+          "type": "string"
+        },
+        "outils_autorises": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "llm",
+            "deterministe"
+          ]
+        },
+        "appelle_llm": {
+          "type": "boolean"
+        },
+        "statut": {
+          "type": "string",
+          "enum": [
+            "actif",
+            "suspendu"
+          ]
+        }
+      }
+    },
+    "liste": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/publique"
+      }
+    }
+  }
+}

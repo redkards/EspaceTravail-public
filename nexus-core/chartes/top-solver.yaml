@@ -1,0 +1,31 @@
+# Charte — Top Solver (solver GTO pédagogique en français)
+# Sources : projets/tous-les-projets.md, registre projets.yaml.
+projet: top-solver
+marque:
+  nom: Top Solver
+  contexte: "outil pédagogique d'analyse de main (GTO) en français ; ex PW Solver"
+marques_interdites:
+  - nom: PW Solver
+    variantes: ["pw solver"]
+    contexte: "ancien nom, fusionné dans Top Solver"
+    gravite: avertissement
+  - nom: Red Cards
+    variantes: ["redkards", "red cards"]
+    contexte: "personnage de la BD REDKARDS"
+    gravite: avertissement
+termes_interdits:
+  - {terme: "strategie imbattable", gravite: bloquant, motif: "aucune stratégie n'est imbattable"}
+  - {terme: "gain garanti", gravite: bloquant, motif: "aucune promesse de gain"}
+  - {terme: "gagnez de l'argent", gravite: bloquant, motif: "aucune promesse de gain"}
+  - {terme: "gagner de l'argent", gravite: bloquant, motif: "aucune promesse de gain"}
+  - {terme: "aide en temps reel", gravite: bloquant, motif: "outil d'étude hors partie, jamais pendant le jeu"}
+mentions_obligatoires:
+  - nom: prévention du jeu excessif
+    types: [publication, commercial]
+    toutes:
+      - ["09 74 75 13 13"]
+      - ["reserve aux majeurs", "interdit aux moins de 18 ans", "interdit aux mineurs"]
+    gravite: bloquant
+ton:
+  vouvoiement: true
+  gravite: avertissement

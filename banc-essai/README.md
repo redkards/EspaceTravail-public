@@ -48,4 +48,21 @@ Deux notes séparées, sur 100 chacune :
 
 Les 5 pires missions du rapport sont classées sur la note livrable. Une mission en attente N3 est **arrêtée pour validation** : le banc ne valide jamais rien.
 
+## Banc hebdomadaire et tendances (B5)
+
+`hebdo.sh` lance chaque semaine la sélection rapide (8 missions) en **F2** si un fournisseur cloud répond
+(`/api/sante` : `ollama_cloud`), sinon en **F1** ; jamais F4. Résultats dans `resultats/hebdo/<AAAA-Wnn>_<F>.json`,
+rapport de la semaine à côté, et une ligne par semaine dans **`resultats/tableau.json`** (note livrable, note
+système, pièges, tokens, durée médiane, taux N3, modèle). Relancer la même semaine reprend sans rien recréer.
+
+Cron (dimanche 04:17, après la veille cyber de 03:17), à mettre dans `/etc/cron.d/nexus-banc-hebdo` :
+```
+17 4 * * 0 root /srv/p1/nexus-mothership/banc-essai/hebdo.sh >/dev/null 2>&1
+```
+Journal : `resultats/hebdo.log`. Codes : 0 terminé · 1 configuration · 2 banc en échec · 4 déjà en cours.
+
+`tableau.html` : page autonome (aucune ressource externe) qui lit `tableau.json` (même dossier, sinon
+`resultats/`) et trace les tendances ; ouverte en `file://`, utilisez « Ouvrir un tableau.json… ».
+Elle sera servie par le cockpit.
+
 Audit du projet SYFER par le Mothership : voir `audit-syfer/README.md`. Tests : `python3 -m pytest tests`.

@@ -1,0 +1,18 @@
+{
+ "id": 1,
+ "mission_id": 2,
+ "mission_titre": "Devis site vitrine",
+ "projet": "divers",
+ "niveau": "N3",
+ "objet": "livrable",
+ "resume": "Devis site vitrine\nLivrable (brouillon)\nPoint 1",
+ "recommandation": "Relire le brouillon puis réaliser l'action manuellement ou via n8n. Motif du classement : montant engagé : 900.0 €",
+ "cout_estime_eur": 900.0,
+ "risque": "moyen",
+ "sources": "Éléments fournis dans la consigne (pas d'accès web en mini-version).",
+ "avis_checker": "Conforme",
+ "statut": "en_attente",
+ "cree_le": "2026-11-03T22:50:25.370363",
+ "decide_le": null,
+ "commentaire": null
+}

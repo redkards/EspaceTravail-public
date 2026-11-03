@@ -1,4 +1,5 @@
 """Routes métier, montées deux fois : /api (clé X-Nexus-Key) et /cockpit/api (basic auth Caddy)."""
+import json
 from typing import Literal
 
 from fastapi import APIRouter, BackgroundTasks, HTTPException, Query
@@ -8,7 +9,7 @@ from sqlalchemy import func, select
 from . import agents as reg
 from . import budget, ledger, pipeline, sentinel
 from . import fonctionnement as fct
-from . import memoire
+from . import exemples, memoire
 from .file_missions import FILE
 from . import projets as registre
 from .db import session_scope
@@ -39,6 +40,10 @@ class NouvelleConnaissance(BaseModel):
     source: str | None = Field(default=None, max_length=300)
 
 
+class Note(BaseModel):
+    note: int = Field(ge=1, le=5)
+
+
 class KillSwitch(BaseModel):
     portee: Literal["grille", "direction", "agent"]
     cible: str | None = None
@@ -54,7 +59,10 @@ def _mission(m: Mission, etapes: list[Etape] | None = None) -> dict:
          "fonctionnement_demande": m.fonctionnement_demande, "fonctionnement": m.fonctionnement,
          "fonctionnement_raison": m.fonctionnement_raison, "repli_f3": m.repli_f3,
          "tokens_entree": m.tokens_entree, "tokens_sortie": m.tokens_sortie,
-         "duree_s": m.duree_s, "revisions": m.revisions, "attente": m.attente}
+         "duree_s": m.duree_s, "revisions": m.revisions, "attente": m.attente,
+         "modeles": json.loads(m.modeles_json) if m.modeles_json else {},
+         "charte_avertissements": json.loads(m.charte_avertissements) if m.charte_avertissements else [],
+         "note": m.note}
     if etapes is not None:
         d["etapes"] = [{"id": e.id, "agent_id": e.agent_id, "role": e.role, "entree": e.entree,
                         "sortie": e.sortie, "verdict": e.verdict, "tokens": e.tokens,
@@ -290,6 +298,41 @@ def creer_routeur(cockpit: bool = False) -> APIRouter:
                                    auteur, origine="manuel")
         except memoire.SecretRefuse as e:
             raise HTTPException(422, str(e))
+
+    @r.post("/missions/{mid}/note")
+    def noter_mission(mid: int, corps: Note):
+        """Note du propriétaire (1 à 5) ; ≥ NEXUS_EXEMPLES_SEUIL → le livrable devient un exemple."""
+        with session_scope() as s:
+            m = s.get(Mission, mid)
+            if m is None:
+                raise HTTPException(404, "Mission introuvable")
+            m.note = corps.note
+        ledger.journaliser("DECIDEUR", "mission_notee", mid, note=corps.note)
+        exemple = exemples.proposer(mid, "note") if corps.note >= exemples.seuil() else None
+        return {"mission_id": mid, "note": corps.note, "exemple": exemple}
+
+    @r.post("/missions/{mid}/exemple")
+    def garder_exemple(mid: int):
+        """« Garder comme exemple » (cockpit) : refusé si secret, charte violée ou mission non validée."""
+        try:
+            return exemples.proposer(mid, "manuel", manuel=True)
+        except exemples.ExempleRefuse as e:
+            raise HTTPException(422, str(e))
+
+    @r.get("/export-qg")
+    def etat_export_qg():
+        from . import export_qg
+        return export_qg.etat()
+
+    @r.get("/exemples")
+    def lister_exemples(service: str | None = None, tous: bool = False):
+        return exemples.lister(service, tous)
+
+    @r.post("/exemples/{eid}/retirer")
+    def retirer_exemple(eid: int):
+        if not exemples.retirer(eid):
+            raise HTTPException(404, "Exemple introuvable")
+        return {"id": eid, "actif": False}
 
     @r.get("/fonctionnement")
     def lire_fonctionnement():

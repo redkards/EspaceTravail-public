@@ -1,0 +1,7 @@
+{
+ "id": 1,
+ "statut": "recue",
+ "projet": "nexus",
+ "fonctionnement": "F1",
+ "message": "Mission transmise au Mothership. Les décisions N3 se valident UNIQUEMENT par le propriétaire, dans le cockpit (https://nexus.exemple.fr/cockpit). Aucun outil de la passerelle ne peut valider, refuser ou réviser."
+}

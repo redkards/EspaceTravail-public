@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://protocole.nexus.redkards.local/v1/evenement-ledger.schema.json",
+  "title": "Événement LEDGER",
+  "description": "Élément de GET /api/ledger : journal append-only chaîné (SHA-256 ou HMAC-SHA256).",
+  "type": "object",
+  "required": [
+    "id",
+    "horodatage",
+    "acteur",
+    "action",
+    "details",
+    "hash_prec",
+    "hash",
+    "algo"
+  ],
+  "properties": {
+    "id": {
+      "$ref": "commun.schema.json#/$defs/identifiant"
+    },
+    "horodatage": {
+      "$ref": "commun.schema.json#/$defs/horodatage"
+    },
+    "acteur": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 60
+    },
+    "action": {
+      "type": "string",
+      "pattern": "^[a-z0-9_]+$",
+      "maxLength": 60
+    },
+    "mission_id": {
+      "anyOf": [
+        {
+          "$ref": "commun.schema.json#/$defs/identifiant"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "details": {
+      "type": "object"
+    },
+    "hash_prec": {
+      "$ref": "commun.schema.json#/$defs/empreinte"
+    },
+    "hash": {
+      "$ref": "commun.schema.json#/$defs/empreinte"
+    },
+    "algo": {
+      "type": "string",
+      "enum": [
+        "sha256",
+        "hmac"
+      ]
+    }
+  },
+  "$defs": {
+    "liste": {
+      "type": "array",
+      "items": {
+        "$ref": "#"
+      }
+    },
+    "verification": {
+      "title": "Vérification du LEDGER (GET /api/ledger/verifier)",
+      "type": "object",
+      "required": [
+        "valide",
+        "entrees",
+        "premiere_erreur",
+        "motif",
+        "hmac_actif"
+      ],
+      "properties": {
+        "valide": {
+          "type": "boolean"
+        },
+        "entrees": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "premiere_erreur": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "motif": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "hmac_actif": {
+          "type": "boolean"
+        },
+        "entrees_signees": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "entrees_non_signees": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    }
+  }
+}

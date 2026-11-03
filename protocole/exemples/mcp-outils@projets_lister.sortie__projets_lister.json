@@ -1,0 +1,49 @@
+{
+ "source": "nexus-core",
+ "projets": [
+  {
+   "code": "paradoxx",
+   "nom": "PARADOXX SYSTÈME"
+  },
+  {
+   "code": "nexus",
+   "nom": "NEXUS MOTHERSHIP"
+  },
+  {
+   "code": "poker-winners",
+   "nom": "Poker Winners"
+  },
+  {
+   "code": "poker-feeling",
+   "nom": "Poker Feeling"
+  },
+  {
+   "code": "redkards",
+   "nom": "REDKARDS / Red Card"
+  },
+  {
+   "code": "top-solver",
+   "nom": "Top Solver"
+  },
+  {
+   "code": "youtube-poker-winner",
+   "nom": "Chaîne YouTube Poker Winner"
+  },
+  {
+   "code": "freelance-ia",
+   "nom": "Freelance IA"
+  },
+  {
+   "code": "esct-boxe",
+   "nom": "Site ESCT Boxe"
+  },
+  {
+   "code": "turf",
+   "nom": "TURF"
+  },
+  {
+   "code": "divers",
+   "nom": "Divers"
+  }
+ ]
+}

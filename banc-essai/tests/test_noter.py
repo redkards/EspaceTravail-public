@@ -145,3 +145,11 @@ def test_audit_syfer_livrable_ideal(audit):
     for d in audit.values():
         n = noter.noter_mission(d, res(d))
         assert n["note_livrable"] == n["note_systeme"] == 100, (d["id"], n["raisons"])
+
+
+def test_plafonne_toujours_booleen_sans_sections(missions):
+    """Régression : sans sections attendues, « plafonne » valait [] et cassait rapport.agreger (somme)."""
+    import noter
+    d = dict(next(iter(missions.values())), sections=[])
+    n = noter.noter_mission(d, {"statut": "terminee", "livrable_texte": "mot " * 400})
+    assert n["details"]["plafonne"] is False

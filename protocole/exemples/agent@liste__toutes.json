@@ -1,0 +1,1408 @@
+[
+ {
+  "id": "AGENT-FACTORY-ANALYST",
+  "nom": "AGENT-FACTORY Analyste",
+  "role": "analyst",
+  "direction": "AGENTOPS",
+  "departement": "Qualité agents",
+  "service": "AGENT-FACTORY/evaluation",
+  "mission": "Évaluation des sorties d'autres agents. Produire le livrable brouillon.",
+  "outils_autorises": [
+   "redaction"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "AGENT-FACTORY-CHECKER",
+  "nom": "AGENT-FACTORY Contrôleur",
+  "role": "checker",
+  "direction": "AGENTOPS",
+  "departement": "Qualité agents",
+  "service": "AGENT-FACTORY/evaluation",
+  "mission": "Évaluation des sorties d'autres agents. Vérifier le livrable et rendre un verdict JSON.",
+  "outils_autorises": [
+   "lecture_livrable"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "AGENT-FACTORY-COLLECTOR",
+  "nom": "AGENT-FACTORY Collecteur",
+  "role": "collector",
+  "direction": "AGENTOPS",
+  "departement": "Qualité agents",
+  "service": "AGENT-FACTORY/evaluation",
+  "mission": "Évaluation des sorties d'autres agents. Structurer les éléments fournis et lister ce qui manque.",
+  "outils_autorises": [
+   "lecture_consigne"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "AGENT-FACTORY-EXECUTOR",
+  "nom": "AGENT-FACTORY Exécutant",
+  "role": "executor",
+  "direction": "AGENTOPS",
+  "departement": "Qualité agents",
+  "service": "AGENT-FACTORY/evaluation",
+  "mission": "Évaluation des sorties d'autres agents. Enregistrer le livrable final et préparer l'action (aucune action externe).",
+  "outils_autorises": [
+   "ecriture_livrable"
+  ],
+  "type": "deterministe",
+  "appelle_llm": false,
+  "statut": "actif"
+ },
+ {
+  "id": "CODE-CORE-ANALYST",
+  "nom": "CODE-CORE Analyste",
+  "role": "analyst",
+  "direction": "TECH",
+  "departement": "Ingénierie",
+  "service": "CODE-CORE/revue",
+  "mission": "Revue de code et rédaction de spécifications. Produire le livrable brouillon.",
+  "outils_autorises": [
+   "redaction"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "CODE-CORE-CHECKER",
+  "nom": "CODE-CORE Contrôleur",
+  "role": "checker",
+  "direction": "TECH",
+  "departement": "Ingénierie",
+  "service": "CODE-CORE/revue",
+  "mission": "Revue de code et rédaction de spécifications. Vérifier le livrable et rendre un verdict JSON.",
+  "outils_autorises": [
+   "lecture_livrable"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "CODE-CORE-COLLECTOR",
+  "nom": "CODE-CORE Collecteur",
+  "role": "collector",
+  "direction": "TECH",
+  "departement": "Ingénierie",
+  "service": "CODE-CORE/revue",
+  "mission": "Revue de code et rédaction de spécifications. Structurer les éléments fournis et lister ce qui manque.",
+  "outils_autorises": [
+   "lecture_consigne"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "CODE-CORE-CONCEPTION-ANALYST",
+  "nom": "CODE-CORE-CONCEPTION Analyste",
+  "role": "analyst",
+  "direction": "TECH",
+  "departement": "Ingénierie",
+  "service": "CODE-CORE/conception",
+  "mission": "Conception logicielle : architecture, spécifications, découpage en tâches, choix de stack, pseudo-code. Produire le livrable brouillon.",
+  "outils_autorises": [
+   "redaction"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "CODE-CORE-CONCEPTION-CHECKER",
+  "nom": "CODE-CORE-CONCEPTION Contrôleur",
+  "role": "checker",
+  "direction": "TECH",
+  "departement": "Ingénierie",
+  "service": "CODE-CORE/conception",
+  "mission": "Conception logicielle : architecture, spécifications, découpage en tâches, choix de stack, pseudo-code. Vérifier le livrable et rendre un verdict JSON.",
+  "outils_autorises": [
+   "lecture_livrable"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "CODE-CORE-CONCEPTION-COLLECTOR",
+  "nom": "CODE-CORE-CONCEPTION Collecteur",
+  "role": "collector",
+  "direction": "TECH",
+  "departement": "Ingénierie",
+  "service": "CODE-CORE/conception",
+  "mission": "Conception logicielle : architecture, spécifications, découpage en tâches, choix de stack, pseudo-code. Structurer les éléments fournis et lister ce qui manque.",
+  "outils_autorises": [
+   "lecture_consigne"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "CODE-CORE-CONCEPTION-EXECUTOR",
+  "nom": "CODE-CORE-CONCEPTION Exécutant",
+  "role": "executor",
+  "direction": "TECH",
+  "departement": "Ingénierie",
+  "service": "CODE-CORE/conception",
+  "mission": "Conception logicielle : architecture, spécifications, découpage en tâches, choix de stack, pseudo-code. Enregistrer le livrable final et préparer l'action (aucune action externe).",
+  "outils_autorises": [
+   "ecriture_livrable"
+  ],
+  "type": "deterministe",
+  "appelle_llm": false,
+  "statut": "actif"
+ },
+ {
+  "id": "CODE-CORE-EXECUTOR",
+  "nom": "CODE-CORE Exécutant",
+  "role": "executor",
+  "direction": "TECH",
+  "departement": "Ingénierie",
+  "service": "CODE-CORE/revue",
+  "mission": "Revue de code et rédaction de spécifications. Enregistrer le livrable final et préparer l'action (aucune action externe).",
+  "outils_autorises": [
+   "ecriture_livrable"
+  ],
+  "type": "deterministe",
+  "appelle_llm": false,
+  "statut": "actif"
+ },
+ {
+  "id": "CONTENT-ARENA-ANALYST",
+  "nom": "CONTENT-ARENA Analyste",
+  "role": "analyst",
+  "direction": "CREATION",
+  "departement": "Contenus",
+  "service": "CONTENT-ARENA/redaction",
+  "mission": "Rédaction d'articles, de posts et de newsletters. Produire le livrable brouillon.",
+  "outils_autorises": [
+   "redaction"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "CONTENT-ARENA-CHECKER",
+  "nom": "CONTENT-ARENA Contrôleur",
+  "role": "checker",
+  "direction": "CREATION",
+  "departement": "Contenus",
+  "service": "CONTENT-ARENA/redaction",
+  "mission": "Rédaction d'articles, de posts et de newsletters. Vérifier le livrable et rendre un verdict JSON.",
+  "outils_autorises": [
+   "lecture_livrable"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "CONTENT-ARENA-COLLECTOR",
+  "nom": "CONTENT-ARENA Collecteur",
+  "role": "collector",
+  "direction": "CREATION",
+  "departement": "Contenus",
+  "service": "CONTENT-ARENA/redaction",
+  "mission": "Rédaction d'articles, de posts et de newsletters. Structurer les éléments fournis et lister ce qui manque.",
+  "outils_autorises": [
+   "lecture_consigne"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "CONTENT-ARENA-EXECUTOR",
+  "nom": "CONTENT-ARENA Exécutant",
+  "role": "executor",
+  "direction": "CREATION",
+  "departement": "Contenus",
+  "service": "CONTENT-ARENA/redaction",
+  "mission": "Rédaction d'articles, de posts et de newsletters. Enregistrer le livrable final et préparer l'action (aucune action externe).",
+  "outils_autorises": [
+   "ecriture_livrable"
+  ],
+  "type": "deterministe",
+  "appelle_llm": false,
+  "statut": "actif"
+ },
+ {
+  "id": "CYBER-FORTRESS-AUDIT-ANALYST",
+  "nom": "CYBER-FORTRESS-AUDIT Analyste",
+  "role": "analyst",
+  "direction": "TECH",
+  "departement": "Cybersécurité",
+  "service": "CYBER-FORTRESS/audit",
+  "mission": "Audit de sécurité : code, configurations (Docker, Caddy, SSH, pare-feu), dépendances ; OWASP Top 10 / ASVS, guide d'hygiène ANSSI, CIS. Produire le livrable brouillon.",
+  "outils_autorises": [
+   "redaction"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "CYBER-FORTRESS-AUDIT-CHECKER",
+  "nom": "CYBER-FORTRESS-AUDIT Contrôleur",
+  "role": "checker",
+  "direction": "TECH",
+  "departement": "Cybersécurité",
+  "service": "CYBER-FORTRESS/audit",
+  "mission": "Audit de sécurité : code, configurations (Docker, Caddy, SSH, pare-feu), dépendances ; OWASP Top 10 / ASVS, guide d'hygiène ANSSI, CIS. Vérifier le livrable et rendre un verdict JSON.",
+  "outils_autorises": [
+   "lecture_livrable"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "CYBER-FORTRESS-AUDIT-COLLECTOR",
+  "nom": "CYBER-FORTRESS-AUDIT Collecteur",
+  "role": "collector",
+  "direction": "TECH",
+  "departement": "Cybersécurité",
+  "service": "CYBER-FORTRESS/audit",
+  "mission": "Audit de sécurité : code, configurations (Docker, Caddy, SSH, pare-feu), dépendances ; OWASP Top 10 / ASVS, guide d'hygiène ANSSI, CIS. Structurer les éléments fournis et lister ce qui manque.",
+  "outils_autorises": [
+   "lecture_consigne"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "CYBER-FORTRESS-AUDIT-EXECUTOR",
+  "nom": "CYBER-FORTRESS-AUDIT Exécutant",
+  "role": "executor",
+  "direction": "TECH",
+  "departement": "Cybersécurité",
+  "service": "CYBER-FORTRESS/audit",
+  "mission": "Audit de sécurité : code, configurations (Docker, Caddy, SSH, pare-feu), dépendances ; OWASP Top 10 / ASVS, guide d'hygiène ANSSI, CIS. Enregistrer le livrable final et préparer l'action (aucune action externe).",
+  "outils_autorises": [
+   "ecriture_livrable"
+  ],
+  "type": "deterministe",
+  "appelle_llm": false,
+  "statut": "actif"
+ },
+ {
+  "id": "CYBER-FORTRESS-CONFORMITE-ANALYST",
+  "nom": "CYBER-FORTRESS-CONFORMITE Analyste",
+  "role": "analyst",
+  "direction": "TECH",
+  "departement": "Cybersécurité",
+  "service": "CYBER-FORTRESS/conformite",
+  "mission": "Sécurité réglementaire : NIS2 si applicable, RGPD art. 32, notification CNIL sous 72 h, politique de mots de passe et de clés, sauvegardes 3-2-1, PCA/PRA. Produire le livrable brouillon.",
+  "outils_autorises": [
+   "redaction"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "CYBER-FORTRESS-CONFORMITE-CHECKER",
+  "nom": "CYBER-FORTRESS-CONFORMITE Contrôleur",
+  "role": "checker",
+  "direction": "TECH",
+  "departement": "Cybersécurité",
+  "service": "CYBER-FORTRESS/conformite",
+  "mission": "Sécurité réglementaire : NIS2 si applicable, RGPD art. 32, notification CNIL sous 72 h, politique de mots de passe et de clés, sauvegardes 3-2-1, PCA/PRA. Vérifier le livrable et rendre un verdict JSON.",
+  "outils_autorises": [
+   "lecture_livrable"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "CYBER-FORTRESS-CONFORMITE-COLLECTOR",
+  "nom": "CYBER-FORTRESS-CONFORMITE Collecteur",
+  "role": "collector",
+  "direction": "TECH",
+  "departement": "Cybersécurité",
+  "service": "CYBER-FORTRESS/conformite",
+  "mission": "Sécurité réglementaire : NIS2 si applicable, RGPD art. 32, notification CNIL sous 72 h, politique de mots de passe et de clés, sauvegardes 3-2-1, PCA/PRA. Structurer les éléments fournis et lister ce qui manque.",
+  "outils_autorises": [
+   "lecture_consigne"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "CYBER-FORTRESS-CONFORMITE-EXECUTOR",
+  "nom": "CYBER-FORTRESS-CONFORMITE Exécutant",
+  "role": "executor",
+  "direction": "TECH",
+  "departement": "Cybersécurité",
+  "service": "CYBER-FORTRESS/conformite",
+  "mission": "Sécurité réglementaire : NIS2 si applicable, RGPD art. 32, notification CNIL sous 72 h, politique de mots de passe et de clés, sauvegardes 3-2-1, PCA/PRA. Enregistrer le livrable final et préparer l'action (aucune action externe).",
+  "outils_autorises": [
+   "ecriture_livrable"
+  ],
+  "type": "deterministe",
+  "appelle_llm": false,
+  "statut": "actif"
+ },
+ {
+  "id": "CYBER-FORTRESS-INCIDENT-ANALYST",
+  "nom": "CYBER-FORTRESS-INCIDENT Analyste",
+  "role": "analyst",
+  "direction": "TECH",
+  "departement": "Cybersécurité",
+  "service": "CYBER-FORTRESS/incident",
+  "mission": "Réponse à incident : qualification, confinement, éradication, reprise, retour d'expérience, rotation des jetons et clés. Produire le livrable brouillon.",
+  "outils_autorises": [
+   "redaction"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "CYBER-FORTRESS-INCIDENT-CHECKER",
+  "nom": "CYBER-FORTRESS-INCIDENT Contrôleur",
+  "role": "checker",
+  "direction": "TECH",
+  "departement": "Cybersécurité",
+  "service": "CYBER-FORTRESS/incident",
+  "mission": "Réponse à incident : qualification, confinement, éradication, reprise, retour d'expérience, rotation des jetons et clés. Vérifier le livrable et rendre un verdict JSON.",
+  "outils_autorises": [
+   "lecture_livrable"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "CYBER-FORTRESS-INCIDENT-COLLECTOR",
+  "nom": "CYBER-FORTRESS-INCIDENT Collecteur",
+  "role": "collector",
+  "direction": "TECH",
+  "departement": "Cybersécurité",
+  "service": "CYBER-FORTRESS/incident",
+  "mission": "Réponse à incident : qualification, confinement, éradication, reprise, retour d'expérience, rotation des jetons et clés. Structurer les éléments fournis et lister ce qui manque.",
+  "outils_autorises": [
+   "lecture_consigne"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "CYBER-FORTRESS-INCIDENT-EXECUTOR",
+  "nom": "CYBER-FORTRESS-INCIDENT Exécutant",
+  "role": "executor",
+  "direction": "TECH",
+  "departement": "Cybersécurité",
+  "service": "CYBER-FORTRESS/incident",
+  "mission": "Réponse à incident : qualification, confinement, éradication, reprise, retour d'expérience, rotation des jetons et clés. Enregistrer le livrable final et préparer l'action (aucune action externe).",
+  "outils_autorises": [
+   "ecriture_livrable"
+  ],
+  "type": "deterministe",
+  "appelle_llm": false,
+  "statut": "actif"
+ },
+ {
+  "id": "CYBER-FORTRESS-VEILLE-ANALYST",
+  "nom": "CYBER-FORTRESS-VEILLE Analyste",
+  "role": "analyst",
+  "direction": "TECH",
+  "departement": "Cybersécurité",
+  "service": "CYBER-FORTRESS/veille",
+  "mission": "Veille vulnérabilités (CVE, avis CERT-FR) sur la pile du kit : Ubuntu, Docker, Caddy, Ollama, n8n, Python/FastAPI, SQLite. Produire le livrable brouillon.",
+  "outils_autorises": [
+   "redaction"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "CYBER-FORTRESS-VEILLE-CHECKER",
+  "nom": "CYBER-FORTRESS-VEILLE Contrôleur",
+  "role": "checker",
+  "direction": "TECH",
+  "departement": "Cybersécurité",
+  "service": "CYBER-FORTRESS/veille",
+  "mission": "Veille vulnérabilités (CVE, avis CERT-FR) sur la pile du kit : Ubuntu, Docker, Caddy, Ollama, n8n, Python/FastAPI, SQLite. Vérifier le livrable et rendre un verdict JSON.",
+  "outils_autorises": [
+   "lecture_livrable"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "CYBER-FORTRESS-VEILLE-COLLECTOR",
+  "nom": "CYBER-FORTRESS-VEILLE Collecteur",
+  "role": "collector",
+  "direction": "TECH",
+  "departement": "Cybersécurité",
+  "service": "CYBER-FORTRESS/veille",
+  "mission": "Veille vulnérabilités (CVE, avis CERT-FR) sur la pile du kit : Ubuntu, Docker, Caddy, Ollama, n8n, Python/FastAPI, SQLite. Structurer les éléments fournis et lister ce qui manque.",
+  "outils_autorises": [
+   "lecture_consigne"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "CYBER-FORTRESS-VEILLE-EXECUTOR",
+  "nom": "CYBER-FORTRESS-VEILLE Exécutant",
+  "role": "executor",
+  "direction": "TECH",
+  "departement": "Cybersécurité",
+  "service": "CYBER-FORTRESS/veille",
+  "mission": "Veille vulnérabilités (CVE, avis CERT-FR) sur la pile du kit : Ubuntu, Docker, Caddy, Ollama, n8n, Python/FastAPI, SQLite. Enregistrer le livrable final et préparer l'action (aucune action externe).",
+  "outils_autorises": [
+   "ecriture_livrable"
+  ],
+  "type": "deterministe",
+  "appelle_llm": false,
+  "statut": "actif"
+ },
+ {
+  "id": "DESIGN-SYSTEM-UI-ANALYST",
+  "nom": "DESIGN-SYSTEM-UI Analyste",
+  "role": "analyst",
+  "direction": "CREATION",
+  "departement": "Design",
+  "service": "DESIGN-SYSTEM/ui",
+  "mission": "Design : parcours utilisateur, maquettes décrites (wireframes textuels), charte, accessibilité RGAA/WCAG. Produire le livrable brouillon.",
+  "outils_autorises": [
+   "redaction"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "DESIGN-SYSTEM-UI-CHECKER",
+  "nom": "DESIGN-SYSTEM-UI Contrôleur",
+  "role": "checker",
+  "direction": "CREATION",
+  "departement": "Design",
+  "service": "DESIGN-SYSTEM/ui",
+  "mission": "Design : parcours utilisateur, maquettes décrites (wireframes textuels), charte, accessibilité RGAA/WCAG. Vérifier le livrable et rendre un verdict JSON.",
+  "outils_autorises": [
+   "lecture_livrable"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "DESIGN-SYSTEM-UI-COLLECTOR",
+  "nom": "DESIGN-SYSTEM-UI Collecteur",
+  "role": "collector",
+  "direction": "CREATION",
+  "departement": "Design",
+  "service": "DESIGN-SYSTEM/ui",
+  "mission": "Design : parcours utilisateur, maquettes décrites (wireframes textuels), charte, accessibilité RGAA/WCAG. Structurer les éléments fournis et lister ce qui manque.",
+  "outils_autorises": [
+   "lecture_consigne"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "DESIGN-SYSTEM-UI-EXECUTOR",
+  "nom": "DESIGN-SYSTEM-UI Exécutant",
+  "role": "executor",
+  "direction": "CREATION",
+  "departement": "Design",
+  "service": "DESIGN-SYSTEM/ui",
+  "mission": "Design : parcours utilisateur, maquettes décrites (wireframes textuels), charte, accessibilité RGAA/WCAG. Enregistrer le livrable final et préparer l'action (aucune action externe).",
+  "outils_autorises": [
+   "ecriture_livrable"
+  ],
+  "type": "deterministe",
+  "appelle_llm": false,
+  "statut": "actif"
+ },
+ {
+  "id": "DIR-AGENTOPS",
+  "nom": "Directeur Agent-Ops",
+  "role": "directeur",
+  "direction": "AGENTOPS",
+  "departement": "Qualité agents",
+  "service": "",
+  "mission": "Piloter la direction Agent-Ops ; recevoir les escalades N2 de AGENT-FACTORY/evaluation.",
+  "outils_autorises": [
+   "lecture_missions",
+   "escalade"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "DIR-CREATION",
+  "nom": "Directeur Création",
+  "role": "directeur",
+  "direction": "CREATION",
+  "departement": "Contenus",
+  "service": "",
+  "mission": "Piloter la direction Création ; recevoir les escalades N2 de CONTENT-ARENA/redaction, DESIGN-SYSTEM/ui.",
+  "outils_autorises": [
+   "lecture_missions",
+   "escalade"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "DIR-CROISSANCE",
+  "nom": "Directeur Croissance",
+  "role": "directeur",
+  "direction": "CROISSANCE",
+  "departement": "Ventes",
+  "service": "",
+  "mission": "Piloter la direction Croissance ; recevoir les escalades N2 de REVENUE-CORE/propositions.",
+  "outils_autorises": [
+   "lecture_missions",
+   "escalade"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "DIR-IMPACT",
+  "nom": "Directeur Impact & environnement",
+  "role": "directeur",
+  "direction": "IMPACT",
+  "departement": "Impact & environnement",
+  "service": "",
+  "mission": "Piloter la direction Impact & environnement ; recevoir les escalades N2 de GREEN-CORE/environnement, GREEN-CORE/rse.",
+  "outils_autorises": [
+   "lecture_missions",
+   "escalade"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "DIR-OPERATIONS",
+  "nom": "Directeur Opérations",
+  "role": "directeur",
+  "direction": "OPERATIONS",
+  "departement": "Projets",
+  "service": "",
+  "mission": "Piloter la direction Opérations ; recevoir les escalades N2 de OPS-CORE/projets, PILOT-CORE/etudes, PILOT-CORE/pilotage.",
+  "outils_autorises": [
+   "lecture_missions",
+   "escalade"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "DIR-SAVOIR",
+  "nom": "Directeur Savoir",
+  "role": "directeur",
+  "direction": "SAVOIR",
+  "departement": "Recherche",
+  "service": "",
+  "mission": "Piloter la direction Savoir ; recevoir les escalades N2 de R&D-PARADOX/veille.",
+  "outils_autorises": [
+   "lecture_missions",
+   "escalade"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "DIR-STRATEGIE",
+  "nom": "Directeur Stratégie",
+  "role": "directeur",
+  "direction": "STRATEGIE",
+  "departement": "Conformité",
+  "service": "",
+  "mission": "Piloter la direction Stratégie ; recevoir les escalades N2 de LEX-GUARD/conformite, LEX-GUARD/droit-france, LEX-GUARD/droit-europe, LEX-GUARD/droit-international.",
+  "outils_autorises": [
+   "lecture_missions",
+   "escalade"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "DIR-TECH",
+  "nom": "Directeur Tech",
+  "role": "directeur",
+  "direction": "TECH",
+  "departement": "Ingénierie",
+  "service": "",
+  "mission": "Piloter la direction Tech ; recevoir les escalades N2 de CODE-CORE/revue, CODE-CORE/conception, CYBER-FORTRESS/audit, CYBER-FORTRESS/veille, CYBER-FORTRESS/conformite, CYBER-FORTRESS/incident.",
+  "outils_autorises": [
+   "lecture_missions",
+   "escalade"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "GREEN-CORE-ENVIRONNEMENT-ANALYST",
+  "nom": "GREEN-CORE-ENVIRONNEMENT Analyste",
+  "role": "analyst",
+  "direction": "IMPACT",
+  "departement": "Environnement",
+  "service": "GREEN-CORE/environnement",
+  "mission": "Environnement : impact environnemental, sobriété numérique, réglementation environnementale applicable. Produire le livrable brouillon.",
+  "outils_autorises": [
+   "redaction"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "GREEN-CORE-ENVIRONNEMENT-CHECKER",
+  "nom": "GREEN-CORE-ENVIRONNEMENT Contrôleur",
+  "role": "checker",
+  "direction": "IMPACT",
+  "departement": "Environnement",
+  "service": "GREEN-CORE/environnement",
+  "mission": "Environnement : impact environnemental, sobriété numérique, réglementation environnementale applicable. Vérifier le livrable et rendre un verdict JSON.",
+  "outils_autorises": [
+   "lecture_livrable"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "GREEN-CORE-ENVIRONNEMENT-COLLECTOR",
+  "nom": "GREEN-CORE-ENVIRONNEMENT Collecteur",
+  "role": "collector",
+  "direction": "IMPACT",
+  "departement": "Environnement",
+  "service": "GREEN-CORE/environnement",
+  "mission": "Environnement : impact environnemental, sobriété numérique, réglementation environnementale applicable. Structurer les éléments fournis et lister ce qui manque.",
+  "outils_autorises": [
+   "lecture_consigne"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "GREEN-CORE-ENVIRONNEMENT-EXECUTOR",
+  "nom": "GREEN-CORE-ENVIRONNEMENT Exécutant",
+  "role": "executor",
+  "direction": "IMPACT",
+  "departement": "Environnement",
+  "service": "GREEN-CORE/environnement",
+  "mission": "Environnement : impact environnemental, sobriété numérique, réglementation environnementale applicable. Enregistrer le livrable final et préparer l'action (aucune action externe).",
+  "outils_autorises": [
+   "ecriture_livrable"
+  ],
+  "type": "deterministe",
+  "appelle_llm": false,
+  "statut": "actif"
+ },
+ {
+  "id": "GREEN-CORE-RSE-ANALYST",
+  "nom": "GREEN-CORE-RSE Analyste",
+  "role": "analyst",
+  "direction": "IMPACT",
+  "departement": "Environnement",
+  "service": "GREEN-CORE/rse",
+  "mission": "RSE : démarche RSE, éco-conception, communication responsable sans greenwashing. Produire le livrable brouillon.",
+  "outils_autorises": [
+   "redaction"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "GREEN-CORE-RSE-CHECKER",
+  "nom": "GREEN-CORE-RSE Contrôleur",
+  "role": "checker",
+  "direction": "IMPACT",
+  "departement": "Environnement",
+  "service": "GREEN-CORE/rse",
+  "mission": "RSE : démarche RSE, éco-conception, communication responsable sans greenwashing. Vérifier le livrable et rendre un verdict JSON.",
+  "outils_autorises": [
+   "lecture_livrable"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "GREEN-CORE-RSE-COLLECTOR",
+  "nom": "GREEN-CORE-RSE Collecteur",
+  "role": "collector",
+  "direction": "IMPACT",
+  "departement": "Environnement",
+  "service": "GREEN-CORE/rse",
+  "mission": "RSE : démarche RSE, éco-conception, communication responsable sans greenwashing. Structurer les éléments fournis et lister ce qui manque.",
+  "outils_autorises": [
+   "lecture_consigne"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "GREEN-CORE-RSE-EXECUTOR",
+  "nom": "GREEN-CORE-RSE Exécutant",
+  "role": "executor",
+  "direction": "IMPACT",
+  "departement": "Environnement",
+  "service": "GREEN-CORE/rse",
+  "mission": "RSE : démarche RSE, éco-conception, communication responsable sans greenwashing. Enregistrer le livrable final et préparer l'action (aucune action externe).",
+  "outils_autorises": [
+   "ecriture_livrable"
+  ],
+  "type": "deterministe",
+  "appelle_llm": false,
+  "statut": "actif"
+ },
+ {
+  "id": "LEX-GUARD-ANALYST",
+  "nom": "LEX-GUARD Analyste",
+  "role": "analyst",
+  "direction": "STRATEGIE",
+  "departement": "Conformité",
+  "service": "LEX-GUARD/conformite",
+  "mission": "Conformité RGPD / AI Act et relecture de CGV. Produire le livrable brouillon.",
+  "outils_autorises": [
+   "redaction"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "LEX-GUARD-CHECKER",
+  "nom": "LEX-GUARD Contrôleur",
+  "role": "checker",
+  "direction": "STRATEGIE",
+  "departement": "Conformité",
+  "service": "LEX-GUARD/conformite",
+  "mission": "Conformité RGPD / AI Act et relecture de CGV. Vérifier le livrable et rendre un verdict JSON.",
+  "outils_autorises": [
+   "lecture_livrable"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "LEX-GUARD-COLLECTOR",
+  "nom": "LEX-GUARD Collecteur",
+  "role": "collector",
+  "direction": "STRATEGIE",
+  "departement": "Conformité",
+  "service": "LEX-GUARD/conformite",
+  "mission": "Conformité RGPD / AI Act et relecture de CGV. Structurer les éléments fournis et lister ce qui manque.",
+  "outils_autorises": [
+   "lecture_consigne"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "LEX-GUARD-DROIT-EUROPE-ANALYST",
+  "nom": "LEX-GUARD-DROIT-EUROPE Analyste",
+  "role": "analyst",
+  "direction": "STRATEGIE",
+  "departement": "Droit",
+  "service": "LEX-GUARD/droit-europe",
+  "mission": "Droit européen : RGPD, AI Act, DSA/DMA, directives de protection des consommateurs. Produire le livrable brouillon.",
+  "outils_autorises": [
+   "redaction"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "LEX-GUARD-DROIT-EUROPE-CHECKER",
+  "nom": "LEX-GUARD-DROIT-EUROPE Contrôleur",
+  "role": "checker",
+  "direction": "STRATEGIE",
+  "departement": "Droit",
+  "service": "LEX-GUARD/droit-europe",
+  "mission": "Droit européen : RGPD, AI Act, DSA/DMA, directives de protection des consommateurs. Vérifier le livrable et rendre un verdict JSON.",
+  "outils_autorises": [
+   "lecture_livrable"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "LEX-GUARD-DROIT-EUROPE-COLLECTOR",
+  "nom": "LEX-GUARD-DROIT-EUROPE Collecteur",
+  "role": "collector",
+  "direction": "STRATEGIE",
+  "departement": "Droit",
+  "service": "LEX-GUARD/droit-europe",
+  "mission": "Droit européen : RGPD, AI Act, DSA/DMA, directives de protection des consommateurs. Structurer les éléments fournis et lister ce qui manque.",
+  "outils_autorises": [
+   "lecture_consigne"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "LEX-GUARD-DROIT-EUROPE-EXECUTOR",
+  "nom": "LEX-GUARD-DROIT-EUROPE Exécutant",
+  "role": "executor",
+  "direction": "STRATEGIE",
+  "departement": "Droit",
+  "service": "LEX-GUARD/droit-europe",
+  "mission": "Droit européen : RGPD, AI Act, DSA/DMA, directives de protection des consommateurs. Enregistrer le livrable final et préparer l'action (aucune action externe).",
+  "outils_autorises": [
+   "ecriture_livrable"
+  ],
+  "type": "deterministe",
+  "appelle_llm": false,
+  "statut": "actif"
+ },
+ {
+  "id": "LEX-GUARD-DROIT-FRANCE-ANALYST",
+  "nom": "LEX-GUARD-DROIT-FRANCE Analyste",
+  "role": "analyst",
+  "direction": "STRATEGIE",
+  "departement": "Droit",
+  "service": "LEX-GUARD/droit-france",
+  "mission": "Droit français : codes, CNIL, ANJ, DGCCRF, droit des sociétés et de la micro-entreprise. Produire le livrable brouillon.",
+  "outils_autorises": [
+   "redaction"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "LEX-GUARD-DROIT-FRANCE-CHECKER",
+  "nom": "LEX-GUARD-DROIT-FRANCE Contrôleur",
+  "role": "checker",
+  "direction": "STRATEGIE",
+  "departement": "Droit",
+  "service": "LEX-GUARD/droit-france",
+  "mission": "Droit français : codes, CNIL, ANJ, DGCCRF, droit des sociétés et de la micro-entreprise. Vérifier le livrable et rendre un verdict JSON.",
+  "outils_autorises": [
+   "lecture_livrable"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "LEX-GUARD-DROIT-FRANCE-COLLECTOR",
+  "nom": "LEX-GUARD-DROIT-FRANCE Collecteur",
+  "role": "collector",
+  "direction": "STRATEGIE",
+  "departement": "Droit",
+  "service": "LEX-GUARD/droit-france",
+  "mission": "Droit français : codes, CNIL, ANJ, DGCCRF, droit des sociétés et de la micro-entreprise. Structurer les éléments fournis et lister ce qui manque.",
+  "outils_autorises": [
+   "lecture_consigne"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "LEX-GUARD-DROIT-FRANCE-EXECUTOR",
+  "nom": "LEX-GUARD-DROIT-FRANCE Exécutant",
+  "role": "executor",
+  "direction": "STRATEGIE",
+  "departement": "Droit",
+  "service": "LEX-GUARD/droit-france",
+  "mission": "Droit français : codes, CNIL, ANJ, DGCCRF, droit des sociétés et de la micro-entreprise. Enregistrer le livrable final et préparer l'action (aucune action externe).",
+  "outils_autorises": [
+   "ecriture_livrable"
+  ],
+  "type": "deterministe",
+  "appelle_llm": false,
+  "statut": "actif"
+ },
+ {
+  "id": "LEX-GUARD-DROIT-INTERNATIONAL-ANALYST",
+  "nom": "LEX-GUARD-DROIT-INTERNATIONAL Analyste",
+  "role": "analyst",
+  "direction": "STRATEGIE",
+  "departement": "Droit",
+  "service": "LEX-GUARD/droit-international",
+  "mission": "Droit international : comparaison de juridictions, export, conventions, conflits de lois. Produire le livrable brouillon.",
+  "outils_autorises": [
+   "redaction"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "LEX-GUARD-DROIT-INTERNATIONAL-CHECKER",
+  "nom": "LEX-GUARD-DROIT-INTERNATIONAL Contrôleur",
+  "role": "checker",
+  "direction": "STRATEGIE",
+  "departement": "Droit",
+  "service": "LEX-GUARD/droit-international",
+  "mission": "Droit international : comparaison de juridictions, export, conventions, conflits de lois. Vérifier le livrable et rendre un verdict JSON.",
+  "outils_autorises": [
+   "lecture_livrable"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "LEX-GUARD-DROIT-INTERNATIONAL-COLLECTOR",
+  "nom": "LEX-GUARD-DROIT-INTERNATIONAL Collecteur",
+  "role": "collector",
+  "direction": "STRATEGIE",
+  "departement": "Droit",
+  "service": "LEX-GUARD/droit-international",
+  "mission": "Droit international : comparaison de juridictions, export, conventions, conflits de lois. Structurer les éléments fournis et lister ce qui manque.",
+  "outils_autorises": [
+   "lecture_consigne"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "LEX-GUARD-DROIT-INTERNATIONAL-EXECUTOR",
+  "nom": "LEX-GUARD-DROIT-INTERNATIONAL Exécutant",
+  "role": "executor",
+  "direction": "STRATEGIE",
+  "departement": "Droit",
+  "service": "LEX-GUARD/droit-international",
+  "mission": "Droit international : comparaison de juridictions, export, conventions, conflits de lois. Enregistrer le livrable final et préparer l'action (aucune action externe).",
+  "outils_autorises": [
+   "ecriture_livrable"
+  ],
+  "type": "deterministe",
+  "appelle_llm": false,
+  "statut": "actif"
+ },
+ {
+  "id": "LEX-GUARD-EXECUTOR",
+  "nom": "LEX-GUARD Exécutant",
+  "role": "executor",
+  "direction": "STRATEGIE",
+  "departement": "Conformité",
+  "service": "LEX-GUARD/conformite",
+  "mission": "Conformité RGPD / AI Act et relecture de CGV. Enregistrer le livrable final et préparer l'action (aucune action externe).",
+  "outils_autorises": [
+   "ecriture_livrable"
+  ],
+  "type": "deterministe",
+  "appelle_llm": false,
+  "statut": "actif"
+ },
+ {
+  "id": "NEXUS-BUDGET",
+  "nom": "Budget",
+  "role": "budget",
+  "direction": "NOYAU",
+  "departement": "Noyau",
+  "service": "",
+  "mission": "Compter les tokens et les coûts ; arrêter une mission qui dépasse son budget.",
+  "outils_autorises": [
+   "lecture_compteurs"
+  ],
+  "type": "deterministe",
+  "appelle_llm": false,
+  "statut": "actif"
+ },
+ {
+  "id": "NEXUS-GATE",
+  "nom": "Gate",
+  "role": "gate",
+  "direction": "NOYAU",
+  "departement": "Noyau",
+  "service": "",
+  "mission": "Classer chaque mission de N0 à N3 selon le risque (règles déterministes, avis LLM consultatif).",
+  "outils_autorises": [
+   "classement_risque"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "NEXUS-LEDGER",
+  "nom": "Ledger",
+  "role": "ledger",
+  "direction": "NOYAU",
+  "departement": "Noyau",
+  "service": "",
+  "mission": "Tenir le journal append-only chaîné par SHA-256 de toutes les actions.",
+  "outils_autorises": [
+   "ecriture_journal",
+   "verification_chaine"
+  ],
+  "type": "deterministe",
+  "appelle_llm": false,
+  "statut": "actif"
+ },
+ {
+  "id": "NEXUS-PRIME",
+  "nom": "Prime",
+  "role": "prime",
+  "direction": "NOYAU",
+  "departement": "Noyau",
+  "service": "",
+  "mission": "Orchestrer les missions : choisir le service et le directeur concernés.",
+  "outils_autorises": [
+   "routage",
+   "lecture_missions"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "NEXUS-SENTINEL",
+  "nom": "Sentinel",
+  "role": "sentinel",
+  "direction": "NOYAU",
+  "departement": "Noyau",
+  "service": "",
+  "mission": "Surveiller le kill switch (grille, direction, agent) et suspendre les missions bloquées.",
+  "outils_autorises": [
+   "lecture_etat",
+   "suspension_mission"
+  ],
+  "type": "deterministe",
+  "appelle_llm": false,
+  "statut": "actif"
+ },
+ {
+  "id": "OPS-CORE-ANALYST",
+  "nom": "OPS-CORE Analyste",
+  "role": "analyst",
+  "direction": "OPERATIONS",
+  "departement": "Projets",
+  "service": "OPS-CORE/projets",
+  "mission": "Plans de projet et checklists opérationnelles. Produire le livrable brouillon.",
+  "outils_autorises": [
+   "redaction"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "OPS-CORE-CHECKER",
+  "nom": "OPS-CORE Contrôleur",
+  "role": "checker",
+  "direction": "OPERATIONS",
+  "departement": "Projets",
+  "service": "OPS-CORE/projets",
+  "mission": "Plans de projet et checklists opérationnelles. Vérifier le livrable et rendre un verdict JSON.",
+  "outils_autorises": [
+   "lecture_livrable"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "OPS-CORE-COLLECTOR",
+  "nom": "OPS-CORE Collecteur",
+  "role": "collector",
+  "direction": "OPERATIONS",
+  "departement": "Projets",
+  "service": "OPS-CORE/projets",
+  "mission": "Plans de projet et checklists opérationnelles. Structurer les éléments fournis et lister ce qui manque.",
+  "outils_autorises": [
+   "lecture_consigne"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "OPS-CORE-EXECUTOR",
+  "nom": "OPS-CORE Exécutant",
+  "role": "executor",
+  "direction": "OPERATIONS",
+  "departement": "Projets",
+  "service": "OPS-CORE/projets",
+  "mission": "Plans de projet et checklists opérationnelles. Enregistrer le livrable final et préparer l'action (aucune action externe).",
+  "outils_autorises": [
+   "ecriture_livrable"
+  ],
+  "type": "deterministe",
+  "appelle_llm": false,
+  "statut": "actif"
+ },
+ {
+  "id": "PILOT-CORE-ETUDES-ANALYST",
+  "nom": "PILOT-CORE-ETUDES Analyste",
+  "role": "analyst",
+  "direction": "OPERATIONS",
+  "departement": "Pilotage",
+  "service": "PILOT-CORE/etudes",
+  "mission": "Études d'entreprise : marché, concurrence, business plan, prévisionnel, rentabilité. Produire le livrable brouillon.",
+  "outils_autorises": [
+   "redaction"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "PILOT-CORE-ETUDES-CHECKER",
+  "nom": "PILOT-CORE-ETUDES Contrôleur",
+  "role": "checker",
+  "direction": "OPERATIONS",
+  "departement": "Pilotage",
+  "service": "PILOT-CORE/etudes",
+  "mission": "Études d'entreprise : marché, concurrence, business plan, prévisionnel, rentabilité. Vérifier le livrable et rendre un verdict JSON.",
+  "outils_autorises": [
+   "lecture_livrable"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "PILOT-CORE-ETUDES-COLLECTOR",
+  "nom": "PILOT-CORE-ETUDES Collecteur",
+  "role": "collector",
+  "direction": "OPERATIONS",
+  "departement": "Pilotage",
+  "service": "PILOT-CORE/etudes",
+  "mission": "Études d'entreprise : marché, concurrence, business plan, prévisionnel, rentabilité. Structurer les éléments fournis et lister ce qui manque.",
+  "outils_autorises": [
+   "lecture_consigne"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "PILOT-CORE-ETUDES-EXECUTOR",
+  "nom": "PILOT-CORE-ETUDES Exécutant",
+  "role": "executor",
+  "direction": "OPERATIONS",
+  "departement": "Pilotage",
+  "service": "PILOT-CORE/etudes",
+  "mission": "Études d'entreprise : marché, concurrence, business plan, prévisionnel, rentabilité. Enregistrer le livrable final et préparer l'action (aucune action externe).",
+  "outils_autorises": [
+   "ecriture_livrable"
+  ],
+  "type": "deterministe",
+  "appelle_llm": false,
+  "statut": "actif"
+ },
+ {
+  "id": "PILOT-CORE-PILOTAGE-ANALYST",
+  "nom": "PILOT-CORE-PILOTAGE Analyste",
+  "role": "analyst",
+  "direction": "OPERATIONS",
+  "departement": "Pilotage",
+  "service": "PILOT-CORE/pilotage",
+  "mission": "Pilotage : tableaux de bord, indicateurs, OKR, plan d'action, revue mensuelle. Produire le livrable brouillon.",
+  "outils_autorises": [
+   "redaction"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "PILOT-CORE-PILOTAGE-CHECKER",
+  "nom": "PILOT-CORE-PILOTAGE Contrôleur",
+  "role": "checker",
+  "direction": "OPERATIONS",
+  "departement": "Pilotage",
+  "service": "PILOT-CORE/pilotage",
+  "mission": "Pilotage : tableaux de bord, indicateurs, OKR, plan d'action, revue mensuelle. Vérifier le livrable et rendre un verdict JSON.",
+  "outils_autorises": [
+   "lecture_livrable"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "PILOT-CORE-PILOTAGE-COLLECTOR",
+  "nom": "PILOT-CORE-PILOTAGE Collecteur",
+  "role": "collector",
+  "direction": "OPERATIONS",
+  "departement": "Pilotage",
+  "service": "PILOT-CORE/pilotage",
+  "mission": "Pilotage : tableaux de bord, indicateurs, OKR, plan d'action, revue mensuelle. Structurer les éléments fournis et lister ce qui manque.",
+  "outils_autorises": [
+   "lecture_consigne"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "PILOT-CORE-PILOTAGE-EXECUTOR",
+  "nom": "PILOT-CORE-PILOTAGE Exécutant",
+  "role": "executor",
+  "direction": "OPERATIONS",
+  "departement": "Pilotage",
+  "service": "PILOT-CORE/pilotage",
+  "mission": "Pilotage : tableaux de bord, indicateurs, OKR, plan d'action, revue mensuelle. Enregistrer le livrable final et préparer l'action (aucune action externe).",
+  "outils_autorises": [
+   "ecriture_livrable"
+  ],
+  "type": "deterministe",
+  "appelle_llm": false,
+  "statut": "actif"
+ },
+ {
+  "id": "R&D-PARADOX-ANALYST",
+  "nom": "R&D-PARADOX Analyste",
+  "role": "analyst",
+  "direction": "SAVOIR",
+  "departement": "Recherche",
+  "service": "R&D-PARADOX/veille",
+  "mission": "Synthèse de veille à partir de textes fournis (pas d'accès web). Produire le livrable brouillon.",
+  "outils_autorises": [
+   "redaction"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "R&D-PARADOX-CHECKER",
+  "nom": "R&D-PARADOX Contrôleur",
+  "role": "checker",
+  "direction": "SAVOIR",
+  "departement": "Recherche",
+  "service": "R&D-PARADOX/veille",
+  "mission": "Synthèse de veille à partir de textes fournis (pas d'accès web). Vérifier le livrable et rendre un verdict JSON.",
+  "outils_autorises": [
+   "lecture_livrable"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "R&D-PARADOX-COLLECTOR",
+  "nom": "R&D-PARADOX Collecteur",
+  "role": "collector",
+  "direction": "SAVOIR",
+  "departement": "Recherche",
+  "service": "R&D-PARADOX/veille",
+  "mission": "Synthèse de veille à partir de textes fournis (pas d'accès web). Structurer les éléments fournis et lister ce qui manque.",
+  "outils_autorises": [
+   "lecture_consigne"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "R&D-PARADOX-EXECUTOR",
+  "nom": "R&D-PARADOX Exécutant",
+  "role": "executor",
+  "direction": "SAVOIR",
+  "departement": "Recherche",
+  "service": "R&D-PARADOX/veille",
+  "mission": "Synthèse de veille à partir de textes fournis (pas d'accès web). Enregistrer le livrable final et préparer l'action (aucune action externe).",
+  "outils_autorises": [
+   "ecriture_livrable"
+  ],
+  "type": "deterministe",
+  "appelle_llm": false,
+  "statut": "actif"
+ },
+ {
+  "id": "REVENUE-CORE-ANALYST",
+  "nom": "REVENUE-CORE Analyste",
+  "role": "analyst",
+  "direction": "CROISSANCE",
+  "departement": "Ventes",
+  "service": "REVENUE-CORE/propositions",
+  "mission": "Brouillons de devis et de propositions commerciales. Produire le livrable brouillon.",
+  "outils_autorises": [
+   "redaction"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "REVENUE-CORE-CHECKER",
+  "nom": "REVENUE-CORE Contrôleur",
+  "role": "checker",
+  "direction": "CROISSANCE",
+  "departement": "Ventes",
+  "service": "REVENUE-CORE/propositions",
+  "mission": "Brouillons de devis et de propositions commerciales. Vérifier le livrable et rendre un verdict JSON.",
+  "outils_autorises": [
+   "lecture_livrable"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "REVENUE-CORE-COLLECTOR",
+  "nom": "REVENUE-CORE Collecteur",
+  "role": "collector",
+  "direction": "CROISSANCE",
+  "departement": "Ventes",
+  "service": "REVENUE-CORE/propositions",
+  "mission": "Brouillons de devis et de propositions commerciales. Structurer les éléments fournis et lister ce qui manque.",
+  "outils_autorises": [
+   "lecture_consigne"
+  ],
+  "type": "llm",
+  "appelle_llm": true,
+  "statut": "actif"
+ },
+ {
+  "id": "REVENUE-CORE-EXECUTOR",
+  "nom": "REVENUE-CORE Exécutant",
+  "role": "executor",
+  "direction": "CROISSANCE",
+  "departement": "Ventes",
+  "service": "REVENUE-CORE/propositions",
+  "mission": "Brouillons de devis et de propositions commerciales. Enregistrer le livrable final et préparer l'action (aucune action externe).",
+  "outils_autorises": [
+   "ecriture_livrable"
+  ],
+  "type": "deterministe",
+  "appelle_llm": false,
+  "statut": "actif"
+ }
+]

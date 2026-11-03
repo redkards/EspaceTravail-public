@@ -1,0 +1,97 @@
+{
+ "id": 1,
+ "projet": "nexus",
+ "titre": "Checklist de démarrage",
+ "consigne": "Rédige une checklist de démarrage",
+ "service": "OPS-CORE/projets",
+ "directeur": "DIR-OPERATIONS",
+ "statut": "terminee",
+ "niveau": "N1",
+ "montant_eur": 0.0,
+ "action": null,
+ "message": "Livrable enregistré : /tmp/protocole-core-b_dhr5a7/data/livrables/nexus/1.md. Aucune action externe exécutée.",
+ "cree_le": "2026-11-03T22:50:25.293121",
+ "maj_le": "2026-11-03T22:50:25.336140",
+ "livrable_texte": "# Livrable (brouillon)\n\n- Point 1\n- Point 2\n- Point 3",
+ "tokens": 743,
+ "cout_eur": 0.0,
+ "fonctionnement_demande": "F1",
+ "fonctionnement": "F1",
+ "fonctionnement_raison": null,
+ "repli_f3": true,
+ "tokens_entree": 707,
+ "tokens_sortie": 36,
+ "duree_s": 0.037,
+ "revisions": 0,
+ "attente": null,
+ "modeles": {
+  "collector": "fake:?",
+  "analyst": "fake:?",
+  "checker": "fake:?",
+  "gate": "fake:?"
+ },
+ "charte_avertissements": [],
+ "note": null,
+ "etapes": [
+  {
+   "id": 1,
+   "agent_id": "OPS-CORE-COLLECTOR",
+   "role": "collector",
+   "entree": "Mission :\nChecklist de démarrage\n\nConsigne :\nRédige une checklist de démarrage",
+   "sortie": "ELEMENTS:\n- consigne reçue\nMANQUE:\n- aucun élément bloquant",
+   "verdict": null,
+   "tokens": 159,
+   "cree_le": "2026-11-03T22:50:25.312290"
+  },
+  {
+   "id": 2,
+   "agent_id": "OPS-CORE-ANALYST",
+   "role": "analyst",
+   "entree": "Mission :\nChecklist de démarrage\n\nConsigne :\nRédige une checklist de démarrage\n\nÉléments :\nELEMENTS:\n- consigne reçue\nMANQUE:\n- aucun élément bloquant\n\nCharte du projet (obligatoire) :\nMarque : NEXUS MOTHERSHIP — kit Mini NEXUS MOTHERSHIP et projet SYFER (agents IA, cockpit, passerelle). Termes interdits : « garanti a 100 », « mise en production automatique », « desactiver le gate ». Vouvoiement.",
+   "sortie": "# Livrable (brouillon)\n\n- Point 1\n- Point 2\n- Point 3",
+   "verdict": null,
+   "tokens": 269,
+   "cree_le": "2026-11-03T22:50:25.318572"
+  },
+  {
+   "id": 3,
+   "agent_id": "OPS-CORE-CHECKER",
+   "role": "checker",
+   "entree": "Consigne :\nRédige une checklist de démarrage\n\nLivrable à vérifier :\n# Livrable (brouillon)\n\n- Point 1\n- Point 2\n- Point 3",
+   "sortie": "{\"ok\": true, \"problemes\": []}",
+   "verdict": null,
+   "tokens": 161,
+   "cree_le": "2026-11-03T22:50:25.323835"
+  },
+  {
+   "id": 4,
+   "agent_id": "OPS-CORE-CHECKER",
+   "role": "checker",
+   "entree": "verdict",
+   "sortie": "{\"ok\": true, \"problemes\": []}",
+   "verdict": "ok",
+   "tokens": 0,
+   "cree_le": "2026-11-03T22:50:25.324782"
+  },
+  {
+   "id": 5,
+   "agent_id": "NEXUS-GATE",
+   "role": "gate",
+   "entree": "Mission :\nChecklist de démarrage\n\nMontant et action :\n0.0 € ; action : aucune\n\nConsigne :\nRédige une checklist de démarrage\n\nLivrable final :\n# Livrable (brouillon)\n\n- Point 1\n- Point 2\n- Point 3",
+   "sortie": "NIVEAU: N0",
+   "verdict": null,
+   "tokens": 154,
+   "cree_le": "2026-11-03T22:50:25.327675"
+  },
+  {
+   "id": 6,
+   "agent_id": "OPS-CORE-EXECUTOR",
+   "role": "executor",
+   "entree": "livrable final",
+   "sortie": "/tmp/protocole-core-b_dhr5a7/data/livrables/nexus/1.md",
+   "verdict": "prepare",
+   "tokens": 0,
+   "cree_le": "2026-11-03T22:50:25.330871"
+  }
+ ]
+}

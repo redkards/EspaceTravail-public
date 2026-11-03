@@ -1,0 +1,51 @@
+{
+ "id": 2,
+ "titre": "Devis site vitrine",
+ "service": "REVENUE-CORE/propositions",
+ "directeur": "DIR-CROISSANCE",
+ "statut": "validee",
+ "niveau": "N3",
+ "message": "Livrable enregistré : /tmp/protocole-core-b_dhr5a7/data/livrables/divers/2.md. Aucune action externe exécutée.",
+ "cree_le": "2026-11-03T22:50:25.339408",
+ "maj_le": "2026-11-03T22:50:25.402236",
+ "projet": "divers",
+ "fonctionnement_demande": "F2",
+ "fonctionnement": "F2",
+ "fonctionnement_raison": null,
+ "tokens": 745,
+ "cout_eur": 0.0,
+ "duree_s": 0.031,
+ "livrable": "# Livrable (brouillon)\n\n- Point 1\n- Point 2\n- Point 3",
+ "etapes": [
+  {
+   "agent": "REVENUE-CORE-COLLECTOR",
+   "role": "collector",
+   "verdict": null
+  },
+  {
+   "agent": "REVENUE-CORE-ANALYST",
+   "role": "analyst",
+   "verdict": null
+  },
+  {
+   "agent": "REVENUE-CORE-CHECKER",
+   "role": "checker",
+   "verdict": null
+  },
+  {
+   "agent": "REVENUE-CORE-CHECKER",
+   "role": "checker",
+   "verdict": "ok"
+  },
+  {
+   "agent": "NEXUS-GATE",
+   "role": "gate",
+   "verdict": null
+  },
+  {
+   "agent": "REVENUE-CORE-EXECUTOR",
+   "role": "executor",
+   "verdict": "prepare"
+  }
+ ]
+}

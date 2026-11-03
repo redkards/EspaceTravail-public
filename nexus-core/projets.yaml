@@ -12,6 +12,7 @@ projets:
 
   - code: nexus
     nom: NEXUS MOTHERSHIP
+    alias: [syfer, nexus-mothership]
     description: Organisation d'agents IA en départements, un seul humain valide.
     services: [AGENT-FACTORY/evaluation, CODE-CORE/conception, CODE-CORE/revue, LEX-GUARD/droit-europe, CYBER-FORTRESS/audit, CYBER-FORTRESS/veille]
 

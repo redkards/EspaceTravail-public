@@ -1,0 +1,24 @@
+# Règles communes à tous les projets (fusionnées avec la charte du projet).
+# Gravité : « bloquant » = retour à l'ANALYST avec la liste précise ; « avertissement » = noté pour
+# le CHECKER et la carte du Décideur.
+
+# Marqueurs de travail inachevé. Dans un livrable destiné à être publié ou envoyé, ils bloquent ;
+# ailleurs (checklist interne…), ils sont signalés : « À COMPLÉTER » y reste le bon réflexe plutôt
+# que d'inventer une information.
+inacheve:
+  marqueurs: ["a completer", "todo", "tbd", "xxx", "[a remplir]", "[a completer]", "lorem ipsum", "fixme",
+              "a definir", "[nom]", "[date]", "[prix]"]
+  gravite_publication: bloquant
+  gravite_autres: avertissement
+
+mentions_obligatoires:
+  - nom: mention juridique
+    types: [juridique]
+    toutes:
+      - ["ne remplace pas l'avis d'un avocat"]
+    gravite: bloquant
+
+termes_interdits:
+  - terme: "garanti a 100"
+    gravite: bloquant
+    motif: "aucune garantie absolue ne peut être promise"

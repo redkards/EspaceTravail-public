@@ -1,0 +1,18 @@
+{
+ "nombre": 1,
+ "taches": [
+  {
+   "id": 1,
+   "titre": "Relire le README",
+   "description": "Vérifier les liens.",
+   "assigne_a": "gemini",
+   "projet": "nexus",
+   "priorite": "haute",
+   "statut": "a_faire",
+   "cree_par": "chatgpt",
+   "pris_par": null,
+   "cree_le": "2026-11-03T22:50:25.896395+00:00",
+   "maj_le": "2026-11-03T22:50:25.896395+00:00"
+  }
+ ]
+}

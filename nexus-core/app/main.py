@@ -22,6 +22,7 @@ from .db import init_db
 from .routes import creer_routeur
 from .routes_decideur import api as decideur_api
 from .routes_decideur import page as decideur_page
+from .pwa import router as pwa_router
 from .securite import garde_cockpit
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s : %(message)s")
@@ -48,11 +49,20 @@ async def _boucle_fond() -> None:
 
 
 def tick_decideur() -> None:
-    from . import decideur
+    from . import decideur, resume
     try:
         decideur.tick()
     except Exception:
         log.exception("Erreur pendant la tâche des sessions de décision")
+    try:
+        resume.tick()
+    except Exception:
+        log.exception("Erreur pendant le résumé quotidien")
+    try:
+        from . import export_qg
+        export_qg.envoyer_en_attente()
+    except Exception:
+        log.exception("Erreur pendant l'export QG")
 
 
 async def _boucle_minute() -> None:
@@ -127,6 +137,7 @@ app.include_router(creer_routeur(), prefix="/api", dependencies=[Depends(verifie
 app.include_router(creer_routeur(cockpit=True), prefix="/cockpit/api")
 app.include_router(decideur_api)  # /cockpit/api/decideur/* : même garde que tout /cockpit/api
 app.include_router(decideur_page)
+app.include_router(pwa_router)  # PWA : manifest, service worker, icônes, page hors ligne
 
 
 @app.middleware("http")

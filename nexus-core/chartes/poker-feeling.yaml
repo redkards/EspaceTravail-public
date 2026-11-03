@@ -1,0 +1,31 @@
+# Charte — Poker Feeling (livre pédagogique, non publié)
+# Sources : tests-poker/contexte/poker-feeling.md, projets/poker-feeling.md.
+projet: poker-feeling
+marque:
+  nom: Poker Feeling
+  contexte: "livre pédagogique de poker (Texas Hold'em, débutants à intermédiaires) ; fil rouge : le personnage Red Cards"
+marques_interdites:
+  - nom: Poker Winners
+    variantes: ["poker winners"]
+    contexte: "site communautaire ; la page du livre sur le site n'existe pas encore"
+    gravite: avertissement
+termes_interdits:
+  - {terme: "gagnez de l'argent", gravite: bloquant, motif: "aucune promesse de gain ni de résultat"}
+  - {terme: "gagner de l'argent", gravite: bloquant, motif: "aucune promesse de gain ni de résultat"}
+  - {terme: "gain garanti", gravite: bloquant, motif: "aucune promesse de gain"}
+  - {terme: "zero tilt", gravite: bloquant, motif: "promesse de résultat interdite"}
+  - {terme: "liste d'attente", gravite: bloquant, motif: "aucune liste d'attente n'existe"}
+  - {terme: "precommande", gravite: bloquant, motif: "aucune vente ouverte"}
+  - {terme: "disponible en librairie", gravite: bloquant, motif: "le livre n'est pas publié"}
+  - {terme: "deja disponible", gravite: bloquant, motif: "le livre n'est pas publié"}
+  - {terme: "prix de lancement", gravite: avertissement, motif: "aucun prix fixé sans validation"}
+mentions_obligatoires:
+  - nom: prévention du jeu excessif
+    types: [publication, commercial]
+    toutes:
+      - ["09 74 75 13 13"]
+      - ["reserve aux majeurs", "interdit aux moins de 18 ans", "interdit aux mineurs"]
+    gravite: bloquant
+ton:
+  vouvoiement: true
+  gravite: avertissement

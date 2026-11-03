@@ -1,0 +1,23 @@
+{
+ "statut": "ok",
+ "service": "nexus-core",
+ "llm": {
+  "fournisseur": "fake",
+  "fournisseur_demande": "fake",
+  "modele": "qwen2.5:3b",
+  "modele_checker": "qwen2.5:3b",
+  "modeles_roles": {
+   "prime": "qwen2.5:3b",
+   "collector": "qwen2.5:3b",
+   "analyst": "qwen2.5:3b",
+   "checker": "qwen2.5:3b",
+   "gate": "qwen2.5:3b",
+   "directeur": "qwen2.5:3b"
+  },
+  "controle_diversifie": false,
+  "repli": "aucun"
+ },
+ "fonctionnement_defaut": "F2",
+ "ledger_hmac": true,
+ "avertissements": []
+}
