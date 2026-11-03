@@ -14,10 +14,10 @@ def test_cle_obligatoire_sur_api(client, entetes):
     assert client.get("/api/missions", headers=entetes).status_code == 200
 
 
-def test_cockpit_sans_cle(client):
+def test_cockpit_sans_cle(client, cockpit):
     r = client.get("/cockpit")
     assert r.status_code == 200 and "Cockpit NEXUS" in r.text
-    assert client.get("/cockpit/api/agents").status_code == 200
+    assert client.get("/cockpit/api/agents", headers=cockpit).status_code == 200
     r = client.get("/", follow_redirects=False)
     assert r.status_code in (302, 307) and r.headers["location"] == "/cockpit"
 
@@ -49,12 +49,12 @@ def test_devis_decision_valider(client, entetes):
     assert client.get("/api/decisions?statut=en_attente", headers=entetes).json() == []
 
 
-def test_devis_decision_refuser_et_reviser(client, entetes):
+def test_devis_decision_refuser_et_reviser(client, entetes, cockpit):
     for choix, statut in (("refuser", "refusee"), ("reviser", "revision")):
         mid = client.post("/api/missions", headers=entetes,
                           json={"titre": "Contrat", "consigne": "Prépare le contrat"}).json()["id"]
         did = client.get("/api/decisions?statut=en_attente", headers=entetes).json()[0]["id"]
-        r = client.post(f"/cockpit/api/decisions/{did}/{choix}", json={"commentaire": "non"})
+        r = client.post(f"/cockpit/api/decisions/{did}/{choix}", json={"commentaire": "non"}, headers=cockpit)
         assert r.status_code == 200 and r.json()["statut"] == statut
         m = client.get(f"/api/missions/{mid}", headers=entetes).json()
         # Une révision relance la mission ; « contrat » la ramène en N3 avec une nouvelle fiche.

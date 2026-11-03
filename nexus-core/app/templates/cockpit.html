@@ -148,7 +148,7 @@ const $ = (s) => document.querySelector(s);
 const esc = (t) => String(t ?? "").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const LIB = { recue:"reçue", en_cours:"en cours", en_attente_n3:"en attente N3", validee:"validée", refusee:"refusée",
   revision:"révision", terminee:"terminée", echouee:"échouée", suspendue:"suspendue", en_attente:"en attente",
-  expiree:"expirée", plafond_atteint:"plafond atteint", faible:"faible", moyen:"moyen", eleve:"élevé", actif:"actif", suspendu:"suspendu" };
+  expiree:"expirée", plafond_atteint:"plafond atteint", en_attente_place:"en attente de place", a_reformuler:"à reformuler", faible:"faible", moyen:"moyen", eleve:"élevé", actif:"actif", suspendu:"suspendu" };
 const lib = (s) => LIB[s] || s || "—";
 const date = (d) => d ? new Date(d + (d.endsWith("Z") ? "" : "Z")).toLocaleString("fr-FR") : "";
 

@@ -3,31 +3,69 @@
 #  Un seul site : le cockpit, l'API de nexus-core et la passerelle MCP
 #  (nexus-bridge : /mcp et /bridge), en HTTPS (Let's Encrypt).
 #  Le port 80 sert uniquement à obtenir le certificat (puis redirige vers 443).
-#  En mode complet, c'est Caddyfile.complet qui est utilisé.
+#  En mode complet, c'est Caddyfile.complet qui est utilisé (mêmes règles pour :443).
 # =============================================================================
 {
 	email {$ACME_EMAIL}
+	# Journal général (erreurs, certificats) : l'adresse /mcp/<jeton> est masquée
+	# et les en-têtes secrets supprimés, même dans les messages d'erreur.
+	log default {
+		output stderr
+		format filter {
+			wrap json
+			fields {
+				request>uri regexp ^/mcp.* /mcp/***
+				request>headers>X-Nexus-Key delete
+				request>headers>X-Cockpit-Auth delete
+				request>headers>Authorization delete
+				request>headers>Cookie delete
+			}
+		}
+	}
+}
+
+# En-têtes de sécurité (tout le site) : pas d'affichage dans un cadre, pas de
+# fuite d'adresse vers d'autres sites, HTTPS imposé pendant un an.
+(securite) {
+	header {
+		Content-Security-Policy "frame-ancestors 'none'"
+		X-Frame-Options "DENY"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "no-referrer"
+		Strict-Transport-Security "max-age=31536000"
+		-Server
+	}
+}
+
+# Journal d'accès : l'adresse des requêtes /mcp/* (qui contient le jeton d'une IA)
+# n'est JAMAIS écrite (remplacée par /mcp/***) ; clés et mots de passe supprimés.
+(journal) {
+	log {
+		output stdout
+		format filter {
+			wrap json
+			fields {
+				request>uri regexp ^/mcp.* /mcp/***
+				request>headers>X-Nexus-Key delete
+				request>headers>X-Cockpit-Auth delete
+				request>headers>Authorization delete
+				request>headers>Cookie delete
+			}
+		}
+	}
 }
 
 {$NEXUS_HOST} {
-	header {
-		Strict-Transport-Security "max-age=31536000"
-		X-Content-Type-Options "nosniff"
-		Referrer-Policy "strict-origin-when-cross-origin"
-		-Server
-	}
+	import securite
+	import journal
 	encode gzip
 
-	# Cockpit ET page /bridge protégés par mot de passe (basic auth).
-	# L'API /api/* passe sans mot de passe Caddy : nexus-core exige l'en-tête X-Nexus-Key.
-	@protege path /cockpit /cockpit/* /bridge /bridge/*
-	basic_auth @protege {
-		{$COCKPIT_USER} {$COCKPIT_PASSWORD_HASH}
-	}
+	# Un en-tête X-Cockpit-Auth envoyé par un visiteur est TOUJOURS supprimé :
+	# seul Caddy l'ajoute, après le mot de passe, sur les routes /cockpit*.
+	request_header -X-Cockpit-Auth
 
 	# Passerelle MCP Claude · ChatGPT · Gemini (nexus-bridge) : SANS basic auth,
 	# protégée par un jeton secret par IA (/mcp/<jeton> ou « Authorization: Bearer »).
-	# Aucun journal d'accès Caddy n'est activé : le jeton du chemin n'est pas enregistré.
 	@mcp path /mcp /mcp/*
 	handle @mcp {
 		request_body {
@@ -39,9 +77,24 @@
 	# Page de suivi de la passerelle (lecture seule, mot de passe du cockpit)
 	@bridge path /bridge /bridge/*
 	handle @bridge {
+		basic_auth {
+			{$COCKPIT_USER} {$COCKPIT_PASSWORD_HASH}
+		}
 		reverse_proxy nexus-bridge:8000
 	}
 
+	# Cockpit : mot de passe (basic auth), PUIS en-tête interne secret attendu par
+	# nexus-core (COCKPIT_INTERNAL, généré par install.sh).
+	@cockpit path /cockpit /cockpit/*
+	handle @cockpit {
+		basic_auth {
+			{$COCKPIT_USER} {$COCKPIT_PASSWORD_HASH}
+		}
+		request_header X-Cockpit-Auth {env.COCKPIT_INTERNAL}
+		reverse_proxy nexus-core:8000
+	}
+
+	# API /api/* : sans mot de passe Caddy, nexus-core exige l'en-tête X-Nexus-Key.
 	handle {
 		reverse_proxy nexus-core:8000
 	}

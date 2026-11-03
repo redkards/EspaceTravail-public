@@ -31,7 +31,30 @@ MOTS_N3 = [
     r"supprimer", r"supprimez", r"suppression",
     # Production
     r"mise en production", r"mettre en production", r"deployer", r"deployez", r"deploiement",
+    # Mouvements d'argent et engagements (audit)
+    r"transferer", r"transferez", r"transfere", r"transferons", r"verser", r"versez", r"versement",
+    r"versements", r"rembourser", r"remboursez", r"remboursement", r"remboursements",
+    r"resilier", r"resiliez", r"resiliation", r"expedier", r"expediez", r"expedition",
+    # Équivalents anglais (« pays » exclu : nom commun français)
+    r"send", r"sends", r"sent", r"sending", r"transfer", r"transfers", r"transferred",
+    r"pay", r"paid", r"paying", r"payment", r"payments", r"wire", r"refund", r"refunds", r"refunded",
+    r"publish", r"publishes", r"published", r"publishing",
+    r"deploy", r"deploys", r"deployed", r"deploying", r"deployment",
 ]
+# Expressions à neutraliser avant la recherche (faux positifs : « ligne de commande »…).
+NEUTRES = [
+    r"lignes? de commandes?", r"invites? de commandes?",
+    r"commandes? (?:shell|bash|linux|unix|docker|git|terminal|systeme|sql|suivantes?|ci-dessous)",
+]
+# Négation proche : le mot-clé qui suit n'est pas compté (« aucun paiement », « ne pas publier »).
+_NEG_DIRECTE = {"aucun", "aucune", "sans"}
+_DETERMINANTS = {"le", "la", "les", "l", "un", "une", "des", "du", "de", "d", "ce", "cet", "cette", "ces"}
+_PRONOMS = {"le", "la", "les", "l", "lui", "leur", "y", "en", "me", "m", "te", "t", "se", "s", "nous", "vous"}
+# Montants : « 1 500 € », « 300€ », « 20 euros », « $50 », « 12,5 USD »… (texte brut, avant normalisation).
+_NOMBRE = r"\d{1,3}(?:[ \u00a0\u202f.]\d{3})+(?:[.,]\d+)?|\d+(?:[.,]\d+)?"
+_MONTANT = re.compile(
+    rf"(?:(?P<n1>{_NOMBRE})\s*(?:k\s*)?(?:€|eur\b|euros?\b|\$|usd\b|dollars?\b))"
+    rf"|(?:(?:€|\$)\s*(?P<n2>{_NOMBRE}))", re.I)
 # Verbes d'envoi pour lesquels un destinataire « moi / nous » n'engage personne d'extérieur.
 VERBES_ENVOI = r"(?:envoyer|envoyez|envoie|envoyons|enverra|envoi|envois)"
 DESTINATAIRE_INTERNE = r"(?:-?\s*(?:moi|nous)|\s+a\s+(?:moi|nous)|\s+au\s+proprietaire)"
@@ -85,10 +108,50 @@ def contient_mot(texte: str, motif: str) -> bool:
     return re.search(rf"(?<![a-z0-9]){motif}(?![a-z0-9])", texte) is not None
 
 
+def _nie(texte: str, debut: int, fin: int) -> bool:
+    """Négation simple dans les 3 mots précédents (cas étroits, pour ne pas ouvrir de contournement).
+
+    Comptent : « aucun/aucune/sans X », « pas de X », « ne pas X », « sans le/aucun X »,
+    « ne X pas », « ne le X pas », « ne jamais X ». « Ne pas oublier de payer » reste détecté.
+    """
+    avant = re.findall(r"[a-z0-9]+", texte[:debut])[-3:]
+    apres = re.findall(r"[a-z0-9]+", texte[fin:])[:2]
+    w1 = avant[-1] if avant else ""
+    w2 = avant[-2] if len(avant) > 1 else ""
+    if w1 in _NEG_DIRECTE:
+        return True
+    if w1 in ("de", "d") and w2 == "pas":
+        return True
+    if w1 in ("pas", "jamais") and w2 in ("ne", "n"):
+        return True
+    if w1 in _DETERMINANTS and w2 in _NEG_DIRECTE:
+        return True
+    if (w1 in ("ne", "n") or (w1 in _PRONOMS and w2 in ("ne", "n"))) and apres and apres[0] in ("pas", "jamais"):
+        return True
+    return False
+
+
 def _contient(texte: str, motifs: list[str]) -> str | None:
+    """Premier motif présent en mot entier et non nié."""
     for m in motifs:
-        if contient_mot(texte, m):
-            return m
+        for r in re.finditer(rf"(?<![a-z0-9]){m}(?![a-z0-9])", texte):
+            if not _nie(texte, r.start(), r.end()):
+                return m
+    return None
+
+
+def _neutraliser(texte: str) -> str:
+    for motif in NEUTRES:
+        texte = re.sub(rf"(?<![a-z0-9]){motif}(?![a-z0-9])", " ", texte)
+    return texte
+
+
+def detecter_montant(texte_brut: str) -> str | None:
+    """Montant non nul en €, euros, $, USD ou dollars ; None sinon."""
+    for m in _MONTANT.finditer(texte_brut or ""):
+        chiffres = re.sub(r"\D", "", m.group("n1") or m.group("n2") or "")
+        if chiffres and int(chiffres) > 0:
+            return m.group(0).strip()
     return None
 
 
@@ -99,7 +162,7 @@ def _sans_envois_internes(texte: str) -> str:
 
 
 def _n3_texte(texte: str) -> str | None:
-    return _contient(_sans_envois_internes(texte), MOTS_N3)
+    return _contient(_neutraliser(_sans_envois_internes(texte)), MOTS_N3)
 
 
 def classer_regles(titre: str, consigne: str, service: str | None = None,
@@ -111,6 +174,10 @@ def classer_regles(titre: str, consigne: str, service: str | None = None,
         return "N3", f"montant engagé : {montant_eur} €"
     if action and action in ACTIONS_N3:
         return "N3", f"action engageante : {action}"
+    # Montant écrit dans la consigne (pas dans le livrable : une étude chiffrée reste interne).
+    m = detecter_montant(f"{titre} {consigne}")
+    if m:
+        return "N3", f"montant détecté dans la consigne : {m}"
     m = _n3_texte(texte)
     if m:
         return "N3", f"mot-clé sensible dans la consigne : {m}"

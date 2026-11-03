@@ -23,15 +23,20 @@ def ecrire(cle: str, valeur: str) -> None:
 
 
 def incrementer(cle: str, delta: float) -> float:
+    """Incrément atomique (UPSERT) : aucun compteur perdu entre traitements concurrents.
+
+    INSERT … ON CONFLICT(cle) DO UPDATE SET valeur = CAST(valeur AS réel) + excluded.valeur,
+    identique sous SQLite (≥ 3.35) et PostgreSQL.
+    """
+    from sqlalchemy import text
     with session_scope() as s:
-        e = s.get(Etat, cle)
-        actuel = float(e.valeur) if e and e.valeur else 0.0
-        nouveau = actuel + delta
-        if e:
-            e.valeur = repr(nouveau)
-        else:
-            s.add(Etat(cle=cle, valeur=repr(nouveau)))
-        return nouveau
+        reel = "DOUBLE PRECISION" if s.get_bind().dialect.name == "postgresql" else "REAL"
+        r = s.execute(text(
+            f"INSERT INTO etat (cle, valeur) VALUES (:cle, :delta) "
+            f"ON CONFLICT (cle) DO UPDATE SET valeur = CAST(CAST(etat.valeur AS {reel}) "
+            f"+ CAST(excluded.valeur AS {reel}) AS TEXT) RETURNING valeur"),
+            {"cle": cle, "delta": repr(float(delta))})
+        return float(r.scalar_one())
 
 
 # --- Kill switch -------------------------------------------------------------

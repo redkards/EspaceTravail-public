@@ -8,6 +8,7 @@ from sqlalchemy import func, select
 from . import agents as reg
 from . import budget, ledger, pipeline, sentinel
 from . import fonctionnement as fct
+from .file_missions import FILE
 from . import projets as registre
 from .db import session_scope
 from .models import Decision, Etape, Mission, maintenant
@@ -128,7 +129,7 @@ def creer_routeur() -> APIRouter:
             rep.update(statut="en_attente_n3", decision_id=did, cout_estime_eur=est["cout_estime_eur"],
                        message=f"Lancement F4 soumis à validation — coût estimé {est['cout_estime_eur']:.2f} €.")
             return rep
-        taches.add_task(pipeline.traiter, mid)
+        taches.add_task(FILE.executer, mid, pipeline.traiter)  # file FIFO bornée (NEXUS_MAX_MISSIONS)
         return rep
 
     @r.get("/missions")
@@ -193,9 +194,9 @@ def creer_routeur() -> APIRouter:
         try:
             res = pipeline.decider(did, choix, commentaire)
             if res.get("relance") and taches is not None:
-                taches.add_task(pipeline.relancer_revision, res["mission_id"], commentaire)
+                taches.add_task(FILE.executer, res["mission_id"], pipeline.relancer_revision, commentaire)
             if res.get("lancer") and taches is not None:
-                taches.add_task(pipeline.traiter, res["mission_id"])  # lancement F4 approuvé
+                taches.add_task(FILE.executer, res["mission_id"], pipeline.traiter)  # lancement F4 approuvé
             return res
         except LookupError as e:
             raise HTTPException(404, str(e))

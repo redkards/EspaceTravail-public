@@ -130,8 +130,8 @@ def test_projets_services_conseilles_valides():
     assert "DESIGN-SYSTEM/ui" in reg_p["poker-feeling"]["services"]
 
 
-def test_organigramme_api_expose_la_nouvelle_direction(client):
-    agents = client.get("/cockpit/api/agents").json()
+def test_organigramme_api_expose_la_nouvelle_direction(client, cockpit):
+    agents = client.get("/cockpit/api/agents", headers=cockpit).json()
     assert len(agents) == 93
     directions = {a["direction"] for a in agents}
     assert "IMPACT" in directions

@@ -1,38 +1,72 @@
 # =============================================================================
 #  Caddyfile.complet — Mini NEXUS MOTHERSHIP, MODE COMPLET (cockpit + n8n + Kuma + ntfy)
-#  Les valeurs {$...} viennent des variables d'environnement du conteneur caddy
-#  (elles-mêmes lues dans .env par docker compose).
+#  Les valeurs {$...} et {env.…} viennent des variables d'environnement du conteneur
+#  caddy (elles-mêmes lues dans .env par docker compose).
 #  HTTPS automatique Let's Encrypt sur le nom d'hôte du VPS.
+#  Le site :443 applique exactement les mêmes règles que Caddyfile.mvp.
 # =============================================================================
 {
 	email {$ACME_EMAIL}
+	# Journal général (erreurs, certificats) : l'adresse /mcp/<jeton> est masquée
+	# et les en-têtes secrets supprimés, même dans les messages d'erreur.
+	log default {
+		output stderr
+		format filter {
+			wrap json
+			fields {
+				request>uri regexp ^/mcp.* /mcp/***
+				request>headers>X-Nexus-Key delete
+				request>headers>X-Cockpit-Auth delete
+				request>headers>Authorization delete
+				request>headers>Cookie delete
+			}
+		}
+	}
 }
 
-# En-têtes de sécurité communs
+# En-têtes de sécurité (tous les sites) : pas d'affichage dans un cadre, pas de
+# fuite d'adresse vers d'autres sites, HTTPS imposé pendant un an.
 (securite) {
 	header {
-		Strict-Transport-Security "max-age=31536000"
+		Content-Security-Policy "frame-ancestors 'none'"
+		X-Frame-Options "DENY"
 		X-Content-Type-Options "nosniff"
-		Referrer-Policy "strict-origin-when-cross-origin"
+		Referrer-Policy "no-referrer"
+		Strict-Transport-Security "max-age=31536000"
 		-Server
+	}
+}
+
+# Journal d'accès : l'adresse des requêtes /mcp/* (qui contient le jeton d'une IA)
+# n'est JAMAIS écrite (remplacée par /mcp/***) ; clés et mots de passe supprimés.
+(journal) {
+	log {
+		output stdout
+		format filter {
+			wrap json
+			fields {
+				request>uri regexp ^/mcp.* /mcp/***
+				request>headers>X-Nexus-Key delete
+				request>headers>X-Cockpit-Auth delete
+				request>headers>Authorization delete
+				request>headers>Cookie delete
+			}
+		}
 	}
 }
 
 # --- Cockpit + API nexus-core + passerelle nexus-bridge (port 443) ----------
 {$NEXUS_HOST} {
 	import securite
+	import journal
 	encode gzip
 
-	# Cockpit ET page /bridge protégés par mot de passe (basic auth).
-	# L'API /api/* passe sans mot de passe Caddy : nexus-core exige l'en-tête X-Nexus-Key.
-	@protege path /cockpit /cockpit/* /bridge /bridge/*
-	basic_auth @protege {
-		{$COCKPIT_USER} {$COCKPIT_PASSWORD_HASH}
-	}
+	# Un en-tête X-Cockpit-Auth envoyé par un visiteur est TOUJOURS supprimé :
+	# seul Caddy l'ajoute, après le mot de passe, sur les routes /cockpit*.
+	request_header -X-Cockpit-Auth
 
 	# Passerelle MCP Claude · ChatGPT · Gemini (nexus-bridge) : SANS basic auth,
 	# protégée par un jeton secret par IA (/mcp/<jeton> ou « Authorization: Bearer »).
-	# Aucun journal d'accès Caddy n'est activé : le jeton du chemin n'est pas enregistré.
 	@mcp path /mcp /mcp/*
 	handle @mcp {
 		request_body {
@@ -44,9 +78,24 @@
 	# Page de suivi de la passerelle (lecture seule, mot de passe du cockpit)
 	@bridge path /bridge /bridge/*
 	handle @bridge {
+		basic_auth {
+			{$COCKPIT_USER} {$COCKPIT_PASSWORD_HASH}
+		}
 		reverse_proxy nexus-bridge:8000
 	}
 
+	# Cockpit : mot de passe (basic auth), PUIS en-tête interne secret attendu par
+	# nexus-core (COCKPIT_INTERNAL, généré par install.sh).
+	@cockpit path /cockpit /cockpit/*
+	handle @cockpit {
+		basic_auth {
+			{$COCKPIT_USER} {$COCKPIT_PASSWORD_HASH}
+		}
+		request_header X-Cockpit-Auth {env.COCKPIT_INTERNAL}
+		reverse_proxy nexus-core:8000
+	}
+
+	# API /api/* : sans mot de passe Caddy, nexus-core exige l'en-tête X-Nexus-Key.
 	handle {
 		reverse_proxy nexus-core:8000
 	}
@@ -57,6 +106,7 @@
 #   curl -u UTILISATEUR:MOT_DE_PASSE https://HOTE:8443/webhook/nexus-mission ...
 {$NEXUS_HOST}:8443 {
 	import securite
+	import journal
 	basic_auth {
 		{$N8N_BASIC_USER} {$N8N_BASIC_PASSWORD_HASH}
 	}
@@ -67,6 +117,7 @@
 # Protégé par les identifiants du cockpit (évite qu'un inconnu crée le compte admin).
 {$NEXUS_HOST}:8444 {
 	import securite
+	import journal
 	basic_auth {
 		{$COCKPIT_USER} {$COCKPIT_PASSWORD_HASH}
 	}
@@ -74,8 +125,11 @@
 }
 
 # --- ntfy (port 8445) : notifications ---------------------------------------
-# Pas de mot de passe : le nom du topic (aléatoire) fait office de secret.
+# Accès refusé par défaut (NTFY_AUTH_DEFAULT_ACCESS=deny-all) : seul le sujet
+# NTFY_TOPIC est ouvert, en ÉCRITURE seule pour l'anonyme (nexus-core, n8n) et en
+# LECTURE pour le compte NTFY_USER créé par install.sh (appli Android).
 {$NEXUS_HOST}:8445 {
 	import securite
+	import journal
 	reverse_proxy ntfy:80
 }

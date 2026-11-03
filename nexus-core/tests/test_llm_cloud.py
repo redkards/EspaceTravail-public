@@ -115,7 +115,7 @@ def test_bascule_journalisee_sans_cle(cloud):
 def test_cle_absente_des_sorties_api(cloud, client, entetes):
     cloud()
     for url, h in (("/api/sante", {}), ("/api/sante", entetes), ("/api/budget", entetes),
-                   ("/cockpit/api/sante", {}), ("/api/ledger?limit=100", entetes)):
+                   ("/cockpit/api/sante", {"X-Cockpit-Auth": "secret-interne-caddy-de-test"}), ("/api/ledger?limit=100", entetes)):
         r = client.get(url, headers=h)
         assert r.status_code == 200 and CLE_CLOUD not in r.text
     llm = client.get("/api/sante").json()["llm"]

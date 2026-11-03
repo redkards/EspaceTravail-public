@@ -15,11 +15,11 @@ services:
 
   caddy:
     cpus: 0.05
-    # Ports ajoutés à 80 et 443 : n8n, Uptime Kuma, ntfy
+    # Ports ajoutés à 80 et 443 : n8n, Uptime Kuma, ntfy (même adresse que 80/443)
     ports:
-      - "8443:8443"
-      - "8444:8444"
-      - "8445:8445"
+      - "${NEXUS_BIND_IP:-0.0.0.0}:8443:8443"
+      - "${NEXUS_BIND_IP:-0.0.0.0}:8444:8444"
+      - "${NEXUS_BIND_IP:-0.0.0.0}:8445:8445"
     volumes:
       # Même cible que dans docker-compose.yml : remplace Caddyfile.mvp
       - ./Caddyfile.complet:/etc/caddy/Caddyfile:ro
@@ -44,7 +44,8 @@ services:
       # Mode complet : PostgreSQL à la place de SQLite
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-nexus}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD manquant}@postgres:5432/${POSTGRES_DB:-nexus}
       REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
-      NTFY_URL: ${NTFY_URL:-http://ntfy}
+      # Serveur ntfy du kit (accès deny-all, sujet ouvert par install.sh --complet)
+      NTFY_URL: http://ntfy
       NTFY_TOPIC: ${NTFY_TOPIC:?NTFY_TOPIC manquant}
     depends_on:
       postgres:

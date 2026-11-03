@@ -10,8 +10,8 @@ import hmac
 import logging
 from contextlib import asynccontextmanager
 
-from fastapi import Depends, FastAPI, Header, HTTPException
-from fastapi.responses import RedirectResponse
+from fastapi import Depends, FastAPI, Header, HTTPException, Request
+from fastapi.responses import JSONResponse, RedirectResponse
 
 from . import agents as reg
 from . import ledger, pipeline
@@ -69,6 +69,9 @@ async def cycle_de_vie(app: FastAPI):
     log.info("LLM actif : %s", info())
     if not cfg().api_key:
         log.warning("NEXUS_API_KEY vide : l'API /api refusera toutes les requêtes (sauf /api/sante).")
+    reprise = pipeline.reprendre_au_demarrage()
+    if reprise["interrompues"] or reprise["relancees"]:
+        log.info("Reprise au démarrage : %s", reprise)
     tache = asyncio.create_task(_boucle_fond()) if cfg().taches_fond else None
     yield
     if tache:
@@ -95,7 +98,18 @@ def sante_publique():
 
 
 app.include_router(creer_routeur(), prefix="/api", dependencies=[Depends(verifier_cle)])
-app.include_router(creer_routeur(), prefix="/cockpit/api", dependencies=[Depends(garde_cockpit)])
+app.include_router(creer_routeur(), prefix="/cockpit/api")
+
+
+@app.middleware("http")
+async def proteger_cockpit_api(request: Request, call_next):
+    """Garde anti-CSRF appliquée AVANT routage et validation sur tout /cockpit/api/*."""
+    if request.url.path == "/cockpit/api" or request.url.path.startswith("/cockpit/api/"):
+        try:
+            await garde_cockpit(request)
+        except HTTPException as e:
+            return JSONResponse({"detail": e.detail}, status_code=e.status_code)
+    return await call_next(request)
 app.include_router(cockpit_router)
 
 

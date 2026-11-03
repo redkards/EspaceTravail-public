@@ -21,10 +21,12 @@
 # =============================================================================
 name: p1-nexus
 
-# Paramètres communs : redémarrage automatique + journaux limités en taille
+# Paramètres communs : redémarrage automatique, journaux limités en taille et
+# « no-new-privileges » (un programme du conteneur ne peut jamais gagner de droits).
 x-commun: &commun
   restart: unless-stopped
   networks: [p1-nexus-net]
+  security_opt: ["no-new-privileges:true"]
   logging:
     driver: json-file
     options:
@@ -54,6 +56,9 @@ services:
       COCKPIT_PASSWORD_HASH: ${COCKPIT_PASSWORD_HASH:?COCKPIT_PASSWORD_HASH manquant}
       N8N_BASIC_USER: ${N8N_BASIC_USER:-admin}
       N8N_BASIC_PASSWORD_HASH: ${N8N_BASIC_PASSWORD_HASH:-}
+      # Secret interne ajouté par Caddy (après le mot de passe) sur /cockpit* ;
+      # nexus-core refuse le cockpit sans lui. Généré par install.sh.
+      COCKPIT_INTERNAL: ${COCKPIT_INTERNAL:?COCKPIT_INTERNAL manquant dans .env - relancez bash install.sh}
     volumes:
       # MVP : un seul site (cockpit). Remplacé par Caddyfile.complet en mode complet.
       - ./Caddyfile.mvp:/etc/caddy/Caddyfile:ro
@@ -116,7 +121,7 @@ services:
   ollama:
     <<: *commun
     profiles: ["local"]
-    image: ollama/ollama:0.3.14
+    image: ollama/ollama:0.40.12
     mem_limit: 3584m
     # 1,1 (et non 1,2) : laisse 0,1 vCPU à nexus-bridge dans le plafond P1 de 1,5
     cpus: 1.1
@@ -150,6 +155,14 @@ services:
       DATABASE_URL: sqlite:////data/nexus.db
       REDIS_URL: ""
       NEXUS_API_KEY: ${NEXUS_API_KEY:?NEXUS_API_KEY manquant}
+      # Secret partagé avec Caddy (en-tête X-Cockpit-Auth des routes /cockpit*)
+      COCKPIT_INTERNAL: ${COCKPIT_INTERNAL:?COCKPIT_INTERNAL manquant dans .env - relancez bash install.sh}
+      # Clé HMAC du journal LEDGER (chaîne infalsifiable sans cette clé)
+      LEDGER_HMAC_KEY: ${LEDGER_HMAC_KEY:?LEDGER_HMAC_KEY manquant dans .env - relancez bash install.sh}
+      # Missions traitées en parallèle (vide = automatique)
+      NEXUS_MAX_MISSIONS: ${NEXUS_MAX_MISSIONS:-}
+      # Registre des projets monté en lecture seule (modifiable sans reconstruire l'image)
+      NEXUS_PROJETS_FILE: /config/projets.yaml
       # Fournisseur : ollama (local) | ollama_cloud | anthropic
       LLM_PROVIDER: ${LLM_PROVIDER:-ollama}
       NEXUS_MODEL: ${NEXUS_MODEL:-qwen2.5:3b}
@@ -159,7 +172,7 @@ services:
       OLLAMA_API_KEY: ${OLLAMA_API_KEY:-}
       OLLAMA_CLOUD_URL: ${OLLAMA_CLOUD_URL:-https://ollama.com}
       # Repli si le fournisseur principal échoue : ollama (local) | aucun
-      LLM_FALLBACK: ${LLM_FALLBACK:-aucun}
+      LLM_FALLBACK: ${LLM_FALLBACK:-ollama}
       NEXUS_MODEL_LOCAL: ${NEXUS_MODEL_LOCAL:-qwen2.5:3b}
       # Coût estimé par 1000 tokens : 0 (offres gratuites uniquement)
       LLM_EUR_PAR_1K_TOKENS: ${LLM_EUR_PAR_1K_TOKENS:-0}
@@ -174,12 +187,21 @@ services:
       EUR_PAR_USD: ${EUR_PAR_USD:-0.92}
       N3_TIMEOUT_HOURS: ${N3_TIMEOUT_HOURS:-24}
       N3_DAILY_CAP: ${N3_DAILY_CAP:-15}
-      # Vides en MVP : nexus-core n'envoie alors aucune notification
-      NTFY_URL: ""
-      NTFY_TOPIC: ""
+      # Alertes N3 sur le téléphone (appli ntfy). MVP : service public gratuit ntfy.sh,
+      # sujet secret aléatoire. Texte toujours générique (« Décision N3 en attente #id »).
+      # Mode complet : remplacé par le serveur ntfy du kit (docker-compose.complet.yml).
+      NTFY_URL: ${NTFY_URL:-https://ntfy.sh}
+      NTFY_TOPIC: ${NTFY_TOPIC:-}
+    # Durcissement : aucun privilège Linux, système de fichiers en lecture seule
+    # (écriture possible seulement dans /data et /tmp).
+    cap_drop: [ALL]
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
     volumes:
       # Livrables (/data/livrables/<id>.md) et autres fichiers de nexus-core
       - ./data/nexus-core:/data
+      - ./nexus-core/projets.yaml:/config/projets.yaml:ro
     # MVP : dépend seulement d'ollama, et seulement si le profil « local » est actif
     # (required: false). postgres/redis sont ajoutés en mode complet.
     depends_on:
@@ -221,6 +243,11 @@ services:
       # Liaison au Mothership (lecture + création de missions, jamais de validation)
       NEXUS_CORE_URL: http://nexus-core:8000
       NEXUS_API_KEY: ${NEXUS_API_KEY:?NEXUS_API_KEY manquant}
+    # Durcissement : aucun privilège Linux, système de fichiers en lecture seule
+    cap_drop: [ALL]
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,mode=1777
     volumes:
       - ./data/nexus-bridge:/data
     depends_on:
@@ -243,7 +270,7 @@ services:
   n8n:
     <<: *commun
     profiles: ["complet"]
-    image: n8nio/n8n:1.64.3
+    image: n8nio/n8n:2.45.6
     mem_limit: 640m
     cpus: 0.15
     environment:
@@ -262,16 +289,15 @@ services:
       N8N_PROXY_HOPS: "1"
       WEBHOOK_URL: https://${NEXUS_HOST}:8443/
       N8N_EDITOR_BASE_URL: https://${NEXUS_HOST}:8443/
-      N8N_BLOCK_ENV_ACCESS_IN_NODE: "false"
+      # true : les workflows ne peuvent pas lire les variables d'environnement
+      # (clés, mots de passe). Utilisez des « Credentials » n8n à la place de $env.
+      N8N_BLOCK_ENV_ACCESS_IN_NODE: "true"
       N8N_DIAGNOSTICS_ENABLED: "false"
       N8N_PERSONALIZATION_ENABLED: "false"
       N8N_HIRING_BANNER_ENABLED: "false"
       EXECUTIONS_DATA_PRUNE: "true"
       EXECUTIONS_DATA_MAX_AGE: "336"
       NODE_OPTIONS: "--max-old-space-size=512"
-      # Variables lues par les workflows via $env
-      NEXUS_API_KEY: ${NEXUS_API_KEY}
-      NTFY_TOPIC: ${NTFY_TOPIC:-}
       NEXUS_HOST: ${NEXUS_HOST}
     volumes:
       - ./data/n8n:/home/node/.n8n
@@ -314,6 +340,11 @@ services:
       NTFY_BEHIND_PROXY: "true"
       NTFY_CACHE_FILE: /var/cache/ntfy/cache.db
       NTFY_CACHE_DURATION: "72h"
+      # Accès refusé par défaut. install.sh --complet ouvre seulement le sujet
+      # NTFY_TOPIC : écriture anonyme (nexus-core, n8n) et lecture pour le compte
+      # NTFY_USER (appli Android). Comptes stockés dans ./data/ntfy/user.db.
+      NTFY_AUTH_FILE: /var/cache/ntfy/user.db
+      NTFY_AUTH_DEFAULT_ACCESS: deny-all
     volumes:
       - ./data/ntfy:/var/cache/ntfy
     healthcheck:

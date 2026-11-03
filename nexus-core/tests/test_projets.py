@@ -38,7 +38,7 @@ def test_projet_inconnu_422(client, entetes):
     assert client.get("/api/missions?projet=inexistant", headers=entetes).status_code == 422
 
 
-def test_filtres_missions_et_decisions(client, entetes):
+def test_filtres_missions_et_decisions(client, entetes, cockpit):
     _mission(client, entetes, projet="turf")
     _mission(client, entetes, projet="nexus")
     client.post("/api/missions", headers=entetes,
@@ -49,12 +49,12 @@ def test_filtres_missions_et_decisions(client, entetes):
     assert len(turf) == 1 and turf[0]["projet"] == "turf"
     decs = client.get("/api/decisions?statut=en_attente&projet=freelance-ia", headers=entetes).json()
     assert len(decs) == 1 and decs[0]["projet"] == "freelance-ia"
-    assert len(client.get("/cockpit/api/decisions?statut=en_attente", headers={}).json()) == 2
+    assert len(client.get("/cockpit/api/decisions?statut=en_attente", headers=cockpit).json()) == 2
     # Compteurs par projet.
     liste = {p["code"]: p for p in client.get("/api/projets", headers=entetes).json()}
     assert liste["freelance-ia"]["decisions_en_attente"] == 1
     assert liste["turf"]["missions"] == 1 and liste["paradoxx"]["missions"] == 0
-    assert client.get("/cockpit/api/projets").status_code == 200
+    assert client.get("/cockpit/api/projets", headers=cockpit).status_code == 200
     assert client.get("/api/projets").status_code == 401  # clé obligatoire
 
 

@@ -11,7 +11,7 @@ import time
 from datetime import timedelta
 
 import httpx
-from sqlalchemy import func, select
+from sqlalchemy import func, select, update
 
 from . import agents as reg
 from . import budget, cyber, gate, ledger, sentinel
@@ -35,7 +35,9 @@ MOTS_SERVICES = {
     "LEX-GUARD/conformite": ["rgpd", "ai act", "conformite", "cgv", "cgu", "mentions legales", "juridique"],
     "REVENUE-CORE/propositions": ["devis", "proposition commerciale", "offre", "tarif", "prospect", "client"],
     "CONTENT-ARENA/redaction": ["article", "post", "newsletter", "redige un texte", "blog", "linkedin"],
-    "CODE-CORE/revue": ["code", "python", "javascript", "bug", "spec", "api", "revue de code"],
+    # « code » seul retiré (« code du travail », « code civil »…) : expressions explicites uniquement.
+    "CODE-CORE/revue": ["code source", "ce code", "mon code", "le code python", "extrait de code", "python",
+                        "javascript", "typescript", "bug", "spec", "api", "revue de code", "relecture de code"],
     "OPS-CORE/projets": ["plan de projet", "checklist", "planning", "etapes", "organisation", "demarrage"],
     "R&D-PARADOX/veille": ["veille", "synthese", "tendance", "etat de l'art", "resume"],
     "AGENT-FACTORY/evaluation": ["evalue", "evaluation", "qualite de la sortie", "agent"],
@@ -79,6 +81,27 @@ MOTS_SERVICES = {
                                 "reponse a incident"],
 }
 MENTION_AVOCAT = "Information générale, ne remplace pas l'avis d'un avocat"
+
+# Départage PRIME en cas d'égalité de score (si le LLM PRIME ne tranche pas) : du plus prudent
+# (droit, sécurité, finances) au plus général. Un service absent de la liste passe après.
+PRIORITE_SERVICES = [
+    "LEX-GUARD/droit-france", "LEX-GUARD/droit-europe", "LEX-GUARD/droit-international", "LEX-GUARD/conformite",
+    "CYBER-FORTRESS/incident", "CYBER-FORTRESS/conformite", "CYBER-FORTRESS/audit", "CYBER-FORTRESS/veille",
+    "PILOT-CORE/etudes", "PILOT-CORE/pilotage", "REVENUE-CORE/propositions", "GREEN-CORE/rse",
+    "GREEN-CORE/environnement", "CODE-CORE/conception", "CODE-CORE/revue", "DESIGN-SYSTEM/ui",
+    "R&D-PARADOX/veille", "CONTENT-ARENA/redaction", "AGENT-FACTORY/evaluation", "OPS-CORE/projets",
+]
+
+
+def scores_services(titre: str, consigne: str) -> dict[str, int]:
+    """Score PRIME : somme, pour chaque expression trouvée en mots entiers, de son nombre de mots."""
+    texte = gate.normaliser(f"{titre} {consigne}")
+    return {s: sum(len(m.split()) for m in mots if gate.contient_mot(texte, re.escape(m)))
+            for s, mots in MOTS_SERVICES.items()}
+
+
+def _priorite(service: str) -> int:
+    return PRIORITE_SERVICES.index(service) if service in PRIORITE_SERVICES else len(PRIORITE_SERVICES)
 
 
 def garantir_mention_juridique(service: str | None, livrable: str) -> str:
@@ -151,6 +174,18 @@ def _maj_mission(mid: int, **champs) -> None:
         m = s.get(Mission, mid)
         for k, v in champs.items():
             setattr(m, k, v)
+
+
+def transition(mid: int, depuis: tuple[str, ...], vers: str, **champs) -> bool:
+    """Change le statut d'une mission seulement s'il vaut encore l'un de `depuis` (atomique).
+
+    `UPDATE missions SET statut=… WHERE id=? AND statut IN (…)` : deux traitements concurrents
+    ne peuvent pas faire la même transition ; renvoie False si la mission a déjà changé.
+    """
+    with session_scope() as s:
+        r = s.execute(update(Mission).where(Mission.id == mid, Mission.statut.in_(depuis))
+                      .values(statut=vers, maj_le=maintenant(), **champs))
+        return r.rowcount == 1
 
 
 def _etape(mid: int, agent_id: str, role: str, entree: str, sortie: str, verdict: str | None,
@@ -301,13 +336,14 @@ def choisir_service(ctx: Contexte) -> str:
     services = reg.services()
     if ctx.service in services:
         return ctx.service
-    texte = gate.normaliser(f"{ctx.titre} {ctx.consigne}")
-    # Mots entiers uniquement (« argent » ne contient pas « agent », « rapide » pas « api »).
-    scores = {s: sum(1 for m in mots if gate.contient_mot(texte, re.escape(m)))
-              for s, mots in MOTS_SERVICES.items()}
-    meilleur = max(scores, key=scores.get)
-    if scores[meilleur] > 0:
-        return meilleur
+    # Mots entiers, score pondéré par le nombre de mots de l'expression (« code du travail » = 3).
+    scores = scores_services(ctx.titre, ctx.consigne)
+    haut = max(scores.values())
+    if haut > 0:
+        ex_aequo = sorted((s for s, v in scores.items() if v == haut), key=_priorite)
+        if len(ex_aequo) == 1:
+            return ex_aequo[0]
+        return _departager(ctx, ex_aequo)
     prime = reg.par_role("prime")["id"]
     liste = "\n".join(f"- {s}" for s in services)
     rep = ctx.appel(prime, assembler([("Services possibles", liste, 3, "debut"),
@@ -369,12 +405,27 @@ def _executer_protege(ctx: Contexte, fonction, *args) -> None:
         _bilan(ctx)
 
 
+def _departager(ctx: Contexte, candidats: list[str]) -> str:
+    """Égalité : avis du LLM PRIME limité aux candidats ; sinon (LLM absent ou hors liste) priorité explicite."""
+    prime = reg.par_role("prime")["id"]
+    rep = ctx.appel(prime, assembler([("Services possibles (à égalité)", "\n".join(f"- {s}" for s in candidats), 3,
+                                       "debut"), ("Mission", ctx.titre, 3, "debut"),
+                                      ("Consigne", ctx.consigne, 1, "debut")], ctx.max_chars),
+                    temperature=0.0, tolerer_erreur=True)
+    choisi = next((s for s in candidats if rep and s.lower() in rep.lower()), None)
+    ledger.journaliser(prime, "routage_departage", ctx.mid, candidats=candidats,
+                       choisi=choisi or candidats[0], par="llm" if choisi else "priorite")
+    return choisi or candidats[0]
+
+
 def traiter(mid: int) -> None:
     """Exécute le pipeline complet d'une mission (appelé en tâche de fond)."""
+    # Prise atomique : une mission n'est traitée qu'une fois, même si elle est soumise deux fois.
+    if not transition(mid, ("recue", "en_attente_place"), "en_cours", attente=None):
+        ledger.journaliser("NEXUS-PRIME", "mission_deja_prise", mid)
+        return
     with session_scope() as s:
         m = s.get(Mission, mid)
-        if m is None:
-            return
         ctx = Contexte(m)
     _executer_protege(ctx, _executer)
 
@@ -567,6 +618,9 @@ def escalader(ctx: Contexte, srv: dict, livrable: str, verdict: dict, refus: int
 
 def relancer_revision(mid: int, commentaire: str | None) -> None:
     """Révision demandée : nouvel ANALYST avec le commentaire, puis CHECKER et GATE."""
+    if not transition(mid, ("revision",), "en_cours"):
+        ledger.journaliser("NEXUS-PRIME", "mission_deja_prise", mid)
+        return
     with session_scope() as s:
         m = s.get(Mission, mid)
         if m is None:
@@ -589,6 +643,30 @@ def _reviser(ctx: Contexte, precedent: str, commentaire: str | None) -> None:
     livrable = ctx.appel(srv["analyst"], _message_analyst(
         ctx, "", precedent, None, commentaire or "Améliore le livrable."))
     _boucle_qualite(ctx, srv, livrable, "")
+
+
+# --- Reprise au démarrage ------------------------------------------------------------
+
+def reprendre_au_demarrage() -> dict:
+    """Après un redémarrage : missions « en_cours » interrompues → échouées (relance proposée) ;
+    missions « recue » / « en_attente_place » → remises dans la file, dans l'ordre d'arrivée."""
+    from .file_missions import FILE
+    with session_scope() as s:
+        interrompues = s.execute(select(Mission.id).where(Mission.statut == "en_cours")
+                                 .order_by(Mission.id)).scalars().all()
+        en_file = s.execute(select(Mission.id).where(Mission.statut.in_(("recue", "en_attente_place")))
+                            .order_by(Mission.id)).scalars().all()
+    for mid in interrompues:
+        if transition(mid, ("en_cours",), "echouee",
+                      message="Échouée : interrompue par un redémarrage de nexus-core. "
+                              "Proposition : relancer la mission (créer une nouvelle mission avec la même consigne)."):
+            ledger.journaliser("NEXUS-PRIME", "mission_interrompue_redemarrage", mid,
+                               proposition="relancer la mission")
+    for mid in en_file:
+        transition(mid, ("en_attente_place",), "recue")
+        ledger.journaliser("NEXUS-PRIME", "mission_reprise_redemarrage", mid)
+        FILE.soumettre(mid, traiter)
+    return {"interrompues": list(interrompues), "relancees": list(en_file)}
 
 
 # --- Décisions N3 ------------------------------------------------------------------
@@ -695,27 +773,33 @@ def creer_decision_lancement_f4(mid: int) -> int | None:
 
 
 def expirer_decisions() -> int:
-    """Décisions en attente depuis plus de N3_TIMEOUT_HOURS → expirée = refus par défaut."""
+    """Décisions en attente depuis plus de N3_TIMEOUT_HOURS → expirée = refus par défaut (atomique)."""
     limite = maintenant() - timedelta(hours=cfg().n3_timeout_hours)
-    expirees: list[tuple[int, int]] = []
     with session_scope() as s:
-        for d in s.execute(select(Decision).where(Decision.statut == "en_attente")
-                           .where(Decision.cree_le < limite)).scalars().all():
-            d.statut = "expiree"
-            d.decide_le = maintenant()
-            d.commentaire = "Expirée sans réponse : refus par défaut."
-            m = s.get(Mission, d.mission_id)
-            m.statut = "refusee"
-            m.message = "Décision N3 expirée : refus par défaut."
-            expirees.append((d.id, d.mission_id))
-    # Journalisation après validation de la transaction.
-    for did, mid in expirees:
+        candidates = s.execute(select(Decision.id, Decision.mission_id).where(Decision.statut == "en_attente")
+                               .where(Decision.cree_le < limite)).all()
+    expirees = 0
+    for did, mid in candidates:
+        with session_scope() as s:
+            r = s.execute(update(Decision).where(Decision.id == did, Decision.statut == "en_attente")
+                          .values(statut="expiree", decide_le=maintenant(),
+                                  commentaire="Expirée sans réponse : refus par défaut."))
+            if r.rowcount != 1:
+                continue  # décidée entre-temps par le propriétaire
+            s.execute(update(Mission).where(Mission.id == mid, Mission.statut == "en_attente_n3")
+                      .values(statut="refusee", attente=None, maj_le=maintenant(),
+                              message="Décision N3 expirée : refus par défaut."))
+        expirees += 1
         ledger.journaliser("NEXUS-GATE", "decision_expiree", mid, decision_id=did)
-    return len(expirees)
+    return expirees
 
 
 def decider(did: int, choix: str, commentaire: str | None) -> dict:
-    """Valider / refuser / réviser une décision N3 (action humaine)."""
+    """Valider / refuser / réviser une décision N3 (action humaine), de façon atomique.
+
+    `UPDATE decisions … WHERE id=? AND statut='en_attente'` puis transition de la mission depuis
+    `en_attente_n3`, dans la même transaction : un seul appel concurrent peut gagner (les autres → 409).
+    """
     statuts = {"valider": "validee", "refuser": "refusee", "reviser": "revision"}
     if choix not in statuts:
         raise ValueError("choix inconnu")
@@ -726,30 +810,34 @@ def decider(did: int, choix: str, commentaire: str | None) -> dict:
         if d.statut != "en_attente":
             raise PermissionError(f"décision déjà traitée ({d.statut})")
         lancement = d.objet == "lancement_f4"
+        mid = d.mission_id
         if lancement and choix == "reviser":
             raise PermissionError("Révision impossible pour un lancement F4 : valider ou refuser.")
         if choix == "reviser":
-            deja = s.execute(select(func.count(Decision.id)).where(Decision.mission_id == d.mission_id)
+            deja = s.execute(select(func.count(Decision.id)).where(Decision.mission_id == mid)
                              .where(Decision.statut == "revision")).scalar_one()
             if deja >= MAX_REVISIONS:
                 raise PermissionError(f"Limite de {MAX_REVISIONS} révisions atteinte pour cette mission : "
                                       "valider ou refuser.")
-        d.statut = statuts[choix]
-        d.decide_le = maintenant()
-        d.commentaire = commentaire
-        mid = d.mission_id
-        m = s.get(Mission, mid)
-        m.statut = statuts[choix]
+    with session_scope() as s:
+        r = s.execute(update(Decision).where(Decision.id == did, Decision.statut == "en_attente")
+                      .values(statut=statuts[choix], decide_le=maintenant(), commentaire=commentaire))
+        if r.rowcount != 1:
+            raise PermissionError("décision déjà traitée (décision concurrente)")
+        champs = {"statut": statuts[choix], "maj_le": maintenant()}
         if lancement:
-            m.attente = None
+            champs["attente"] = None
             if choix == "valider":
-                m.statut = "recue"
-                m.message = "Lancement F4 approuvé : mission en file d'exécution."
+                champs.update(statut="recue", message="Lancement F4 approuvé : mission en file d'exécution.")
             else:
-                m.message = "Lancement F4 refusé par le propriétaire."
+                champs["message"] = "Lancement F4 refusé par le propriétaire."
         if choix == "reviser":
-            m.message = f"Révision demandée : {commentaire or '(sans commentaire)'}"
-        service = m.service
+            champs["message"] = f"Révision demandée : {commentaire or '(sans commentaire)'}"
+        r = s.execute(update(Mission).where(Mission.id == mid, Mission.statut == "en_attente_n3").values(**champs))
+        if r.rowcount != 1:
+            s.rollback()
+            raise PermissionError("La mission n'attend plus de décision (statut modifié entre-temps).")
+        service = s.get(Mission, mid).service
     ledger.journaliser("DECIDEUR", f"decision_{statuts[choix]}", mid, decision_id=did,
                        commentaire=commentaire, objet="lancement_f4" if lancement else "livrable")
     if lancement:

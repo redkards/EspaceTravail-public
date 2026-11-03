@@ -273,7 +273,7 @@ def test_f1_aucune_correction():
 
 # --- Mesures et API -------------------------------------------------------------------
 
-def test_mesures_et_route_fonctionnement(client, entetes):
+def test_mesures_et_route_fonctionnement(client, entetes, cockpit):
     for f in ("F1", "F2", "F2"):
         client.post("/api/missions", headers=entetes, json={"titre": "Checklist", "consigne": "Liste les étapes",
                                                              "service": "OPS-CORE/projets", "fonctionnement": f})
@@ -289,7 +289,7 @@ def test_mesures_et_route_fonctionnement(client, entetes):
     assert conso["F2"]["tokens"] > 0 and conso["F2"]["duree_moyenne_s"] is not None
     assert r["f4_indisponible"] == "budget IA à 0 €"
     assert client.get("/api/fonctionnement").status_code == 401
-    assert client.get("/cockpit/api/fonctionnement").status_code == 200
+    assert client.get("/cockpit/api/fonctionnement", headers=cockpit).status_code == 200
 
 
 def test_migration_colonnes_fonctionnement(tmp_path, monkeypatch):
