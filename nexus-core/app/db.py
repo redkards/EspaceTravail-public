@@ -81,6 +81,7 @@ COLONNES_AJOUTEES = [
     ("missions", "relance_auto", "INTEGER NOT NULL DEFAULT 0"),
     ("decisions", "objet", "VARCHAR(20) NOT NULL DEFAULT 'livrable'"),
     ("ledger", "algo", "VARCHAR(10) NOT NULL DEFAULT 'sha256'"),
+    ("decisions", "risque_raisons", "TEXT"),
 ]
 
 

@@ -75,6 +75,7 @@ class Decision(Base):
     recommandation: Mapped[str] = mapped_column(Text)
     cout_estime_eur: Mapped[float] = mapped_column(Float, default=0.0)
     risque: Mapped[str] = mapped_column(String(10))  # faible | moyen | eleve
+    risque_raisons: Mapped[str | None] = mapped_column(Text, nullable=True)  # JSON : règles déclenchées
     sources: Mapped[str] = mapped_column(Text, default="")
     avis_checker: Mapped[str] = mapped_column(Text, default="")
     # en_attente | validee | refusee | revision | expiree

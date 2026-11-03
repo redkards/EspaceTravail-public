@@ -14,7 +14,7 @@ import httpx
 from sqlalchemy import func, select, update
 
 from . import agents as reg
-from . import budget, cyber, gate, ledger, sentinel
+from . import budget, cyber, decideur, gate, ledger, sentinel
 from . import fonctionnement as fct
 from .config import cfg
 from .db import session_scope
@@ -737,6 +737,7 @@ def creer_decision_si_possible(mid: int, verdict: dict | None = None, motif: str
         lignes = [l.strip(" #-*") for l in livrable.splitlines() if l.strip(" #-*")]
         resume = "\n".join([m.titre] + lignes[:2])
         verdict = verdict or {"ok": True, "problemes": []}
+        risque, raisons = decideur.risque_mission(m)  # règles explicables (montant, tiers, production…)
         avis = "Conforme" if verdict.get("ok") else "Réserves"
         if verdict.get("problemes"):
             avis += " : " + "; ".join(verdict["problemes"])
@@ -745,7 +746,7 @@ def creer_decision_si_possible(mid: int, verdict: dict | None = None, motif: str
             recommandation=(f"Relire le brouillon puis réaliser l'action manuellement ou via n8n. "
                             f"Motif du classement : {motif or m.message or 'N3'}"),
             cout_estime_eur=float(m.montant_eur or 0) + float(m.cout_eur or 0),
-            risque=_risque(m.montant_eur or 0, m.action, motif),
+            risque=risque, risque_raisons=json.dumps(raisons, ensure_ascii=False),
             sources="Éléments fournis dans la consigne (pas d'accès web en mini-version).",
             avis_checker=avis,
         )
@@ -753,8 +754,8 @@ def creer_decision_si_possible(mid: int, verdict: dict | None = None, motif: str
         s.flush()
         did = d.id
         titre = m.titre
-    ledger.journaliser("NEXUS-GATE", "decision_n3_creee", mid, decision_id=did)
-    notifier(f"Décision N3 en attente : {titre}", f"Mission #{mid} — à valider dans le cockpit.", mid)
+    ledger.journaliser("NEXUS-GATE", "decision_n3_creee", mid, decision_id=did, risque=risque)
+    decideur.nouvelle_decision(did)  # notification groupée par session (immédiate si urgente)
     return did
 
 
@@ -788,13 +789,15 @@ def creer_decision_lancement_f4(mid: int) -> int | None:
     with session_scope() as s:
         m = s.get(Mission, mid)
         n4 = fct.niveau("F4")
+        risque, raisons = decideur.risque_mission(m, "lancement_f4", est["cout_estime_eur"])
         d = Decision(
             mission_id=mid, niveau="N3", objet="lancement_f4",
             resume=(f"Lancer en F4 — coût estimé {est['cout_estime_eur']:.2f} €\n{m.titre}\n"
                     f"Plafonds : {n4.budget_tokens} tokens, {n4.cout_max_eur:.2f} €, {n4.delai_max_s:.0f} s.")[:600],
             recommandation=("Valider pour lancer la mission avec les modèles Anthropic (payant). "
                             "Refuser pour l'abandonner ; relancer en F3 (gratuit) si besoin."),
-            cout_estime_eur=est["cout_estime_eur"], risque="moyen",
+            cout_estime_eur=est["cout_estime_eur"], risque=risque,
+            risque_raisons=json.dumps(raisons, ensure_ascii=False),
             sources=(f"Estimation : {est['tokens_prevus']} tokens au tarif du modèle le plus cher, "
                      f"1 $ = {est['eur_par_usd']} € (fonctionnement.yaml)."),
             avis_checker="Sans objet (mission non encore exécutée).",
@@ -804,8 +807,7 @@ def creer_decision_lancement_f4(mid: int) -> int | None:
         did, titre = d.id, m.titre
     ledger.journaliser("NEXUS-GATE", "decision_lancement_f4_creee", mid, decision_id=did,
                        cout_estime_eur=est["cout_estime_eur"])
-    notifier(f"Lancement F4 a valider : {titre}",
-             f"Mission #{mid} — coût estimé {est['cout_estime_eur']:.2f} €. À valider dans le cockpit.", mid)
+    decideur.nouvelle_decision(did)  # notification générique, groupée par session
     return did
 
 
@@ -917,8 +919,11 @@ def executer_livrable(mid: int, executor_id: str, statut_final: str = "terminee"
 
 # --- Notification ntfy (best effort) --------------------------------------------
 
-def notifier(titre: str, message: str, mission_id: int | None = None) -> bool:
-    """Notification ntfy optionnelle : un échec est journalisé, jamais bloquant."""
+def notifier(titre: str, message: str, mission_id: int | None = None, clic: str | None = None) -> bool:
+    """Notification ntfy optionnelle : un échec est journalisé, jamais bloquant.
+
+    Le texte doit rester générique (aucun détail métier) ; `clic` = lien ouvert depuis la notification.
+    """
     c = cfg()
     if not c.ntfy_url or not c.ntfy_topic:
         ledger.journaliser("NEXUS-GATE", "notification_non_envoyee", mission_id,
@@ -928,7 +933,8 @@ def notifier(titre: str, message: str, mission_id: int | None = None) -> bool:
         # Titre en ASCII pour l'en-tête HTTP ; le corps reste en UTF-8.
         r = httpx.post(f"{c.ntfy_url}/{c.ntfy_topic}", content=message.encode("utf-8"),
                        headers={"Title": re.sub(r"[^\x20-\x7e]", "", gate.normaliser(titre))[:120],
-                                "Priority": "high", "Tags": "warning"}, timeout=5)
+                                "Priority": "high", "Tags": "warning", **({"Click": clic} if clic else {})},
+                       timeout=5)
         r.raise_for_status()
         return True
     except Exception as e:
