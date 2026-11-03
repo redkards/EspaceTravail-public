@@ -22,7 +22,9 @@
 #    NEXUS_API_KEY   défaut : lue dans .env (ENV_FILE, ../.env,
 #                    /srv/p1/nexus-mothership/.env, /opt/nexus-mothership/.env)
 #    NEXUS_RESOLVE   facultatif, ex. srvXXXX.hstgr.cloud:443:IP_PUBLIQUE
-#    DELAI_MAX_S     délai max par mission (défaut selon F : 300/900/1500/2400)
+#    DELAI_MAX_S     délai max d'attente par mission (défaut 2700 s ; 3900 s en F4) :
+#                    les planchers relèvent souvent F1/F2 en F3 (droit, cyber, pilotage)
+#                    et une relance automatique peut doubler la durée.
 #    INTERVALLE_S    intervalle d'interrogation (défaut 10)
 #    FICHIER_RESULTATS  défaut : resultats/<AAAA-MM-JJ>_<F>[_<nom>].json
 #
@@ -56,7 +58,7 @@ Pour le mesurer quand même : FORCER_F4=1 FONCTIONNEMENT=F4 ./lancer.sh (et vali
 fi
 [[ "$F" == "F4" ]] && info "ATTENTION : F4 est PAYANT. Chaque mission attend votre validation (coût estimé) dans le cockpit ; le banc ne valide rien lui-même."
 
-case "$F" in F1) DEF=300 ;; F2) DEF=900 ;; F3) DEF=1500 ;; *) DEF=2400 ;; esac
+if [[ "$F" == "F4" ]]; then DEF=3900; else DEF=2700; fi
 DELAI_MAX_S="${DELAI_MAX_S:-$DEF}"
 INTERVALLE_S="${INTERVALLE_S:-10}"
 [[ "$DELAI_MAX_S" =~ ^[0-9]+$ && "$DELAI_MAX_S" -gt 0 ]] || erreur "DELAI_MAX_S doit être un entier positif."
