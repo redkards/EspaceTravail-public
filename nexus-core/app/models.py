@@ -1,7 +1,7 @@
 """Modèle de données (SQLAlchemy 2)."""
 from datetime import datetime, timezone
 
-from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -105,3 +105,19 @@ class Etat(Base):
     __tablename__ = "etat"
     cle: Mapped[str] = mapped_column(String(120), primary_key=True)
     valeur: Mapped[str] = mapped_column(Text, default="")
+
+
+class Connaissance(Base):
+    """Connaissance d'un projet (mémoire) ; index plein texte FTS5 créé par memoire.initialiser_fts."""
+    __tablename__ = "connaissances"
+    __table_args__ = (UniqueConstraint("projet", "source", name="uq_connaissance_projet_source"),)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    projet: Mapped[str] = mapped_column(String(40), index=True)
+    titre: Mapped[str] = mapped_column(String(200))
+    contenu: Mapped[str] = mapped_column(Text)
+    source: Mapped[str] = mapped_column(String(300))
+    date: Mapped[datetime] = mapped_column(DateTime, default=maintenant)
+    auteur: Mapped[str] = mapped_column(String(60))
+    version: Mapped[int] = mapped_column(Integer, default=1)
+    origine: Mapped[str] = mapped_column(String(10), default="manuel")  # manuel | import | auto
+    empreinte: Mapped[str] = mapped_column(String(64))

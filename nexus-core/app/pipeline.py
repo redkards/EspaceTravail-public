@@ -14,7 +14,7 @@ import httpx
 from sqlalchemy import func, select, update
 
 from . import agents as reg
-from . import budget, cyber, decideur, gate, ledger, sentinel
+from . import budget, cyber, decideur, gate, ledger, memoire, sentinel
 from . import fonctionnement as fct
 from .config import cfg
 from .db import session_scope
@@ -220,6 +220,8 @@ class Contexte:
         self.debut = _horloge()
         self.livrable_partiel: str | None = mission.livrable_texte
         self.relancer = False  # positionné par escalader() : relance automatique demandée
+        self.projet = mission.projet or "divers"
+        self.connaissances = ""  # extraits de la mémoire du projet (voir _charger_connaissances)
         self.f = fct.niveau(mission.fonctionnement or fct.defaut())
         self._instancier()
 
@@ -492,14 +494,27 @@ def _executer(ctx: Contexte) -> None:
         raise MissionArretee("suspendue", f"Arrêt d'urgence actif ({cle}).")
     appliquer_planchers(ctx)
 
-    # 3. COLLECTOR
-    elements = ctx.appel(srv["collector"], assembler([("Mission", ctx.titre, 3, "debut"),
-                                                      ("Consigne", ctx.consigne, 2, "debut")], ctx.max_chars))
+    # 3. COLLECTOR (avec les 3 extraits les plus pertinents de la mémoire du projet)
+    _charger_connaissances(ctx)
+    sections = [("Mission", ctx.titre, 3, "debut"), ("Consigne", ctx.consigne, 2, "debut")]
+    if ctx.connaissances:
+        sections.append(("Connaissances du projet (à reprendre dans ELEMENTS en citant la source entre crochets)",
+                         ctx.connaissances, 1, "debut"))
+    elements = ctx.appel(srv["collector"], assembler(sections, ctx.max_chars))
 
     # 4-5. ANALYST ⇄ CHECKER, puis 6-8. GATE et suite
     livrable = ctx.appel(srv["analyst"], _message_analyst(ctx, elements))
     ctx.livrable_partiel = livrable
     _boucle_qualite(ctx, srv, livrable, elements)
+
+
+def _charger_connaissances(ctx: Contexte) -> None:
+    """Extraits FTS de la mémoire du projet, bornés selon le niveau de fonctionnement."""
+    trouves = memoire.extraits(ctx.projet, f"{ctx.titre} {ctx.consigne}", ctx.f.code)
+    ctx.connaissances = memoire.formater(trouves)
+    if trouves:
+        ledger.journaliser("NEXUS-PRIME", "connaissances_fournies", ctx.mid, projet=ctx.projet,
+                           sources=[e["source"] for e in trouves], caracteres=len(ctx.connaissances))
 
 
 def _message_analyst(ctx: Contexte, elements: str, precedent: str | None = None,
@@ -527,8 +542,10 @@ def _controler(ctx: Contexte, srv: dict, livrable: str) -> dict:
             ledger.journaliser(srv["checker"], "verdict", mid, ok=False, problemes=refus["problemes"],
                                source="garde_fou_cyber")
             return refus
-    message = assembler([("Consigne", ctx.consigne, 1, "debut"),
-                         ("Livrable à vérifier", livrable, 3, "tete_queue")], ctx.max_chars)
+    sections = [("Consigne", ctx.consigne, 1, "debut"), ("Livrable à vérifier", livrable, 3, "tete_queue")]
+    if ctx.connaissances:
+        sections.insert(1, ("Connaissances du projet : le livrable ne doit PAS les contredire (sinon ok: false en citant la source)", ctx.connaissances, 2, "debut"))
+    message = assembler(sections, ctx.max_chars)
     verdict = parser_verdict(ctx.appel(srv["checker"], message, temperature=0.0))
     _etape(mid, srv["checker"], "checker", "verdict", json.dumps(verdict, ensure_ascii=False),
            "ok" if verdict["ok"] else "refus", 0)
@@ -677,6 +694,7 @@ def _reviser(ctx: Contexte, precedent: str, commentaire: str | None) -> None:
     ctx.directeur = srv["directeur"]
     _maj_mission(mid, statut="en_cours", message=f"Révision en cours : {commentaire or '(sans commentaire)'}")
     ledger.journaliser("NEXUS-PRIME", "revision_lancee", mid, commentaire=commentaire, fonctionnement=ctx.f.code)
+    _charger_connaissances(ctx)
     livrable = ctx.appel(srv["analyst"], _message_analyst(
         ctx, "", precedent, None, commentaire or "Améliore le livrable."))
     _boucle_qualite(ctx, srv, livrable, "")
@@ -907,6 +925,14 @@ def executer_livrable(mid: int, executor_id: str, statut_final: str = "terminee"
                  message=f"Livrable enregistré{' : ' + fichier if fichier else ' en base'}. "
                          "Aucune action externe exécutée.")
     ledger.journaliser(executor_id, "livrable_enregistre", mid, fichier=fichier, action_externe=False)
+    # Mémoire du projet : résumé du livrable validé (désactivable : NEXUS_MEMOIRE_AUTO=0).
+    try:
+        with session_scope() as s:
+            m = s.get(Mission, mid)
+            titre, projet_m, livrable_m = m.titre, m.projet, m.livrable_texte
+        memoire.memoriser_livrable(mid, titre, projet_m or "divers", livrable_m)
+    except Exception:
+        log.exception("Mémorisation du livrable %s impossible", mid)
 
 
 # --- Notification ntfy (best effort) --------------------------------------------

@@ -119,6 +119,8 @@ def init_db(tentatives: int = 30, pause_s: float = 2.0) -> None:
                     log.warning("Extension vector indisponible : %s", e)
             Base.metadata.create_all(eng)
             migrer(eng)
+            from .memoire import initialiser_fts
+            initialiser_fts(eng)
             return
         except Exception as e:
             if i == tentatives - 1:

@@ -73,6 +73,11 @@ async def cycle_de_vie(app: FastAPI):
     init_db()
     reg.charger()
     registre.charger()  # échec explicite au démarrage si projets.yaml est invalide
+    from . import memoire
+    try:
+        log.info("Connaissances importées : %s", memoire.importer())
+    except Exception:
+        log.exception("Import des connaissances impossible (démarrage poursuivi)")
     from . import fonctionnement
     fonctionnement.charger()  # idem pour fonctionnement.yaml
     log.info("Fonctionnement par défaut : %s", fonctionnement.defaut())

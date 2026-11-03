@@ -8,6 +8,7 @@ from sqlalchemy import func, select
 from . import agents as reg
 from . import budget, ledger, pipeline, sentinel
 from . import fonctionnement as fct
+from . import memoire
 from .file_missions import FILE
 from . import projets as registre
 from .db import session_scope
@@ -30,6 +31,12 @@ class NouvelleMission(BaseModel):
 class Commentaire(BaseModel):
     commentaire: str | None = Field(default=None, max_length=4000)
     code: str | None = Field(default=None, max_length=12)  # code Décideur (cockpit, risque élevé)
+
+
+class NouvelleConnaissance(BaseModel):
+    titre: str = Field(min_length=1, max_length=200)
+    contenu: str = Field(min_length=1, max_length=20000)
+    source: str | None = Field(default=None, max_length=300)
 
 
 class KillSwitch(BaseModel):
@@ -260,6 +267,29 @@ def creer_routeur(cockpit: bool = False) -> APIRouter:
                         "appelle_llm": reg.appelle_llm(a),
                         "statut": "suspendu" if suspendu else "actif"})
         return res
+
+    @r.get("/projets/{code}/connaissances")
+    def lire_connaissances(code: str, q: str | None = Query(default=None, max_length=300),
+                           limite: int = Query(10, ge=1, le=50)):
+        """Mémoire du projet : recherche plein texte (q) ou dernières connaissances."""
+        try:
+            return memoire.rechercher(code, q, limite)
+        except ValueError as e:
+            raise HTTPException(404, str(e))
+
+    @r.post("/projets/{code}/connaissances", status_code=201)
+    def ajouter_connaissance(code: str, corps: NouvelleConnaissance):
+        auteur = "proprietaire" if cockpit else "api"
+        try:
+            registre.resoudre(code)
+        except ValueError as e:
+            raise HTTPException(404, str(e))
+        try:
+            return memoire.ajouter(code, corps.titre, corps.contenu,
+                                   corps.source or f"{auteur} {maintenant().strftime('%Y-%m-%d %H:%M:%S.%f')}",
+                                   auteur, origine="manuel")
+        except memoire.SecretRefuse as e:
+            raise HTTPException(422, str(e))
 
     @r.get("/fonctionnement")
     def lire_fonctionnement():
