@@ -23,7 +23,7 @@ La **version complète** (n8n, surveillance, notifications Android) s'ajoute plu
 
 ---
 
-Ce kit installe votre « Mini Mothership » : 40 agents IA organisés en directions, avec un **cockpit** pour valider les décisions importantes depuis votre téléphone. En version complète, il ajoute **n8n** pour les automatisations, des **notifications** sur Android et une **surveillance** des services.
+Ce kit installe votre « Mini Mothership » : 93 agents IA organisés en directions (dont un département de cybersécurité défensive, CYBER-FORTRESS), avec un **cockpit** pour valider les décisions importantes depuis votre téléphone. En version complète, il ajoute **n8n** pour les automatisations, des **notifications** sur Android et une **surveillance** des services.
 L'IA utilise **Ollama Cloud** (offre gratuite), avec l'IA locale du VPS en secours. Aucune action externe (envoi, publication, paiement) n'est faite sans votre validation.
 
 > Vous avez seulement besoin du **terminal web de hPanel** (déjà connecté en root) et de votre **téléphone Android**.
@@ -85,7 +85,7 @@ Chaque mission tourne à un **niveau de fonctionnement** qui règle l'effort, le
 | **F4 Expert** | Claude (Anthropic), modèle par rôle | 80 000 | 3 | oui | 30 min | ≤ 0,50 € |
 
 - **Choisir** : menu « Niveau de fonctionnement » du formulaire *Nouvelle mission* (cockpit), variable `FONCTIONNEMENT=F3` de `projets/lancer-mission.sh` et `tests-poker/run_tests.sh`, ou paramètre `fonctionnement` de l'outil `mothership_mission` des IA. Défaut : `NEXUS_FONCTIONNEMENT_DEFAUT=F2` dans `.env`.
-- **Relèvements automatiques** (jamais de baisse ; la raison est affichée sur la mission) : F1 → F2 si le GATE classe la mission N2 ou N3, ou si l'IA locale est absente ; missions juridiques (`LEX-GUARD/droit-*`) et de pilotage (`PILOT-CORE/*`) → F3 minimum.
+- **Relèvements automatiques** (jamais de baisse ; la raison est affichée sur la mission) : F1 → F2 si le GATE classe la mission N2 ou N3, ou si l'IA locale est absente ; missions juridiques (`LEX-GUARD/droit-*`), de pilotage (`PILOT-CORE/*`) et de cybersécurité (`CYBER-FORTRESS/*`) → F3 minimum.
 - **F4 est payant et toujours soumis à votre accord** : le coût est estimé, une décision « Lancer en F4 — coût estimé X € » apparaît dans le cockpit et rien ne démarre avant votre validation (les IA connectées par la passerelle ne peuvent pas valider). Avec `BUDGET_MONTHLY_EUR=0` (installation gratuite), F4 est indisponible : la mission part en **F3** (case « repli F3 », cochée par défaut) ou est refusée.
 - **Plafonds** : si le délai, les tokens ou le coût max sont atteints, la mission s'arrête proprement (statut « plafond atteint »), le livrable partiel est gardé et le cockpit propose de relancer au niveau supérieur.
 - **Suivi** : onglet *Fonctionnement* du cockpit (grille et consommation du mois par niveau) ou `GET /api/fonctionnement`. Réglages : `nexus-core/fonctionnement.yaml`.
@@ -109,7 +109,7 @@ Internet ──► Caddy (HTTPS automatique, ports 80/443)
 | Service | Rôle | RAM max | CPU max |
 |---|---|---|---|
 | caddy | HTTPS + mot de passe du cockpit | 64 Mo | 0,10 |
-| nexus-core | les 40 agents + cockpit (SQLite) | 384 Mo | 0,20 |
+| nexus-core | les 93 agents + cockpit (SQLite) | 384 Mo | 0,20 |
 | nexus-bridge | passerelle Claude · ChatGPT · Gemini (mémoire commune) | 128 Mo | 0,10 |
 | ollama | IA locale de secours (`qwen2.5:3b`) ; absente avec `--sans-repli` | 3,5 Go | 1,10 |
 | **Total** | | **≈ 4,1 Go** (0,6 Go sans repli) | **1,5 vCPU** |
@@ -121,7 +121,7 @@ Internet ──► Caddy (HTTPS automatique, ports 80/443)
 | ollama | IA locale (si repli) | 2,9 Go | 0,80 |
 | postgres | base de données (missions, décisions, journal, n8n) | 640 Mo | 0,20 |
 | n8n | automatisations | 640 Mo | 0,15 |
-| nexus-core | les 40 agents + cockpit | 384 Mo | 0,10 |
+| nexus-core | les 93 agents + cockpit | 384 Mo | 0,10 |
 | nexus-bridge | passerelle Claude · ChatGPT · Gemini | 128 Mo | 0,10 |
 | redis | file de tâches | 128 Mo | 0,05 |
 | uptime-kuma | surveillance | 128 Mo | 0,03 |

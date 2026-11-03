@@ -53,10 +53,11 @@ DATABASE_URL=postgresql+psycopg://nexus:${POSTGRES_PASSWORD}@postgres:5432/nexus
 
 Python 3.12, FastAPI, SQLAlchemy 2, psycopg 3, httpx, PyYAML, uvicorn. Dockerfile slim, utilisateur non root. Tests pytest avec SQLite et LLM factice (aucun réseau).
 
-### Agents (fichiers YAML dans nexus-core/agents/) — Mini Mothership = 40 rôles
+### Agents (fichiers YAML dans nexus-core/agents/) — Mini Mothership = 93 rôles
+93 = noyau (5) + 8 directeurs + 20 services × quadrant COLLECTOR / ANALYST / CHECKER / EXECUTOR (80 agents).
 - Noyau (5) : NEXUS-PRIME, NEXUS-GATE, NEXUS-SENTINEL, NEXUS-LEDGER, NEXUS-BUDGET.
-- 7 directeurs : DIR-STRATEGIE, DIR-CROISSANCE, DIR-CREATION, DIR-TECH, DIR-OPERATIONS, DIR-SAVOIR, DIR-AGENTOPS.
-- 7 services pilotes (1 par direction), chacun avec un quadrant COLLECTOR / ANALYST / CHECKER / EXECUTOR (28 agents) :
+- 8 directeurs : DIR-STRATEGIE, DIR-CROISSANCE, DIR-CREATION, DIR-TECH, DIR-OPERATIONS, DIR-SAVOIR, DIR-AGENTOPS, DIR-IMPACT.
+- 7 services pilotes d'origine (1 par direction) :
   - LEX-GUARD/conformite (Stratégie : conformité RGPD/AI Act, relecture CGV)
   - REVENUE-CORE/propositions (Croissance : brouillons de devis et propositions commerciales)
   - CONTENT-ARENA/redaction (Création : articles, posts, newsletters)
@@ -64,6 +65,13 @@ Python 3.12, FastAPI, SQLAlchemy 2, psycopg 3, httpx, PyYAML, uvicorn. Dockerfil
   - OPS-CORE/projets (Opérations : plans de projet, checklists)
   - R&D-PARADOX/veille (Savoir : synthèse de veille à partir de textes fournis)
   - AGENT-FACTORY/evaluation (Agent-Ops : évalue les sorties d'autres agents)
+- 9 services spécialisés : CODE-CORE/conception, DESIGN-SYSTEM/ui, LEX-GUARD/droit-france | droit-europe | droit-international, PILOT-CORE/etudes | pilotage (Opérations), GREEN-CORE/environnement | rse (direction DIR-IMPACT).
+- Département CYBER-FORTRESS (direction Tech, DIR-TECH) — 4 services, 16 agents :
+  - CYBER-FORTRESS/audit (revue de sécurité du code, des configurations Docker/Caddy/SSH/pare-feu et des dépendances ; OWASP Top 10 / ASVS, hygiène ANSSI, CIS ; constat = gravité, preuve, correction)
+  - CYBER-FORTRESS/veille (CVE, avis CERT-FR sur la pile du kit ; priorisation, mises à jour à planifier)
+  - CYBER-FORTRESS/conformite (NIS2 si applicable, RGPD art. 32, notification CNIL 72 h, politique de mots de passe et de clés, sauvegardes 3-2-1, PCA/PRA)
+  - CYBER-FORTRESS/incident (qualification, confinement, éradication, reprise, retour d'expérience, rotation des jetons et clés)
+  - Règles : posture strictement défensive (jamais d'exploitation, de malware, de contournement d'authentification ni d'attaque d'un tiers) ; les agents proposent, n'exécutent rien ; aucun secret dans les livrables ; références citées seulement si certaines (« référence à vérifier » sinon). Garde-fou déterministe (`app/cyber.py`) avant le CHECKER : secret ou action offensive → refus et secret masqué avant tout stockage. GATE : N2 minimum, N3 si action sur la production (pare-feu, comptes, clés, redémarrage, suppression, ports) ou notification à une autorité. Fonctionnement : F3 minimum.
 - Format YAML d'un agent : `id, nom, role (prime|gate|sentinel|ledger|budget|directeur|collector|analyst|checker|executor), direction, departement, service, mission, consignes (prompt système FR), outils_autorises (liste), modele (optionnel)`.
 
 ### Modèle de données (tables)
@@ -89,7 +97,7 @@ etat(cle, valeur) — kill switch (`kill:grille`, `kill:dir:<x>`, `kill:agent:<i
 Distincts des niveaux de décision N0–N3. Chaque niveau fixe : fournisseur, budget_tokens, revisions_max (boucles de correction ANALYST après refus CHECKER), double_controle (2ᵉ CHECKER avec le modèle local, les deux doivent valider), llm_max_chars, num_ctx, delai_max_s, cout_max_eur.
 F1 Éclair (ollama local, 6 000, 0, non, 4 000, 4096, 180 s, 0 €) · F2 Standard (LLM_PROVIDER courant, 20 000, 1, non, 12 000, 8192, 600 s, 0 € ; BUDGET_TASK_TOKENS / LLM_MAX_CHARS / OLLAMA_NUM_CTX restent la base de F2) · F3 Renforcé (courant, 40 000, 2, oui, 16 000, 8192, 1 200 s, 0 €) · F4 Expert (anthropic, ANALYST/CHECKER claude-sonnet-5-5, COLLECTOR/EXECUTOR/autres claude-haiku-5-5, 80 000, 3, oui, 24 000, 1 800 s, ≤ 0,50 € ; tarifs $/MTok en config, EUR_PAR_USD défaut 0.92).
 - Choix : champ `fonctionnement` (F1..F4) de POST /api/missions, défaut NEXUS_FONCTIONNEMENT_DEFAUT (F2) ; champ `repli_f3` (bool, défaut true).
-- Planchers (ne fait que monter, raison tracée dans `fonctionnement_raison` et LEDGER) : GATE N2+ (pré-classement par règles, puis GATE final) → F1 relevé en F2 ; IA locale injoignable → F1 relevé en F2 ; LEX-GUARD/droit-* et PILOT-CORE/* → F3 minimum.
+- Planchers (ne fait que monter, raison tracée dans `fonctionnement_raison` et LEDGER) : GATE N2+ (pré-classement par règles, puis GATE final) → F1 relevé en F2 ; IA locale injoignable → F1 relevé en F2 ; LEX-GUARD/droit-*, PILOT-CORE/* et CYBER-FORTRESS/* → F3 minimum.
 - F4 : indisponible si BUDGET_MONTHLY_EUR=0, ANTHROPIC_API_KEY absente ou budget mensuel restant < estimation → repli F3 (« F4 indisponible : budget IA à 0 € — mission lancée en F3 ») si `repli_f3`, sinon 422. Disponible → décision N3 `objet=lancement_f4` « Lancer en F4 — coût estimé X € » ; aucune exécution avant validation (révision impossible ; refus → `refusee`). Disponibilité revérifiée au démarrage.
 - Exécution : plafonds tokens / délai (chrono global) / coût (contrôlé avant et après chaque appel) → statut `plafond_atteint`, livrable partiel conservé, proposition de relance au niveau supérieur. Jamais de dépassement silencieux.
 - Mesures par mission : fonctionnement_demande / fonctionnement, fonctionnement_raison, tokens_entree, tokens_sortie, cout_eur, duree_s, revisions ; LEDGER : fonctionnement_applique, fonctionnement_releve, plafond_atteint, mission_bilan.
@@ -99,7 +107,7 @@ GET /api/sante (+ fonctionnement_defaut) · GET /api/fonctionnement (grille + co
 Traitement des missions : en tâche de fond (BackgroundTasks ou file Redis simple) pour ne pas bloquer l'appel ; la réponse renvoie l'id et le statut.
 
 ### Cockpit (/cockpit, HTML servi par nexus-core, sans dépendance externe)
-Français, utilisable sur téléphone Android : file des décisions N3 avec boutons Valider / Refuser / Demander une révision, liste des missions et statuts, formulaire « Nouvelle mission », organigramme des 40 agents (actif/suspendu), journal LEDGER, bouton d'arrêt d'urgence avec confirmation intégrée à la page. Les appels du cockpit passent par des routes /cockpit/api/* qui réutilisent la logique sans exiger la clé (Caddy protège /cockpit par basic auth). `/` redirige vers `/cockpit`.
+Français, utilisable sur téléphone Android : file des décisions N3 avec boutons Valider / Refuser / Demander une révision, liste des missions et statuts, formulaire « Nouvelle mission », organigramme des 93 agents (actif/suspendu), journal LEDGER, bouton d'arrêt d'urgence avec confirmation intégrée à la page. Les appels du cockpit passent par des routes /cockpit/api/* qui réutilisent la logique sans exiger la clé (Caddy protège /cockpit par basic auth). `/` redirige vers `/cockpit`.
 
 ## n8n (agent INFRA)
 Workflows importés automatiquement par install.sh (`n8n import:workflow --separate --input=/workflows`) :

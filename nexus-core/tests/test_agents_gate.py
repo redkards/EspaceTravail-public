@@ -4,22 +4,22 @@ from app import gate
 from app.llm import parser_niveau, parser_verdict
 
 
-def test_chargement_77_agents():
+def test_chargement_93_agents():
     tous = reg.charger()
-    assert len(tous) == 77
+    assert len(tous) == 93
     roles = [a["role"] for a in tous.values()]
     for r in ("prime", "gate", "sentinel", "ledger", "budget"):
         assert roles.count(r) == 1
     assert roles.count("directeur") == 8  # 7 + DIR-IMPACT
     for r in ("collector", "analyst", "checker", "executor"):
-        assert roles.count(r) == 16  # 7 + 9 nouveaux services
+        assert roles.count(r) == 20  # 7 + 9 + 4 CYBER-FORTRESS
     for a in tous.values():
         assert a["consignes"].strip() and isinstance(a["outils_autorises"], list)
 
 
-def test_seize_services_complets():
+def test_vingt_services_complets():
     s = reg.services()
-    assert len(s) == 16
+    assert len(s) == 20
     assert "R&D-PARADOX/veille" in s
     for v in s.values():
         assert {"collector", "analyst", "checker", "executor", "directeur"} <= set(v)

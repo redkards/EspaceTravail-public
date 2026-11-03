@@ -14,7 +14,7 @@ import httpx
 from sqlalchemy import func, select
 
 from . import agents as reg
-from . import budget, gate, ledger, sentinel
+from . import budget, cyber, gate, ledger, sentinel
 from . import fonctionnement as fct
 from .config import cfg
 from .db import session_scope
@@ -61,6 +61,22 @@ MOTS_SERVICES = {
                                  "bilan carbone", "sobriete numerique", "ecologie", "ecologique", "energie"],
     "GREEN-CORE/rse": ["rse", "responsabilite societale", "eco-conception", "ecoconception", "greenwashing",
                        "communication responsable", "developpement durable"],
+    # CYBER-FORTRESS (mots entiers ; « rgpd » seul reste sur LEX-GUARD/conformite).
+    "CYBER-FORTRESS/audit": ["cybersecurite", "cyber securite", "securite informatique", "securite",
+                             "audit de securite", "revue de securite", "securite du code", "durcissement",
+                             "owasp", "asvs", "anssi", "cis", "pare-feu", "firewall", "ufw", "ssh", "fail2ban",
+                             "test d'intrusion"],
+    "CYBER-FORTRESS/veille": ["cve", "vulnerabilite", "vulnerabilites", "cert-fr", "faille", "failles",
+                              "avis de securite", "correctif de securite", "correctifs de securite",
+                              "mise a jour de securite", "mises a jour de securite"],
+    "CYBER-FORTRESS/conformite": ["nis2", "nis 2", "article 32", "art. 32", "notification a la cnil",
+                                  "notifier la cnil", "72 h", "72 heures", "politique de mots de passe",
+                                  "politique de mot de passe", "3-2-1", "pca", "pra", "plan de continuite",
+                                  "plan de reprise"],
+    "CYBER-FORTRESS/incident": ["incident de securite", "intrusion", "piratage", "pirate", "phishing",
+                                "hameconnage", "ransomware", "rancongiciel", "compromission", "compromis",
+                                "fuite de donnees", "rotation des cles", "rotation des jetons",
+                                "reponse a incident"],
 }
 MENTION_AVOCAT = "Information générale, ne remplace pas l'avis d'un avocat"
 
@@ -251,7 +267,8 @@ class Contexte:
         self.sortie += r.tokens_sortie
         self.cout += cout
         self.enregistrer_compteurs()
-        _etape(self.mid, agent_id, a["role"] + ("_local" if controle_local else ""), entree, r.texte, None,
+        sortie = cyber.masquer(r.texte) if cyber.concerne(self.service) else r.texte  # jamais de secret stocké
+        _etape(self.mid, agent_id, a["role"] + ("_local" if controle_local else ""), entree, sortie, None,
                r.tokens)
         ledger.journaliser(agent_id, f"appel_{a['role']}", self.mid, tokens=r.tokens,
                            tokens_entree=r.tokens_entree, tokens_sortie=r.tokens_sortie, cout_eur=cout,
@@ -384,7 +401,7 @@ def _verifier_f4_au_lancement(ctx: Contexte) -> None:
 def appliquer_planchers(ctx: Contexte) -> None:
     """Planchers automatiques (le niveau ne fait que monter) : service, puis pré-classement GATE."""
     srv = ctx.service or ""
-    if srv.startswith("LEX-GUARD/droit-") or srv.startswith("PILOT-CORE/"):
+    if srv.startswith("LEX-GUARD/droit-") or srv.startswith("PILOT-CORE/") or cyber.concerne(srv):
         ctx.relever("F3", f"service {srv} : niveau minimum F3")
     niveau_regles, motif = gate.classer_regles(ctx.titre, ctx.consigne, ctx.service, ctx.montant, ctx.action)
     if niveau_regles in ("N2", "N3"):
@@ -445,6 +462,15 @@ def _message_analyst(ctx: Contexte, elements: str, precedent: str | None = None,
 def _controler(ctx: Contexte, srv: dict, livrable: str) -> dict:
     """CHECKER principal, puis (F3/F4) double contrôle par le modèle local : les deux doivent valider."""
     mid = ctx.mid
+    if cyber.concerne(ctx.service):
+        # CYBER-FORTRESS : secret ou action offensive → refus déterministe, sans dépendre du modèle.
+        refus = cyber.verdict_garde_fou(livrable)
+        if refus:
+            _etape(mid, srv["checker"], "checker", "garde-fou cybersécurité",
+                   json.dumps(refus, ensure_ascii=False), "refus", 0)
+            ledger.journaliser(srv["checker"], "verdict", mid, ok=False, problemes=refus["problemes"],
+                               source="garde_fou_cyber")
+            return refus
     message = assembler([("Consigne", ctx.consigne, 1, "debut"),
                          ("Livrable à vérifier", livrable, 3, "tete_queue")], ctx.max_chars)
     verdict = parser_verdict(ctx.appel(srv["checker"], message, temperature=0.0))
@@ -477,8 +503,11 @@ def _boucle_qualite(ctx: Contexte, srv: dict, livrable: str, elements: str) -> N
     refus = 0
     while True:
         livrable = garantir_mention_juridique(ctx.service, livrable)
+        brut = livrable
+        if cyber.concerne(ctx.service):
+            livrable = cyber.masquer(livrable)  # le secret n'est ni stocké ni renvoyé à l'ANALYST
         ctx.livrable_partiel = livrable
-        verdict = _controler(ctx, srv, livrable)
+        verdict = _controler(ctx, srv, brut)
         if verdict["ok"]:
             break
         refus += 1

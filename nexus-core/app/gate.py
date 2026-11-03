@@ -50,6 +50,17 @@ SERVICES_N2 = {"CONTENT-ARENA/redaction"}
 MOTS_TIERS = [r"client", r"clients", r"tiers", r"partenaire", r"partenaires", r"fournisseur", r"prestataire",
               r"cgv", r"cgu", r"mentions legales", r"conditions generales", r"politique de confidentialite",
               r"grand public", r"a remettre", r"a transmettre"]
+# Cybersécurité : N3 si le livrable recommande une action sur la production ou une notification.
+MOTS_PRODUCTION_CYBER = [
+    r"pare-feu", r"firewall", r"ufw", r"iptables", r"nftables", r"regle de filtrage",
+    r"ouvrir le port", r"ouverture (?:de|du|des) ports?", r"fermer le port", r"fermeture (?:de|du|des) ports?",
+    r"compte", r"comptes", r"utilisateur root", r"desactiver le compte", r"bloquer le compte",
+    r"cle", r"cles", r"cle ssh", r"cles ssh", r"jeton", r"jetons", r"rotation", r"revoquer", r"revocation",
+    r"redemarrer", r"redemarrage", r"reboot", r"restart", r"arreter le service", r"couper",
+    r"supprimer", r"suppression", r"effacer", r"reinstaller", r"restaurer", r"restauration",
+    r"notifier", r"notification", r"declarer", r"declaration", r"signaler", r"signalement",
+    r"cnil", r"anssi", r"cert-fr", r"plainte", r"autorite", r"autorites",
+]
 # Pilotage : N3 si décision financière ou engagement.
 MOTS_ENGAGEMENT = [r"investir", r"investissement", r"investissements", r"emprunt", r"emprunter",
                    r"pret", r"prets", r"levee de fonds", r"financement", r"financer", r"recruter",
@@ -114,6 +125,13 @@ def classer_regles(titre: str, consigne: str, service: str | None = None,
         if m:
             return "N3", f"avis juridique destiné à un tiers : {m}"
         return "N2", f"avis juridique ({srv}) : relecture humaine requise"
+    if srv.startswith("CYBER-FORTRESS/"):
+        # Cybersécurité : N2 minimum ; N3 si action sur la production ou notification à une autorité.
+        for source, contenu in (("consigne", texte), ("livrable", normaliser(livrable or ""))):
+            m = _contient(contenu, MOTS_PRODUCTION_CYBER)
+            if m:
+                return "N3", f"cybersécurité : action sur la production ou notification ({source} : {m})"
+        return "N2", f"cybersécurité ({srv}) : relecture humaine requise"
     if srv.startswith("PILOT-CORE/"):
         m = _contient(texte, MOTS_ENGAGEMENT)
         if m:

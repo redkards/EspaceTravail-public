@@ -15,9 +15,9 @@ NOUVEAUX = ["CODE-CORE/conception", "DESIGN-SYSTEM/ui", "LEX-GUARD/droit-france"
 AVOCAT = "Information générale, ne remplace pas l'avis d'un avocat"
 
 
-def test_77_agents_et_nouvelle_direction():
+def test_93_agents_et_nouvelle_direction():
     tous = reg.charger()
-    assert len(tous) == 77
+    assert len(tous) == 93
     assert tous["DIR-IMPACT"]["role"] == "directeur" and tous["DIR-IMPACT"]["direction"] == "IMPACT"
     s = reg.services()
     for srv in NOUVEAUX:
@@ -132,7 +132,7 @@ def test_projets_services_conseilles_valides():
 
 def test_organigramme_api_expose_la_nouvelle_direction(client):
     agents = client.get("/cockpit/api/agents").json()
-    assert len(agents) == 77
+    assert len(agents) == 93
     directions = {a["direction"] for a in agents}
     assert "IMPACT" in directions
     services = {a["service"] for a in agents if a["service"]}

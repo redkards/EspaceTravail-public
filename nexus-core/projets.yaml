@@ -8,18 +8,18 @@ projets:
   - code: paradoxx
     nom: PARADOXX SYSTÈME
     description: Structure de pilotage multi-projets et VPS Hostinger dédié.
-    services: [OPS-CORE/projets, PILOT-CORE/pilotage, CODE-CORE/conception, CODE-CORE/revue, GREEN-CORE/environnement]
+    services: [OPS-CORE/projets, PILOT-CORE/pilotage, CODE-CORE/conception, CODE-CORE/revue, GREEN-CORE/environnement, CYBER-FORTRESS/audit, CYBER-FORTRESS/veille]
 
   - code: nexus
     nom: NEXUS MOTHERSHIP
     description: Organisation d'agents IA en départements, un seul humain valide.
-    services: [AGENT-FACTORY/evaluation, CODE-CORE/conception, CODE-CORE/revue, LEX-GUARD/droit-europe]
+    services: [AGENT-FACTORY/evaluation, CODE-CORE/conception, CODE-CORE/revue, LEX-GUARD/droit-europe, CYBER-FORTRESS/audit, CYBER-FORTRESS/veille]
 
   - code: poker-winners
     nom: Poker Winners
     alias: [poker-vitrine, poker vitrine]
     description: Site vitrine poker et bêta privée.
-    services: [LEX-GUARD/droit-france, CONTENT-ARENA/redaction, DESIGN-SYSTEM/ui, CODE-CORE/revue, REVENUE-CORE/propositions]
+    services: [LEX-GUARD/droit-france, CONTENT-ARENA/redaction, DESIGN-SYSTEM/ui, CODE-CORE/revue, REVENUE-CORE/propositions, CYBER-FORTRESS/audit]
 
   - code: poker-feeling
     nom: Poker Feeling
@@ -46,7 +46,7 @@ projets:
   - code: freelance-ia
     nom: Freelance IA
     description: Activité freelance de développeur d'applications et d'automatisation IA.
-    services: [PILOT-CORE/etudes, PILOT-CORE/pilotage, REVENUE-CORE/propositions, LEX-GUARD/droit-france, LEX-GUARD/droit-europe, CODE-CORE/conception]
+    services: [PILOT-CORE/etudes, PILOT-CORE/pilotage, REVENUE-CORE/propositions, LEX-GUARD/droit-france, LEX-GUARD/droit-europe, CODE-CORE/conception, CYBER-FORTRESS/audit]
 
   - code: esct-boxe
     nom: Site ESCT Boxe
