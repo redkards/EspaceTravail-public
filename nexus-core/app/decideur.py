@@ -74,21 +74,24 @@ def seuil_risque_eleve() -> float:
 
 
 def _montant_cite(texte: str) -> float | None:
-    """Plus grand montant cité (« 2 400 € », « 1.500 € », « 3k€ », « 12,5 USD ») ; None si aucun."""
-    meilleur = None
-    for m in gate._MONTANT.finditer(texte or ""):
-        n = m.group("n1") or m.group("n2") or ""
-        n = re.sub(r"[ \u00a0\u202f]", "", n)
-        if re.fullmatch(r"\d{1,3}(?:\.\d{3})+(?:,\d+)?", n):  # 1.500 ou 1.500,50
-            n = n.replace(".", "")
-        try:
-            v = float(n.replace(",", "."))
-        except ValueError:
-            continue
-        if re.search(r"\d\s*k", m.group(0), re.I):
-            v *= 1000
-        meilleur = v if meilleur is None else max(meilleur, v)
-    return meilleur
+    """Plus grand montant cité (chiffres FR/EN, k/M, lettres, €/$/EUR/USD) ; None si aucun."""
+    return gate.montant_max(texte)
+
+
+def code_exige(d: Decision, m: Mission | None) -> bool:
+    """Code Décideur exigé pour valider : risque élevé OU montant (engagé ou cité) ≥ seuil."""
+    if d.risque == "eleve":
+        return True
+    if d.objet == "plan_semaine" or m is None:
+        return False
+    montant = max(float(m.montant_eur or 0), _montant_cite(f"{m.titre} {m.consigne}") or 0)
+    return montant >= seuil_risque_eleve()
+
+
+def code_exige_pour(did: int) -> bool:
+    with session_scope() as s:
+        d = s.get(Decision, did)
+        return bool(d) and code_exige(d, s.get(Mission, d.mission_id))
 
 
 def evaluer_risque(titre: str, consigne: str, livrable: str | None = None, montant_eur: float = 0.0,
@@ -186,7 +189,7 @@ def carte(d: Decision, m: Mission, maintenant_utc: datetime | None = None) -> di
         "tokens": tokens if afficher_tokens else None, "service": m.service, "projet": m.projet,
         "fonctionnement": m.fonctionnement, "restant_s": restant, "urgent": restant < URGENCE_H * 3600,
         "expire_le": expiration(d).isoformat(), "lien_livrable": f"/cockpit/api/missions/{m.id}",
-        "code_requis": d.risque == "eleve",
+        "code_requis": code_exige(d, m),
         "avertissements": json.loads(m.charte_avertissements) if m.charte_avertissements else [],
         "alertes_bouclier": json.loads(m.alertes_bouclier) if m.alertes_bouclier else [],
         "propositions": _propositions(d) if d.objet == "plan_semaine" else None,

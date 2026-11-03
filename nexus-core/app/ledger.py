@@ -47,9 +47,29 @@ def _calcul(horodatage, acteur, action, mission_id, details_json, hash_prec, alg
     return hashlib.sha256(charge).hexdigest()
 
 
+# Texte libre (contenu des missions, commentaires, extraits de livrable) : jamais en clair dans le LEDGER,
+# qui est immuable (un effacement RGPD ne peut pas le réécrire). Seule une empreinte courte est gardée.
+TEXTE_LIBRE = {"titre", "consigne", "commentaire", "texte", "livrable", "resume", "recommandation", "indication",
+               "suggestion", "problemes", "avertissements", "motifs", "contenu", "extrait", "question", "motif"}
+
+
+def empreinte_texte(valeur) -> dict:
+    brut = valeur if isinstance(valeur, str) else json.dumps(valeur, ensure_ascii=False, sort_keys=True, default=str)
+    return {"empreinte": hashlib.sha256(brut.encode("utf-8")).hexdigest()[:16],
+            "longueur": len(valeur) if isinstance(valeur, (str, list, tuple)) else len(brut)}
+
+
+def _proteger(details: dict) -> dict:
+    return {k: (empreinte_texte(v) if k in TEXTE_LIBRE and v not in (None, "", [], ()) else v)
+            for k, v in details.items()}
+
+
 def journaliser(acteur: str, action: str, mission_id: int | None = None, **details) -> str:
-    """Ajoute une entrée dans sa propre transaction et renvoie son empreinte."""
-    details_json = json.dumps(details, ensure_ascii=False, sort_keys=True, default=str)
+    """Ajoute une entrée dans sa propre transaction et renvoie son empreinte.
+
+    Les champs de texte libre (TEXTE_LIBRE) sont remplacés par une empreinte : identifiants et
+    empreintes seulement, aucun contenu de mission (droit à l'effacement)."""
+    details_json = json.dumps(_proteger(details), ensure_ascii=False, sort_keys=True, default=str)
     cle = cle_hmac()
     algo = "hmac" if cle else "sha256"
     with _verrou, session_scope() as s:

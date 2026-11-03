@@ -101,7 +101,7 @@ def noter(mid: int, corps: NouvelAvis, request: Request):
 def preparer(did: int, corps: Preparation):
     d = _decision(did)
     _controles(d, corps)
-    code_requis = corps.choix == "valider" and d.risque == "eleve"
+    code_requis = corps.choix == "valider" and decideur.code_exige_pour(did)
     return {"jeton": decideur.preparer(did, corps.choix), "expire_s": decideur.JETON_TTL_S,
             "libelle": f"Confirmer : {LIBELLES[corps.choix]} #{did}", "code_requis": code_requis,
             "code_configure": decideur.code_configure(), "verrou_restant_s": decideur.verrou_restant_s()}
@@ -114,7 +114,8 @@ def confirmer(did: int, corps: Confirmation, request: Request, taches: Backgroun
     _controles(d, corps)
     if not decideur.jeton_valide(corps.jeton, did, corps.choix):
         raise HTTPException(409, "Confirmation requise ou expirée : appuyez de nouveau sur l'action.")
-    if corps.choix == "valider" and d.risque == "eleve":
+    code_requis = corps.choix == "valider" and decideur.code_exige_pour(did)
+    if code_requis:
         try:
             decideur.verifier_code(corps.code, qui)
         except decideur.CodeRefuse as e:
@@ -127,7 +128,7 @@ def confirmer(did: int, corps: Confirmation, request: Request, taches: Backgroun
         raise HTTPException(409, str(e))
     ledger.journaliser("DECIDEUR", "decideur_action", res["mission_id"], decision_id=did, choix=corps.choix,
                        utilisateur=qui, source="decideur_mobile", risque=d.risque,
-                       code_saisi=corps.choix == "valider" and d.risque == "eleve")
+                       code_saisi=code_requis)
     if res.get("relance"):
         taches.add_task(FILE.executer, res["mission_id"], pipeline.relancer_revision, corps.commentaire)
     if res.get("lancer"):

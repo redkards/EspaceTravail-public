@@ -135,7 +135,7 @@ def passage(noms: list[str], mode: str, code: str, graine: int, pdf: bool = True
     fiche = S.fiche(res)
     prec = passages(sauf=sortie)
     prec_banc = next((p.get("indice_banc") for p in reversed(prec) if p.get("indice_banc") is not None), None)
-    ib = indice_banc(fiche) if T._res and res.get("banc", {}).get("statut") in ("reussi", "echoue") else None
+    ib = indice_banc(fiche) if res.get("banc", {}).get("statut") in ("reussi", "echoue") else None
     porte = P.evaluer(res, ib, prec_banc)
     doc = {"schema": SCHEMA, "systeme": NOM, "version_systeme": VERSION, "horodatage": sortie.name, "mode": mode,
            "graine": graine, "profil": {"code": profil["code"], "nom": profil["nom"]},

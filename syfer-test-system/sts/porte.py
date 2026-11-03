@@ -10,7 +10,7 @@ def _exec(s):
     return bool(s) and s.get("statut") in ("reussi", "echoue")
 
 
-def _crit(nom, conf, ok, mesure, absent=False, raison=""):
+def _crit(nom, conf, ok, mesure, raison="", absent=False):
     if absent:
         etat = "NON ÉVALUÉ"
         bloque = conf.get("bloquant", True) and conf.get("si_absent", "bloquant") == "bloquant"
@@ -34,7 +34,7 @@ def evaluer(suites: dict, indice_banc: float | None, indice_banc_precedent: floa
     if actif("tests_verts"):
         t = g("tests")
         if not _exec(t):
-            res.append(_crit("tests_verts", cr["tests_verts"], False, None, True, "tests non exécutés"))
+            res.append(_crit("tests_verts", cr["tests_verts"], False, None, absent=True, raison="tests non exécutés"))
         else:
             m = t["mesures"]
             ko = m["echoues"] + m["erreurs"]
@@ -46,7 +46,7 @@ def evaluer(suites: dict, indice_banc: float | None, indice_banc_precedent: floa
         s = g("simulations")
         c = cr["simulations"]
         if not _exec(s):
-            res.append(_crit("simulations", c, False, None, True, "simulations non exécutées"))
+            res.append(_crit("simulations", c, False, None, absent=True, raison="simulations non exécutées"))
         else:
             tx = s["mesures"]["taux_reussite"]
             res.append(_crit("simulations", c, tx >= c.get("seuil_pct", 99), f"{tx} %",
@@ -56,8 +56,7 @@ def evaluer(suites: dict, indice_banc: float | None, indice_banc_precedent: floa
         s = g("iterations")
         c = cr["iterations_critiques"]
         if not _exec(s):
-            res.append(_crit("iterations_critiques", c, False, None, True,
-                             (s or {}).get("motif") or "itérations non exécutées"))
+            res.append(_crit("iterations_critiques", c, False, None, absent=True, raison=(s or {}).get("motif") or "itérations non exécutées"))
         else:
             n = s["mesures"].get("critiques_ouverts") or 0
             res.append(_crit("iterations_critiques", c, n <= c.get("max", 0), f"{n} critique(s) ouvert(s)",
@@ -66,7 +65,7 @@ def evaluer(suites: dict, indice_banc: float | None, indice_banc_precedent: floa
         s = g("attaque")
         c = cr["attaque"]
         if not _exec(s):
-            res.append(_crit("attaque", c, False, None, True, "attaque non exécutée"))
+            res.append(_crit("attaque", c, False, None, absent=True, raison="attaque non exécutée"))
         else:
             m = s["mesures"]
             ok = m["taux_blocage_pct"] >= c.get("seuil_pct", 95) and m["faux_positifs_bloquants"] <= c.get("fp_bloquants_max", 0)
@@ -76,7 +75,7 @@ def evaluer(suites: dict, indice_banc: float | None, indice_banc_precedent: floa
         s = g("statiques")
         c = cr["secrets"]
         if not _exec(s) or "secrets" not in s["mesures"].get("controles", {}):
-            res.append(_crit("secrets", c, False, None, True, "recherche de secrets non exécutée"))
+            res.append(_crit("secrets", c, False, None, absent=True, raison="recherche de secrets non exécutée"))
         else:
             n = s["mesures"]["secrets_suspects"]
             res.append(_crit("secrets", c, n <= c.get("max", 0), f"{n} suspect(s)",
@@ -84,7 +83,7 @@ def evaluer(suites: dict, indice_banc: float | None, indice_banc_precedent: floa
     if actif("banc_regression"):
         c = cr["banc_regression"]
         if indice_banc is None:
-            res.append(_crit("banc_regression", c, False, None, True, "banc non exécuté"))
+            res.append(_crit("banc_regression", c, False, None, absent=True, raison="banc non exécuté"))
         elif indice_banc_precedent is None:
             res.append(_crit("banc_regression", c, True, f"{indice_banc} (premier passage)", raison="aucun passage précédent"))
         else:
@@ -96,7 +95,7 @@ def evaluer(suites: dict, indice_banc: float | None, indice_banc_precedent: floa
         s = g("charge")
         c = cr["charge_sans_perte"]
         if not _exec(s):
-            res.append(_crit("charge_sans_perte", c, False, None, True, (s or {}).get("motif") or "charge non exécutée"))
+            res.append(_crit("charge_sans_perte", c, False, None, absent=True, raison=(s or {}).get("motif") or "charge non exécutée"))
         else:
             p = s["mesures"]["pertes_donnees"]
             res.append(_crit("charge_sans_perte", c, not p, f"{len(p)} critère(s) d'intégrité KO",

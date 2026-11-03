@@ -240,10 +240,7 @@ def creer_routeur(cockpit: bool = False) -> APIRouter:
         _api_peut_decider()
         if True:  # risque élevé : code Décideur exigé (cockpit, et API en mode test)
             from . import decideur
-            with session_scope() as s:
-                d = s.get(Decision, did)
-                risque = d.risque if d else None
-            if risque == "eleve":
+            if decideur.code_exige_pour(did):  # risque élevé ou montant ≥ seuil
                 try:
                     decideur.verifier_code(corps.code if corps else None, "cockpit" if cockpit else "api")
                 except decideur.CodeRefuse as e:

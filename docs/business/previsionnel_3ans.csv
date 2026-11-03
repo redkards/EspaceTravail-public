@@ -1,0 +1,235 @@
+scenario;annee;bloc;poste;montant_eur
+prudent;An 1;Chiffre d'affaires;Diagnostic ECHO;2360
+prudent;An 1;Chiffre d'affaires;Pilotes;2850
+prudent;An 1;Chiffre d'affaires;Installations Solo;3200
+prudent;An 1;Chiffre d'affaires;Maintenance (abonnements);2131
+prudent;An 1;Chiffre d'affaires;Agents sur mesure / regie;6750
+prudent;An 1;Chiffre d'affaires;Licences integrateurs;0
+prudent;An 1;Chiffre d'affaires;TOTAL CA HT;17291
+prudent;An 1;Charges;Infrastructure (VPS, sauvegardes);550
+prudent;An 1;Charges;IA payante plafonnee;60
+prudent;An 1;Charges;Outils et abonnements;420
+prudent;An 1;Charges;Assurance RC pro;400
+prudent;An 1;Charges;Juridique (marque, e-Soleau, CGV, societe);585
+prudent;An 1;Charges;Marketing;600
+prudent;An 1;Charges;Commission Malt;202
+prudent;An 1;Charges;Formation et veille;150
+prudent;An 1;Charges;CFE;0
+prudent;An 1;Charges;Sous-traitance (jours au-dela de 160 j/an);0
+prudent;An 1;Charges;TOTAL charges d'exploitation;2967
+prudent;An 1;Prelevements;Cotisations sociales 25,6 % + CFP 0,2 % (micro BNC SSI);4461
+prudent;An 1;Prelevements;Impot (versement liberatoire 2,2 % si option);380
+prudent;An 1;Resultat;Revenu net disponible du dirigeant;9483
+prudent;An 1;Indicateurs;Revenu net mensuel moyen;790
+prudent;An 1;Indicateurs;Clients nouveaux (diag+pilotes+installations);9
+prudent;An 1;Indicateurs;Abonnes maintenance en fin d'annee;3.5
+prudent;An 1;Indicateurs;Jours de production estimes;44
+prudent;An 1;Indicateurs;Regime;micro-entreprise (TVA due si CA > 37 500 EUR)
+prudent;An 2;Chiffre d'affaires;Diagnostic ECHO;4140
+prudent;An 2;Chiffre d'affaires;Pilotes;0
+prudent;An 2;Chiffre d'affaires;Installations Solo;9000
+prudent;An 2;Chiffre d'affaires;Maintenance (abonnements);5761
+prudent;An 2;Chiffre d'affaires;Agents sur mesure / regie;15000
+prudent;An 2;Chiffre d'affaires;Licences integrateurs;0
+prudent;An 2;Chiffre d'affaires;TOTAL CA HT;33901
+prudent;An 2;Charges;Infrastructure (VPS, sauvegardes);550
+prudent;An 2;Charges;IA payante plafonnee;120
+prudent;An 2;Charges;Outils et abonnements;480
+prudent;An 2;Charges;Assurance RC pro;400
+prudent;An 2;Charges;Juridique (marque, e-Soleau, CGV, societe);215
+prudent;An 2;Charges;Marketing;900
+prudent;An 2;Charges;Commission Malt;450
+prudent;An 2;Charges;Formation et veille;200
+prudent;An 2;Charges;CFE;250
+prudent;An 2;Charges;Sous-traitance (jours au-dela de 160 j/an);0
+prudent;An 2;Charges;TOTAL charges d'exploitation;3565
+prudent;An 2;Prelevements;Cotisations sociales 25,6 % + CFP 0,2 % (micro BNC SSI);8746
+prudent;An 2;Prelevements;Impot (versement liberatoire 2,2 % si option);746
+prudent;An 2;Resultat;Revenu net disponible du dirigeant;20844
+prudent;An 2;Indicateurs;Revenu net mensuel moyen;1737
+prudent;An 2;Indicateurs;Clients nouveaux (diag+pilotes+installations);11
+prudent;An 2;Indicateurs;Abonnes maintenance en fin d'annee;6.3
+prudent;An 2;Indicateurs;Jours de production estimes;66
+prudent;An 2;Indicateurs;Regime;micro-entreprise (TVA due si CA > 37 500 EUR)
+prudent;An 3;Chiffre d'affaires;Diagnostic ECHO;5520
+prudent;An 3;Chiffre d'affaires;Pilotes;0
+prudent;An 3;Chiffre d'affaires;Installations Solo;13300
+prudent;An 3;Chiffre d'affaires;Maintenance (abonnements);10404
+prudent;An 3;Chiffre d'affaires;Agents sur mesure / regie;22000
+prudent;An 3;Chiffre d'affaires;Licences integrateurs;0
+prudent;An 3;Chiffre d'affaires;TOTAL CA HT;51224
+prudent;An 3;Charges;Infrastructure (VPS, sauvegardes);1060
+prudent;An 3;Charges;IA payante plafonnee;180
+prudent;An 3;Charges;Outils et abonnements;540
+prudent;An 3;Charges;Assurance RC pro;450
+prudent;An 3;Charges;Juridique (marque, e-Soleau, CGV, societe);315
+prudent;An 3;Charges;Marketing;1200
+prudent;An 3;Charges;Commission Malt;660
+prudent;An 3;Charges;Formation et veille;300
+prudent;An 3;Charges;CFE;300
+prudent;An 3;Charges;Sous-traitance (jours au-dela de 160 j/an);0
+prudent;An 3;Charges;TOTAL charges d'exploitation;5005
+prudent;An 3;Prelevements;Cotisations sociales 25,6 % + CFP 0,2 % (micro BNC SSI);13216
+prudent;An 3;Prelevements;Impot (versement liberatoire 2,2 % si option);1127
+prudent;An 3;Resultat;Revenu net disponible du dirigeant;31876
+prudent;An 3;Indicateurs;Revenu net mensuel moyen;2656
+prudent;An 3;Indicateurs;Clients nouveaux (diag+pilotes+installations);15
+prudent;An 3;Indicateurs;Abonnes maintenance en fin d'annee;9.9
+prudent;An 3;Indicateurs;Jours de production estimes;92
+prudent;An 3;Indicateurs;Regime;micro-entreprise (TVA due si CA > 37 500 EUR)
+central;An 1;Chiffre d'affaires;Diagnostic ECHO;5520
+central;An 1;Chiffre d'affaires;Pilotes;2850
+central;An 1;Chiffre d'affaires;Installations Solo;9500
+central;An 1;Chiffre d'affaires;Maintenance (abonnements);5077
+central;An 1;Chiffre d'affaires;Agents sur mesure / regie;18200
+central;An 1;Chiffre d'affaires;Licences integrateurs;0
+central;An 1;Chiffre d'affaires;TOTAL CA HT;41147
+central;An 1;Charges;Infrastructure (VPS, sauvegardes);550
+central;An 1;Charges;IA payante plafonnee;360
+central;An 1;Charges;Outils et abonnements;600
+central;An 1;Charges;Assurance RC pro;550
+central;An 1;Charges;Juridique (marque, e-Soleau, CGV, societe);1100
+central;An 1;Charges;Marketing;1200
+central;An 1;Charges;Commission Malt;546
+central;An 1;Charges;Formation et veille;300
+central;An 1;Charges;CFE;0
+central;An 1;Charges;Sous-traitance (jours au-dela de 160 j/an);0
+central;An 1;Charges;TOTAL charges d'exploitation;5206
+central;An 1;Prelevements;Cotisations sociales 25,6 % + CFP 0,2 % (micro BNC SSI);10616
+central;An 1;Prelevements;Impot (versement liberatoire 2,2 % si option);905
+central;An 1;Resultat;Revenu net disponible du dirigeant;24420
+central;An 1;Indicateurs;Revenu net mensuel moyen;2035
+central;An 1;Indicateurs;Clients nouveaux (diag+pilotes+installations);16
+central;An 1;Indicateurs;Abonnes maintenance en fin d'annee;6.4
+central;An 1;Indicateurs;Jours de production estimes;82
+central;An 1;Indicateurs;Regime;micro-entreprise (TVA due si CA > 37 500 EUR)
+central;An 2;Chiffre d'affaires;Diagnostic ECHO;9480
+central;An 2;Chiffre d'affaires;Pilotes;0
+central;An 2;Chiffre d'affaires;Installations Solo;18900
+central;An 2;Chiffre d'affaires;Maintenance (abonnements);14045
+central;An 2;Chiffre d'affaires;Agents sur mesure / regie;25200
+central;An 2;Chiffre d'affaires;Licences integrateurs;2750
+central;An 2;Chiffre d'affaires;TOTAL CA HT;70375
+central;An 2;Charges;Infrastructure (VPS, sauvegardes);550
+central;An 2;Charges;IA payante plafonnee;480
+central;An 2;Charges;Outils et abonnements;720
+central;An 2;Charges;Assurance RC pro;600
+central;An 2;Charges;Juridique (marque, e-Soleau, CGV, societe);415
+central;An 2;Charges;Marketing;2000
+central;An 2;Charges;Commission Malt;756
+central;An 2;Charges;Formation et veille;400
+central;An 2;Charges;CFE;300
+central;An 2;Charges;Sous-traitance (jours au-dela de 160 j/an);0
+central;An 2;Charges;TOTAL charges d'exploitation;6221
+central;An 2;Prelevements;Cotisations sociales 25,6 % + CFP 0,2 % (micro BNC SSI);18157
+central;An 2;Prelevements;Impot (versement liberatoire 2,2 % si option);1548
+central;An 2;Resultat;Revenu net disponible du dirigeant;44449
+central;An 2;Indicateurs;Revenu net mensuel moyen;3704
+central;An 2;Indicateurs;Clients nouveaux (diag+pilotes+installations);21
+central;An 2;Indicateurs;Abonnes maintenance en fin d'annee;12.3
+central;An 2;Indicateurs;Jours de production estimes;116
+central;An 2;Indicateurs;Regime;micro-entreprise (TVA due si CA > 37 500 EUR)
+central;An 3;Chiffre d'affaires;Diagnostic ECHO;11060
+central;An 3;Chiffre d'affaires;Pilotes;0
+central;An 3;Chiffre d'affaires;Installations Solo;24200
+central;An 3;Chiffre d'affaires;Maintenance (abonnements);24834
+central;An 3;Chiffre d'affaires;Agents sur mesure / regie;27000
+central;An 3;Chiffre d'affaires;Licences integrateurs;8250
+central;An 3;Chiffre d'affaires;TOTAL CA HT;95344
+central;An 3;Charges;Infrastructure (VPS, sauvegardes);1060
+central;An 3;Charges;IA payante plafonnee;600
+central;An 3;Charges;Outils et abonnements;840
+central;An 3;Charges;Assurance RC pro;650
+central;An 3;Charges;Juridique (marque, e-Soleau, CGV, societe);515
+central;An 3;Charges;Marketing;2500
+central;An 3;Charges;Commission Malt;810
+central;An 3;Charges;Formation et veille;500
+central;An 3;Charges;CFE;350
+central;An 3;Charges;Sous-traitance (jours au-dela de 160 j/an);0
+central;An 3;Charges;TOTAL charges d'exploitation;7825
+central;An 3;Prelevements;Cotisations sociales 25,6 % + CFP 0,2 % (micro BNC SSI);24599
+central;An 3;Prelevements;Impot (versement liberatoire 2,2 % si option);2098
+central;An 3;Resultat;Revenu net disponible du dirigeant;60822
+central;An 3;Indicateurs;Revenu net mensuel moyen;5068
+central;An 3;Indicateurs;Clients nouveaux (diag+pilotes+installations);25
+central;An 3;Indicateurs;Abonnes maintenance en fin d'annee;18.7
+central;An 3;Indicateurs;Jours de production estimes;148
+central;An 3;Indicateurs;Regime;micro-entreprise (TVA due si CA > 37 500 EUR)
+ambitieux;An 1;Chiffre d'affaires;Diagnostic ECHO;11060
+ambitieux;An 1;Chiffre d'affaires;Pilotes;2850
+ambitieux;An 1;Chiffre d'affaires;Installations Solo;19800
+ambitieux;An 1;Chiffre d'affaires;Maintenance (abonnements);9347
+ambitieux;An 1;Chiffre d'affaires;Agents sur mesure / regie;26100
+ambitieux;An 1;Chiffre d'affaires;Licences integrateurs;0
+ambitieux;An 1;Chiffre d'affaires;TOTAL CA HT;69157
+ambitieux;An 1;Charges;Infrastructure (VPS, sauvegardes);550
+ambitieux;An 1;Charges;IA payante plafonnee;720
+ambitieux;An 1;Charges;Outils et abonnements;840
+ambitieux;An 1;Charges;Assurance RC pro;650
+ambitieux;An 1;Charges;Juridique (marque, e-Soleau, CGV, societe);1800
+ambitieux;An 1;Charges;Marketing;2400
+ambitieux;An 1;Charges;Commission Malt;783
+ambitieux;An 1;Charges;Formation et veille;500
+ambitieux;An 1;Charges;CFE;0
+ambitieux;An 1;Charges;Sous-traitance (jours au-dela de 160 j/an);0
+ambitieux;An 1;Charges;TOTAL charges d'exploitation;8243
+ambitieux;An 1;Prelevements;Cotisations sociales 25,6 % + CFP 0,2 % (micro BNC SSI);17843
+ambitieux;An 1;Prelevements;Impot (versement liberatoire 2,2 % si option);1521
+ambitieux;An 1;Resultat;Revenu net disponible du dirigeant;41550
+ambitieux;An 1;Indicateurs;Revenu net mensuel moyen;3462
+ambitieux;An 1;Indicateurs;Clients nouveaux (diag+pilotes+installations);26
+ambitieux;An 1;Indicateurs;Abonnes maintenance en fin d'annee;10.2
+ambitieux;An 1;Indicateurs;Jours de production estimes;118
+ambitieux;An 1;Indicateurs;Regime;micro-entreprise (TVA due si CA > 37 500 EUR)
+ambitieux;An 2;Chiffre d'affaires;Diagnostic ECHO;17800
+ambitieux;An 2;Chiffre d'affaires;Pilotes;0
+ambitieux;An 2;Chiffre d'affaires;Installations Solo;36000
+ambitieux;An 2;Chiffre d'affaires;Maintenance (abonnements);26719
+ambitieux;An 2;Chiffre d'affaires;Agents sur mesure / regie;31000
+ambitieux;An 2;Chiffre d'affaires;Licences integrateurs;10200
+ambitieux;An 2;Chiffre d'affaires;TOTAL CA HT;121719
+ambitieux;An 2;Charges;Infrastructure (VPS, sauvegardes);550
+ambitieux;An 2;Charges;IA payante plafonnee;960
+ambitieux;An 2;Charges;Outils et abonnements;1080
+ambitieux;An 2;Charges;Assurance RC pro;700
+ambitieux;An 2;Charges;Juridique (marque, e-Soleau, CGV, societe);815
+ambitieux;An 2;Charges;Marketing;4000
+ambitieux;An 2;Charges;Commission Malt;930
+ambitieux;An 2;Charges;Formation et veille;600
+ambitieux;An 2;Charges;CFE;350
+ambitieux;An 2;Charges;Sous-traitance (jours au-dela de 160 j/an);5463
+ambitieux;An 2;Charges;TOTAL charges d'exploitation;15448
+ambitieux;An 2;Prelevements;Cotisations sociales 25,6 % + CFP 0,2 % (micro BNC SSI);31404
+ambitieux;An 2;Prelevements;Impot (versement liberatoire 2,2 % si option);2678
+ambitieux;An 2;Resultat;Revenu net disponible du dirigeant;72189
+ambitieux;An 2;Indicateurs;Revenu net mensuel moyen;6016
+ambitieux;An 2;Indicateurs;Clients nouveaux (diag+pilotes+installations);35
+ambitieux;An 2;Indicateurs;Abonnes maintenance en fin d'annee;20.9
+ambitieux;An 2;Indicateurs;Jours de production estimes;174
+ambitieux;An 2;Indicateurs;Regime;micro-entreprise (TVA due si CA > 37 500 EUR)
+ambitieux;An 3;Chiffre d'affaires;Diagnostic ECHO;22250
+ambitieux;An 3;Chiffre d'affaires;Pilotes;0
+ambitieux;An 3;Chiffre d'affaires;Installations Solo;50000
+ambitieux;An 3;Chiffre d'affaires;Maintenance (abonnements);49726
+ambitieux;An 3;Chiffre d'affaires;Agents sur mesure / regie;32500
+ambitieux;An 3;Chiffre d'affaires;Licences integrateurs;27200
+ambitieux;An 3;Chiffre d'affaires;TOTAL CA HT;181676
+ambitieux;An 3;Charges;Infrastructure (VPS, sauvegardes);1060
+ambitieux;An 3;Charges;IA payante plafonnee;1200
+ambitieux;An 3;Charges;Outils et abonnements;1320
+ambitieux;An 3;Charges;Assurance RC pro;800
+ambitieux;An 3;Charges;Juridique (marque, e-Soleau, CGV, societe);1515
+ambitieux;An 3;Charges;Marketing;6000
+ambitieux;An 3;Charges;Commission Malt;975
+ambitieux;An 3;Charges;Formation et veille;800
+ambitieux;An 3;Charges;CFE;400
+ambitieux;An 3;Charges;Sous-traitance (jours au-dela de 160 j/an);32061
+ambitieux;An 3;Charges;TOTAL charges d'exploitation;46131
+ambitieux;An 3;Prelevements;Cotisations sociales 25,6 % + CFP 0,2 % (micro BNC SSI);46872
+ambitieux;An 3;Prelevements;Impot (versement liberatoire 2,2 % si option);3997
+ambitieux;An 3;Resultat;Revenu net disponible du dirigeant;84676
+ambitieux;An 3;Indicateurs;Revenu net mensuel moyen;7056
+ambitieux;An 3;Indicateurs;Clients nouveaux (diag+pilotes+installations);45
+ambitieux;An 3;Indicateurs;Abonnes maintenance en fin d'annee;33.7
+ambitieux;An 3;Indicateurs;Jours de production estimes;244
+ambitieux;An 3;Indicateurs;Regime;micro-entreprise (TVA due si CA > 37 500 EUR)

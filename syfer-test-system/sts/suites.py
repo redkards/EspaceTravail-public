@@ -27,7 +27,8 @@ GRAVITES = ["critique", "majeure", "mineure", "info"]
 CRIT_VERS_GRAVITE = {"critique": "critique", "haute": "majeure", "moyenne": "mineure", "basse": "info",
                      "bloquant": "critique", "majeur": "majeure", "majeure": "majeure", "mineur": "mineure",
                      "mineure": "mineure", "critique": "critique", "info": "info", "elevee": "majeure",
-                     "élevée": "majeure", "faible": "mineure"}
+                     "élevée": "majeure", "faible": "mineure",
+                     "1": "critique", "2": "majeure", "3": "mineure", "4": "info"}
 
 RESPONSABLES = {
     "nexus-core": "Dév nexus-core (Mothership)", "nexus-bridge": "Dév nexus-bridge (passerelle MCP)",
@@ -292,6 +293,8 @@ def _gravite(d: dict) -> str:
 
 
 def _ouvert(d: dict) -> bool:
+    if d.get("reproduit") is False:
+        return False
     st = str(d.get("statut", d.get("etat", "ouvert"))).lower()
     return not any(x in st for x in ("corrig", "ferm", "resolu", "résolu", "clos"))
 
@@ -343,11 +346,16 @@ def suite_iterations(ctx: Contexte) -> dict:
         return saute("iterations", titre, "iterations-100/iterer.py absent (en construction)")
     t0, env = time.time(), ctx.env()
     aide = C.options_aide(script, rep, env)
-    nb = 20 if ctx.rapide else 100
+    # Paramétrable : SYFER_ITER_N / SYFER_ITER_TAILLE (défauts : tout 100 × 5, rapide 10 × 5).
+    nb = int(os.environ.get("SYFER_ITER_N") or (10 if ctx.rapide else 100))
+    taille = int(os.environ.get("SYFER_ITER_TAILLE") or 5)
     args = []
     o = C.choisir_option(aide, ["--iterations", "--nombre", "--nb", "-n", "--n"])
     if o:
         args += [o, str(nb)]
+    o = C.choisir_option(aide, ["--taille"])
+    if o:
+        args += [o, str(taille)]
     o = C.choisir_option(aide, ["--graine", "--seed"])
     if o:
         args += [o, str(ctx.graine)]
@@ -382,12 +390,19 @@ def suite_iterations(ctx: Contexte) -> dict:
         motif = (r["erreurs"].strip().splitlines() or r["sortie"].strip().splitlines() or [f"rc={r['rc']}"])[-1]
         return _res("iterations", titre, "erreur", f"aucun résultat JSON lisible ({motif[:160]})", time.time() - t0,
                     commandes=[cmd])
-    total = _premier(doc, {"total", "iterations", "nb_iterations", "scenarios"})
-    reussis = _premier(doc, {"reussis", "reussies", "succes", "ok", "conformes"})
-    echoues = _premier(doc, {"echoues", "echouees", "echecs", "ko", "non_conformes"})
-    if reussis is None and total is not None and echoues is not None:
+    tx = doc.get("totaux") if isinstance(doc.get("totaux"), dict) else {}
+    if "mini_scenarios" in tx:   # format iterations-100/iterer.py
+        total, echoues = tx["mini_scenarios"], tx.get("scenarios_en_echec", 0)
         reussis = total - echoues
-    bruts = extraire_defauts_generiques(doc) + _defauts_fichiers(rep / "defauts")
+    else:
+        total = _premier(doc, {"total", "iterations", "nb_iterations", "scenarios"})
+        reussis = _premier(doc, {"reussis", "reussies", "succes", "ok", "conformes"})
+        echoues = _premier(doc, {"echoues", "echouees", "echecs", "ko", "non_conformes"})
+        if reussis is None and total is not None and echoues is not None:
+            reussis = total - echoues
+    bruts = extraire_defauts_generiques(doc)
+    if not bruts:
+        bruts = _defauts_fichiers(rep / "defauts")
     defauts, crit_ouverts = [], 0
     for d in bruts:
         g = _gravite(d)
@@ -395,16 +410,23 @@ def suite_iterations(ctx: Contexte) -> dict:
         if g == "critique" and ouvert:
             crit_ouverts += 1
         if ouvert:
-            defauts.append(defaut("iterations", g, d.get("titre") or d.get("description") or d.get("id") or "défaut",
-                                  d.get("preuve") or d.get("reproduction") or d.get("graine") or d.get("_fichier", ""),
-                                  d.get("correction") or d.get("correction_suggeree") or "Corriger puis rejouer la graine.",
+            titre = d.get("titre") or (f"{d.get('id')} — {d.get('oracle_titre')} ({d.get('description', '')})"
+                                       if d.get("oracle_titre") else d.get("description") or d.get("id") or "défaut")
+            preuve = d.get("preuve") or (f"{d.get('occurrences', '?')} occurrence(s) · observé : {str(d.get('observe', ''))[:160]}"
+                                         f" · attendu : {str(d.get('attendu', ''))[:120]} · {d.get('fichier_ligne_probable', '')}"
+                                         if "observe" in d else d.get("reproduction") or d.get("graine") or d.get("_fichier", ""))
+            defauts.append(defaut("iterations", g, titre, preuve,
+                                  (d.get("correction") or d.get("correction_suggeree") or "Corriger puis rejouer la graine.")
+                                  + (f" Rejouer : {d['rejouer']}" if isinstance(d.get("rejouer"), str) else ""),
                                   d.get("responsable") or RESPONSABLES["iterations-100"],
                                   ident=f"iterations:{d.get('id') or d.get('_fichier') or len(defauts)}"))
     taux = round(100 * reussis / total, 2) if (total and reussis is not None) else None
-    statut = "reussi" if r["rc"] == 0 and crit_ouverts == 0 and (echoues in (None, 0)) else "echoue"
+    statut = "reussi" if crit_ouverts == 0 and not defauts and (echoues in (None, 0)) else "echoue"
     return _res("iterations", titre, statut, None, time.time() - t0,
                 {"iterations": total, "reussis": reussis, "echoues": echoues, "taux_reussite": taux,
                  "defauts_total": len(bruts), "defauts_ouverts": len(defauts), "critiques_ouverts": crit_ouverts,
+                 "par_gravite": {g: sum(1 for d in defauts if d["gravite"] == g) for g in GRAVITES},
+                 "couverture": doc.get("couverture"), "critere_sortie": doc.get("critere_sortie"), "taille": taille,
                  "rc": r["rc"], "options": args}, defauts, [cmd])
 
 
@@ -721,6 +743,10 @@ def suite_compaction(ctx: Contexte) -> dict:
     o = C.choisir_option(aide, ["--rapide", "--court"])
     if o:
         args.append(o)
+    # Mode court : corpus réduit (tout : 2 000 missions ; rapide : 500).
+    for opt, (n_tout, n_rap) in (("--missions", (2000, 500)), ("--fiches", (1000, 250)), ("--connaissances", (400, 100))):
+        if C.choisir_option(aide, [opt]):
+            args += [opt, str(n_rap if ctx.rapide else n_tout)]
     o = C.choisir_option(aide, ["--graine", "--seed"])
     if o:
         args += [o, str(ctx.graine)]
@@ -751,8 +777,15 @@ def suite_compaction(ctx: Contexte) -> dict:
                               if isinstance(v, (int, float)) and not isinstance(v, bool) and
                               re.search(r"gain|ratio|taux|perte|octets|economie|duree|integr", str(k), re.I)}
         mes["indicateurs"] = dict(list(mes["indicateurs"].items())[:30])
+        mes["verifications"] = {c: v for c, k, v in _parcourir(doc) if isinstance(v, bool) and re.search(r"verif|integr", str(k), re.I)}
+        proj = doc.get("projection") or {}
+        nom1 = next(iter(proj), None)
+        if nom1:
+            mes["gain_1an"] = (proj[nom1].get("1an") or {}).get("gain_x")
+        mes["brut_octets"] = doc.get("brut_octets")
     defauts = []
     pertes = [k for k, v in (mes.get("indicateurs") or {}).items() if "perte" in k and v]
+    pertes += [k for k, v in (mes.get("verifications") or {}).items() if v is False]
     if pertes:
         defauts.append(defaut("compaction", "critique", "Compaction : perte d'information mesurée", ", ".join(pertes),
                               "Revoir la compaction (aucune donnée ne doit disparaître sans archive).",
@@ -871,9 +904,16 @@ def suite_statiques(ctx: Contexte) -> dict:
     composes = sorted(ctx.bac.glob("docker-compose*.yml"))
     if shutil.which("docker") and composes:
         dkok = []
-        env_dc = dict(env, NEXUS_HOST="syfer.exemple.local", COMPOSE_PROJECT_NAME="syfertest")
+        base_dc = ctx.bac / "docker-compose.yml"
         for f in composes:
-            r = C.executer(["docker", "compose", "-f", str(f), "config", "-q"], ctx.bac, env_dc, 60)
+            # Une surcouche (docker-compose.<mode>.yml) est validée FUSIONNÉE avec docker-compose.yml, tous profils.
+            fichiers = [f] if f == base_dc or not base_dc.exists() else [base_dc, f]
+            # Variables exigées (${X:?…}) : valeurs FACTICES ; aucun .env réel n'est lu.
+            noms = {n for x in fichiers for n in re.findall(r"\$\{([A-Za-z_][A-Za-z0-9_]*):?\?", x.read_text(encoding="utf-8"))}
+            env_dc = dict(env, COMPOSE_PROJECT_NAME="syfertest", **{n: "valeur-factice-syfer-test" for n in noms})
+            cmd = ["docker", "compose", "--env-file", "/dev/null"] + [a for x in fichiers for a in ("-f", str(x))]
+            cmd += (["--profile", "*"] if len(fichiers) > 1 else []) + ["config", "-q"]
+            r = C.executer(cmd, ctx.bac, env_dc, 60)
             dkok.append(r["rc"] == 0)
             if r["rc"] != 0:
                 msg = [l for l in r["erreurs"].splitlines() if "level=warning" not in l]

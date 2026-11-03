@@ -69,10 +69,84 @@ _NEG_DIRECTE = {"aucun", "aucune", "sans"}
 _DETERMINANTS = {"le", "la", "les", "l", "un", "une", "des", "du", "de", "d", "ce", "cet", "cette", "ces"}
 _PRONOMS = {"le", "la", "les", "l", "lui", "leur", "y", "en", "me", "m", "te", "t", "se", "s", "nous", "vous"}
 # Montants : « 1 500 € », « 300€ », « 20 euros », « $50 », « 12,5 USD »… (texte brut, avant normalisation).
-_NOMBRE = r"\d{1,3}(?:[ \u00a0\u202f.]\d{3})+(?:[.,]\d+)?|\d+(?:[.,]\d+)?"
+_NOMBRE = r"(?<![\d.,])(?:\d{1,3}(?:[   .,']\d{3})+(?:[.,]\d+)?|\d+(?:[.,]\d+)?)"
+_MULT = r"(?:k|K|M|Md|Mds|mio|millions?|milliards?|mille)"
+_DEVISE = r"(?:€|eur\b|euros?\b|\$|usd\b|us\$|dollars?\b)"
 _MONTANT = re.compile(
-    rf"(?:(?P<n1>{_NOMBRE})\s*(?:k\s*)?(?:€|eur\b|euros?\b|\$|usd\b|dollars?\b))"
-    rf"|(?:(?:€|\$)\s*(?P<n2>{_NOMBRE}))", re.I)
+    rf"(?:(?P<n1>{_NOMBRE})\s*(?P<m1>{_MULT})?\.?\s*(?:d'|d’|de\s+)?{_DEVISE})"
+    rf"|(?:(?:€|\$|us\$|usd\s|eur\s)\s*(?P<n2>{_NOMBRE})\s*(?P<m2>{_MULT}\b)?)", re.I)
+_MULTIPLICATEURS = {"k": 1e3, "mille": 1e3, "m": 1e6, "mio": 1e6, "million": 1e6, "millions": 1e6,
+                    "md": 1e9, "mds": 1e9, "milliard": 1e9, "milliards": 1e9}
+# Nombres en lettres (jusqu'aux milliards).
+_UNITES = {"zero": 0, "un": 1, "une": 1, "deux": 2, "trois": 3, "quatre": 4, "cinq": 5, "six": 6, "sept": 7,
+           "huit": 8, "neuf": 9, "dix": 10, "onze": 11, "douze": 12, "treize": 13, "quatorze": 14, "quinze": 15,
+           "seize": 16, "vingt": 20, "vingts": 20, "trente": 30, "quarante": 40, "cinquante": 50, "soixante": 60}
+_ECHELLES = {"mille": 1e3, "million": 1e6, "millions": 1e6, "milliard": 1e9, "milliards": 1e9}
+_MOTS_NOMBRE = set(_UNITES) | set(_ECHELLES) | {"cent", "cents", "et"}
+_LETTRES = re.compile(r"(?<![a-z0-9])((?:(?:" + "|".join(sorted(_MOTS_NOMBRE, key=len, reverse=True)) +
+                      r")[\s-]+)+)(?:d'|de\s+)?(?:euros?|€|eur|dollars?)\b")
+
+
+def _nombre(n: str) -> float | None:
+    """« 1 500 », « 1.500 », « 1,500 » (anglais), « 1 250,50 », « 1.500,00 », « 2,000.50 », « 1,2 »."""
+    n = re.sub(r"[   ']", "", n)
+    if "," in n and "." in n:  # le dernier séparateur est la décimale
+        n = n.replace(".", "").replace(",", ".") if n.rfind(",") > n.rfind(".") else n.replace(",", "")
+    elif n.count(",") > 1 or re.fullmatch(r"\d{1,3},\d{3}", n):
+        n = n.replace(",", "")  # séparateurs de milliers anglais
+    elif n.count(".") > 1 or re.fullmatch(r"\d{1,3}\.\d{3}", n):
+        n = n.replace(".", "")  # séparateurs de milliers français
+    else:
+        n = n.replace(",", ".")
+    try:
+        return float(n)
+    except ValueError:
+        return None
+
+
+def _valeur_lettres(mots: list[str]) -> float | None:
+    total, courant, vu = 0.0, 0.0, False
+    for i, w in enumerate(mots):
+        if w == "et":
+            continue
+        vu = True
+        if w in _UNITES:
+            v = _UNITES[w]
+            if v == 20 and i > 0 and mots[i - 1] == "quatre":
+                courant += 80 - 4  # quatre-vingt(s)
+            else:
+                courant += v
+        elif w in ("cent", "cents"):
+            courant = (courant or 1) * 100
+        elif w in _ECHELLES:
+            total += (courant or 1) * _ECHELLES[w]
+            courant = 0
+    return total + courant if vu else None
+
+
+def montants(texte_brut: str) -> list[tuple[str, float]]:
+    """Montants cités : [(extrait, valeur)] — chiffres FR/EN, k/M, lettres, €/$/EUR/USD."""
+    res = []
+    for m in _MONTANT.finditer(texte_brut or ""):
+        v = _nombre(m.group("n1") or m.group("n2") or "")
+        mult = (m.group("m1") or m.group("m2") or "").strip()
+        if v is not None and mult:
+            v *= _MULTIPLICATEURS.get(mult.lower(), 1)
+        if v:
+            res.append((m.group(0).strip(), v))
+    norm = normaliser(texte_brut or "").replace("’", "'")
+    for m in _LETTRES.finditer(norm):
+        v = _valeur_lettres(re.split(r"[\s-]+", m.group(1).strip()))
+        if v:
+            res.append((m.group(0).strip(), v))
+    return res
+
+
+def montant_max(texte_brut: str) -> float | None:
+    vals = [v for _, v in montants(texte_brut)]
+    return max(vals) if vals else None
+
+
 # Verbes d'envoi pour lesquels un destinataire « moi / nous » n'engage personne d'extérieur.
 VERBES_ENVOI = r"(?:envoyer|envoyez|envoie|envoyons|enverra|envoi|envois)"
 DESTINATAIRE_INTERNE = r"(?:-?\s*(?:moi|nous)|\s+a\s+(?:moi|nous)|\s+au\s+proprietaire)"
@@ -165,12 +239,9 @@ def _neutraliser(texte: str) -> str:
 
 
 def detecter_montant(texte_brut: str) -> str | None:
-    """Montant non nul en €, euros, $, USD ou dollars ; None sinon."""
-    for m in _MONTANT.finditer(texte_brut or ""):
-        chiffres = re.sub(r"\D", "", m.group("n1") or m.group("n2") or "")
-        if chiffres and int(chiffres) > 0:
-            return m.group(0).strip()
-    return None
+    """Montant non nul (€, euros, EUR, $, USD, dollars ; chiffres FR/EN, k/M, lettres) ; None sinon."""
+    trouves = montants(texte_brut)
+    return trouves[0][0] if trouves else None
 
 
 def _sans_envois_internes(texte: str) -> str:
