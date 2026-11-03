@@ -34,7 +34,39 @@ MOTS_SERVICES = {
     "OPS-CORE/projets": ["plan de projet", "checklist", "planning", "etapes", "organisation", "demarrage"],
     "R&D-PARADOX/veille": ["veille", "synthese", "tendance", "etat de l'art", "resume"],
     "AGENT-FACTORY/evaluation": ["evalue", "evaluation", "qualite de la sortie", "agent"],
+    # Nouveaux services (mots entiers, sans accents).
+    "CODE-CORE/conception": ["architecture", "conception", "concevoir", "specification", "specifications",
+                             "stack", "pseudo-code", "pseudo code", "decoupage en taches", "choix technique"],
+    "DESIGN-SYSTEM/ui": ["design", "maquette", "maquettes", "wireframe", "wireframes", "parcours utilisateur",
+                         "ux", "ui", "charte graphique", "accessibilite", "rgaa", "wcag", "ergonomie"],
+    "LEX-GUARD/droit-france": ["droit francais", "loi francaise", "code civil", "code du commerce",
+                               "code de commerce", "code de la consommation", "code du travail", "cnil", "anj",
+                               "dgccrf", "micro-entreprise", "micro entreprise", "sasu", "statut juridique",
+                               "droit des societes", "jeux d'argent"],
+    "LEX-GUARD/droit-europe": ["droit europeen", "droit de l'ue", "union europeenne", "reglement europeen",
+                               "directive europeenne", "dsa", "dma", "digital services act", "cjue"],
+    "LEX-GUARD/droit-international": ["droit international", "export", "exporter", "conflit de lois",
+                                      "conflits de lois", "convention internationale", "juridictions",
+                                      "a l'etranger", "hors ue", "loi applicable"],
+    "PILOT-CORE/etudes": ["etude de marche", "concurrence", "concurrents", "business plan", "previsionnel",
+                          "rentabilite", "seuil de rentabilite", "chiffre d'affaires"],
+    "PILOT-CORE/pilotage": ["tableau de bord", "tableaux de bord", "indicateur", "indicateurs", "kpi", "okr",
+                            "plan d'action", "revue mensuelle", "pilotage"],
+    "GREEN-CORE/environnement": ["environnement", "environnemental", "environnementale", "empreinte carbone",
+                                 "bilan carbone", "sobriete numerique", "ecologie", "ecologique", "energie"],
+    "GREEN-CORE/rse": ["rse", "responsabilite societale", "eco-conception", "ecoconception", "greenwashing",
+                       "communication responsable", "developpement durable"],
 }
+MENTION_AVOCAT = "Information générale, ne remplace pas l'avis d'un avocat"
+
+
+def garantir_mention_juridique(service: str | None, livrable: str) -> str:
+    """Services LEX-GUARD/droit-* : la mention finale est ajoutée si le modèle l'a oubliée."""
+    if not (service or "").startswith("LEX-GUARD/droit-"):
+        return livrable
+    if gate.normaliser(MENTION_AVOCAT) in gate.normaliser(livrable):
+        return livrable
+    return f"{livrable.rstrip()}\n\n{MENTION_AVOCAT}."
 
 
 # --- Assemblage des messages (limite LLM_MAX_CHARS) ---------------------------------
@@ -241,6 +273,7 @@ def _boucle_qualite(ctx: Contexte, srv: dict, livrable: str, elements: str) -> N
     mid = ctx.mid
     verdict = {"ok": False, "problemes": []}
     for boucle in range(MAX_BOUCLES_CHECKER + 1):
+        livrable = garantir_mention_juridique(ctx.service, livrable)
         # Le CHECKER reçoit toujours le livrable complet ; la consigne est tronquée en premier.
         rep = ctx.appel(srv["checker"], assembler([("Consigne", ctx.consigne, 1, "debut"),
                                                    ("Livrable à vérifier", livrable, 3, "tete_queue")]),

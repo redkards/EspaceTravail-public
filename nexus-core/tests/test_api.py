@@ -79,7 +79,7 @@ def test_ledger_budget_agents(client, entetes):
     client.post("/api/missions", headers=entetes, json={"titre": "a", "consigne": "Fais une synthèse"})
     assert client.get("/api/ledger/verifier", headers=entetes).json()["valide"] is True
     assert len(client.get("/api/ledger?limit=5", headers=entetes).json()) == 5
-    assert len(client.get("/api/agents", headers=entetes).json()) == 40
+    assert len(client.get("/api/agents", headers=entetes).json()) == 77
     b = client.get("/api/budget", headers=entetes).json()
     assert b["tokens"] > 0 and b["budget_tache_tokens"] == 20000
     # Aucune route de modification/suppression du ledger.

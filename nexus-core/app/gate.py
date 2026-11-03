@@ -44,6 +44,22 @@ MOTS_N2 = [
     r"post (?:linkedin|instagram|facebook)", r"newsletter", r"article de blog",
 ]
 SERVICES_N2 = {"CONTENT-ARENA/redaction"}
+
+# Règles par service (texte normalisé, mots entiers).
+# Droit : au minimum N2 ; N3 si le livrable est destiné à un tiers.
+MOTS_TIERS = [r"client", r"clients", r"tiers", r"partenaire", r"partenaires", r"fournisseur", r"prestataire",
+              r"cgv", r"cgu", r"mentions legales", r"conditions generales", r"politique de confidentialite",
+              r"grand public", r"a remettre", r"a transmettre"]
+# Pilotage : N3 si décision financière ou engagement.
+MOTS_ENGAGEMENT = [r"investir", r"investissement", r"investissements", r"emprunt", r"emprunter",
+                   r"pret", r"prets", r"levee de fonds", r"financement", r"financer", r"recruter",
+                   r"recrutement", r"embaucher", r"embauche", r"engager", r"engagement", r"engagements",
+                   r"budget alloue", r"allouer", r"augmenter les prix", r"baisser les prix", r"decision financiere",
+                   r"depenser", r"depense", r"depenses"]
+# RSE : N3 si communication / publication externe (risque de greenwashing).
+MOTS_EXTERNE = [r"externe", r"communication", r"communiquer", r"communique", r"campagne", r"site web",
+                r"site internet", r"reseaux sociaux", r"rapport public", r"label", r"slogan", r"publicite",
+                r"clients", r"grand public"]
 # Mots-clés N0 : simple lecture / synthèse interne.
 MOTS_N0 = [r"synthese", r"resume", r"resumer", r"lis", r"lecture", r"note interne", r"recapitul\w*"]
 
@@ -91,6 +107,21 @@ def classer_regles(titre: str, consigne: str, service: str | None = None,
         m = _n3_texte(normaliser(livrable))
         if m:
             return "N3", f"mot-clé sensible dans le livrable : {m}"
+    # Règles propres aux services spécialisés.
+    srv = service or ""
+    if srv.startswith("LEX-GUARD/droit-"):
+        m = _contient(texte, MOTS_TIERS)
+        if m:
+            return "N3", f"avis juridique destiné à un tiers : {m}"
+        return "N2", f"avis juridique ({srv}) : relecture humaine requise"
+    if srv.startswith("PILOT-CORE/"):
+        m = _contient(texte, MOTS_ENGAGEMENT)
+        if m:
+            return "N3", f"décision financière ou engagement : {m}"
+    if srv == "GREEN-CORE/rse":
+        m = _contient(texte, MOTS_EXTERNE)
+        if m:
+            return "N3", f"communication RSE externe (risque de greenwashing) : {m}"
     if service in SERVICES_N2:
         return "N2", f"service de publication : {service}"
     m = _contient(texte, MOTS_N2)

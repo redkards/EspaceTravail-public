@@ -8,56 +8,56 @@ projets:
   - code: paradoxx
     nom: PARADOXX SYSTÈME
     description: Structure de pilotage multi-projets et VPS Hostinger dédié.
-    services: [OPS-CORE/projets, CODE-CORE/revue, LEX-GUARD/conformite]
+    services: [OPS-CORE/projets, PILOT-CORE/pilotage, CODE-CORE/conception, CODE-CORE/revue, GREEN-CORE/environnement]
 
   - code: nexus
     nom: NEXUS MOTHERSHIP
     description: Organisation d'agents IA en départements, un seul humain valide.
-    services: [AGENT-FACTORY/evaluation, CODE-CORE/revue, OPS-CORE/projets]
+    services: [AGENT-FACTORY/evaluation, CODE-CORE/conception, CODE-CORE/revue, LEX-GUARD/droit-europe]
 
   - code: poker-winners
     nom: Poker Winners
     alias: [poker-vitrine, poker vitrine]
     description: Site vitrine poker et bêta privée.
-    services: [CONTENT-ARENA/redaction, CODE-CORE/revue, REVENUE-CORE/propositions]
+    services: [LEX-GUARD/droit-france, CONTENT-ARENA/redaction, DESIGN-SYSTEM/ui, CODE-CORE/revue, REVENUE-CORE/propositions]
 
   - code: poker-feeling
     nom: Poker Feeling
     description: Livre de poker « Poker Feeling ».
-    services: [CONTENT-ARENA/redaction, R&D-PARADOX/veille]
+    services: [CONTENT-ARENA/redaction, DESIGN-SYSTEM/ui, R&D-PARADOX/veille, LEX-GUARD/droit-france]
 
   - code: redkards
     nom: REDKARDS / Red Card
     alias: [red-card, redcard]
     description: Bande dessinée REDKARDS.
-    services: [CONTENT-ARENA/redaction, OPS-CORE/projets]
+    services: [DESIGN-SYSTEM/ui, CONTENT-ARENA/redaction, OPS-CORE/projets, LEX-GUARD/droit-france]
 
   - code: top-solver
     nom: Top Solver
     alias: [solver, pw-solver]
     description: Solver GTO de poker en français, outil d'analyse de main.
-    services: [CODE-CORE/revue, R&D-PARADOX/veille]
+    services: [CODE-CORE/conception, CODE-CORE/revue, DESIGN-SYSTEM/ui, LEX-GUARD/droit-france, R&D-PARADOX/veille]
 
   - code: youtube-poker-winner
     nom: Chaîne YouTube Poker Winner
     description: Chaîne YouTube de poker éducatif.
-    services: [CONTENT-ARENA/redaction, R&D-PARADOX/veille]
+    services: [CONTENT-ARENA/redaction, R&D-PARADOX/veille, PILOT-CORE/pilotage, LEX-GUARD/droit-france]
 
   - code: freelance-ia
     nom: Freelance IA
     description: Activité freelance de développeur d'applications et d'automatisation IA.
-    services: [REVENUE-CORE/propositions, LEX-GUARD/conformite, OPS-CORE/projets]
+    services: [PILOT-CORE/etudes, PILOT-CORE/pilotage, REVENUE-CORE/propositions, LEX-GUARD/droit-france, LEX-GUARD/droit-europe, CODE-CORE/conception]
 
   - code: esct-boxe
     nom: Site ESCT Boxe
     alias: [siteesctboxe]
     description: Site web du club ESCT Boxe.
-    services: [CODE-CORE/revue, CONTENT-ARENA/redaction]
+    services: [DESIGN-SYSTEM/ui, CODE-CORE/conception, CODE-CORE/revue, CONTENT-ARENA/redaction, LEX-GUARD/droit-europe]
 
   - code: turf
     nom: TURF
     description: Projet TURF.
-    services: [R&D-PARADOX/veille, OPS-CORE/projets]
+    services: [R&D-PARADOX/veille, PILOT-CORE/etudes, LEX-GUARD/droit-france, OPS-CORE/projets]
 
   - code: divers
     nom: Divers
