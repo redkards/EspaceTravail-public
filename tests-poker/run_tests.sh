@@ -61,6 +61,11 @@ api() {
   local methode="$1" chemin="$2" corps="${3:-}"
   local args=(-sS -o "$TMP_REPONSE" -w '%{http_code}' --max-time 30
               -X "$methode" -H "X-Nexus-Key: ${NEXUS_API_KEY}" -H 'Accept: application/json')
+  # Sur le VPS lui-même, le nom d'hôte pointe vers 127.0.1.1 : NEXUS_RESOLVE="hote:443:IP"
+  # force l'adresse publique (ex. srv2113898.hstgr.cloud:443:2.24.51.112).
+  if [[ -n "${NEXUS_RESOLVE:-}" ]]; then
+    args+=(--resolve "$NEXUS_RESOLVE")
+  fi
   if [[ -n "$corps" ]]; then
     args+=(-H 'Content-Type: application/json' --data-binary "$corps")
   fi
