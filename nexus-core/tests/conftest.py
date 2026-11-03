@@ -25,7 +25,8 @@ def environnement(tmp_path, monkeypatch):
     monkeypatch.setenv("BUDGET_TASK_TOKENS", "20000")
     for v in ("NTFY_URL", "NTFY_TOPIC", "ANTHROPIC_API_KEY", "NEXUS_FONCTIONNEMENT_DEFAUT", "EUR_PAR_USD",
               "NEXUS_FONCTIONNEMENT_FILE", "BUDGET_MONTHLY_EUR", "LEDGER_HMAC_KEY", "NEXUS_MAX_MISSIONS",
-              "NEXUS_PROJETS_FILE"):
+              "NEXUS_PROJETS_FILE", "COCKPIT_CODE_DECIDEUR", "NEXUS_SESSIONS_N3", "NEXUS_MEMOIRE_AUTO",
+              "NEXUS_CONNAISSANCES_DIR"):
         monkeypatch.delenv(v, raising=False)
     from app import fonctionnement
     fonctionnement.charger(recharger=True)

@@ -29,6 +29,7 @@ class NouvelleMission(BaseModel):
 
 class Commentaire(BaseModel):
     commentaire: str | None = Field(default=None, max_length=4000)
+    code: str | None = Field(default=None, max_length=12)  # code Décideur (cockpit, risque élevé)
 
 
 class KillSwitch(BaseModel):
@@ -74,7 +75,8 @@ def _filtre_projet(projet: str | None) -> str | None:
         raise HTTPException(422, str(e))
 
 
-def creer_routeur() -> APIRouter:
+def creer_routeur(cockpit: bool = False) -> APIRouter:
+    """Routes métier ; `cockpit=True` : valider une décision à risque élevé exige le code Décideur."""
     r = APIRouter()
 
     @r.get("/sante")
@@ -207,6 +209,16 @@ def creer_routeur() -> APIRouter:
 
     @r.post("/decisions/{did}/valider")
     def valider(did: int, taches: BackgroundTasks, corps: Commentaire | None = None):
+        if cockpit:
+            from . import decideur
+            with session_scope() as s:
+                d = s.get(Decision, did)
+                risque = d.risque if d else None
+            if risque == "eleve":
+                try:
+                    decideur.verifier_code(corps.code if corps else None, "cockpit")
+                except decideur.CodeRefuse as e:
+                    raise HTTPException(e.statut, str(e))
         return _decider(did, "valider", corps, taches)
 
     @r.post("/decisions/{did}/refuser")

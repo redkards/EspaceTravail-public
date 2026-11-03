@@ -76,6 +76,7 @@
 <body>
 <header>
   <h1>Cockpit NEXUS</h1>
+  <a href="/cockpit/decideur" class="etat" style="color:var(--accent)">Décideur mobile</a>
   <span class="etat" id="etat">Chargement…</span>
   <button class="urgence" id="btnUrgence" type="button">Arrêt d'urgence</button>
   <div class="confirm carte" id="confirmUrgence" style="flex-basis:100%">
@@ -189,6 +190,8 @@ async function chargerDecisions() {
       <div class="meta"><b>Avis CHECKER :</b> ${esc(d.avis_checker)}</div>
       <div class="meta"><b>Sources :</b> ${esc(d.sources)} · créée le ${date(d.cree_le)}</div>
       <label for="c${d.id}">Commentaire (facultatif)</label><input id="c${d.id}">
+      ${d.risque === "eleve" ? `<label for="k${d.id}">Code Décideur (risque élevé, 6 chiffres)</label>
+        <input id="k${d.id}" inputmode="numeric" autocomplete="one-time-code" maxlength="6">` : ""}
       <div class="ligne" style="margin-top:8px">
         <button class="ok" data-d="${d.id}" data-c="valider" type="button">Valider</button>
         <button class="ko" data-d="${d.id}" data-c="refuser" type="button">Refuser</button>
@@ -202,7 +205,8 @@ $("#listeDec").addEventListener("click", async (e) => {
   const b = e.target.closest("button"); if (!b) return;
   if (b.dataset.m) return voirMission(b.dataset.m, "#det" + b.dataset.m);
   const c = $("#c" + b.dataset.d).value;
-  try { await api(`/decisions/${b.dataset.d}/${b.dataset.c}`, { method: "POST", body: JSON.stringify({ commentaire: c || null }) });
+  const k = $("#k" + b.dataset.d);
+  try { await api(`/decisions/${b.dataset.d}/${b.dataset.c}`, { method: "POST", body: JSON.stringify({ commentaire: c || null, code: k ? k.value : null }) });
     toast("Décision enregistrée."); rafraichir(); } catch (err) { toast(err.message); }
 });
 

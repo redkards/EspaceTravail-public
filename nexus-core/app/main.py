@@ -20,6 +20,8 @@ from .cockpit import router as cockpit_router
 from .config import cfg
 from .db import init_db
 from .routes import creer_routeur
+from .routes_decideur import api as decideur_api
+from .routes_decideur import page as decideur_page
 from .securite import garde_cockpit
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s : %(message)s")
@@ -43,6 +45,21 @@ async def _boucle_fond() -> None:
     while True:
         await asyncio.sleep(PERIODE_FOND_S)
         await asyncio.to_thread(maintenance)
+
+
+def tick_decideur() -> None:
+    from . import decideur
+    try:
+        decideur.tick()
+    except Exception:
+        log.exception("Erreur pendant la tâche des sessions de décision")
+
+
+async def _boucle_minute() -> None:
+    """Sessions de décision N3 et rappels avant expiration (chaque minute)."""
+    while True:
+        await asyncio.sleep(60)
+        await asyncio.to_thread(tick_decideur)
 
 
 @asynccontextmanager
@@ -72,10 +89,11 @@ async def cycle_de_vie(app: FastAPI):
     reprise = pipeline.reprendre_au_demarrage()
     if reprise["interrompues"] or reprise["relancees"]:
         log.info("Reprise au démarrage : %s", reprise)
-    tache = asyncio.create_task(_boucle_fond()) if cfg().taches_fond else None
+    taches = [asyncio.create_task(_boucle_fond()), asyncio.create_task(_boucle_minute())] \
+        if cfg().taches_fond else []
     yield
-    if tache:
-        tache.cancel()
+    for t in taches:
+        t.cancel()
 
 
 def verifier_cle(x_nexus_key: str | None = Header(default=None)) -> None:
@@ -101,7 +119,9 @@ def sante_publique():
 
 
 app.include_router(creer_routeur(), prefix="/api", dependencies=[Depends(verifier_cle)])
-app.include_router(creer_routeur(), prefix="/cockpit/api")
+app.include_router(creer_routeur(cockpit=True), prefix="/cockpit/api")
+app.include_router(decideur_api)  # /cockpit/api/decideur/* : même garde que tout /cockpit/api
+app.include_router(decideur_page)
 
 
 @app.middleware("http")

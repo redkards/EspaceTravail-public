@@ -337,6 +337,13 @@ def preparer(did: int, choix: str) -> str:
     return jeton
 
 
+def jeton_valide(jeton: str | None, did: int, choix: str) -> bool:
+    """Vérifie sans consommer (le jeton reste utilisable après une erreur de code)."""
+    with _verrou_jetons:
+        v = _jetons.get(jeton or "")
+    return bool(v and v[0] == did and v[1] == choix and v[2] >= time.monotonic())
+
+
 def consommer(jeton: str | None, did: int, choix: str) -> bool:
     with _verrou_jetons:
         v = _jetons.pop(jeton or "", None)
