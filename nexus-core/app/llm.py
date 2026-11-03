@@ -180,16 +180,19 @@ class FournisseurFactice:
     script: dict = defaultdict(deque)
     tokens_par_appel: int | None = None
     appels: list = []
+    entrees: list = []  # (rôle, message utilisateur reçu) : inspecté par les tests
 
     @classmethod
     def reinitialiser(cls):
         cls.script = defaultdict(deque)
         cls.tokens_par_appel = None
         cls.appels = []
+        cls.entrees = []
 
     def appeler(self, systeme: str, utilisateur: str, role: str = "", temperature: float = 0.3,
                 modele: str | None = None) -> Reponse:
         FournisseurFactice.appels.append(role)
+        FournisseurFactice.entrees.append((role, utilisateur))
         if FournisseurFactice.script[role]:
             texte = FournisseurFactice.script[role].popleft()
         else:
@@ -203,6 +206,9 @@ class FournisseurFactice:
             return json.dumps({"ok": True, "problemes": []})
         if role == "gate":
             return "NIVEAU: N0"
+        if role == "directeur":
+            return ("DIAGNOSTIC: consigne trop vague pour le service\nDECISION: REFORMULER\n"
+                    "CONSIGNE: préciser le livrable attendu et les éléments fournis")
         if role == "prime":
             return "SERVICE: OPS-CORE/projets"
         if role == "collector":

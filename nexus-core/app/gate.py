@@ -1,7 +1,8 @@
 """GATE : classement N0–N3 par règles déterministes.
 
-Le LLM peut seulement proposer un niveau plus élevé ; il ne descend jamais
-le niveau calculé par les règles.
+- Les règles portent sur la consigne ET sur le livrable final.
+- Les mots-clés sont cherchés en mots entiers, sans casse ni accents.
+- L'avis du LLM ne peut que MONTER le niveau, jamais le descendre.
 """
 import re
 import unicodedata
@@ -11,11 +12,30 @@ NIVEAUX = ["N0", "N1", "N2", "N3"]
 ACTIONS_N3 = {"envoyer_client", "publier", "signer", "mise_en_production", "depense",
               "supprimer", "donnees_sensibles"}
 
-# Mots-clés N3 (texte normalisé : minuscules, sans accents).
+# Déclencheurs N3 (texte normalisé : minuscules, sans accents ; motifs en mots entiers).
 MOTS_N3 = [
-    r"contrat", r"devis", r"paiement", r"payer", r"factur\w*", r"mot de passe",
-    r"donnees personnelles", r"publi(?:er|e|ez|ons|era)", r"envoy\w*", r"envoi\w*",
+    # Publication / diffusion
+    r"publication", r"publications", r"publier", r"publie", r"publiez", r"publions", r"publiera",
+    r"mise en ligne", r"mettre en ligne", r"mettez en ligne", r"poster", r"postez",
+    r"diffuser", r"diffusez", r"diffusion",
+    # Envoi
+    r"envoyer", r"envoyez", r"envoie", r"envoi", r"envois", r"envoyons", r"enverra",
+    # Argent
+    r"virement", r"virements", r"paiement", r"paiements", r"payer", r"payez",
+    r"facture", r"factures", r"facturer", r"facturation", r"devis",
+    r"achat", r"achats", r"acheter", r"abonnement", r"abonnements", r"commande", r"commandes", r"commander",
+    # Engagement juridique
+    r"contrat", r"contrats", r"signature", r"signatures", r"signer", r"signez",
+    # Sécurité / données
+    r"mot de passe", r"mots de passe", r"donnees personnelles",
+    r"supprimer", r"supprimez", r"suppression",
+    # Production
+    r"mise en production", r"mettre en production", r"deployer", r"deployez", r"deploiement",
 ]
+# Verbes d'envoi pour lesquels un destinataire « moi / nous » n'engage personne d'extérieur.
+VERBES_ENVOI = r"(?:envoyer|envoyez|envoie|envoyons|enverra|envoi|envois)"
+DESTINATAIRE_INTERNE = r"(?:-?\s*moi|\s+me|\s+nous|\s+a\s+moi|\s+au\s+proprietaire)"
+
 # Mots-clés N2 : publication selon la charte, production de code.
 MOTS_N2 = [
     r"charte", r"code", r"script", r"programme", r"fonction python", r"requete sql",
@@ -23,7 +43,7 @@ MOTS_N2 = [
 ]
 SERVICES_N2 = {"CONTENT-ARENA/redaction"}
 # Mots-clés N0 : simple lecture / synthèse interne.
-MOTS_N0 = [r"synthese", r"resume", r"resumer", r"lis\b", r"lecture", r"note interne", r"recapitul\w*"]
+MOTS_N0 = [r"synthese", r"resume", r"resumer", r"lis", r"lecture", r"note interne", r"recapitul\w*"]
 
 
 def normaliser(texte: str) -> str:
@@ -31,29 +51,52 @@ def normaliser(texte: str) -> str:
     return re.sub(r"\s+", " ", t.lower())
 
 
+def contient_mot(texte: str, motif: str) -> bool:
+    """Recherche en mot entier dans un texte déjà normalisé."""
+    return re.search(rf"(?<![a-z0-9]){motif}(?![a-z0-9])", texte) is not None
+
+
 def _contient(texte: str, motifs: list[str]) -> str | None:
     for m in motifs:
-        if re.search(rf"\b{m}\b", texte):
+        if contient_mot(texte, m):
             return m
     return None
 
 
+def _sans_envois_internes(texte: str) -> str:
+    """Neutralise « envoyez-moi », « envoie-nous », « envoyer à moi »… (envoi au propriétaire)."""
+    return re.sub(rf"(?<![a-z0-9]){VERBES_ENVOI}{DESTINATAIRE_INTERNE}(?![a-z0-9])", " ", texte)
+
+
+def _n3_texte(texte: str) -> str | None:
+    return _contient(_sans_envois_internes(texte), MOTS_N3)
+
+
 def classer_regles(titre: str, consigne: str, service: str | None = None,
-                   montant_eur: float | None = None, action: str | None = None) -> tuple[str, str]:
-    """Renvoie (niveau, motif) selon les règles déterministes."""
+                   montant_eur: float | None = None, action: str | None = None,
+                   livrable: str | None = None) -> tuple[str, str]:
+    """Renvoie (niveau, motif) selon les règles déterministes (consigne, puis livrable)."""
     texte = normaliser(f"{titre} {consigne}")
     if montant_eur and montant_eur > 0:
         return "N3", f"montant engagé : {montant_eur} €"
     if action and action in ACTIONS_N3:
         return "N3", f"action engageante : {action}"
-    m = _contient(texte, MOTS_N3)
+    m = _n3_texte(texte)
     if m:
-        return "N3", f"mot-clé sensible : {m}"
+        return "N3", f"mot-clé sensible dans la consigne : {m}"
+    if livrable:
+        m = _n3_texte(normaliser(livrable))
+        if m:
+            return "N3", f"mot-clé sensible dans le livrable : {m}"
     if service in SERVICES_N2:
         return "N2", f"service de publication : {service}"
     m = _contient(texte, MOTS_N2)
     if m:
         return "N2", f"publication ou code : {m}"
+    if livrable:
+        m = _contient(normaliser(livrable), MOTS_N2)
+        if m:
+            return "N2", f"publication ou code dans le livrable : {m}"
     if _contient(texte, MOTS_N0):
         return "N0", "simple lecture ou synthèse interne"
     return "N1", "livrable interne"
@@ -66,9 +109,10 @@ def niveau_max(a: str, b: str | None) -> str:
 
 
 def classer(titre: str, consigne: str, service: str | None = None, montant_eur: float | None = None,
-            action: str | None = None, niveau_llm: str | None = None) -> tuple[str, str]:
+            action: str | None = None, niveau_llm: str | None = None,
+            livrable: str | None = None) -> tuple[str, str]:
     """Combine règles et avis LLM : le résultat n'est jamais inférieur aux règles."""
-    niveau, motif = classer_regles(titre, consigne, service, montant_eur, action)
+    niveau, motif = classer_regles(titre, consigne, service, montant_eur, action, livrable)
     final = niveau_max(niveau, niveau_llm)
     if final != niveau:
         motif = f"{motif} ; relevé à {final} par l'avis du GATE"

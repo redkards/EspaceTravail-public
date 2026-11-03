@@ -47,6 +47,7 @@ class Config:
     nexus_host: str
     taches_fond: bool
     llm_timeout_s: float
+    llm_max_chars: int
 
 
 def cfg() -> Config:
@@ -78,7 +79,8 @@ def cfg() -> Config:
         # Offre cloud gratuite : coût nul par défaut (tokens toujours comptés).
         eur_par_1k_tokens=_float("LLM_EUR_PAR_1K_TOKENS", 0.0),
         budget_monthly_eur=_float("BUDGET_MONTHLY_EUR", 0.0),
-        budget_task_tokens=_int("BUDGET_TASK_TOKENS", 6000),
+        # 20 000 : une mission avec 2 boucles de correction tient dans le budget.
+        budget_task_tokens=_int("BUDGET_TASK_TOKENS", 20000),
         n3_timeout_hours=_float("N3_TIMEOUT_HOURS", 24.0),
         n3_daily_cap=_int("N3_DAILY_CAP", 15),
         ntfy_url=os.environ.get("NTFY_URL", "").rstrip("/"),
@@ -86,6 +88,8 @@ def cfg() -> Config:
         nexus_host=os.environ.get("NEXUS_HOST", ""),
         taches_fond=os.environ.get("NEXUS_TACHES_FOND", "1") != "0",
         llm_timeout_s=_float("LLM_TIMEOUT_S", 180.0),
+        # Taille maximale (caractères) du message utilisateur envoyé au LLM.
+        llm_max_chars=max(1000, _int("LLM_MAX_CHARS", 12000)),
     )
 
 
