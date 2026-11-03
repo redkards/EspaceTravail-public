@@ -1,0 +1,53 @@
+{
+ "_lisez_moi": "Porte de qualité : critères bloquants configurables. actif=false désactive un critère ; bloquant=false le rend informatif ; si_absent = « bloquant » (pas de preuve = pas de déploiement) ou « ignore ». La porte est VERTE seulement si aucun critère bloquant n'est ROUGE ou NON ÉVALUÉ-bloquant.",
+ "criteres": {
+  "tests_verts": {
+   "actif": true,
+   "bloquant": true,
+   "si_absent": "bloquant",
+   "libelle": "Tous les tests unitaires verts"
+  },
+  "simulations": {
+   "actif": true,
+   "bloquant": true,
+   "si_absent": "bloquant",
+   "seuil_pct": 99,
+   "libelle": "Simulations ≥ 99 %"
+  },
+  "iterations_critiques": {
+   "actif": true,
+   "bloquant": true,
+   "si_absent": "bloquant",
+   "max": 0,
+   "libelle": "0 défaut critique ouvert (iterations-100)"
+  },
+  "attaque": {
+   "actif": true,
+   "bloquant": true,
+   "si_absent": "bloquant",
+   "seuil_pct": 95,
+   "fp_bloquants_max": 0,
+   "libelle": "Attaque ≥ 95 % et 0 faux positif bloquant"
+  },
+  "secrets": {
+   "actif": true,
+   "bloquant": true,
+   "si_absent": "bloquant",
+   "max": 0,
+   "libelle": "0 secret dans le dépôt"
+  },
+  "banc_regression": {
+   "actif": true,
+   "bloquant": true,
+   "si_absent": "bloquant",
+   "baisse_max_points": 5,
+   "libelle": "Banc : pas de baisse > 5 points vs dernier passage"
+  },
+  "charge_sans_perte": {
+   "actif": true,
+   "bloquant": true,
+   "si_absent": "bloquant",
+   "libelle": "Charge 200 % sans perte de données"
+  }
+ }
+}

@@ -1,0 +1,85 @@
+{
+ "_lisez_moi": "Formule de score SYFER Test System v1. Chaque axe = moyenne pondérée de ses composantes disponibles (0–100), poids renormalisés si une composante manque (la « couverture » de l'axe le signale). Score global = moyenne pondérée des axes disponibles. Modifiable : changer un poids ici suffit (aucun code à toucher).",
+ "axes": {
+  "fiabilite": {
+   "libelle": "Fiabilité",
+   "poids": 0.2,
+   "composantes": {
+    "tests": 0.4,
+    "simulations": 0.3,
+    "iterations": 0.25,
+    "protocole": 0.05
+   }
+  },
+  "securite": {
+   "libelle": "Sécurité",
+   "poids": 0.25,
+   "composantes": {
+    "attaque": 0.35,
+    "secrets": 0.25,
+    "oracles_securite": 0.25,
+    "porte_n3": 0.15
+   }
+  },
+  "performance": {
+   "libelle": "Performance",
+   "poids": 0.1,
+   "composantes": {
+    "jumeau_score": 0.5,
+    "charge_criteres": 0.5
+   }
+  },
+  "qualite": {
+   "libelle": "Qualité",
+   "poids": 0.15,
+   "composantes": {
+    "banc_systeme": 0.5,
+    "banc_pieges": 0.2,
+    "banc_livrable": 0.0,
+    "charte_qualite": 0.3
+   }
+  },
+  "resilience": {
+   "libelle": "Résilience",
+   "poids": 0.15,
+   "composantes": {
+    "continuite": 0.3,
+    "charge_pannes": 0.25,
+    "jumeau_panne": 0.25,
+    "restauration": 0.2
+   }
+  },
+  "cout": {
+   "libelle": "Coût",
+   "poids": 0.075,
+   "composantes": {
+    "cout_mensuel": 1.0
+   }
+  },
+  "decideur": {
+   "libelle": "Charge Décideur",
+   "poids": 0.075,
+   "composantes": {
+    "n3_par_jour": 0.5,
+    "expirations": 0.25,
+    "delai_decision": 0.25
+   }
+  }
+ },
+ "parametres": {
+  "cout_nul_eur": 150,
+  "_cout": "coût mensuel total (VPS + IA) : 0 € → 100 points, 150 € → 0 point (même borne que le jumeau)",
+  "n3_bon_jour": 2,
+  "n3_nul_jour": 12,
+  "expiration_points": 10,
+  "_expiration": "points retirés par décision N3 expirée sur le mois simulé",
+  "delai_decision_bon_h": 6,
+  "delai_decision_nul_h": 24,
+  "secret_points": 50,
+  "_secret": "points retirés par secret suspect",
+  "faux_positif_bloquant_points": 10,
+  "faux_positif_points": 2,
+  "poids_livrable_banc_reel": 0.3,
+  "_livrable": "poids de la note livrable quand le banc tourne avec un vrai LLM (VPS) ; 0 avec le LLM factice"
+ }
+}

@@ -607,12 +607,16 @@ def suite_charge(ctx: Contexte, ids: str | None = None) -> dict:
                                       "Optimiser le chemin chaud (pool de fils, file, index SQLite) ou ajuster le seuil documenté.",
                                       RESPONSABLES["charge-200"], ident=f"charge:{x['id']}:{c['critere']}"))
     reussis = sum(bool(x.get("reussi")) for x in executes)
+    integ = [c["ok"] for x in executes for c in x.get("criteres", [])
+             if c.get("ok") is not None and c["critere"] in ("ledger_valide", "archive_valide", "integrite_sqlite",
+                                                              "compteurs_exacts")]
     return _res("charge", titre, "reussi" if executes and reussis == len(executes) else "echoue",
                 "mode court (--rapide : durées ÷ 3)" if "--rapide" in args else None, time.time() - t0,
                 {"scenarios": len(executes), "reussis": reussis, "sautes": len(doc["resultats"]) - len(executes),
                  "criteres_ok": crit_ok, "criteres_total": crit_tot, "pertes_donnees": pertes,
                  "par_famille": fam, "rapide": doc.get("rapide"), "duree_campagne_s": doc.get("duree_totale_s"),
                  "taux_reussite": round(100 * reussis / max(1, len(executes)), 1),
+                 "integrite_ok": sum(integ), "integrite_total": len(integ),
                  "taux_criteres": round(100 * crit_ok / max(1, crit_tot), 1)},
                 defauts, [cmd])
 
