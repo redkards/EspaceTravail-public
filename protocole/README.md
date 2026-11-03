@@ -22,7 +22,7 @@ Version actuelle : voir `VERSION` (**1.0.0**).
 | `evenement-ledger` (+ `#liste`, `#verification`) | journal chaîné SHA-256 / HMAC | `ledger.py` |
 | `sante` | GET /api/sante | `main.sante_publique` (le cockpit ajoute `agents`, `arret_urgence`) |
 | `fonctionnement` | GET /api/fonctionnement | `routes.lire_fonctionnement`, `fonctionnement.py` |
-| `mcp-outils` | 18 outils de la passerelle : `<outil>.entree` et `<outil>.sortie`, plus `erreur` | `nexus-bridge/app/outils.py`, `main._appeler` |
+| `mcp-outils` | outils de la passerelle (20 en 1.0.0, liste dans `x-outils`) : `<outil>.entree` et `<outil>.sortie`, plus `erreur` | `nexus-bridge/app/outils.py`, `main._appeler` |
 
 `exemples/` : instantané d'exemples **réels** (régénérable, voir plus bas), nommés `<cible>__<cas>.json`
 (`#` remplacé par `@`). Les fichiers `_brut__*` servent seulement à rejouer nexus-core pour la passerelle.

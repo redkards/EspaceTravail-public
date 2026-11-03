@@ -54,8 +54,9 @@ def modeles_roles(fournisseur_nom: str | None = None) -> dict[str, str]:
     Exemple : collector=gemma4:31b,analyst=gemma4:31b,checker@ollama_cloud=gpt-oss:120b.
     Une entrée propre au fournisseur l'emporte sur l'entrée générale.
     """
+    from .surcharges import lire
     general, specifique = {}, {}
-    for entree in os.environ.get("NEXUS_MODELES_ROLES", "").split(","):
+    for entree in (lire("modeles_roles") or os.environ.get("NEXUS_MODELES_ROLES", "")).split(","):
         if "=" not in entree:
             continue
         cle, modele = (x.strip() for x in entree.split("=", 1))

@@ -5,7 +5,9 @@
   "description": "Entrées (arguments de tools/call, additionalProperties=false : la passerelle refuse un paramètre inconnu) et sorties (structuredContent, lecture tolérante) des outils de la passerelle. Clés : « <outil>.entree » et « <outil>.sortie ». Aucun outil ne valide une décision N3.",
   "x-outils": [
     "journal_lister",
+    "lecons_lister",
     "memoire_chercher",
+    "memoire_collective_rechercher",
     "memoire_ecrire",
     "memoire_lire",
     "memoire_oublier",
@@ -1068,6 +1070,189 @@
               },
               "contenu": {
                 "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "memoire_collective_rechercher.entree": {
+      "title": "Mémoire collective (recherche)",
+      "x-ecriture": false,
+      "type": "object",
+      "properties": {
+        "q": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 300,
+          "description": "Mots-clés de recherche."
+        },
+        "projet": {
+          "$ref": "commun.schema.json#/$defs/codeProjet",
+          "description": "Optionnel : limiter à un projet.",
+          "x-valeurs-dynamiques": "liste BRIDGE_PROJETS de la passerelle (projets_lister)"
+        },
+        "service": {
+          "type": "string",
+          "maxLength": 80,
+          "description": "Optionnel : limiter à un service (ex. CONTENT-ARENA/redaction)."
+        },
+        "limite": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10,
+          "default": 5
+        }
+      },
+      "required": [
+        "q"
+      ],
+      "additionalProperties": false
+    },
+    "memoire_collective_rechercher.sortie": {
+      "title": "Mémoire collective (recherche) — résultat (structuredContent)",
+      "type": "object",
+      "required": [
+        "q",
+        "connaissances",
+        "lecons",
+        "exemples",
+        "archive"
+      ],
+      "properties": {
+        "q": {
+          "type": "string"
+        },
+        "note": {
+          "type": "string"
+        },
+        "connaissances": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "lecons": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "exemples": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "archive": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "lecons_lister.entree": {
+      "title": "Leçons apprises",
+      "x-ecriture": false,
+      "type": "object",
+      "properties": {
+        "statut": {
+          "type": "string",
+          "enum": [
+            "acceptee",
+            "proposee",
+            "candidate",
+            "suspendue",
+            "rejetee"
+          ],
+          "default": "acceptee"
+        },
+        "projet": {
+          "$ref": "commun.schema.json#/$defs/codeProjet",
+          "description": "Optionnel : limiter à un projet.",
+          "x-valeurs-dynamiques": "liste BRIDGE_PROJETS de la passerelle (projets_lister)"
+        },
+        "service": {
+          "type": "string",
+          "maxLength": 80,
+          "description": "Optionnel : limiter à un service."
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "lecons_lister.sortie": {
+      "title": "Leçons apprises — résultat (structuredContent)",
+      "type": "object",
+      "required": [
+        "statut",
+        "nombre",
+        "lecons"
+      ],
+      "properties": {
+        "statut": {
+          "type": "string",
+          "pattern": "^[a-z_]+$",
+          "x-valeurs-connues": [
+            "acceptee",
+            "proposee",
+            "candidate",
+            "suspendue",
+            "rejetee"
+          ]
+        },
+        "nombre": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "lecons": {
+          "type": "array",
+          "maxItems": 50,
+          "items": {
+            "type": "object",
+            "required": [
+              "id"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "commun.schema.json#/$defs/identifiant"
+              },
+              "texte": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "type": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "service": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "projet": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "statut": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "occurrences": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
               }
             }
           }

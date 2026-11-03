@@ -39,7 +39,9 @@ def type_livrable(service: str | None, action: str | None = None) -> str:
 
 
 def _dossiers() -> list[Path]:
-    d = [Path(os.environ["NEXUS_CHARTES_DIR"])] if os.environ.get("NEXUS_CHARTES_DIR", "").strip() else []
+    from .surcharges import lire
+    d = [Path(lire("charte_dir"))] if lire("charte_dir") else []  # test fantôme d'une charte modifiée
+    d += [Path(os.environ["NEXUS_CHARTES_DIR"])] if os.environ.get("NEXUS_CHARTES_DIR", "").strip() else []
     return d + [CONFIG_MONTEE, EMBARQUE]
 
 

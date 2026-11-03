@@ -13,7 +13,7 @@
   "sources": "Estimation : 80000 tokens au tarif du modèle le plus cher, 1 $ = 0.92 € (fonctionnement.yaml).",
   "avis_checker": "Sans objet (mission non encore exécutée).",
   "statut": "en_attente",
-  "cree_le": "2026-11-03T22:50:25.380407",
+  "cree_le": "2026-11-03T23:02:11.579823",
   "decide_le": null,
   "commentaire": null
  },
@@ -31,7 +31,7 @@
   "sources": "Éléments fournis dans la consigne (pas d'accès web en mini-version).",
   "avis_checker": "Conforme",
   "statut": "en_attente",
-  "cree_le": "2026-11-03T22:50:25.370363",
+  "cree_le": "2026-11-03T23:02:11.565485",
   "decide_le": null,
   "commentaire": null
  }

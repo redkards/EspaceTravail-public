@@ -1,0 +1,28 @@
+{
+ "q": "checklist",
+ "projet": null,
+ "service": null,
+ "connaissances": [
+  {
+   "projet": "nexus",
+   "titre": "livrable #1 — Checklist de démarrage",
+   "source": "livrable #1",
+   "date": "2026-11-03T23:02:11.515139",
+   "contenu": "# Livrable (brouillon) - Point 1 - Point 2 - Point 3"
+  }
+ ],
+ "lecons": [],
+ "exemples": [],
+ "archive": [
+  {
+   "seq": 1,
+   "mission_id": 1,
+   "mois": "2026-11",
+   "evenement": "fin_execution",
+   "projet": "nexus",
+   "service": "OPS-CORE/projets",
+   "statut": "terminee",
+   "extrait": "[Checklist] de démarrage Rédige une [checklist] de démarrage # Livrable (brouillon)\n\n- Point 1\n- Point 2\n- Point 3 "
+  }
+ ]
+}

@@ -15,6 +15,7 @@ from sqlalchemy import func, select, update
 
 from . import agents as reg
 from . import archive, budget, charte, cyber, decideur, exemples, gate, lecons, ledger, memoire, sentinel
+from . import surcharges
 from . import fonctionnement as fct
 from .config import cfg
 from .db import session_scope
@@ -224,6 +225,7 @@ class Contexte:
         self.connaissances = ""  # extraits de la mémoire du projet (voir _charger_connaissances)
         self.modeles: dict = json.loads(mission.modeles_json) if mission.modeles_json else {}
         self.avertissements: list[str] = []  # avertissements de charte (non bloquants)
+        self.fantome = bool(mission.fantome)  # rejeu du test fantôme : aucun effet de bord
         self.f = fct.niveau(mission.fonctionnement or fct.defaut())
         self._instancier()
 
@@ -412,7 +414,8 @@ def _bilan(ctx: Contexte) -> None:
                      tokens_entree=m.tokens_entree, tokens_sortie=m.tokens_sortie,
                      cout_eur=m.cout_eur, duree_s=m.duree_s, revisions=m.revisions)
     ledger.journaliser("NEXUS-BUDGET", "mission_bilan", ctx.mid, **bilan)
-    apprendre(ctx.mid, "fin_execution")
+    if not ctx.fantome:  # un rejeu fantôme n'alimente ni l'archive ni les leçons
+        apprendre(ctx.mid, "fin_execution")
 
 
 def _executer_protege(ctx: Contexte, fonction, *args) -> None:
@@ -526,6 +529,15 @@ def _executer(ctx: Contexte) -> None:
     _boucle_qualite(ctx, srv, livrable, elements)
 
 
+def _lecons_appliquees(ctx: Contexte) -> str:
+    """Leçons acceptées + leçon candidate du test fantôme (variante « après »), ≤ 800 caractères."""
+    texte = lecons.actives(ctx.service, ctx.projet)
+    variante = surcharges.lire("lecon")
+    if variante:
+        texte = (f"- {variante}\n" + texte).strip()[: lecons.INJECTION_CARACTERES]
+    return texte
+
+
 def _charger_connaissances(ctx: Contexte) -> None:
     """Extraits FTS de la mémoire du projet, bornés selon le niveau de fonctionnement."""
     trouves = memoire.extraits(ctx.projet, f"{ctx.titre} {ctx.consigne}", ctx.f.code)
@@ -542,10 +554,10 @@ def _message_analyst(ctx: Contexte, elements: str, precedent: str | None = None,
     rappel = charte.consignes_courtes(ctx.projet, ctx.service, ctx.action)
     if rappel:
         sections.append(("Charte du projet (obligatoire)", rappel, 4, "debut"))
-    apprises = lecons.actives(ctx.service, ctx.projet)
+    apprises = _lecons_appliquees(ctx)
     if apprises:
         sections.append(("Leçons apprises (validées par le propriétaire, à appliquer)", apprises, 4, "debut"))
-    modele = exemples.pour_analyst(ctx.service, ctx.projet)
+    modele = surcharges.lire("exemple") or exemples.pour_analyst(ctx.service, ctx.projet)
     if modele:
         sections.append(("Exemple validé pour ce service (imitez la structure et le ton ; ne recopiez aucun fait)",
                          modele, 1, "debut"))
@@ -584,7 +596,7 @@ def _controler(ctx: Contexte, srv: dict, livrable: str) -> dict:
         _maj_mission(mid, charte_avertissements=json.dumps(ctx.avertissements, ensure_ascii=False))
         ledger.journaliser("NEXUS-GATE", "charte_avertissement", mid, avertissements=nouveaux)
     sections = [("Consigne", ctx.consigne, 1, "debut"), ("Livrable à vérifier", livrable, 3, "tete_queue")]
-    apprises = lecons.actives(ctx.service, ctx.projet)
+    apprises = _lecons_appliquees(ctx)
     if apprises:
         sections.insert(1, ("Leçons apprises à vérifier (refuser si le livrable les ignore)", apprises, 2, "debut"))
     if controle["avertissements"]:
@@ -651,6 +663,9 @@ def _boucle_qualite(ctx: Contexte, srv: dict, livrable: str, elements: str) -> N
     _maj_mission(mid, niveau=niveau)
     ledger.journaliser(gate_id, "classement", mid, niveau=niveau, motif=motif)
 
+    if ctx.fantome:  # rejeu : ni décision, ni EXECUTOR, ni notification
+        _maj_mission(mid, statut="fantome", message=f"Rejeu fantôme terminé (GATE {niveau}).")
+        return
     # Plancher F2 pour un livrable N2+ : relèvement puis nouveau passage qualité au niveau F2.
     if niveau in ("N2", "N3") and ctx.relever("F2", f"GATE {niveau} sur le livrable : F1 relevé en F2"):
         _boucle_qualite(ctx, srv, livrable, elements)
@@ -687,6 +702,10 @@ def escalader(ctx: Contexte, srv: dict, livrable: str, verdict: dict, refus: int
     ledger.journaliser(directeur, "escalade_n2", mid, problemes=verdict["problemes"], recommandation=recommandation)
     with session_scope() as s:
         deja_relancee = bool(s.get(Mission, mid).relance_auto)
+    if ctx.fantome:  # rejeu : pas de relance automatique
+        _maj_mission(mid, statut="a_reformuler", niveau="N2", livrable_texte=livrable,
+                     message=(entete + "Rejeu fantôme : refus répétés.")[:1000])
+        return
     if decision == "RELANCER" and not deja_relancee:
         sup = fct.suivant(ctx.f.code)
         cible = sup if sup in ("F2", "F3") else ctx.f.code  # F4 payant : jamais sans accord du propriétaire
@@ -757,7 +776,11 @@ def reprendre_au_demarrage() -> dict:
         interrompues = s.execute(select(Mission.id).where(Mission.statut == "en_cours")
                                  .order_by(Mission.id)).scalars().all()
         en_file = s.execute(select(Mission.id).where(Mission.statut.in_(("recue", "en_attente_place")))
-                            .order_by(Mission.id)).scalars().all()
+                            .where(Mission.fantome.is_(False)).order_by(Mission.id)).scalars().all()
+        for m in s.execute(select(Mission).where(Mission.fantome.is_(True),
+                                                 Mission.statut != "fantome")).scalars():
+            m.statut = "fantome"  # rejeu interrompu : simplement clos
+        interrompues = [i for i in interrompues if not s.get(Mission, i).fantome]
     for mid in interrompues:
         if transition(mid, ("en_cours",), "echouee",
                       message="Échouée : interrompue par un redémarrage de nexus-core. "

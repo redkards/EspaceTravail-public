@@ -1,11 +1,14 @@
 {
- "id": 16,
- "horodatage": "2026-11-03T22:50:25.343072",
- "acteur": "NEXUS-SENTINEL",
- "action": "controle_ok",
+ "id": 19,
+ "horodatage": "2026-11-03T23:02:11.546038",
+ "acteur": "NEXUS-PRIME",
+ "action": "routage",
  "mission_id": 2,
- "details": {},
- "hash_prec": "41b740c035e24e2c11530476f4f787a1bf10e2d8e8e7f66eec2dcbaf5a560fca",
- "hash": "c0fd9f5a26c428ebfb84355f477e631afc4047384fdddfbc78eca15fb9e30250",
+ "details": {
+  "directeur": "DIR-CROISSANCE",
+  "service": "REVENUE-CORE/propositions"
+ },
+ "hash_prec": "a2882394a7621ffe5895d037717caa243866a41ac9de6ab8620c6964c21c6661",
+ "hash": "add84ee7b20e0a5d3b5934dc37f2abc3fb69aefb7e2132fbdc45e30d3d794828",
  "algo": "hmac"
 }

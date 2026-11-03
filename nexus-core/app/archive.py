@@ -103,6 +103,7 @@ def enregistrement(mid: int, evenement: str) -> dict:
             "charte_avertissements": json.loads(m.charte_avertissements) if m.charte_avertissements else [],
             "decisions": [{"id": d.id, "objet": d.objet, "statut": d.statut, "risque": d.risque,
                            "commentaire": d.commentaire, "motif": d.recommandation} for d in decisions],
+            "montant_eur": m.montant_eur, "action": m.action,
             "revisions": m.revisions, "relance_auto": m.relance_auto, "message": m.message,
             "tokens": m.tokens, "tokens_entree": m.tokens_entree, "tokens_sortie": m.tokens_sortie,
             "cout_eur": m.cout_eur, "duree_s": m.duree_s, "note": m.note, "note_banc": None,

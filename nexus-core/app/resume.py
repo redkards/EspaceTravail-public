@@ -34,6 +34,7 @@ def bilan(maintenant_utc: datetime | None = None) -> dict:
     debut = paris.replace(hour=0, minute=0, second=0, microsecond=0).astimezone(timezone.utc).replace(tzinfo=None)
     with session_scope() as s:
         terminees = s.execute(select(func.count(Mission.id)).where(Mission.maj_le >= debut)
+                              .where(Mission.fantome.is_(False))
                               .where(Mission.statut.in_(("terminee", "validee")))).scalar_one()
         alertes = s.execute(select(func.count(Mission.id)).where(Mission.maj_le >= debut)
                             .where(Mission.statut.in_(("echouee", "plafond_atteint", "a_reformuler",

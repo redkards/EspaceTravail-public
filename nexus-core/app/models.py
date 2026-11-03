@@ -53,6 +53,8 @@ class Mission(Base):
     modeles_json: Mapped[str | None] = mapped_column(Text, nullable=True)
     charte_avertissements: Mapped[str | None] = mapped_column(Text, nullable=True)
     note: Mapped[int | None] = mapped_column(Integer, nullable=True)  # note du propriétaire (1 à 5)
+    # Mission rejouée par le test fantôme : aucun effet de bord, exclue des statistiques.
+    fantome: Mapped[bool] = mapped_column(Boolean, default=False, server_default="0", index=True)
 
 
 class Etape(Base):

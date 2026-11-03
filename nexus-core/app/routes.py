@@ -157,6 +157,8 @@ def creer_routeur(cockpit: bool = False) -> APIRouter:
         code = _filtre_projet(projet)
         with session_scope() as s:
             q = select(Mission).order_by(Mission.id.desc()).limit(limit)
+            if statut != "fantome":  # rejeux du test fantôme : visibles seulement sur demande
+                q = q.where(Mission.fantome.is_(False))
             if statut:
                 q = q.where(Mission.statut == statut)
             if code:
@@ -197,7 +199,7 @@ def creer_routeur(cockpit: bool = False) -> APIRouter:
             ledger.journaliser("DECIDEUR", "projets_recharges", None, nombre=len(reg_projets))
         with session_scope() as s:
             missions = dict(s.execute(select(Mission.projet, func.count(Mission.id))
-                                      .group_by(Mission.projet)).all())
+                                      .where(Mission.fantome.is_(False)).group_by(Mission.projet)).all())
             en_cours = dict(s.execute(select(Mission.projet, func.count(Mission.id))
                                       .where(Mission.statut.in_(("recue", "en_cours")))
                                       .group_by(Mission.projet)).all())
@@ -344,7 +346,8 @@ def creer_routeur(cockpit: bool = False) -> APIRouter:
                        func.coalesce(func.sum(Mission.tokens_entree), 0),
                        func.coalesce(func.sum(Mission.tokens_sortie), 0),
                        func.coalesce(func.sum(Mission.cout_eur), 0.0), func.avg(Mission.duree_s))
-                .where(Mission.cree_le >= debut).group_by(Mission.fonctionnement)).all()
+                .where(Mission.cree_le >= debut).where(Mission.fantome.is_(False))
+                .group_by(Mission.fonctionnement)).all()
         conso = {r[0]: r for r in rows}
         mois = []
         for code in fct.CODES:

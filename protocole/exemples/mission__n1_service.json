@@ -9,9 +9,9 @@
  "niveau": "N1",
  "montant_eur": 0.0,
  "action": null,
- "message": "Livrable enregistré : /tmp/protocole-core-b_dhr5a7/data/livrables/nexus/1.md. Aucune action externe exécutée.",
- "cree_le": "2026-11-03T22:50:25.293121",
- "maj_le": "2026-11-03T22:50:25.336140",
+ "message": "Livrable enregistré : /tmp/protocole-core-en6vzqu3/data/livrables/nexus/1.md. Aucune action externe exécutée.",
+ "cree_le": "2026-11-03T23:02:11.473732",
+ "maj_le": "2026-11-03T23:02:11.517859",
  "livrable_texte": "# Livrable (brouillon)\n\n- Point 1\n- Point 2\n- Point 3",
  "tokens": 743,
  "cout_eur": 0.0,
@@ -21,7 +21,7 @@
  "repli_f3": true,
  "tokens_entree": 707,
  "tokens_sortie": 36,
- "duree_s": 0.037,
+ "duree_s": 0.039,
  "revisions": 0,
  "attente": null,
  "modeles": {
@@ -41,7 +41,7 @@
    "sortie": "ELEMENTS:\n- consigne reçue\nMANQUE:\n- aucun élément bloquant",
    "verdict": null,
    "tokens": 159,
-   "cree_le": "2026-11-03T22:50:25.312290"
+   "cree_le": "2026-11-03T23:02:11.492340"
   },
   {
    "id": 2,
@@ -51,7 +51,7 @@
    "sortie": "# Livrable (brouillon)\n\n- Point 1\n- Point 2\n- Point 3",
    "verdict": null,
    "tokens": 269,
-   "cree_le": "2026-11-03T22:50:25.318572"
+   "cree_le": "2026-11-03T23:02:11.499770"
   },
   {
    "id": 3,
@@ -61,7 +61,7 @@
    "sortie": "{\"ok\": true, \"problemes\": []}",
    "verdict": null,
    "tokens": 161,
-   "cree_le": "2026-11-03T22:50:25.323835"
+   "cree_le": "2026-11-03T23:02:11.505393"
   },
   {
    "id": 4,
@@ -71,7 +71,7 @@
    "sortie": "{\"ok\": true, \"problemes\": []}",
    "verdict": "ok",
    "tokens": 0,
-   "cree_le": "2026-11-03T22:50:25.324782"
+   "cree_le": "2026-11-03T23:02:11.506382"
   },
   {
    "id": 5,
@@ -81,17 +81,17 @@
    "sortie": "NIVEAU: N0",
    "verdict": null,
    "tokens": 154,
-   "cree_le": "2026-11-03T22:50:25.327675"
+   "cree_le": "2026-11-03T23:02:11.509085"
   },
   {
    "id": 6,
    "agent_id": "OPS-CORE-EXECUTOR",
    "role": "executor",
    "entree": "livrable final",
-   "sortie": "/tmp/protocole-core-b_dhr5a7/data/livrables/nexus/1.md",
+   "sortie": "/tmp/protocole-core-en6vzqu3/data/livrables/nexus/1.md",
    "verdict": "prepare",
    "tokens": 0,
-   "cree_le": "2026-11-03T22:50:25.330871"
+   "cree_le": "2026-11-03T23:02:11.512362"
   }
  ]
 }

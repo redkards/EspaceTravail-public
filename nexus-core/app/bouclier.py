@@ -86,7 +86,8 @@ MAX_CARACTERES = 20000
 NIVEAU_MINIMUM_SUSPECT = "N2"
 FACTEUR_MENTION = 0.25      # poids d'un motif cité (guillemets, contexte méta) au lieu d'ordonné
 BONUS_COMBINAISON = 15      # au moins deux familles d'injonctions distinctes
-BONUS_CACHE = 25            # injonction trouvée dans un canal caché (HTML masqué, base64, tags Unicode)
+BONUS_CACHE = 25
+PLAFOND_MENTIONS = 25       # contribution maximale de l'ensemble des motifs cités            # injonction trouvée dans un canal caché (HTML masqué, base64, tags Unicode)
 CANARI = re.compile(r"\bCANARI-[A-Z0-9]{4,}\b")
 
 
@@ -440,12 +441,14 @@ def detecter_injection(texte: str) -> Detection:
                 familles[famille] = (p, not mention, m.group(0)[:80])
     compact = re.sub(r"[^a-z]", "", t)
     for c in COMPACTS:
-        if c in compact and not any(f in familles and familles[f][1] for f in ("ignorer_consignes", "secret", "approbation")):
+        if c in compact and not any(f in familles for f in ("ignorer_consignes", "secret", "approbation")):
             familles["obfuscation"] = (45, True, c)
             break
     injonctions = [f"{f} : « {x} »" for f, (_, inj, x) in familles.items() if inj]
     mentions = [f"{f} : « {x} »" for f, (_, inj, x) in familles.items() if not inj]
-    score = sum(p for p, _, _ in familles.values())
+    score = sum(p for p, inj, _ in familles.values() if inj)
+    # Les motifs seulement CITÉS ne suffisent jamais à lever une alerte à eux seuls (article, documentation).
+    score += min(PLAFOND_MENTIONS, sum(p for p, inj, _ in familles.values() if not inj))
     if len(injonctions) >= 2:
         score += BONUS_COMBINAISON
     score = int(min(100, round(score)))
@@ -628,12 +631,14 @@ def verifier_sortie(livrable: str, contexte: dict | None = None) -> dict:
             break
 
     # Consignes injectées relayées telles quelles vers les agents suivants.
+    # (l'exfiltration est déjà traitée ci-dessus, avec la liste des domaines autorisés)
     d = detecter_injection(texte)
-    if d.score >= SEUIL_MOYEN and d.injonctions:
-        motifs.append(f"consignes d'injection relayées (score {d.score}) : " + "; ".join(d.injonctions[:3]))
+    relayees = [i for i in d.injonctions if not i.startswith("exfiltration")]
+    if d.score >= SEUIL_MOYEN and relayees:
+        motifs.append(f"consignes d'injection relayées (score {d.score}) : " + "; ".join(relayees[:3]))
 
     motifs = list(dict.fromkeys(motifs))
-    score = min(100, 35 * len(motifs) + (d.score // 2 if d.injonctions else 0))
+    score = min(100, 35 * len(motifs) + (d.score // 2 if relayees else 0))
     suspect = bool(motifs)
     return {"suspect": suspect, "motifs": motifs, "score": score if suspect else 0,
             "niveau_minimum": niveau_minimum_si_suspect() if suspect else None}

@@ -108,6 +108,12 @@ def core(sortie: Path) -> None:
         ecrire(sortie, "evenement-ledger#verification", "ok", ok(c.get("/api/ledger/verifier", headers=h)))
         # Données brutes pour servir le faux nexus-core du mode « bridge ».
         ecrire(sortie, "_brut", "projets", ok(c.get("/api/projets", headers=h)))
+        # Mémoire collective (routes récentes) : rejouées si nexus-core les sert.
+        for nom, url in (("memoire_recherche", "/api/memoire/recherche?q=checklist&limite=5"),
+                         ("memoire_lecons", "/api/memoire/lecons?statut=acceptee")):
+            r = c.get(url, headers=h)
+            if r.status_code == 200:
+                ecrire(sortie, "_brut", nom, r.json())
 
 
 def bridge(sortie: Path) -> None:
@@ -144,6 +150,9 @@ def bridge(sortie: Path) -> None:
             return httpx.Response(200, json=lire(sortie, "decision#liste", "en_attente"))
         if p == "/api/projets":
             return httpx.Response(200, json=lire(sortie, "_brut", "projets"))
+        for chemin, nom in (("/api/memoire/recherche", "memoire_recherche"), ("/api/memoire/lecons", "memoire_lecons")):
+            if p == chemin and (sortie / f"_brut__{nom}.json").exists():
+                return httpx.Response(200, json=lire(sortie, "_brut", nom))
         if p.endswith("/connaissances"):
             return httpx.Response(200, json=lire(sortie, "connaissance#liste", "recherche"))
         return httpx.Response(404, json={"detail": "Not Found"})
@@ -190,6 +199,8 @@ def bridge(sortie: Path) -> None:
         appel("chatgpt", "passation_derniere", {"projet": "turf"}, "aucune")
         appel("claude", "projets_lister", {})
         appel("claude", "projet_connaissances", {"projet": "nexus", "q": "éditorial"})
+        appel("gemini", "memoire_collective_rechercher", {"q": "checklist", "limite": 5})
+        appel("gemini", "lecons_lister", {})
         appel("claude", "mothership_mission", {"titre": "Checklist", "consigne": "Rédige une checklist.",
                                                "projet": "nexus", "fonctionnement": "F1"})
         appel("claude", "mothership_statut", {"id": mission["id"]})

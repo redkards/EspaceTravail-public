@@ -85,6 +85,7 @@ COLONNES_AJOUTEES = [
     ("missions", "modeles_json", "TEXT"),
     ("missions", "charte_avertissements", "TEXT"),
     ("missions", "note", "INTEGER"),
+    ("missions", "fantome", "BOOLEAN NOT NULL DEFAULT {FAUX}"),
 ]
 
 
@@ -96,7 +97,7 @@ def migrer(eng: Engine) -> list[str]:
     vrai = "TRUE" if eng.dialect.name == "postgresql" else "1"
     for table, colonne, definition in COLONNES_AJOUTEES:
         if colonne not in existantes[table]:
-            definition = definition.replace("{VRAI}", vrai)
+            definition = definition.replace("{VRAI}", vrai).replace("{FAUX}", "FALSE" if vrai == "TRUE" else "0")
             with eng.begin() as c:
                 c.execute(text(f"ALTER TABLE {table} ADD COLUMN {colonne} {definition}"))
                 if colonne == "projet":
