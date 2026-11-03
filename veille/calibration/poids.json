@@ -1,0 +1,204 @@
+{
+ "version": "2026-11-04.1",
+ "parametres": {
+  "alpha": 2.0,
+  "conf": {
+   "A": 1.0,
+   "B": 0.6,
+   "C": 0.5,
+   "D": 0.3
+  },
+  "w_type": 2.0,
+  "w_autorite": 0.0,
+  "plancher_fraicheur": 0.8,
+  "mult_demi_vie": 0.5,
+  "demi_vie_uniforme": 60,
+  "expansion": true,
+  "canal": {
+   "flux": 1.0,
+   "document": 1.2,
+   "media": 1.0,
+   "social": 1.0,
+   "web": 1.0
+  }
+ },
+ "demi_vie_jours": {
+  "droit": 1825,
+  "normes_documentation": 1460,
+  "marches_publics": 45,
+  "cybersecurite": 30,
+  "ia": 120,
+  "tech": 60,
+  "entreprise": 365,
+  "environnement": 730,
+  "design_ux": 1095,
+  "marketing_communication": 120,
+  "poker": 180,
+  "bd_edition": 365,
+  "forums_experts": 365,
+  "medias": 7,
+  "reseaux_sociaux": 3,
+  "communication_institutionnelle": 90,
+  "defaut": 180
+ },
+ "affinites": {
+  "LEX-GUARD": {
+   "loi": 1.0,
+   "jurisprudence": 0.9,
+   "guide": 0.8,
+   "norme": 0.6,
+   "actualite": 0.5,
+   "defaut": 0.2
+  },
+  "CYBER-FORTRESS/audit": {
+   "norme": 1.0,
+   "guide": 1.0,
+   "documentation": 0.7,
+   "loi": 0.5,
+   "discussion": 0.3,
+   "defaut": 0.2
+  },
+  "CYBER-FORTRESS/conformite": {
+   "norme": 1.0,
+   "guide": 0.9,
+   "loi": 0.9,
+   "documentation": 0.5,
+   "defaut": 0.2
+  },
+  "CYBER-FORTRESS/veille": {
+   "actualite": 1.0,
+   "donnees": 1.0,
+   "release": 0.9,
+   "guide": 0.4,
+   "defaut": 0.3
+  },
+  "CYBER-FORTRESS/incident": {
+   "actualite": 0.9,
+   "donnees": 0.9,
+   "guide": 0.9,
+   "loi": 0.7,
+   "release": 0.8,
+   "defaut": 0.3
+  },
+  "CODE-CORE": {
+   "documentation": 1.0,
+   "norme": 0.9,
+   "guide": 0.8,
+   "discussion": 0.6,
+   "release": 0.5,
+   "defaut": 0.2
+  },
+  "OPS-CORE": {
+   "documentation": 1.0,
+   "guide": 0.8,
+   "release": 0.7,
+   "discussion": 0.5,
+   "defaut": 0.2
+  },
+  "AGENT-FACTORY": {
+   "recherche": 1.0,
+   "documentation": 0.9,
+   "norme": 0.5,
+   "actualite": 0.4,
+   "defaut": 0.2
+  },
+  "DESIGN-SYSTEM": {
+   "norme": 1.0,
+   "guide": 0.9,
+   "documentation": 0.6,
+   "discussion": 0.4,
+   "release": 0.4,
+   "defaut": 0.2
+  },
+  "GREEN-CORE": {
+   "norme": 1.0,
+   "guide": 0.9,
+   "actualite": 0.6,
+   "donnees": 0.7,
+   "cahier_des_charges": 0.5,
+   "defaut": 0.3
+  },
+  "REVENUE-CORE": {
+   "cahier_des_charges": 1.0,
+   "appel_offres": 1.0,
+   "guide": 0.7,
+   "donnees": 0.5,
+   "defaut": 0.2
+  },
+  "PILOT-CORE": {
+   "guide": 0.9,
+   "donnees": 0.9,
+   "loi": 0.7,
+   "cahier_des_charges": 0.8,
+   "actualite": 0.5,
+   "defaut": 0.3
+  },
+  "R&D-PARADOX": {
+   "recherche": 1.0,
+   "actualite": 0.8,
+   "release": 0.6,
+   "social": 0.5,
+   "podcast": 0.6,
+   "defaut": 0.3
+  },
+  "CONTENT-ARENA": {
+   "actualite": 0.9,
+   "social": 0.8,
+   "podcast": 0.8,
+   "guide": 0.6,
+   "defaut": 0.3
+  }
+ },
+ "methode": "montée par coordonnées sur grille, validation croisée 5 plis (calibration/calibrer.py)",
+ "evaluation": {
+  "avant": {
+   "precision@5": 0.3133,
+   "ndcg@10": 0.7948,
+   "objectif": 0.5541,
+   "par_categorie": {
+    "normale": {
+     "precision@5": 0.3,
+     "ndcg@10": 0.7722,
+     "n": 50
+    },
+    "tendances": {
+     "precision@5": 0.38,
+     "ndcg@10": 0.9081,
+     "n": 10
+    }
+   }
+  },
+  "apres_entrainement": {
+   "precision@5": 0.3833,
+   "ndcg@10": 0.8671,
+   "objectif": 0.6252,
+   "par_categorie": {
+    "normale": {
+     "precision@5": 0.376,
+     "ndcg@10": 0.8635,
+     "n": 50
+    },
+    "tendances": {
+     "precision@5": 0.42,
+     "ndcg@10": 0.8852,
+     "n": 10
+    }
+   }
+  },
+  "validation_croisee": {
+   "plis": 5,
+   "avant": {
+    "precision@5": 0.3133,
+    "ndcg@10": 0.7948,
+    "objectif": 0.5541
+   },
+   "apres": {
+    "precision@5": 0.3533,
+    "ndcg@10": 0.8565,
+    "objectif": 0.6049
+   }
+  },
+  "n_requetes": 60,
+  "corpus": "90965e0106a9"
+ }
+}

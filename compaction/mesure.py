@@ -644,11 +644,13 @@ def rapport(R: dict) -> str:
           "rapides" + (f" ; passer le tiède en lzma (COMPACTION_ALGO_TIEDE=lzma) gagnerait encore "
           f"{(1 - vl['dossier_octets'] / P['dossier_octets']) * 100:.0f} % pour une lecture à {vl['lecture_tiede_ms']} ms."
           if vl else "."),
-          f"- **Déduplication** : bénéfique seulement pour des segments longs et fréquents (critère `rentable`) ; "
-          f"en bloc zlib : {M['zlib bloc + dict']['ratio']} → {M['zlib bloc + dict + dédup']['ratio']}, en lzma : "
-          f"{M['lzma bloc']['ratio']} → {M['lzma bloc + dédup']['ratio']} (lzma voit déjà tout le bloc). Dans le "
-          f"pipeline : {P['stats']['dedup']['fragments']} fragments, {mo(P['stats']['dedup']['octets_evites'])} de "
-          "texte non répété (consignes types, gabarits).",
+          f"- **Déduplication : gain faible, à ne pas surestimer.** Sur les enregistrements intégraux elle DÉGRADE le "
+          f"ratio (zlib bloc {M['zlib bloc + dict']['ratio']} → {M['zlib bloc + dict + dédup']['ratio']}, lzma "
+          f"{M['lzma bloc']['ratio']} → {M['lzma bloc + dédup']['ratio']}) : un fragment compressé seul perd le "
+          "contexte du bloc. Dans le pipeline à paliers, avec le critère `rentable` (segments longs et fréquents "
+          f"seulement), elle reste légèrement positive : {P['stats']['dedup']['fragments']} fragments, "
+          f"{mo(P['stats']['dedup']['octets_evites'])} de texte non répété, ≈ 0,3 % sur le total mesuré à part. "
+          "Gardée pour les consignes types et gabarits réels (plus longs que dans ce corpus).",
           f"- **Paliers** : le plus gros gain vient de la réduction du contenu (tiède ×"
           f"{P['stats']['paliers'].get('tiede', {}).get('ratio')}, froid ×{P['stats']['paliers'].get('froid', {}).get('ratio')}"
           " en fichiers), en gardant ce qui alimente la mémoire collective (problèmes du CHECKER, décisions, métriques, "

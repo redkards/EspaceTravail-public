@@ -423,7 +423,12 @@ class _Gestionnaire(BaseHTTPRequestHandler):
                 maxi = min(10, int(p.get("max", 5)))
                 r = fiches_pour_mission(p.get("consigne", ""), p.get("service"), p.get("projet"), maxi, chemin_db=self.chemin_db)
                 return self._json(200, {"fiches": r, "bloc": formater_pour_collector(r)})
-            return self._json(404, {"erreur": "routes : /sante, /recherche, /mission"})
+            if u.path == "/tendances":
+                import tendances
+                r = tendances.calculer_tendances(p.get("projet"), p.get("sujet"), min(90, int(p.get("jours", 7))),
+                                                 chemin_db=self.chemin_db)
+                return self._json(200, r)
+            return self._json(404, {"erreur": "routes : /sante, /recherche, /mission, /tendances"})
         except (ValueError, FileNotFoundError, sqlite3.Error) as e:
             return self._json(400, {"erreur": type(e).__name__})
 

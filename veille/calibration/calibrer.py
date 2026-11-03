@@ -163,6 +163,16 @@ def poids_initiaux() -> dict:
     return p
 
 
+def admissible(poids: dict) -> bool:
+    """Contraintes métier : A ≥ B ≥ C ≥ D (la hiérarchie de confiance ne s'inverse jamais) et un signal social
+    ne pèse jamais plus qu'un média ni qu'un flux officiel."""
+    prm = poids["parametres"]
+    c = prm["conf"]
+    k = prm["canal"]
+    return (c["A"] >= c["B"] >= c["C"] >= c["D"] and k["social"] <= k["media"] <= k["flux"]
+            and k["web"] <= k["flux"])
+
+
 def monter_par_coordonnees(ev: Evaluateur, requetes: list[dict], passes: int = 3) -> tuple[dict, float]:
     meilleur = poids_initiaux()
     score = ev.mesurer(meilleur, requetes)["objectif"]
@@ -173,6 +183,8 @@ def monter_par_coordonnees(ev: Evaluateur, requetes: list[dict], passes: int = 3
                 if v == lire(meilleur, cle):
                     continue
                 cand = poser(meilleur, cle, v)
+                if not admissible(cand):
+                    continue
                 s = ev.mesurer(cand, requetes)["objectif"]
                 if s > score + 1e-6:
                     meilleur, score, ameliore = cand, s, True
@@ -236,7 +248,7 @@ def calibrer() -> dict:
     final, _ = monter_par_coordonnees(ev, reqs)
     apres = ev.mesurer(final)
     corpus = hashlib.sha256(json.dumps(its, sort_keys=True, ensure_ascii=False).encode()).hexdigest()[:12]
-    final["version"] = f"{datetime.now(timezone.utc):%Y-%m-%d}.1"
+    final["version"] = f"{datetime.now():%Y-%m-%d}.1"
     final["methode"] = "montée par coordonnées sur grille, validation croisée 5 plis (calibration/calibrer.py)"
     final["evaluation"] = {"avant": avant, "apres_entrainement": apres, "validation_croisee": cv,
                            "n_requetes": len(reqs), "corpus": corpus}

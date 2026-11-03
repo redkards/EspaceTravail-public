@@ -1,0 +1,53 @@
+{
+ "code": "E",
+ "nom": "Autonome Max",
+ "resume": "KVM 8 + VPS vitrine, IA payante ≤ 80 €/mois, pilote hebdomadaire, veille complète, mémoire collective active.",
+ "materiel": "KVM 8 + KVM 2 vitrine",
+ "modele": "qwen2.5:7b + llama3.1:8b + cloud gratuit + API payante (F3 Haiku, F4)",
+ "roles": 93,
+ "securite": "standard",
+ "autonomie": "élevée",
+ "ia_payante_eur": 80,
+ "cout_cible_eur_mois": 115,
+ "env": {
+  "NEXUS_MODEL": "qwen2.5:7b",
+  "NEXUS_MODEL_CHECKER": "llama3.1:8b",
+  "NEXUS_MODEL_LOCAL": "qwen2.5:7b",
+  "NEXUS_MAX_MISSIONS": "3",
+  "NEXUS_FONCTIONNEMENT_DEFAUT": "F2",
+  "BUDGET_MONTHLY_EUR": "80",
+  "NEXUS_PILOTE_HEBDO": "07:30",
+  "NEXUS_VEILLE": "1",
+  "NEXUS_VEILLE_MAX": "200",
+  "NEXUS_MEMOIRE_AUTO": "1",
+  "NEXUS_LECONS_REFORMULER": "1",
+  "NEXUS_SEUIL_RISQUE_ELEVE_EUR": "1000",
+  "N3_DAILY_CAP": "15"
+ },
+ "jumeau": {
+  "offre": "KVM8",
+  "vitrine_kvm2": true,
+  "modele_principal": "7b",
+  "modele_controleur": "8b",
+  "cloud_gratuit": true,
+  "max_missions": 3,
+  "v2": true,
+  "priorite_jour": true,
+  "payant_plafond_eur": 80,
+  "payant_f3": true,
+  "surcharges": {
+   "gate.p_preclassement": 0.9,
+   "pilote.p_coche": 0.6,
+   "arrivees.veille_jour": 3
+  }
+ },
+ "banc_fonctionnement": "F2",
+ "suites": [
+  "simulations",
+  "iterations",
+  "jumeau",
+  "charge",
+  "banc"
+ ],
+ "_lisez_moi": "Profil de version SYFER. env = variables transmises à nexus-core (et aux épreuves qui le lancent) ; jumeau = champs d'un scénario du jumeau numérique (voir jumeau-numerique/scenarios.yaml) ; suites = épreuves lancées par « syfer_test.py version E ». Les champs descriptifs non simulables (zones, Tailscale, nombre de rôles) sont reportés dans les limites du rapport."
+}

@@ -1,0 +1,55 @@
+{
+ "code": "D",
+ "nom": "Forteresse",
+ "resume": "3 zones isolées, administration par Tailscale, double contrôle partout (F3 minimum), autonomie faible.",
+ "materiel": "KVM 8 (hypothèse : 3 zones et double modèle exigent 32 Go)",
+ "modele": "qwen2.5:7b + llama3.1:8b (contrôleur)",
+ "roles": 93,
+ "securite": "renforcée (3 zones, Tailscale, double contrôle)",
+ "autonomie": "faible",
+ "ia_payante_eur": 0,
+ "cout_cible_eur_mois": 26,
+ "env": {
+  "NEXUS_MODEL": "qwen2.5:7b",
+  "NEXUS_MODEL_CHECKER": "llama3.1:8b",
+  "NEXUS_MODEL_LOCAL": "qwen2.5:7b",
+  "NEXUS_MAX_MISSIONS": "2",
+  "NEXUS_FONCTIONNEMENT_DEFAUT": "F3",
+  "BUDGET_MONTHLY_EUR": "0",
+  "NEXUS_PILOTE_HEBDO": "off",
+  "NEXUS_VEILLE": "1",
+  "NEXUS_MEMOIRE_AUTO": "1",
+  "NEXUS_SEUIL_RISQUE_ELEVE_EUR": "200",
+  "N3_DAILY_CAP": "15"
+ },
+ "jumeau": {
+  "offre": "KVM8",
+  "vitrine_kvm2": false,
+  "modele_principal": "7b",
+  "modele_controleur": "8b",
+  "cloud_gratuit": false,
+  "max_missions": 2,
+  "v2": true,
+  "priorite_jour": true,
+  "payant_plafond_eur": 0,
+  "payant_f3": false,
+  "surcharges": {
+   "gate.p_preclassement": 0.6,
+   "pilote.proposees_par_projet": 0,
+   "mix.p_F1": 0.0,
+   "mix.p_F3": 0.95,
+   "mix.p_F4": 0.05
+  }
+ },
+ "banc_fonctionnement": "F3",
+ "suites": [
+  "simulations",
+  "iterations",
+  "jumeau",
+  "charge",
+  "attaque",
+  "banc",
+  "statiques"
+ ],
+ "_lisez_moi": "Profil de version SYFER. env = variables transmises à nexus-core (et aux épreuves qui le lancent) ; jumeau = champs d'un scénario du jumeau numérique (voir jumeau-numerique/scenarios.yaml) ; suites = épreuves lancées par « syfer_test.py version D ». Les champs descriptifs non simulables (zones, Tailscale, nombre de rôles) sont reportés dans les limites du rapport."
+}

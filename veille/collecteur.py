@@ -1313,6 +1313,9 @@ NOMS_DOMAINES = {
     "poker": "Poker", "bd_edition": "BD et édition", "forums_experts": "Forums d'experts techniques",
     "reseaux_sociaux": "Réseaux sociaux (ouverts) et plateformes exclues",
     "communication_institutionnelle": "Communication institutionnelle", "tech": "Actualité technique et logiciels de la pile",
+    "normes_documentation": "Documents techniques officiels (normes, référentiels, documentation)",
+    "marches_publics": "Marchés publics, cahiers des charges, appels d'offres",
+    "medias": "Médias (presse, radio, podcasts, agrégateurs, vidéo)",
 }
 
 
@@ -1333,20 +1336,28 @@ def generer_catalogue_md(cat: dict) -> str:
          f"{flux['oui']}, construits selon un motif documenté : {flux['motif']}, à confirmer sur le VPS "
          f"(`python collecteur.py verifier`) : {flux['non']}.", "",
          "Légende — Confiance : **A** officielle · **B** expert reconnu / presse spécialisée · **C** communauté · "
-         "**D** réseau social. Accès : rss · atom · api · manuel. Vérifié : date ou « non ». "
-         "Flux : oui (URL confirmée) · motif (motif documenté) · non (à confirmer) · — (sans objet).", ""]
+         "**D** réseau social (dans la base, une fiche média est plafonnée à C et une fiche sociale à D). "
+         "Accès : rss · atom · api · document (texte découpé en sections) · manuel. Vérifié : date ou « non ». "
+         "Flux : oui (URL confirmée) · motif (motif documenté) · non (à confirmer) · — (sans objet).", "",
+         "**Stockage selon la licence** : `integral` (texte des sections, seulement pour les licences ouvertes : "
+         "Licence Ouverte Etalab, domaine public, CC BY/BY-SA, CC0, licence IETF des RFC, W3C, MIT, Apache, réutilisation UE) · "
+         "`extrait` (titre + résumé court + lien ; presse ≤ 300 caractères) · `metadonnees` (normes payantes ou à "
+         "reproduction restreinte : titre + lien) · `agrege` (réseaux sociaux : extrait anonymisé ≤ 200 caractères, "
+         "30 jours, agrégats de tendances).", ""]
     for d, titre in NOMS_DOMAINES.items():
         groupe = [s for s in sources if (s.get("domaines") or [""])[0] == d]
         if not groupe:
             continue
-        l += [f"## {titre} ({len(groupe)})", "", "| Nom | Type | Confiance | Accès | Collecte | Vérifié | Flux |",
-              "|---|---|---|---|---|---|---|"]
+        l += [f"## {titre} ({len(groupe)})", "",
+              "| Nom | Type | Confiance | Accès | Collecte | Licence | Stockage | Vérifié | Flux |",
+              "|---|---|---|---|---|---|---|---|---|"]
         for s in sorted(groupe, key=lambda x: (x["collecte"] != "oui", x["confiance"], x["nom"].lower())):
             nom = s["nom"].replace("|", "/")
             v = s["verifie"] if s["verifie"] != "non_verifie" else "non"
             f = {"sans_objet": "—"}.get(s["flux_verifie"], s["flux_verifie"])
             c = "oui" if s["collecte"] == "oui" else "non"
-            l.append(f"| [{nom}]({s['url']}) | {s['type']} | {s['confiance']} | {s['acces']} | {c} | {v} | {f} |")
+            l.append(f"| [{nom}]({s['url']}) | {s['type']} | {s['confiance']} | {s['acces']} | {c} | "
+                     f"{s.get('licence', '')} | {s.get('stockage', '')} | {v} | {f} |")
         l.append("")
     exclues = [s for s in sources if s["collecte"] == "non"]
     l += ["## Sources non collectées et pourquoi", "", "| Source | Raison |", "|---|---|"]

@@ -39,6 +39,7 @@ pour en relire une, on ne décompresse **qu'un seul bloc** (quelques millisecond
 Les textes longs et fréquents (consignes types, gabarits) sont stockés **une seule fois**
 (repérés par leur empreinte SHA-256), et les missions y font référence. Un critère de
 rentabilité évite de le faire pour les petits textes (le banc montre que ce serait contre-productif).
+Honnêtement : le gain mesuré est faible (≈ 0,3 %) ; l'essentiel vient des blocs et des paliers.
 
 ### 4. Prouver l'intégrité
 
