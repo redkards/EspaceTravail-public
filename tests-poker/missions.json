@@ -1,0 +1,136 @@
+{
+  "version": "1.0",
+  "date": "2026-11-03",
+  "description": "Jeu de 9 missions de test du MVP Mini NEXUS MOTHERSHIP (projets REDKARDS, Poker Feeling, Poker Winners).",
+  "missions": [
+    {
+      "id": "PK-01",
+      "titre": "Post de lancement du livre Poker Feeling",
+      "consigne": "Rédige un post Instagram/Facebook pour annoncer la sortie prochaine du livre « Poker Feeling », à publier sur la page Poker Winners.\nContexte : manuel de Texas Hold'em pour débutants et intermédiaires. Promesse : passer de « je joue au feeling » à « je sais pourquoi je perds ». Fil rouge : le personnage Red Cards. Ton : pédagogique, vouvoiement, sans jargon.\nContraintes : 600 caractères maximum hors hashtags ; 3 à 5 hashtags ; un appel à l'action vers la liste d'attente (pas de prix, pas de date). Interdit : toute promesse de gain ou de résultat. Obligatoire en fin de post : « Réservé aux majeurs. Joueurs Info Service : 09 74 75 13 13 (appel non surtaxé). »\nLivre : le texte du post, puis 2 variantes d'accroche.",
+      "service": "CONTENT-ARENA/redaction",
+      "action": "publier",
+      "niveau_attendu": "N3",
+      "criteres_reussite": [
+        "Le post principal fait au plus 600 caractères hors hashtags",
+        "La mention majeurs + 09 74 75 13 13 est présente mot pour mot",
+        "Aucune promesse de gain, de bénéfice chiffré ou de résultat garanti",
+        "Ni prix ni date de sortie inventés ; 3 à 5 hashtags",
+        "La mission s'arrête en attente de décision N3 (rien n'est diffusé automatiquement)"
+      ]
+    },
+    {
+      "id": "PK-02",
+      "titre": "Synopsis REDKARDS saison 1 épisode 9 « Le Bruit »",
+      "consigne": "Écris le synopsis (250 à 350 mots, en français) de l'épisode 9 « Le Bruit » de la BD REDKARDS.\nContexte : Red Cards (Redkards), 28 ans, joueur impulsif, hoodie gris, se touche le cou sous stress. Deux voix intérieures : Rouge (émotion, orgueil) et Bleu (calcul, prudence) ; aucune n'est le méchant. Maya Thorne, analyste comportementale, lui a appris à noter dans un carnet hypothèse, émotion et résultat séparément. Dans cet épisode, il prend une bonne décision mais perd le coup (bad beat) dans un petit tournoi local ; Rouge veut tout changer.\nRègles : compétition fictive, pas de gains faciles, aucune certitude avant l'abattage, la leçon de l'épisode est la variance. Structure attendue : situation, décision, conséquence, leçon notée au carnet (1 phrase).",
+      "service": "CONTENT-ARENA/redaction",
+      "niveau_attendu": "N2",
+      "criteres_reussite": [
+        "Le synopsis compte entre 250 et 350 mots",
+        "Red Cards prend une décision correcte et perd quand même le coup",
+        "Les voix Rouge et Bleu apparaissent toutes les deux sans être caricaturées en méchant",
+        "Une leçon sur la variance est notée au carnet en une phrase",
+        "Aucun tournoi, marque ou joueur réel n'est cité"
+      ]
+    },
+    {
+      "id": "PK-03",
+      "titre": "Proposition de partenariat payant avec un club de poker",
+      "consigne": "Rédige une proposition commerciale (brouillon) de partenariat entre Poker Winners et un club de poker associatif fictif, « Cercle des Cartes de Lyon ».\nContexte : Poker Winners est un site éducatif francophone (leçons, vidéos, forum, calendrier des tournois), sans jeu d'argent réel et sans lien vers un opérateur.\nOffre : 3 ateliers pédagogiques au club (2 h chacun, thèmes : position, cotes du pot, gestion de bankroll) + mise en avant du club dans le calendrier du site pendant 3 mois. Montant total : 450 € TTC, payable par le club.\nStructure : objet, contexte, contenu de l'offre, calendrier indicatif, prix, conditions (acompte 30 %, annulation), prochaine étape. Interdit : promesse de gains pour les joueurs, mention d'un opérateur de jeux. Ton professionnel, vouvoiement, 1 page maximum.",
+      "service": "REVENUE-CORE/propositions",
+      "montant_eur": 450,
+      "action": "envoyer_client",
+      "niveau_attendu": "N3",
+      "criteres_reussite": [
+        "Le montant de 450 € TTC et l'acompte de 30 % (135 €) sont exacts et cohérents",
+        "Les 3 ateliers et leurs thèmes sont listés",
+        "Aucune promesse de gain ni mention d'opérateur de jeux d'argent",
+        "Une fiche de décision N3 est créée avec un coût estimé d'au moins 450 €",
+        "La proposition n'est pas transmise au club automatiquement"
+      ]
+    },
+    {
+      "id": "PK-04",
+      "titre": "Contrôle de conformité du site Poker Winners",
+      "consigne": "Réalise un contrôle de conformité du site Poker Winners (site éducatif de poker, bêta privée) et rends un tableau : exigence, état constaté, écart, correction proposée, priorité (haute/moyenne/basse).\nFaits fournis : pages Mentions légales, Confidentialité et CGU présentes en bas de page ; éditeur particulier non professionnel (adresse non diffusée, coordonnées laissées à l'hébergeur) ; hébergeur indiqué. RGPD : consentement à l'inscription, export des informations du compte, suppression confirmée par e-mail puis anonymisation. Pied de page : « Le jeu comporte des risques : endettement, dépendance… Appelez le 09 74 75 13 13 (appel non surtaxé). Interdit aux moins de 18 ans. » Aucun lien vers un opérateur de jeux. Offre Premium affichée, mais prix, renouvellement, résiliation et rétractation sont encore « à compléter ».\nAxes à couvrir : RGPD, mentions légales (LCEN), règles françaises sur la communication autour des jeux d'argent (ANJ, loi du 12 mai 2010), messages de mise en garde jeu responsable, protection des mineurs. Signale ce qui doit être vérifié par un juriste.",
+      "service": "LEX-GUARD/conformite",
+      "niveau_attendu": "N1",
+      "criteres_reussite": [
+        "Le tableau couvre les 5 axes demandés (RGPD, LCEN, ANJ, jeu responsable, mineurs)",
+        "Les champs Premium « à compléter » sont signalés comme écart prioritaire avant tout paiement",
+        "La mention de mise en garde du pied de page est analysée (présence, formulation, numéro)",
+        "Aucune affirmation juridique n'est présentée comme certaine sans renvoi à une vérification",
+        "Au moins un point est explicitement marqué « à faire valider par un juriste »"
+      ]
+    },
+    {
+      "id": "PK-05",
+      "titre": "Revue de code du contrôleur de recherche (Symfony)",
+      "consigne": "Fais la revue de code du contrôleur PHP ci-dessous, extrait du dépôt public redkards/poker-vitrine (backPoker/src/Controller/Api/SearchController.php, Symfony 7.4, PHP 8.2). Il sert GET /api/search?q=... : recherche publique dans les actualités publiées et les sujets du forum.\nRends : 1) résumé en 3 lignes ; 2) liste de constats classés (bloquant / important / mineur) avec numéro de ligne approximatif ; 3) points de sécurité (validation de l'entrée, limitation de débit, exposition de pseudos) ; 4) tests unitaires à ajouter (au moins 3). Ne réécris pas tout le fichier.\n\n```php\n/**\n * v1.1 — Recherche dans les actualités publiées et le forum (public).\n * Aucune donnée personnelle servie, hormis le pseudo de l'auteur d'un sujet.\n */\nclass SearchController extends AbstractController\n{\n    public const MIN_LENGTH = 2;\n    public const MAX_LENGTH = 100;\n    private const MAX_RESULTS = 10;\n\n    public function __construct(\n        private readonly ArticleRepository $articles,\n        private readonly ForumTopicRepository $topics,\n    ) {\n    }\n\n    #[Route('/api/search', name: 'api_search', methods: ['GET'])]\n    public function search(Request $request, RateLimiterFactoryInterface $searchLimiter, #[MapQueryParameter] string $q = ''): JsonResponse\n    {\n        $q = trim(preg_replace('/\\s+/u', ' ', $q) ?? '');\n        $length = mb_strlen($q);\n\n        if ($length < self::MIN_LENGTH || $length > self::MAX_LENGTH) {\n            return $this->json(\n                ['message' => sprintf('La recherche doit contenir entre %d et %d caractères.', self::MIN_LENGTH, self::MAX_LENGTH)],\n                Response::HTTP_BAD_REQUEST,\n            );\n        }\n        if (!$searchLimiter->create((string) $request->getClientIp())->consume()->isAccepted()) {\n            return $this->json(['message' => 'Trop de recherches : patientez une minute.'], Response::HTTP_TOO_MANY_REQUESTS);\n        }\n\n        return $this->json([\n            'query' => $q,\n            'articles' => array_map(fn (Article $a) => $this->articleData($a), $this->articles->searchPublished($q, self::MAX_RESULTS)),\n            'topics' => array_map(fn (ForumTopic $t) => $this->topicData($t), $this->topics->search($q, self::MAX_RESULTS)),\n        ]);\n    }\n\n    /**\n     * @return array<string, mixed>\n     */\n    private function articleData(Article $article): array\n    {\n        return [\n            'id' => $article->getId(),\n            'title' => $article->getTitle(),\n            'slug' => $article->getSlug(),\n            'excerpt' => $article->getExcerpt(),\n            'category' => $article->getCategory(),\n            'imageUrl' => $article->getImageUrl(),\n            'publishedAt' => $article->getPublishedAt()?->format(\\DATE_ATOM),\n        ];\n    }\n\n    /**\n     * @return array<string, mixed>\n     */\n    private function topicData(ForumTopic $topic): array\n    {\n        $author = $topic->getAuthor();\n\n        return [\n            'id' => $topic->getId(),\n            'title' => $topic->getTitle(),\n            'category' => ['slug' => $topic->getCategory()?->getSlug(), 'name' => $topic->getCategory()?->getName()],\n            'author' => ['pseudo' => !$author || $author->isAnonymized() ? GdprService::ANONYMOUS_LABEL : (string) $author->getPseudo()],\n            'lastPostAt' => $topic->getLastPostAt()?->format(\\DATE_ATOM),\n        ];\n    }\n}\n```",
+      "service": "CODE-CORE/revue",
+      "niveau_attendu": "N2",
+      "criteres_reussite": [
+        "Les constats sont classés bloquant / important / mineur",
+        "La revue mentionne la limitation de débit par IP et l'ordre validation puis limitation",
+        "La revue traite l'anonymisation du pseudo de l'auteur (GdprService::ANONYMOUS_LABEL)",
+        "Au moins 3 tests sont proposés (longueur < 2, longueur > 100, 429, résultat anonymisé…)",
+        "Aucune vulnérabilité inventée sans lien avec le code fourni"
+      ]
+    },
+    {
+      "id": "PK-06",
+      "titre": "Checklist de bêta-test du site Poker Winners",
+      "consigne": "Établis une checklist de bêta-test pour le site Poker Winners, à dérouler en 30 minutes par une seule personne, sur téléphone puis sur ordinateur.\nPages du site : accueil, inscription, connexion, vérification d'e-mail, mon espace, actualités, vidéos (favoris, vidéos Premium verrouillées), leçons à 3 niveaux avec quiz, tableaux de ranges, calendrier des tournois, forum (créer un sujet, signaler un message), recherche, profil public d'un membre, pages légales en bas de page. La boutique est désactivée.\nFormat : tableau numéroté avec colonnes « Étape », « Action », « Résultat attendu », « OK / KO », « Remarque ». 20 à 30 lignes. Ajoute à la fin une grille de tri des anomalies (bloquant / gênant / confort) et 3 cas à tester en navigation privée.",
+      "service": "OPS-CORE/projets",
+      "niveau_attendu": "N1",
+      "criteres_reussite": [
+        "La checklist compte entre 20 et 30 lignes numérotées avec les 5 colonnes demandées",
+        "Chaque rubrique listée (inscription, leçons, ranges, vidéos, forum, recherche, calendrier, pages légales) a au moins une ligne",
+        "Le verrouillage des contenus Premium et l'absence de boutique sont vérifiés",
+        "La grille de tri bloquant / gênant / confort est présente",
+        "Le test mobile et 3 cas en navigation privée sont inclus"
+      ]
+    },
+    {
+      "id": "PK-07",
+      "titre": "Note de veille : encadrement des contenus poker",
+      "consigne": "À partir du seul texte fourni ci-dessous (fictif, pour test), rédige une note de veille de 150 à 220 mots pour l'équipe Poker Winners : 3 points clés, 2 impacts concrets pour le site, 1 action recommandée. N'ajoute aucune information extérieure ; si un point est incertain, écris « à vérifier ».\n\nTEXTE FOURNI :\n« Note d'information (test) — L'autorité de régulation des jeux rappelle que les sites éditoriaux consacrés au poker ne sont pas des opérateurs tant qu'ils ne proposent aucune mise d'argent. Elle observe cependant une hausse des contenus pédagogiques renvoyant vers des salles en ligne via des liens affiliés. Ces liens constituent une communication commerciale en faveur d'un opérateur et doivent alors respecter les règles applicables : message de mise en garde, interdiction de cibler les mineurs, absence de promesse de gain. Les créateurs de contenus sont invités à distinguer clairement information et promotion, et à conserver une trace de leurs partenariats. »",
+      "service": "R&D-PARADOX/veille",
+      "niveau_attendu": "N1",
+      "criteres_reussite": [
+        "La note fait entre 150 et 220 mots",
+        "Elle contient exactement 3 points clés, 2 impacts et 1 action recommandée",
+        "Elle relève que des liens affiliés feraient basculer le site dans la communication commerciale",
+        "Aucune information absente du texte fourni (date, chiffre, nom de loi) n'est ajoutée",
+        "Les éléments incertains sont marqués « à vérifier »"
+      ]
+    },
+    {
+      "id": "PK-08",
+      "titre": "Évaluation d'un livrable rédactionnel par AGENT-FACTORY",
+      "consigne": "Évalue le livrable ci-dessous, produit par un agent de rédaction pour la page d'accueil du site Poker Winners. Consigne d'origine : texte d'accueil de 80 mots maximum, vouvoiement, aucune promesse de gain, mention « Interdit aux moins de 18 ans » obligatoire.\n\nLIVRABLE À ÉVALUER :\n« Bienvenue sur Poker Winners ! Ici tu vas enfin comprendre le poker et doubler ta bankroll en un mois grâce à nos leçons exclusives. Vidéos, forum, quiz et calendrier des tournois : tout est réuni pour devenir un vrai winner. Rejoins des milliers de joueurs dès aujourd'hui ! »\n\nRends : une note sur 10 pour chacun des critères (respect de la consigne, conformité, ton, clarté), la liste des écarts constatés, un verdict (accepté / à corriger / rejeté) et une version corrigée de 80 mots maximum.",
+      "service": "AGENT-FACTORY/evaluation",
+      "niveau_attendu": "N1",
+      "criteres_reussite": [
+        "Le tutoiement est relevé comme écart à la consigne (vouvoiement)",
+        "La promesse « doubler ta bankroll en un mois » est relevée comme non conforme",
+        "L'absence de la mention « Interdit aux moins de 18 ans » est relevée",
+        "Le verdict est « à corriger » ou « rejeté », avec des notes chiffrées par critère",
+        "La version corrigée fait 80 mots au plus, vouvoie et contient la mention 18 ans"
+      ]
+    },
+    {
+      "id": "PK-09",
+      "titre": "Résumé interne de l'état du projet REDKARDS",
+      "consigne": "Fais un résumé interne en 5 puces maximum de l'état du projet REDKARDS, à partir uniquement de ces éléments :\n- Saga BD/Webtoon poker prévue sur 10 saisons de 20 épisodes.\n- Saison 1 en bêta de lecture V0.2 : 20 épisodes, environ 130 pages.\n- Pilote de 6 planches illustré ; épisodes 2 à 20 encore en storyboard textuel.\n- Relecture qualité des épisodes 1 à 20 terminée : 0 point bloquant, 9 importants, 24 mineurs, à arbitrer.\n- Prochaine étape : contrôler les corrections, choisir le style graphique, puis dessiner les épisodes 2 à 20.\nTermine par une ligne « Décision attendue : … ».",
+      "service": "OPS-CORE/projets",
+      "niveau_attendu": "N0",
+      "criteres_reussite": [
+        "Le résumé tient en 5 puces maximum",
+        "Les chiffres (10 × 20, V0.2, 130 pages, 6 planches, 0/9/24) sont repris sans erreur",
+        "Aucune information absente des éléments fournis n'est ajoutée",
+        "La dernière ligne commence par « Décision attendue : »",
+        "La mission se termine sans décision humaine (statut terminee)"
+      ]
+    }
+  ]
+}
