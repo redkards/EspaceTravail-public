@@ -708,14 +708,6 @@ def reprendre_au_demarrage() -> dict:
 
 # --- Décisions N3 ------------------------------------------------------------------
 
-def _risque(montant: float, action: str | None, motif: str) -> str:
-    if montant >= 1000 or action in ("signer", "supprimer", "donnees_sensibles", "depense"):
-        return "eleve"
-    if montant > 0 or action or "sensible" in motif:
-        return "moyen"
-    return "faible"
-
-
 def decisions_du_jour() -> int:
     debut = maintenant().replace(hour=0, minute=0, second=0, microsecond=0)
     with session_scope() as s:

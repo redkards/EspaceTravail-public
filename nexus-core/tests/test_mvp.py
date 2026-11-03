@@ -20,6 +20,8 @@ def _actions():
 
 
 def test_ntfy_vide_journalise_sans_planter(monkeypatch):
+    # Expiration < 4 h : décision urgente → notification immédiate (sinon groupée par session).
+    monkeypatch.setenv("N3_TIMEOUT_HOURS", "3")
     monkeypatch.setenv("NTFY_URL", "")
     mid = creer_mission(titre="Devis", consigne="Rédige un devis", service="REVENUE-CORE/propositions")
     pipeline.traiter(mid)
@@ -29,6 +31,7 @@ def test_ntfy_vide_journalise_sans_planter(monkeypatch):
 
 
 def test_ntfy_injoignable_journalise_sans_planter(monkeypatch):
+    monkeypatch.setenv("N3_TIMEOUT_HOURS", "3")  # décision urgente : notification immédiate
     monkeypatch.setenv("NTFY_URL", "http://127.0.0.1:9")  # port fermé
     monkeypatch.setenv("NTFY_TOPIC", "nexus-test")
     mid = creer_mission(titre="Devis", consigne="Rédige un devis", service="REVENUE-CORE/propositions")
