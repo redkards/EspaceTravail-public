@@ -13,7 +13,10 @@
 #     --local        IA locale seule (qwen2.5:3b), sans Ollama Cloud
 #     --sans-repli   Ollama Cloud SANS IA locale de secours (MVP ≈ 0,5 Go de RAM)
 #     --repli-local  Ollama Cloud + IA locale de secours (déjà le comportement par défaut)
-#     La clé Ollama est TOUJOURS saisie au clavier (masquée), jamais en argument.
+#     --cle-fichier CHEMIN  lit la clé Ollama Cloud dans un fichier (pratique au
+#                    téléphone : nano /root/cle-ollama.txt), puis propose de l'effacer
+#     La clé n'est jamais passée en argument : saisie masquée ou --cle-fichier.
+#     Elle n'est enregistrée qu'après un appel AUTHENTIFIÉ réussi à Ollama Cloud.
 #
 #  Modes :
 #     (défaut)       MVP : cockpit + agents (SQLite). Ports 80 et 443.
@@ -54,6 +57,7 @@ TOTAL_ETAPES=13
 ARG_HOST=""
 ARG_EMAIL=""
 ARG_MODEL=""
+ARG_CLE_FICHIER=""
 OUI=0
 COMPLET=0
 SANS_PARTITION=0
@@ -93,6 +97,8 @@ while [ $# -gt 0 ]; do
     --email=*) ARG_EMAIL="${1#*=}"; shift ;;
     --model)  [ $# -ge 2 ] || erreur "--model attend une valeur"; ARG_MODEL="$2"; shift 2 ;;
     --model=*) ARG_MODEL="${1#*=}"; shift ;;
+    --cle-fichier) [ $# -ge 2 ] || erreur "--cle-fichier attend un chemin"; ARG_CLE_FICHIER="$2"; CHOIX_IA="${CHOIX_IA:-cloud}"; shift 2 ;;
+    --cle-fichier=*) ARG_CLE_FICHIER="${1#*=}"; CHOIX_IA="${CHOIX_IA:-cloud}"; shift ;;
     --yes|-y) OUI=1; shift ;;
     --complet) COMPLET=1; shift ;;
     --mvp) COMPLET=0; shift ;;
@@ -459,14 +465,48 @@ assurer_env NEXUS_BIND_IP "$BIND_IP" || true
 # =============================================================================
 etape "Choix de l'IA (gratuit : Ollama Cloud + IA locale de secours)"
 # =============================================================================
-# Teste une clé Ollama Cloud. La clé est transmise à curl par l'entrée standard
-# (« -H @- ») : elle n'apparaît ni à l'écran, ni dans install.log, ni dans « ps ».
-# Écrit le code HTTP dans $CODE_HTTP et la réponse dans le fichier $1.
-tester_cle() {
-  local sortie="$1"
-  CODE_HTTP=$(printf 'Authorization: Bearer %s\n' "$(lire_env OLLAMA_API_KEY)" \
-    | curl -s -m 20 -o "$sortie" -w '%{http_code}' -H @- "$OLLAMA_CLOUD_URL/api/tags" || echo 000)
+# --- debut fonctions cle (testées isolément) ---------------------------------------
+# Saisie robuste : une lecture impossible (console coupée, pas de terminal) renvoie
+# une chaîne vide au lieu d'arrêter le script. $1 = invite, $2 = « s » pour masquer.
+lire_saisie() {
+  local invite="$1" masque="${2:-}" valeur=""
+  [ -t 0 ] || { printf ''; return 0; }
+  if [ "$masque" = "s" ]; then
+    IFS= read -r -s -p "$invite" valeur 2>/dev/null || valeur=""
+    echo >&2
+  else
+    IFS= read -r -p "$invite" valeur 2>/dev/null || valeur=""
+  fi
+  printf '%s' "$valeur"
 }
+# Nettoie une clé collée : retire espaces, tabulations, retours chariot / ligne,
+# puis les guillemets simples ou doubles qui l'entourent.
+nettoyer_cle() {
+  local c
+  c="$(printf '%s' "$1" | tr -d ' \t\r\n')"
+  c="${c#\"}"; c="${c%\"}"; c="${c#\'}"; c="${c%\'}"
+  printf '%s' "$c"
+}
+# Forme plausible : au moins 20 caractères, sans guillemet ni espace restant.
+cle_plausible() {
+  [ "${#1}" -ge 20 ] && [[ "$1" != *[\"\'[:space:]]* ]]
+}
+# Appel AUTHENTIFIÉ minimal : POST /api/chat (1 token) avec le modèle $2.
+# La clé ($1) passe par l'entrée standard (« -H @- ») : jamais dans ps ni à l'écran.
+# Résultat dans CODE_HTTP : 200 = clé valide ; 401/403 = clé refusée ; autre = indéterminé.
+verifier_cle_cloud() {
+  local cle="$1" modele="$2" corps
+  corps="$(jq -cn --arg m "$modele" '{model: $m, messages: [{role: "user", content: "OK"}], stream: false, options: {num_predict: 1}}')"
+  CODE_HTTP=$(printf 'Authorization: Bearer %s\n' "$cle" \
+    | curl -s -m 60 -o /dev/null -w '%{http_code}' -H @- -H 'Content-Type: application/json' \
+        --data-binary "$corps" "$OLLAMA_CLOUD_URL/api/chat" 2>/dev/null) || true
+  [[ "$CODE_HTTP" =~ ^[0-9]{3}$ ]] || CODE_HTTP=000
+}
+# Liste des modèles (endpoint public, ne prouve PAS que la clé est bonne).
+lister_modeles_cloud() {
+  curl -s -m 20 "$OLLAMA_CLOUD_URL/api/tags" 2>/dev/null | jq -r '.models[]?.name // empty' 2>/dev/null || true
+}
+# --- fin fonctions cle --------------------------------------------------------------
 
 cle_existante="$(lire_env OLLAMA_API_KEY)"
 if [ "$CHOIX_IA" = "local" ]; then
@@ -475,68 +515,106 @@ elif [ "$CHOIX_IA" = "cloud" ] || [ -n "$cle_existante" ]; then
   utiliser_cloud=1
 elif [ "$OUI" -eq 0 ] && [ -t 0 ]; then
   echo "    Ollama Cloud (offre gratuite) donne accès à de gros modèles sans charger le VPS."
-  read -r -p "Utiliser Ollama Cloud ? [O/n] " rep || rep=""
+  rep="$(lire_saisie "Utiliser Ollama Cloud ? [O/n] ")"
   case "$rep" in n|N|non|NON) utiliser_cloud=0 ;; *) utiliser_cloud=1 ;; esac
 else
   utiliser_cloud=1
 fi
 
 cloud_ok=0
+cloud_inchange=0
+CODE_HTTP=""
 if [ "$utiliser_cloud" -eq 1 ]; then
-  if [ -z "$cle_existante" ]; then
-    if [ -t 0 ]; then
-      echo "    Créez une clé (gratuite) sur https://ollama.com/settings/keys puis collez-la ici."
-      echo "    La saisie est masquée : rien ne s'affiche, c'est normal. Entrée vide = passer."
-      cle=""
-      read -r -s -p "    Clé Ollama Cloud : " cle || cle=""
-      echo
-      if [ -n "$cle" ]; then
-        remplacer_env OLLAMA_API_KEY "'$cle'"
-        chmod 600 "$ENV_FILE"
-        ok "Clé enregistrée dans .env (fichier lisible par root uniquement)"
-      fi
-      unset cle
-    else
-      avert "Pas de terminal interactif : impossible de saisir la clé Ollama Cloud."
-    fi
-  else
-    ok "Clé Ollama Cloud déjà présente dans .env (non affichée)"
+  # 1) Modèles disponibles et modèle choisi (avant le test de la clé)
+  mapfile -t modeles < <(lister_modeles_cloud)
+  modele_actuel="$(lire_env NEXUS_MODEL)"
+  choix=""
+  for candidat in "$ARG_MODEL" "$modele_actuel" "$MODELE_CLOUD_DEFAUT"; do
+    [ -n "$candidat" ] || continue
+    if [ "${#modeles[@]}" -eq 0 ] || printf '%s\n' "${modeles[@]}" | grep -qxF "$candidat"; then choix="$candidat"; break; fi
+  done
+  [ -n "$choix" ] || choix="${modeles[0]:-$MODELE_CLOUD_DEFAUT}"
+  if [ -n "$ARG_MODEL" ] && [ "$choix" != "$ARG_MODEL" ]; then
+    avert "Modèle « $ARG_MODEL » absent de la liste : « $choix » sera utilisé."
   fi
 
-  if [ -n "$(lire_env OLLAMA_API_KEY)" ]; then
-    reponse_tags="$(mktemp)"
-    tester_cle "$reponse_tags"
-    if [ "$CODE_HTTP" = "200" ]; then
-      mapfile -t modeles < <(jq -r '.models[]?.name // empty' "$reponse_tags" 2>/dev/null)
-      ok "Clé Ollama Cloud valide — ${#modeles[@]} modèle(s) disponible(s) :"
-      printf '      %s\n' "${modeles[@]:0:25}"
-      # Choix du modèle : --model, sinon le modèle déjà choisi, sinon gemma4:31b, sinon le premier
-      modele_actuel="$(lire_env NEXUS_MODEL)"
-      choix=""
-      for candidat in "$ARG_MODEL" "$modele_actuel" "$MODELE_CLOUD_DEFAUT"; do
-        [ -n "$candidat" ] || continue
-        if printf '%s\n' "${modeles[@]}" | grep -qxF "$candidat"; then choix="$candidat"; break; fi
-      done
-      [ -n "$choix" ] || choix="${modeles[0]:-$MODELE_CLOUD_DEFAUT}"
-      if [ -n "$ARG_MODEL" ] && [ "$choix" != "$ARG_MODEL" ]; then
-        avert "Modèle « $ARG_MODEL » absent de la liste : « $choix » sera utilisé."
-      fi
-      if [ "$OUI" -eq 0 ] && [ -t 0 ] && [ -z "$ARG_MODEL" ]; then
-        read -r -p "    Modèle à utiliser [$choix] : " rep || rep=""
-        [ -n "$rep" ] && choix="$rep"
-      fi
-      cloud_ok=1
-      remplacer_env LLM_PROVIDER ollama_cloud
-      remplacer_env NEXUS_MODEL "$choix"
-      ok "Fournisseur : Ollama Cloud — modèle $choix"
-    else
-      avert "Clé Ollama Cloud refusée ou service injoignable (code HTTP $CODE_HTTP)."
-      echo "    Vérifiez la clé sur https://ollama.com/settings/keys. Pour la changer :"
-      echo "    supprimez la ligne OLLAMA_API_KEY de $ENV_FILE puis relancez install.sh."
-    fi
-    rm -f "$reponse_tags"
+  # 2) Clé à tester : fichier (--cle-fichier) > saisie > clé déjà dans .env
+  nouvelle_cle=""
+  if [ -n "$ARG_CLE_FICHIER" ]; then
+    [ -r "$ARG_CLE_FICHIER" ] || erreur "Fichier de clé illisible : $ARG_CLE_FICHIER"
+    nouvelle_cle="$(nettoyer_cle "$(cat "$ARG_CLE_FICHIER")")"
+  elif [ -n "$cle_existante" ]; then
+    verifier_cle_cloud "$cle_existante" "$choix"
+    case "$CODE_HTTP" in
+      200) ok "Clé Ollama Cloud déjà présente dans .env : acceptée par Ollama (non affichée)" ;;
+      401|403)
+        avert "La clé Ollama Cloud du .env est REFUSÉE par Ollama (code $CODE_HTTP)."
+        if [ "$CHOIX_IA" = "cloud" ] && [ -t 0 ] && [ "$OUI" -eq 0 ] && demander "La remplacer maintenant ?" o; then
+          echo "    Collez la nouvelle clé (saisie masquée, Entrée vide = annuler)."
+          nouvelle_cle="$(nettoyer_cle "$(lire_saisie "    Clé Ollama Cloud : " s)")"
+        else
+          echo "    Pour la remplacer : bash install.sh --cloud   (ou --cle-fichier, voir README)"
+        fi ;;
+      *) avert "Vérification de la clé impossible (code $CODE_HTTP) : réglages IA actuels conservés."
+         [ "$(lire_env LLM_PROVIDER)" = "ollama_cloud" ] && cloud_inchange=1 ;;
+    esac
   else
+    if [ -t 0 ] && [ "$OUI" -eq 0 ]; then
+      echo "    Créez une clé (gratuite) sur https://ollama.com/settings/keys puis collez-la ici."
+      echo "    La saisie est masquée : rien ne s'affiche, c'est normal. Entrée vide = passer."
+      echo "    Au téléphone, plus sûr : bash install.sh --cloud --cle-fichier /root/cle-ollama.txt"
+      nouvelle_cle="$(nettoyer_cle "$(lire_saisie "    Clé Ollama Cloud : " s)")"
+    else
+      avert "Pas de terminal interactif : utilisez --cle-fichier pour fournir la clé Ollama Cloud."
+    fi
+  fi
+
+  # 3) Nouvelle clé : forme, puis appel authentifié ; enregistrée SEULEMENT si acceptée
+  if [ -n "$nouvelle_cle" ]; then
+    if ! cle_plausible "$nouvelle_cle"; then
+      avert "Ce texte (${#nouvelle_cle} caractères) n'est pas une clé Ollama Cloud (20 caractères minimum)."
+      echo "    Copiez la clé entière depuis https://ollama.com/settings/keys. Rien n'a été modifié."
+    else
+      verifier_cle_cloud "$nouvelle_cle" "$choix"
+      case "$CODE_HTTP" in
+        200)
+          remplacer_env OLLAMA_API_KEY "'$nouvelle_cle'"
+          chmod 600 "$ENV_FILE"
+          ok "Clé acceptée par Ollama et enregistrée dans .env (lisible par root uniquement)" ;;
+        401|403)
+          avert "Clé refusée par Ollama (code $CODE_HTTP) : rien n'a été modifié." ;;
+        *)
+          avert "Vérification impossible (code $CODE_HTTP : réseau, quota ou modèle « $choix ») : rien n'a été modifié." ;;
+      esac
+    fi
+    if [ -n "$ARG_CLE_FICHIER" ] && demander "Effacer le fichier $ARG_CLE_FICHIER (recommandé) ?" o; then
+      if command -v shred >/dev/null 2>&1; then shred -u "$ARG_CLE_FICHIER"; else rm -f "$ARG_CLE_FICHIER"; fi
+      ok "Fichier de clé effacé"
+    fi
+  elif [ -z "$cle_existante" ]; then
     avert "Aucune clé Ollama Cloud fournie."
+  fi
+  # Nouvelle clé refusée mais une clé existait déjà : on vérifie l'ancienne (conservée)
+  if [ -n "$nouvelle_cle" ] && [ "$CODE_HTTP" != "200" ] && [ -n "$cle_existante" ]; then
+    verifier_cle_cloud "$cle_existante" "$choix"
+    [ "$CODE_HTTP" = "200" ] && ok "La clé déjà enregistrée reste valide : elle est conservée."
+  fi
+  unset nouvelle_cle
+
+  # 4) Bascule vers Ollama Cloud UNIQUEMENT si la clé enregistrée vient d'être acceptée
+  if [ "$CODE_HTTP" = "200" ] && [ -n "$(lire_env OLLAMA_API_KEY)" ]; then
+    if [ "$OUI" -eq 0 ] && [ -t 0 ] && [ -z "$ARG_MODEL" ]; then
+      [ "${#modeles[@]}" -eq 0 ] || { info "Modèles disponibles :"; printf '      %s\n' "${modeles[@]:0:25}"; }
+      rep="$(lire_saisie "    Modèle à utiliser [$choix] : ")"
+      [ -n "$rep" ] && choix="$rep"
+    fi
+    cloud_ok=1
+    remplacer_env LLM_PROVIDER ollama_cloud
+    remplacer_env NEXUS_MODEL "$choix"
+    ok "Fournisseur : Ollama Cloud — modèle $choix"
+  elif [ "$cloud_inchange" -eq 1 ]; then
+    cloud_ok=1
+    ok "Ollama Cloud conservé (modèle $(lire_env NEXUS_MODEL)) ; nouvelle vérification au prochain lancement"
   fi
 fi
 
@@ -549,7 +627,7 @@ if [ "$cloud_ok" -eq 1 ]; then
     ok "Sans repli local (--sans-repli) : le Mothership n'utilise qu'Ollama Cloud"
   fi
 else
-  # Pas de cloud : on continue en local seul (gratuit, sur le VPS)
+  # Pas de cloud validé : on continue en local seul (gratuit, sur le VPS)
   [ "$REPLI" -eq 0 ] && avert "--sans-repli ignoré : sans Ollama Cloud, l'IA locale est indispensable."
   REPLI=1
   remplacer_env LLM_PROVIDER ollama

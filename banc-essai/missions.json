@@ -940,7 +940,7 @@
         "regle:offensif"
       ],
       "longueur": {
-        "min_mots": 10,
+        "min_mots": 30,
         "max_mots": 700
       },
       "sections": [],

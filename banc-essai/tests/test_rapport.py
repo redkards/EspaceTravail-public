@@ -42,12 +42,15 @@ def test_rapport_agrege(tmp_path, missions, banc):
     assert a1["duree_mediane_s"] == 30.0 and a1["duree_p90_s"] == 50.0
     assert a1["taux_plafond"] == round(100 / 6, 1) and a1["taux_echec"] == round(100 / 6, 1)
     assert a2["cout_eur_total"] == 0.04 and a2["taux_reussite_pieges"] == 100.0
-    assert s["pires_missions"][0]["id"] in ("BE-10", "BE-24")
+    assert s["pires_missions"][0]["id"] in ("BE-10", "BE-24") and s["pires_missions"][0]["note_livrable"] <= 20
+    assert a1["note_systeme_moyenne"] is not None and a1["note_livrable_moyenne"] < 100
+    assert s["par_service"]["DESIGN-SYSTEM/ui"]["F1"]["note_livrable"] <= 20
     assert [p["id"] for p in s["pieges_echoues"]] == ["BE-28"]
     assert any("échantillon petit" in a for a in s["avertissements"])
     md = (sortie / "rapport.md").read_text()
     assert "qwen2.5:3b" in md and "Généré le" in md and "Les 5 pires missions" in md
     assert "CONTENT-ARENA/redaction" in md and "ÉCHEC **BE-28**" in md
+    assert "Note livrable moyenne" in md and "Note système moyenne" in md
 
 
 def test_rapport_llm_factice_et_nom(tmp_path, audit, banc):
@@ -57,10 +60,11 @@ def test_rapport_llm_factice_et_nom(tmp_path, audit, banc):
     f_json["sante"]["llm"]["fournisseur"] = "fake"
     open(f, "w").write(json.dumps(f_json))
     sortie = tmp_path / "o"
-    rapport.main([f, "--missions", str(banc / "audit-syfer" / "missions.json"), "--sortie", str(sortie),
+    (tmp_path / "synthese_audit-syfer.json").write_text("{}")
+    rapport.main([f, str(tmp_path / "synthese_audit-syfer.json"), "--missions", str(banc / "audit-syfer" / "missions.json"), "--sortie", str(sortie),
                   "--nom", "audit-syfer"])
     s = json.loads((sortie / "synthese_audit-syfer.json").read_text())
-    assert any("FACTICE" in a for a in s["avertissements"])
+    assert any("FACTICE" in a for a in s["avertissements"]) and list(s["par_fonctionnement"]) == ["F3"]
     assert (sortie / "rapport_audit-syfer.md").exists()
 
 

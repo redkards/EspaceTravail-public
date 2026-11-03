@@ -42,7 +42,7 @@ def test_rapide_complet(banc, serveur, env_propre, tmp_path):
     d = json.loads(res.read_text())
     assert d["fonctionnement"] == "F1" and d["sante"]["llm"]["modele"] == "faux-3b" and d["fin"]
     assert [r["id"] for r in d["resultats"]] == json.loads((banc / "missions.json").read_text())["selection_rapide"]
-    assert all(r["notation"]["note"] == 100 for r in d["resultats"]), [r["notation"] for r in d["resultats"]]
+    assert all(r["notation"]["note_livrable"] == r["notation"]["note_systeme"] == 100 for r in d["resultats"]), [r["notation"] for r in d["resultats"]]
     statuts = {r["id"]: r["statut"] for r in d["resultats"]}
     assert statuts["BE-28"] == "en_attente_n3" and statuts["BE-01"] == "terminee"
     assert "arrêtée pour validation" in p.stderr
@@ -142,4 +142,4 @@ def test_audit_syfer_envoie_le_service_en_f3(banc, env_propre, tmp_path):
         assert [c["service"] for c in s.posts] == ["CYBER-FORTRESS/audit", "LEX-GUARD/droit-france"]
         assert all(c["fonctionnement"] == "F3" and c["projet"] == "nexus" for c in s.posts)
         d = json.loads(res.read_text())
-        assert d["fonctionnement"] == "F3" and all(r["notation"]["note"] == 100 for r in d["resultats"])
+        assert d["fonctionnement"] == "F3" and all(r["notation"]["note_livrable"] == r["notation"]["note_systeme"] == 100 for r in d["resultats"])

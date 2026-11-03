@@ -23,7 +23,13 @@ MOTS_N3 = [
     # Argent
     r"virement", r"virements", r"paiement", r"paiements", r"payer", r"payez",
     r"facture", r"factures", r"facturer", r"facturation", r"devis",
-    r"achat", r"achats", r"acheter", r"abonnement", r"abonnements", r"commande", r"commandes", r"commander",
+    r"achat", r"achats", r"acheter", r"abonnement", r"abonnements",
+    # « commande » seule est ambiguë (ligne de commande) : seul le sens achat déclenche N3.
+    r"commander", r"commandez", r"commandons", r"commandera",
+    r"passer (?:une |la |des |les |cette |ma |sa |notre )?commandes?", r"passez (?:une |la |des |les )?commandes?",
+    r"passe (?:une |la |des |les )?commandes?", r"passera (?:une |la |des |les )?commandes?",
+    r"bons? de commandes?", r"commandes? (?:de|d') (?:materiel|produits?|marchandises?|fournitures?|stock)",
+    r"commandes? (?:fournisseur|client)s?",
     # Engagement juridique
     r"contrat", r"contrats", r"signature", r"signatures", r"signer", r"signez",
     # Sécurité / données
