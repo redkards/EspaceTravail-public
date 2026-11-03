@@ -1,0 +1,71 @@
+{
+ "id": "O02-7a453381",
+ "oracle": "O02",
+ "oracles": [
+  "O02",
+  "O03"
+ ],
+ "causes": {
+  "O02": {
+   "verbe": "vire-tu"
+  },
+  "O03": {
+   "verbe": "vire-tu"
+  }
+ },
+ "signature": "{\"verbe\": \"vire-tu\"}",
+ "oracle_titre": "Verbe engageant non nié, montant engagé ou avis N3 ⇒ N3",
+ "gravite": 1,
+ "graine": 237291978041979,
+ "iteration": 8,
+ "occurrences": 2,
+ "cas_minimal": {
+  "service": "auto",
+  "projet": "divers",
+  "gabarit": "note",
+  "montant": "aucun",
+  "verbe": "vire-tu",
+  "fonctionnement": "defaut",
+  "contenu": "aucun",
+  "reponse_ia": "bonne",
+  "decideur": "aucune",
+  "evenement": "aucun",
+  "canal_creation": "api"
+ },
+ "non_neutres": {
+  "verbe": "vire-tu"
+ },
+ "description": "verbe=vire-tu",
+ "scenario_initial": {
+  "service": "propositions",
+  "projet": "poker-winners",
+  "gabarit": "liste",
+  "verbe": "vire-tu",
+  "reponse_ia": "a-preciser",
+  "evenement": "redemarrage-avant-decision"
+ },
+ "actions": [
+  {
+   "faire": "creer_mission",
+   "canal": "api",
+   "double": false,
+   "file_pleine": false
+  }
+ ],
+ "consigne": "Prépare une note interne sur le dossier hebergement (ZQX8041979). Vire la somme convenue sur le compte de Durand.",
+ "montant_texte": "",
+ "observe": "premier classement GATE N0 (Livrable enregistré : <bac>/data/livrables/divers/1.md. Aucune action externe exécutée.)",
+ "attendu": "N3 : verbe sensible non nié « vire-tu »",
+ "reproduit": true,
+ "autres_violations": [
+  {
+   "oracle": "O03",
+   "titre": "Livrable N3 jamais exécuté sans validation humaine",
+   "observe": "mission #1 terminee (classements ['N0']) sans validation humaine N3 du livrable final",
+   "attendu": "un livrable N3 n'est exécuté qu'après « valider » du Décideur"
+  }
+ ],
+ "fichier_ligne_probable": "nexus-core/app/gate.py:16",
+ "correction_suggeree": "Compléter MOTS_N3 (formes à la 2e personne et synonymes : « paie », « vire », « mets en ligne », « efface »…) et la détection des montants (lettres, M€, $ à l'anglaise), puis ajouter des tests.",
+ "rejouer": "python3 iterer.py --rejouer O02-7a453381"
+}

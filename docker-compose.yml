@@ -168,6 +168,38 @@ services:
       # Mémoire par projet : résumé automatique + dossiers de connaissances (lecture seule)
       NEXUS_MEMOIRE_AUTO: ${NEXUS_MEMOIRE_AUTO:-1}
       NEXUS_CONNAISSANCES_DIR: /connaissances
+      # Décisions : UNIQUEMENT via le cockpit. 1 = l'API (clé) peut décider : TESTS UNIQUEMENT.
+      NEXUS_API_PEUT_DECIDER: ${NEXUS_API_PEUT_DECIDER:-0}
+      NEXUS_SEUIL_RISQUE_ELEVE_EUR: ${NEXUS_SEUIL_RISQUE_ELEVE_EUR:-1000}
+      # Modèles par rôle / modèles cloud autorisés (vide = réglages par défaut)
+      NEXUS_MODELES_ROLES: ${NEXUS_MODELES_ROLES:-}
+      NEXUS_MODELES_CLOUD: ${NEXUS_MODELES_CLOUD:-}
+      NEXUS_RESUME_QUOTIDIEN: ${NEXUS_RESUME_QUOTIDIEN:-19:00}
+      # Export vers le QG (webhook signé HMAC ; vide = désactivé)
+      NEXUS_WEBHOOK_QG: ${NEXUS_WEBHOOK_QG:-}
+      NEXUS_WEBHOOK_SECRET: ${NEXUS_WEBHOOK_SECRET:-}
+      # Mémoire collective : exemples, leçons (seuils, mesures, baisse de qualité tolérée en %)
+      NEXUS_EXEMPLES_SEUIL: ${NEXUS_EXEMPLES_SEUIL:-4}
+      NEXUS_LECONS_SEUIL: ${NEXUS_LECONS_SEUIL:-3}
+      NEXUS_LECONS_MESURES_MIN: ${NEXUS_LECONS_MESURES_MIN:-3}
+      NEXUS_LECONS_BAISSE: ${NEXUS_LECONS_BAISSE:-10}
+      NEXUS_LECONS_REFORMULER: ${NEXUS_LECONS_REFORMULER:-0}
+      NEXUS_ARCHIVE_DIR: /data/archive
+      # Banc d'essai (lecture seule), note en un geste, test fantôme, fenêtre de nuit, pilote hebdo
+      NEXUS_BANC_RESULTATS: /banc/tableau.json
+      NEXUS_BANC_DIR: /banc-essai
+      NEXUS_ECHANTILLON_NOTE: ${NEXUS_ECHANTILLON_NOTE:-0.2}
+      NEXUS_FANTOME_K: ${NEXUS_FANTOME_K:-5}
+      NEXUS_FENETRE_NUIT: ${NEXUS_FENETRE_NUIT:-01:00-06:00}
+      NEXUS_PILOTE_HEBDO: ${NEXUS_PILOTE_HEBDO:-07:30}
+      # Chartes : /config/chartes (montage ci-dessous) ; dossier supplémentaire facultatif
+      NEXUS_CHARTES_DIR: ${NEXUS_CHARTES_DIR:-}
+      # Base de veille (collecteur lancé par cron sur l'hôte, voir veille/README.md).
+      # Chemin à confirmer côté nexus-core : base SQLite en WAL sur montage lecture seule
+      # -> l'ouvrir en « file:...?mode=ro&immutable=1 » ou via veille/recherche.py.
+      VEILLE_DB: /veille-donnees/veille.db
+      # Base remplacée atomiquement par le collecteur (sans WAL), ouverte en mode=ro
+      VEILLE_LECTURE_SEULE: "1"
       # Registre des projets monté en lecture seule (modifiable sans reconstruire l'image)
       NEXUS_PROJETS_FILE: /config/projets.yaml
       # Fournisseur : ollama (local) | ollama_cloud | anthropic
@@ -212,6 +244,12 @@ services:
       # Connaissances par projet (fiches projets/*.md, contexte des tests), lecture seule
       - ./projets:/connaissances/projets:ro
       - ./tests-poker/contexte:/connaissances/contexte:ro
+      # Chartes de projet, banc d'essai (résultats + scripts de notation), veille (code + base)
+      - ./nexus-core/chartes:/config/chartes:ro
+      - ./banc-essai/resultats:/banc:ro
+      - ./banc-essai:/banc-essai:ro
+      - ./veille:/veille:ro
+      - ./data/veille:/veille-donnees:ro
     # MVP : dépend seulement d'ollama, et seulement si le profil « local » est actif
     # (required: false). postgres/redis sont ajoutés en mode complet.
     depends_on:

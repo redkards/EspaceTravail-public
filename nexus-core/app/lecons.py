@@ -22,7 +22,7 @@ from pathlib import Path
 import yaml
 from sqlalchemy import func, select
 
-from . import cyber, gate, ledger, sentinel
+from . import bouclier, cyber, gate, ledger, sentinel
 from .config import cfg
 from .db import session_scope
 from .models import Avis, Decision, Etape, Lecon, Mission, maintenant
@@ -116,6 +116,11 @@ def signaux(mid: int) -> list[tuple[str, str]]:
     return res
 
 
+def _suspect(texte: str | None) -> bool:
+    """Bouclier : texte de leçon refusé dès le seuil MOYEN (il serait injecté comme consigne)."""
+    return bool(texte) and bouclier.detecter_injection(texte).score >= bouclier.SEUIL_MOYEN
+
+
 def enregistrer_signaux(mid: int) -> dict:
     """Regroupe les signaux de la mission dans les leçons (une occurrence par mission et par leçon)."""
     with session_scope() as s:
@@ -127,6 +132,10 @@ def enregistrer_signaux(mid: int) -> dict:
         texte = _nettoyer(brut)
         sig = signature(texte)
         if not sig:
+            continue
+        if _suspect(texte):  # une leçon devient une consigne : aucun texte suspect d'injection
+            ledger.journaliser("NEXUS-BOUCLIER", "lecon_signal_ecarte", mid, origine=origine,
+                               score=bouclier.detecter_injection(texte).score)
             continue
         typ = type_de(texte)
         cle = f"{service}|{projet}|{typ}|{sig}"[:200]
@@ -158,6 +167,8 @@ def enregistrer_signaux(mid: int) -> dict:
         if lid:
             ledger.journaliser("NEXUS-PRIME", "lecon_proposee", mid, lecon_id=lid, service=service, projet=projet)
             _reformuler(lid)
+            from . import fantome  # test fantôme de nuit avant la décision du propriétaire
+            fantome.planifier("lecon", lid, {"lecon": texte}, service, projet)
     return stats
 
 
@@ -174,7 +185,7 @@ def _reformuler(lid: int) -> None:
     except ErreurLLM:
         return
     propre = _nettoyer(r.texte)
-    if propre and not cyber.detecter_secrets(propre):
+    if propre and not cyber.detecter_secrets(propre) and not _suspect(propre):
         with session_scope() as s:
             s.get(Lecon, lid).texte_llm = propre
 
@@ -182,7 +193,8 @@ def _reformuler(lid: int) -> None:
 # --- Lecture, décisions, injection --------------------------------------------------------------
 
 def _dico(l: Lecon) -> dict:
-    return {"id": l.id, "service": l.service, "projet": l.projet, "texte": l.texte, "texte_llm": l.texte_llm,
+    fantome = json.loads(sentinel.lire(f"fantome:lecon:{l.id}") or "null")
+    return {"fantome": fantome,"id": l.id, "service": l.service, "projet": l.projet, "texte": l.texte, "texte_llm": l.texte_llm,
             "type": l.type, "origine": l.origine, "statut": l.statut, "occurrences": l.occurrences,
             "sources": json.loads(l.sources_json or "[]"), "premiere": l.premiere.isoformat(),
             "derniere": l.derniere.isoformat(), "note_activation": l.note_activation,
@@ -212,6 +224,7 @@ def actives(service: str | None, projet: str | None) -> str:
         req = select(Lecon).where(Lecon.statut == "acceptee").order_by(Lecon.occurrences.desc(), Lecon.id)
         lecons = [l for l in s.execute(req).scalars()
                   if (l.service in (None, service)) and (l.projet in (None, projet))]
+        lecons = [l for l in lecons if not _suspect(l.texte_llm or l.texte)]  # défense en profondeur
         lignes = [f"- [{l.type}] {l.texte_llm or l.texte}" for l in lecons[:INJECTION_N]]
     texte, res = 0, []
     for ligne in lignes:
@@ -263,7 +276,11 @@ def accepter(lid: int, utilisateur: str, texte: str | None = None, terme_charte:
             propre = _nettoyer(texte)
             if cyber.detecter_secrets(texte):
                 raise ValueError("Texte refusé : il contient un secret.")
+            if _suspect(texte):
+                raise ValueError("Texte refusé par le bouclier : il contient des consignes adressées à l'IA.")
             l.texte, l.texte_llm = propre, None
+        elif _suspect(l.texte_llm or l.texte):
+            raise ValueError("Leçon refusée par le bouclier (texte suspect d'injection) : reformulez-la.")
         mesures = _mesures(l.service)
         l.statut, l.decidee_le, l.motif = "acceptee", maintenant(), None
         l.note_activation = mesures[-1][1] if mesures else None

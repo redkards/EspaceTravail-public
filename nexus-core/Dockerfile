@@ -24,6 +24,7 @@ RUN groupadd --system --gid 10001 nexus \
 COPY --chown=nexus:nexus app ./app
 COPY --chown=nexus:nexus agents ./agents
 COPY --chown=nexus:nexus projets.yaml fonctionnement.yaml ./
+COPY --chown=nexus:nexus chartes ./chartes
 
 USER nexus
 EXPOSE 8000

@@ -1,0 +1,631 @@
+# Campagne « SYFER à 200 % » — 25 scénarios de charge, d'endurance et de fautes pour nexus-core.
+#
+# CHARGE NOMINALE (définie ici : le jumeau numérique n'avait pas publié d'hypothèses au moment de la campagne)
+#   40 missions/jour ; pic du lundi 15 missions/h ; 2 sessions de décision N3/jour ; plafond 15 N3/jour ;
+#   veille 4 collectes/jour ; 3 IA sur la passerelle MCP (limite 60 appels/min/IA) ; cockpit ≈ 20 requêtes/min.
+#   « charge_cible_pct » est exprimé par rapport au PIC (15 missions/h) sauf mention « base: jour ».
+#
+# TEMPS COMPRESSÉ (facteur C = « compression ») : 1 s réelle = C s simulées. Arrivées ×C, latence LLM ÷C
+#   (latence_reelle_s = durée d'un appel LLM réel, hypothèse 15 s), tâches de fond ×C, délai N3 ÷C.
+#   Le surcoût propre de nexus-core (SQLite, LEDGER, archive) n'est PAS compressé → hypothèse prudente.
+#
+# Champs : id, nom, famille, objectif, charge_cible_pct, duree_simulee, compression, paliers|rafale|profil_jour,
+#   mix (fonctionnement F1..F4, part_n3, part_piege, part_refus, part_service_explicite, projets, services),
+#   env (variables de nexus-core), llm (latence_reelle_s | latence_fixe_s, gigue, taux_echec, multiplicateur,
+#   tokens), activites (sondes, cockpit_lecteurs, api_lecteurs, connaissances, recherches, notes,
+#   effacements, decisions, double_clic_mission, mcp, sauvegarde, veille), fautes (kill9, llm,
+#   remplir_disque, liberer_disque), drain_max_s, criteres (seuils chiffrés de réussite).
+
+nominal:
+  missions_jour: 40
+  pic_heure: 15
+  sessions_n3_jour: 2
+  plafond_n3_jour: 15
+  veille_collectes_jour: 4
+  mcp_ias: 3
+  mcp_appels_min_par_ia: 30
+  cockpit_requetes_min: 20
+  llm_s_par_appel: 15          # hypothèse (cloud gratuit F2/F3) ; à remplacer par le jumeau numérique
+  appels_llm_par_mission: 4.5
+  mix_reference:
+    fonctionnement: {F1: 0.2, F2: 0.6, F3: 0.15, F4: 0.05}
+    part_n3: 0.15
+    part_piege: 0.0
+    part_refus: 0.1
+
+mix_standard: &mix_standard
+  fonctionnement: {F1: 0.2, F2: 0.6, F3: 0.15, F4: 0.05}
+  part_n3: 0.15
+  part_piege: 0.0
+  part_refus: 0.1
+  part_service_explicite: 0.5
+
+criteres_base: &criteres_base
+  erreurs_5xx_max: 0
+  missions_perdues_max: 0
+  doublons_max: 0
+  bloquees_max: 0
+  ledger_valide: true
+  archive_valide: true
+  compteurs_exacts: true
+  integrite_sqlite: true
+  secrets_stockes_max: 0
+
+scenarios:
+
+  # ------------------------------------------------------------------ montée en charge
+  - id: S01
+    nom: Référence nominale (100 % du pic)
+    famille: montee
+    objectif: Mesurer la référence (débit, latences, stockage par mission) au pic nominal de 15 missions/h.
+    charge_cible_pct: 100
+    duree_simulee: 1 h 20 min au pic
+    compression: 120
+    paliers: [{pct: 100, duree_s: 40}]
+    mix: *mix_standard
+    activites:
+      - {type: sondes, periode_s: 0.5}
+      - {type: cockpit_lecteurs, fils: 1, par_min: 60}
+    drain_max_s: 40
+    criteres:
+      <<: *criteres_base
+      p95_creation_ms_max: 300
+      p95_e2e_s_max: 5
+      disponibilite_min: 0.99
+      debit_min_pct: 95
+
+  - id: S02
+    nom: Montée progressive 50→600 % jusqu'à rupture (réglage par défaut, 1 mission à la fois)
+    famille: montee
+    objectif: >
+      Trouver le point de rupture avec NEXUS_MAX_MISSIONS par défaut (1 avec un modèle local) :
+      paliers 50, 100, 150, 200, 300, 400, 600 % ; rupture = débit < 90 % de l'offert, erreurs, ou p95 création > 1 s.
+    charge_cible_pct: 600
+    duree_simulee: 7 paliers de 36 min simulées
+    compression: 120
+    paliers: [{pct: 50, duree_s: 18}, {pct: 100, duree_s: 18}, {pct: 150, duree_s: 18}, {pct: 200, duree_s: 18},
+              {pct: 300, duree_s: 18}, {pct: 400, duree_s: 18}, {pct: 600, duree_s: 18}]
+    arret_rupture: true
+    file_rupture: 150
+    mix: *mix_standard
+    activites:
+      - {type: sondes, periode_s: 0.5}
+    drain_max_s: 90
+    criteres:
+      <<: *criteres_base
+      p95_creation_ms_max: 1000
+
+  - id: S03
+    nom: Montée 200→2400 % avec 4 missions simultanées (fournisseur cloud)
+    famille: montee
+    objectif: >
+      Même montée avec NEXUS_MAX_MISSIONS=4 (F2/F3 cloud) pour trouver la limite PROPRE à la plateforme
+      (SQLite, verrou du LEDGER, pool de fils) au-delà de la limite LLM.
+    charge_cible_pct: 2400
+    duree_simulee: 6 paliers de 36 min simulées
+    compression: 120
+    env: {NEXUS_MAX_MISSIONS: 4}
+    paliers: [{pct: 200, duree_s: 18}, {pct: 400, duree_s: 18}, {pct: 800, duree_s: 18}, {pct: 1200, duree_s: 18},
+              {pct: 1600, duree_s: 18}, {pct: 2400, duree_s: 18}]
+    arret_rupture: true
+    file_rupture: 250
+    mix: *mix_standard
+    activites:
+      - {type: sondes, periode_s: 0.5}
+    drain_max_s: 90
+    criteres:
+      <<: *criteres_base
+      p95_creation_ms_max: 1000
+
+  - id: S04
+    nom: Plateau 200 % — mix complet et activité humaine/IA doublée
+    famille: montee
+    objectif: >
+      Tenir 2 h simulées à 200 % du pic avec tout le reste doublé : cockpit, lectures API, mémoire,
+      notes, recherches. Critère principal de la campagne.
+    charge_cible_pct: 200
+    duree_simulee: 2 h au double du pic
+    compression: 120
+    paliers: [{pct: 200, duree_s: 60}]
+    mix: *mix_standard
+    activites:
+      - {type: sondes, periode_s: 0.5}
+      - {type: cockpit_lecteurs, fils: 2, par_min: 40}
+      - {type: api_lecteurs, fils: 2, par_min: 30}
+      - {type: connaissances, fils: 1, par_min: 20, part_piege: 0.1}
+      - {type: recherches, fils: 1, par_min: 30}
+      - {type: notes, fils: 1, par_min: 20}
+    drain_max_s: 60
+    criteres:
+      <<: *criteres_base
+      p95_creation_ms_max: 500
+      p95_e2e_s_max: 10
+      disponibilite_min: 0.99
+      debit_min_pct: 90
+
+  # ------------------------------------------------------------------ rafales
+  - id: S05
+    nom: Rafale — 200 missions en 2 minutes
+    famille: rafale
+    objectif: >
+      200 missions en 2 min (≈ 13 jours de pic en une fois) ; LLM 0,25 s/appel → la file dépasse
+      40 missions. Vérifier qu'aucune n'est perdue et que l'API reste disponible ; vidange accélérée ensuite.
+    charge_cible_pct: 40000
+    duree_simulee: temps réel (2 min)
+    compression: 1
+    rafale: {missions: 200, duree_s: 120}
+    llm: {latence_fixe_s: 0.25, gigue: 0.2}
+    mix: *mix_standard
+    activites:
+      - {type: sondes, periode_s: 0.5}
+      - {type: cockpit_lecteurs, fils: 1, par_min: 30}
+    fautes:
+      - {type: llm, a_s: 120, regler: {latence_fixe_s: 0.005}}   # vidange accélérée
+    timeout_client_s: 10
+    drain_max_s: 90
+    criteres:
+      <<: *criteres_base
+      timeouts_max: 0
+      p95_creation_ms_max: 1000
+      disponibilite_min: 0.99
+
+  - id: S06
+    nom: Rafale éclair — 200 missions en 10 s (saturation du pool de fils)
+    famille: rafale
+    objectif: >
+      Vérifier la tenue quand la file dépasse le pool de fils de Starlette (40) : chaque mission en
+      attente occupe un fil (BackgroundTasks + FILE.executer) ; les routes synchrones peuvent se figer.
+    charge_cible_pct: 480000
+    duree_simulee: temps réel (10 s)
+    compression: 1
+    rafale: {missions: 200, duree_s: 10}
+    llm: {latence_fixe_s: 0.1, gigue: 0.2}
+    mix: *mix_standard
+    activites:
+      - {type: sondes, periode_s: 0.5}
+      - {type: api_lecteurs, fils: 2, par_min: 120}
+    fautes:
+      - {type: llm, a_s: 25, regler: {latence_fixe_s: 0.005}}
+    timeout_client_s: 10
+    drain_max_s: 90
+    criteres:
+      <<: *criteres_base
+      timeouts_max: 0
+      p95_creation_ms_max: 1000
+      disponibilite_min: 0.95
+
+  # ------------------------------------------------------------------ endurance
+  - id: S07
+    nom: Endurance — 24 h simulées accélérées à 200 % (base « vieille d'un an »)
+    famille: endurance
+    objectif: >
+      Journée complète accélérée (×864) à 200 % du volume quotidien (80 missions, pic 30/h) avec un LEDGER
+      déjà chargé d'un an d'historique (300 000 entrées) et une archive de 3 000 enregistrements :
+      dérive mémoire, croissance du stockage par mission, coût des vérifications d'intégrité.
+    charge_cible_pct: 200
+    duree_simulee: 24 h
+    compression: 864
+    profil_jour: {pct: 200, heures: 24}
+    historique_ledger: 300000
+    historique_archive: 3000
+    mix: *mix_standard
+    activites:
+      - {type: sondes, periode_s: 1}
+      - {type: cockpit_lecteurs, fils: 1, par_min: 40}
+      - {type: connaissances, fils: 1, par_min: 10, part_piege: 0.1}
+      - {type: notes, fils: 1, par_min: 10}
+    drain_max_s: 60
+    criteres:
+      <<: *criteres_base
+      p95_creation_ms_max: 500
+      disponibilite_min: 0.99
+      rss_max_mo: 400
+
+  # ------------------------------------------------------------------ décisions N3
+  - id: S08
+    nom: Décisions N3 en masse — 60 N3 en 30 s, plafond 15/jour, 4 missions simultanées
+    famille: n3
+    objectif: >
+      60 missions « publier » (N3) traitées 4 par 4 : le plafond de 15 fiches/jour doit tenir même en
+      concurrence ; les 45 autres restent en file (en_attente_n3 sans fiche), aucune perdue.
+    charge_cible_pct: 4000
+    duree_simulee: 30 s réelles
+    compression: 1
+    env: {NEXUS_MAX_MISSIONS: 4, N3_DAILY_CAP: 15}
+    rafale: {missions: 60, duree_s: 30}
+    llm: {latence_fixe_s: 0.02}
+    mix: {fonctionnement: {F2: 1.0}, part_n3: 1.0, part_service_explicite: 0.5}
+    activites:
+      - {type: cockpit_lecteurs, fils: 1, par_min: 60}
+    drain_max_s: 60
+    criteres:
+      <<: *criteres_base
+      plafond_n3_respecte: true
+
+  - id: S09
+    nom: Décisions N3 — expirations accélérées et Décideur en double clic
+    famille: n3
+    objectif: >
+      Délai N3 de 24 h compressé (×1440 → 60 s) et tâches de fond accélérées : expirations en série
+      pendant que le Décideur valide/refuse en double clic (2 requêtes simultanées) ; une seule doit passer.
+    charge_cible_pct: 200
+    duree_simulee: 36 h
+    compression: 1440
+    n3_timeout_h_simule: 24
+    paliers: [{pct: 200, duree_s: 90}]
+    base: jour
+    llm: {latence_reelle_s: 15}
+    mix: {fonctionnement: {F1: 0.3, F2: 0.7}, part_n3: 0.6, part_service_explicite: 0.5}
+    activites:
+      - {type: decisions, fils: 1, par_min: 20, choix: [refuser, valider]}
+    drain_max_s: 30
+    codes_attendus: ["409", "422", "429", "404"]
+    criteres:
+      <<: *criteres_base
+      plafond_n3_respecte: true
+      double_clic_ok: true
+
+  # ------------------------------------------------------------------ mémoire collective
+  - id: S10
+    nom: Mémoire collective sous charge — leçons, exemples, connaissances, recherches
+    famille: memoire
+    objectif: >
+      200 % de missions (10 % refusées par le CHECKER → signaux de leçons) avec écritures de connaissances
+      (10 % piégées → 422 attendus), recherches mémoire et notes (→ exemples) en parallèle.
+    charge_cible_pct: 200
+    duree_simulee: 1 h 30
+    compression: 120
+    paliers: [{pct: 200, duree_s: 45}]
+    mix: {fonctionnement: {F1: 0.2, F2: 0.6, F3: 0.2}, part_n3: 0.1, part_refus: 0.2, part_service_explicite: 0.6}
+    activites:
+      - {type: sondes, periode_s: 0.5}
+      - {type: connaissances, fils: 2, par_min: 60, part_piege: 0.1}
+      - {type: recherches, fils: 2, par_min: 60}
+      - {type: notes, fils: 1, par_min: 60}
+    drain_max_s: 60
+    criteres:
+      <<: *criteres_base
+      p95_creation_ms_max: 500
+      disponibilite_min: 0.99
+
+  - id: S11
+    nom: Effacements RGPD concurrents pendant l'archivage (archive d'un mois déjà remplie)
+    famille: memoire
+    objectif: >
+      Droit à l'effacement exercé 30 fois/min pendant que 200 % de missions s'archivent, archive du mois
+      pré-remplie de 3 000 enregistrements : chaîne intacte, plus aucun contenu effacé, coût d'un effacement.
+    charge_cible_pct: 200
+    duree_simulee: 1 h 30
+    compression: 120
+    paliers: [{pct: 200, duree_s: 45}]
+    historique_archive: 3000
+    mix: *mix_standard
+    activites:
+      - {type: sondes, periode_s: 0.5}
+      - {type: effacements, fils: 1, par_min: 30}
+    timeout_client_s: 30
+    drain_max_s: 60
+    criteres:
+      <<: *criteres_base
+      effacements_ok: true
+      disponibilite_min: 0.99
+
+  # ------------------------------------------------------------------ bouclier
+  - id: S12
+    nom: Bouclier sous charge — 10 % de contenus piégés
+    famille: securite
+    objectif: >
+      10 % des missions contiennent une injection ; l'ANALYST factice « obéit » (canari, faux secret,
+      URL d'exfiltration). Aucun canari ni secret ne doit être stocké ; 100 % des pièges signalés.
+    charge_cible_pct: 200
+    duree_simulee: 1 h 30
+    compression: 120
+    paliers: [{pct: 200, duree_s: 45}]
+    mix: {fonctionnement: {F1: 0.2, F2: 0.6, F3: 0.2}, part_n3: 0.1, part_piege: 0.1, part_service_explicite: 0.5}
+    activites:
+      - {type: sondes, periode_s: 0.5}
+      - {type: connaissances, fils: 1, par_min: 30, part_piege: 0.1}
+    drain_max_s: 60
+    criteres:
+      <<: *criteres_base
+      pieges_signales_min: 1.0
+
+  # ------------------------------------------------------------------ passerelle MCP
+  - id: S13
+    nom: Passerelle MCP — 3 IA à 60 appels/min (limite exacte)
+    famille: mcp
+    objectif: >
+      Claude, ChatGPT et Gemini à 60 appels/min chacun (2× le nominal de 30) via nexus-bridge, mélange
+      mémoire, tâches, recherche collective et missions ; core à 100 %. Peu ou pas de 429, aucune 5xx.
+    charge_cible_pct: 200
+    duree_simulee: 45 s réelles
+    compression: 120
+    bridge: true
+    paliers: [{pct: 100, duree_s: 45}]
+    mix: *mix_standard
+    activites:
+      - {type: mcp, fils: 3, par_min: 55, part_lots: 0.0}
+    drain_max_s: 40
+    criteres:
+      <<: *criteres_base
+      p95_creation_ms_max: 500
+
+  - id: S14
+    nom: Passerelle MCP à 200 % — 3 IA à 120 appels/min, 20 % en lots de 10
+    famille: mcp
+    objectif: >
+      Dépassement volontaire de la limite (60/min/IA) avec des lots JSON-RPC : la limite doit tenir
+      (429 « tout ou rien » par lot), sans 5xx ni latence dégradée pour les appels acceptés.
+    charge_cible_pct: 400
+    duree_simulee: 45 s réelles
+    compression: 120
+    bridge: true
+    paliers: [{pct: 200, duree_s: 45}]
+    mix: *mix_standard
+    activites:
+      - {type: mcp, fils: 3, par_min: 120, part_lots: 0.2, taille_lot: 10}
+    drain_max_s: 40
+    criteres:
+      <<: *criteres_base
+      limite_debit_active: true
+
+  - id: S15
+    nom: Passerelle MCP pendant une saturation de nexus-core (effet cascade)
+    famille: mcp
+    objectif: >
+      150 missions en 10 s sur le core (file > pool de fils) pendant que les 3 IA appellent la passerelle :
+      la passerelle doit répondre (erreur propre) et ne pas se figer elle aussi.
+    charge_cible_pct: 360000
+    duree_simulee: temps réel
+    compression: 1
+    bridge: true
+    rafale: {missions: 150, duree_s: 10}
+    llm: {latence_fixe_s: 0.15, gigue: 0.2}
+    mix: *mix_standard
+    activites:
+      - {type: mcp, fils: 3, par_min: 50, part_lots: 0.0, timeout_s: 25}
+      - {type: sondes, periode_s: 0.5}
+    fautes:
+      - {type: llm, a_s: 30, regler: {latence_fixe_s: 0.005}}
+    timeout_client_s: 10
+    drain_max_s: 90
+    criteres:
+      <<: *criteres_base
+      timeouts_max: 0
+
+  # ------------------------------------------------------------------ cockpit
+  - id: S16
+    nom: Cockpit — 30 lecteurs concurrents pendant 200 %
+    famille: cockpit
+    objectif: >
+      30 onglets/appareils rafraîchissent le cockpit (missions, décisions, LEDGER, budget, Décideur…)
+      pendant 200 % de missions : latence des lectures et effet sur les missions.
+    charge_cible_pct: 200
+    duree_simulee: 1 h 30
+    compression: 120
+    paliers: [{pct: 200, duree_s: 45}]
+    mix: *mix_standard
+    activites:
+      - {type: cockpit_lecteurs, fils: 30, par_min: 60}
+      - {type: sondes, periode_s: 0.5}
+    drain_max_s: 60
+    criteres:
+      <<: *criteres_base
+      p95_creation_ms_max: 500
+      disponibilite_min: 0.99
+
+  - id: S17
+    nom: Cockpit — double clic (décisions et création de mission)
+    famille: cockpit
+    objectif: >
+      Double clic sur Valider/Refuser (une seule action doit passer, l'autre 409) et sur « Créer la
+      mission » (combien de missions créées ?) pendant 200 %.
+    charge_cible_pct: 200
+    duree_simulee: 1 h 30
+    compression: 120
+    paliers: [{pct: 200, duree_s: 45}]
+    mix: {fonctionnement: {F1: 0.3, F2: 0.7}, part_n3: 0.5, part_service_explicite: 0.5}
+    activites:
+      - {type: decisions, fils: 1, par_min: 30, choix: [refuser, valider]}
+      - {type: double_clic_mission, fils: 1, par_min: 12}
+    drain_max_s: 60
+    criteres:
+      <<: *criteres_base
+      double_clic_ok: true
+
+  # ------------------------------------------------------------------ fautes d'infrastructure
+  - id: S18
+    nom: Redémarrage à chaud (kill -9) deux fois pendant 200 %
+    famille: fautes
+    objectif: >
+      Arrêt brutal du processus à 20 s et 40 s puis redémarrage : missions en cours → échouées avec
+      proposition de relance, missions en file → relancées, aucune perdue, LEDGER et archive intacts.
+    charge_cible_pct: 200
+    duree_simulee: 2 h
+    compression: 120
+    paliers: [{pct: 200, duree_s: 60}]
+    mix: *mix_standard
+    activites:
+      - {type: sondes, periode_s: 0.5}
+    fautes:
+      - {type: kill9, a_s: 20, pause_s: 2}
+      - {type: kill9, a_s: 40, pause_s: 2}
+    codes_attendus: ["409", "422", "429", "404", "connexion", "timeout"]
+    drain_max_s: 60
+    criteres:
+      <<: *criteres_base
+      reprise_ok: true
+
+  - id: S19
+    nom: Disque presque plein (tmpfs 24 Mo, 256 Ko libres) puis libéré
+    famille: fautes
+    objectif: >
+      Le disque des données se remplit pendant 200 % : erreurs propres (pas de corruption), aucune
+      mission bloquée « en_cours », reprise normale après libération.
+    charge_cible_pct: 200
+    duree_simulee: 1 h 40
+    compression: 120
+    disque_mo: 24
+    paliers: [{pct: 200, duree_s: 50}]
+    mix: *mix_standard
+    activites:
+      - {type: sondes, periode_s: 0.5}
+    fautes:
+      - {type: remplir_disque, a_s: 10, libre_ko: 256}
+      - {type: liberer_disque, a_s: 35}
+    codes_attendus: ["409", "422", "429", "404", "5xx"]
+    drain_max_s: 60
+    criteres:
+      missions_perdues_max: 0
+      bloquees_max: 0
+      ledger_valide: true
+      archive_valide: true
+      integrite_sqlite: true
+      secrets_stockes_max: 0
+
+  - id: S20
+    nom: Verrous SQLite — 8 missions simultanées et écrivains concurrents (1200 %)
+    famille: fautes
+    objectif: >
+      NEXUS_MAX_MISSIONS=8, LLM quasi instantané, 1200 % de missions + 4 écrivains de connaissances
+      (240/min) + notes + cockpit : compter les « database is locked », les 5xx et la latence d'écriture.
+    charge_cible_pct: 1200
+    duree_simulee: 1 h 20
+    compression: 120
+    env: {NEXUS_MAX_MISSIONS: 8}
+    paliers: [{pct: 1200, duree_s: 40}]
+    llm: {latence_fixe_s: 0.005, gigue: 0.5}
+    mix: *mix_standard
+    activites:
+      - {type: connaissances, fils: 4, par_min: 60, part_piege: 0.05}
+      - {type: notes, fils: 2, par_min: 60}
+      - {type: cockpit_lecteurs, fils: 4, par_min: 60}
+      - {type: sondes, periode_s: 0.5}
+    drain_max_s: 60
+    criteres:
+      <<: *criteres_base
+      db_locked_max: 0
+      p99_creation_ms_max: 2000
+
+  # ------------------------------------------------------------------ LLM dégradé
+  - id: S21
+    nom: LLM lent (latence ×5) à 200 %
+    famille: llm
+    objectif: >
+      Le fournisseur répond 5 fois plus lentement (75 s/appel simulé) : la file s'allonge ; mesurer
+      l'attente, vérifier qu'aucune mission ne se perd ni ne reste bloquée, puis retour à la normale.
+    charge_cible_pct: 200
+    duree_simulee: 1 h 30
+    compression: 120
+    paliers: [{pct: 200, duree_s: 45}]
+    llm: {latence_reelle_s: 15, multiplicateur: 5}
+    mix: *mix_standard
+    activites:
+      - {type: sondes, periode_s: 0.5}
+    fautes:
+      - {type: llm, a_s: 45, regler: {multiplicateur: 0.2}}
+    drain_max_s: 90
+    criteres:
+      <<: *criteres_base
+      disponibilite_min: 0.95
+
+  - id: S22
+    nom: LLM en panne intermittente (20 % d'échecs + coupure totale de 8 s)
+    famille: llm
+    objectif: >
+      20 % des appels LLM échouent (503), plus une coupure totale de 8 s : missions « échouées »
+      proprement (jamais bloquées), compteurs exacts, LEDGER cohérent.
+    charge_cible_pct: 200
+    duree_simulee: 1 h 30
+    compression: 120
+    paliers: [{pct: 200, duree_s: 45}]
+    llm: {latence_reelle_s: 15, taux_echec: 0.2}
+    mix: *mix_standard
+    activites:
+      - {type: sondes, periode_s: 0.5}
+    fautes:
+      - {type: llm, a_s: 20, duree_s: 8, regler: {taux_echec: 1.0}}
+    drain_max_s: 60
+    criteres:
+      <<: *criteres_base
+      disponibilite_min: 0.99
+
+  # ------------------------------------------------------------------ sauvegarde, veille
+  - id: S23
+    nom: Sauvegarde à chaud toutes les 5 s pendant 200 % (base d'un an)
+    famille: exploitation
+    objectif: >
+      Copie SQLite en ligne (méthode de backup.sh) toutes les 5 s sur une base chargée d'un an de LEDGER :
+      durée de la copie, impact sur les latences, copie valide (intégrité + chaîne LEDGER recalculée).
+    charge_cible_pct: 200
+    duree_simulee: 1 h 30
+    compression: 120
+    historique_ledger: 300000
+    paliers: [{pct: 200, duree_s: 45}]
+    mix: *mix_standard
+    activites:
+      - {type: sondes, periode_s: 0.5}
+      - {type: sauvegarde, periode_s: 5}
+    drain_max_s: 60
+    criteres:
+      <<: *criteres_base
+      sauvegarde_valide: true
+      p95_creation_ms_max: 500
+
+  - id: S24
+    nom: Veille qui insère 5 000 fiches pendant 200 %
+    famille: exploitation
+    objectif: >
+      La veille SYFER (base séparée, schéma réel du collecteur) insère 5 000 fiches en 40 s (≈ 4 collectes
+      massives) pendant que les missions la lisent (recherche FTS5 à chaque COLLECTOR).
+    charge_cible_pct: 200
+    duree_simulee: 1 h 30
+    compression: 120
+    env: {NEXUS_VEILLE: 1, NEXUS_VEILLE_DIR: "{racine}/veille", VEILLE_DB: "{dossier}/veille.db"}
+    paliers: [{pct: 200, duree_s: 45}]
+    mix: *mix_standard
+    activites:
+      - {type: sondes, periode_s: 0.5}
+      - {type: veille, fils: 1, fiches: 5000, lot: 50, duree_s: 40}
+    drain_max_s: 60
+    criteres:
+      <<: *criteres_base
+      veille_insertions_min: 5000
+      p95_creation_ms_max: 500
+
+  # ------------------------------------------------------------------ tempête
+  - id: S25
+    nom: Tempête — 300 % + LLM ×2 et 5 % de pannes + cockpit + MCP + sauvegarde + RGPD + kill -9
+    famille: rupture
+    objectif: >
+      Toutes les agressions en même temps, au-delà du double : la structure doit se dégrader sans
+      perdre de données (aucune mission perdue, LEDGER et archive valides, aucun secret stocké).
+    charge_cible_pct: 300
+    duree_simulee: 2 h
+    compression: 120
+    bridge: true
+    paliers: [{pct: 300, duree_s: 60}]
+    llm: {latence_reelle_s: 15, multiplicateur: 2, taux_echec: 0.05}
+    mix: {fonctionnement: {F1: 0.2, F2: 0.6, F3: 0.15, F4: 0.05}, part_n3: 0.2, part_piege: 0.1, part_refus: 0.1,
+          part_service_explicite: 0.5}
+    activites:
+      - {type: sondes, periode_s: 0.5}
+      - {type: cockpit_lecteurs, fils: 5, par_min: 40}
+      - {type: decisions, fils: 1, par_min: 12, choix: [refuser]}
+      - {type: mcp, fils: 3, par_min: 60, part_lots: 0.1, taille_lot: 5}
+      - {type: sauvegarde, periode_s: 10}
+      - {type: effacements, fils: 1, par_min: 10}
+      - {type: connaissances, fils: 1, par_min: 20, part_piege: 0.1}
+    fautes:
+      - {type: kill9, a_s: 30, pause_s: 2}
+      - {type: llm, a_s: 60, regler: {multiplicateur: 0.1, taux_echec: 0.0}}
+    codes_attendus: ["409", "422", "429", "404", "connexion", "timeout"]
+    timeout_client_s: 15
+    drain_max_s: 90
+    criteres:
+      missions_perdues_max: 0
+      bloquees_max: 0
+      ledger_valide: true
+      archive_valide: true
+      integrite_sqlite: true
+      secrets_stockes_max: 0

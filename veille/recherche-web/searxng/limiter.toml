@@ -1,0 +1,7 @@
+# Limiteur SearXNG : seul le connecteur local (127.0.0.1) interroge l'instance
+[botdetection.ip_limit]
+link_token = false
+
+[botdetection.ip_lists]
+pass_ip = ["127.0.0.1"]
+block_ip = []

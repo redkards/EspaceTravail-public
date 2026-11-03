@@ -1,0 +1,35 @@
+# Configuration minimale SearXNG pour la veille SYFER (usage machine local, sans journalisation des requêtes)
+use_default_settings: true
+general:
+  instance_name: "SYFER veille"
+  enable_metrics: false
+server:
+  # secret_key fourni par la variable SEARXNG_SECRET (docker-compose) : ne jamais l'écrire ici
+  limiter: true            # protège les moteurs tiers d'un usage abusif
+  image_proxy: false
+  public_instance: false
+search:
+  safe_search: 1
+  autocomplete: ""
+  default_lang: "fr"
+  formats:
+    - html
+    - json                 # indispensable pour le connecteur (sinon HTTP 403)
+outgoing:
+  request_timeout: 4.0
+  max_request_timeout: 8.0
+  pool_connections: 20
+# Moteurs : garder une liste courte et généraliste ; les réseaux sociaux restent exclus (CGU)
+engines:
+  - name: wikipedia
+    disabled: false
+  - name: duckduckgo
+    disabled: false
+  - name: qwant
+    disabled: false
+  - name: mojeek
+    disabled: false
+  - name: reddit
+    disabled: true
+  - name: twitter
+    disabled: true

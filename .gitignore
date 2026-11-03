@@ -6,3 +6,15 @@ __pycache__/
 *.db
 *.db-wal
 *.db-shm
+# Résultats d'exécution (artefacts, conservés hors dépôt)
+simulations/resultats/
+iterations-100/defauts/
+iterations-100/resultats/
+charge-200/resultats/
+jumeau-numerique/resultats/
+securite-ia/resultats/
+syfer-test-system/resultats/
+compaction/resultats*
+banc-essai/resultats/
+.pytest_cache/
+veille/veille.db*

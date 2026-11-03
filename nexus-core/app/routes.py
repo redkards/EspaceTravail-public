@@ -1,5 +1,6 @@
 """Routes métier, montées deux fois : /api (clé X-Nexus-Key) et /cockpit/api (basic auth Caddy)."""
 import json
+import os
 from typing import Literal
 
 from fastapi import APIRouter, BackgroundTasks, HTTPException, Query
@@ -62,6 +63,7 @@ def _mission(m: Mission, etapes: list[Etape] | None = None) -> dict:
          "duree_s": m.duree_s, "revisions": m.revisions, "attente": m.attente,
          "modeles": json.loads(m.modeles_json) if m.modeles_json else {},
          "charte_avertissements": json.loads(m.charte_avertissements) if m.charte_avertissements else [],
+         "alertes_bouclier": json.loads(m.alertes_bouclier) if m.alertes_bouclier else [],
          "note": m.note}
     if etapes is not None:
         d["etapes"] = [{"id": e.id, "agent_id": e.agent_id, "role": e.role, "entree": e.entree,
@@ -224,26 +226,38 @@ def creer_routeur(cockpit: bool = False) -> APIRouter:
         except PermissionError as e:
             raise HTTPException(409, str(e))
 
+    def _api_peut_decider() -> None:
+        """Valider / refuser / réviser une N3 : réservé au Décideur via le cockpit (X-Cockpit-Auth +
+        anti-CSRF ; code pour un risque élevé). La clé API (passerelle IA, n8n) ne décide jamais.
+        NEXUS_API_PEUT_DECIDER=1 : option réservée aux tests (défaut 0)."""
+        if not cockpit and os.environ.get("NEXUS_API_PEUT_DECIDER", "0").strip() != "1":
+            ledger.journaliser("NEXUS-GATE", "decision_api_refusee", None)
+            raise HTTPException(403, "Validation réservée au Décideur via le cockpit "
+                                     "(la clé API ne peut ni valider, ni refuser, ni réviser une décision).")
+
     @r.post("/decisions/{did}/valider")
     def valider(did: int, taches: BackgroundTasks, corps: Commentaire | None = None):
-        if cockpit:
+        _api_peut_decider()
+        if True:  # risque élevé : code Décideur exigé (cockpit, et API en mode test)
             from . import decideur
             with session_scope() as s:
                 d = s.get(Decision, did)
                 risque = d.risque if d else None
             if risque == "eleve":
                 try:
-                    decideur.verifier_code(corps.code if corps else None, "cockpit")
+                    decideur.verifier_code(corps.code if corps else None, "cockpit" if cockpit else "api")
                 except decideur.CodeRefuse as e:
                     raise HTTPException(e.statut, str(e))
         return _decider(did, "valider", corps, taches)
 
     @r.post("/decisions/{did}/refuser")
     def refuser(did: int, corps: Commentaire | None = None):
+        _api_peut_decider()
         return _decider(did, "refuser", corps)
 
     @r.post("/decisions/{did}/reviser")
     def reviser(did: int, taches: BackgroundTasks, corps: Commentaire | None = None):
+        _api_peut_decider()
         return _decider(did, "reviser", corps, taches)
 
     @r.post("/killswitch")
@@ -298,7 +312,7 @@ def creer_routeur(cockpit: bool = False) -> APIRouter:
             return memoire.ajouter(code, corps.titre, corps.contenu,
                                    corps.source or f"{auteur} {maintenant().strftime('%Y-%m-%d %H:%M:%S.%f')}",
                                    auteur, origine="manuel")
-        except memoire.SecretRefuse as e:
+        except (memoire.SecretRefuse, memoire.InjectionRefusee) as e:
             raise HTTPException(422, str(e))
 
     @r.post("/missions/{mid}/note")

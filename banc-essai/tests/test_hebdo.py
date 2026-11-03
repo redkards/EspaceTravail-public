@@ -47,6 +47,14 @@ def test_local_f1_puis_cumul(banc, serveur, env_propre, tmp_path):
         assert cle in s, cle
     assert s["note_livrable"] == 100 and s["fonctionnement"] == "F1" and s["modele"].startswith("faux / faux-3b")
     assert s["taux_n3"] > 0 and s["tokens_moyens"] == 1000 and s["duree_mediane_s"] == 12.5
+    # Notes par service attendu (garde-fou de régression des leçons).
+    ps = s["par_service"]
+    defs = {m["id"]: m for m in json.loads((banc / "missions.json").read_text())["missions"]}
+    rapides = json.loads((banc / "missions.json").read_text())["selection_rapide"]
+    assert sum(v["missions"] for v in ps.values()) == 8
+    assert set(ps) == {defs[i]["service_attendu"] for i in rapides}
+    assert all(set(v) == {"missions", "note_livrable", "note_systeme"} for v in ps.values())
+    assert all(v["note_livrable"] in (100, None) for v in ps.values())  # None : service à pièges seulement
     # Semaine suivante, cloud détecté → F2 ; le tableau cumule.
     serveur.fournisseur = "ollama_cloud"
     p = hebdo(banc, env_propre, tmp_path, SEMAINE="2026-W45", **v)
@@ -100,6 +108,7 @@ def test_tableau_html_autonome(banc):
     assert "prefers-color-scheme: dark" in h and 'data-theme="dark"' in h
     assert 'role: "img"' in h and "aria-label" in h and "<table" in h
     assert "innerHTML" not in h  # données insérées par textContent uniquement
+    assert 'id="service"' in h and "par_service" in h  # filtre par service
     js = h.split("<script>")[1].split("</script>")[0]
     if shutil.which("node"):
         f = banc / "resultats" / ".tableau-syntaxe.js"
@@ -108,3 +117,29 @@ def test_tableau_html_autonome(banc):
             assert subprocess.run(["node", "--check", str(f)], capture_output=True).returncode == 0
         finally:
             f.unlink(missing_ok=True)
+
+
+def test_par_service_compatible_avec_l_existant(banc, tmp_path):
+    """Une semaine enregistrée avant l'ajout de « par_service » est conservée telle quelle."""
+    import tableau
+    from faux_serveur import livrable_ideal
+    defs = {m["id"]: m for m in json.loads((banc / "missions.json").read_text())["missions"]}
+    ids = ["BE-01", "BE-02", "BE-03"]
+    res = tmp_path / "r.json"
+    res.write_text(json.dumps({"fonctionnement": "F2", "debut": "2026-11-08T04:17:00Z",
+                               "sante": {"llm": {"fournisseur": "x", "modele": "m"}},
+                               "resultats": [{"id": i, "mission_id": n + 1, "statut": "terminee",
+                                              "service": defs[i]["service_attendu"],
+                                              "niveau": defs[i].get("niveau_decision_attendu", "N1"),
+                                              "livrable_texte": livrable_ideal(defs[i])}
+                                             for n, i in enumerate(ids)]}))
+    t = tmp_path / "tableau.json"
+    t.write_text(json.dumps({"version": 1, "semaines": [{"semaine": "2026-W44", "note_livrable": 50}]}))
+    assert tableau.main(["--resultats", str(res), "--semaine", "2026-W45", "--tableau", str(t)]) == 0
+    d = json.loads(t.read_text())
+    assert d["semaines"][0] == {"semaine": "2026-W44", "note_livrable": 50}  # ancienne ligne intacte
+    ps = d["semaines"][1]["par_service"]
+    attendus = {}
+    for i in ids:
+        attendus[defs[i]["service_attendu"]] = attendus.get(defs[i]["service_attendu"], 0) + 1
+    assert {k: v["missions"] for k, v in ps.items()} == attendus

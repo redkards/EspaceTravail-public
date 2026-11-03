@@ -1,0 +1,70 @@
+# Jeu d'évaluation : 60 requêtes réalistes des services SYFER (dont 10 « tendances / médias »).
+# attendus : id de fiche du corpus d'évaluation → note (2 = réponse attendue, 1 = utile).
+# Sur une base réelle, `calibrer.py --db` traduit chaque id en (source, ref) grâce au corpus.
+version: 1
+requetes:
+  # ---------------------------------------------------------------- CYBER-FORTRESS / CODE-CORE (normes, guides)
+  - {id: q01, service: CYBER-FORTRESS/audit, requete: "exigences mots de passe", attendus: {nist-1: 2, nist-2: 2, anssi-1: 2, owasp-2: 2, cnil-1: 2, anssi-2: 1}}
+  - {id: q02, service: CYBER-FORTRESS/audit, requete: "stockage sécurisé des mots de passe hachage", attendus: {owasp-1: 2, nist-3: 2, anssi-2: 2, so-2: 1, web-2: 1}}
+  - {id: q03, service: CYBER-FORTRESS/conformite, requete: "authentification multifacteur recommandations", attendus: {anssi-3: 2, nist-5: 2, owasp-4: 2, cert-5: 1}}
+  - {id: q04, service: CODE-CORE/conception, requete: "gestion des sessions cookies sécurisés", attendus: {owasp-3: 2, nist-4: 2}}
+  - {id: q05, service: CYBER-FORTRESS/veille, requete: "faille Caddy correctif", attendus: {cert-1: 2, gh-1: 2, cert-4: 1}}
+  - {id: q06, service: CYBER-FORTRESS/incident, requete: "vulnérabilité n8n exploitée", attendus: {cert-2: 2, bleep-2: 1, gh-2: 2}}
+  - {id: q07, service: CYBER-FORTRESS/veille, requete: "vulnérabilité Ollama", attendus: {cisa-1: 2, gh-3: 1, sans-1: 2}}
+  - {id: q08, service: CYBER-FORTRESS/incident, requete: "violation de données notification 72 heures", attendus: {rgpd-33: 2, cnil-4: 2, leurre-7: 1}}
+  - {id: q09, service: CYBER-FORTRESS/audit, requete: "sauvegardes et restauration bonnes pratiques", attendus: {anssi-4: 2}}
+  - {id: q10, service: CYBER-FORTRESS/audit, requete: "journalisation des événements de sécurité", attendus: {anssi-5: 2}}
+  - {id: q11, service: CODE-CORE/revue, requete: "injection SQL requêtes paramétrées", attendus: {owasp-5: 2}}
+  - {id: q12, service: CODE-CORE/conception, requete: "en-tête ETag requête conditionnelle 304", attendus: {rfc9110-2: 2, rfc9110-3: 2}}
+  - {id: q13, service: CODE-CORE/conception, requete: "OAuth2 jeton d'accès FastAPI", attendus: {fastapi-1: 2, rfc6749-1: 2}}
+  - {id: q14, service: CODE-CORE/conception, requete: "classement bm25 recherche plein texte SQLite", attendus: {sqlite-1: 2, hn-2: 1, so-1: 1}}
+  - {id: q15, service: CODE-CORE/revue, requete: "ignorer les accents index plein texte", attendus: {sqlite-2: 2, so-1: 2}}
+  - {id: q16, service: OPS-CORE/projets, requete: "base SQLite en lecture seule immutable", attendus: {sqlite-3: 2, docker-2: 1}}
+  - {id: q17, service: OPS-CORE/projets, requete: "limiter mémoire et CPU d'un conteneur", attendus: {docker-1: 2}}
+  - {id: q18, service: OPS-CORE/projets, requete: "proxy inverse en-têtes Caddy", attendus: {caddy-1: 2, lobsters-1: 1}}
+  - {id: q19, service: CYBER-FORTRESS/audit, requete: "certificat HTTPS automatique", attendus: {caddy-2: 2}}
+  - {id: q20, service: CYBER-FORTRESS/conformite, requete: "fichier security.txt signalement de vulnérabilités", attendus: {rfc9116-1: 2}}
+  - {id: q21, service: AGENT-FACTORY/evaluation, requete: "garder un modèle chargé en mémoire Ollama", attendus: {ollama-2: 2, ollama-1: 1}}
+  - {id: q22, service: AGENT-FACTORY/evaluation, requete: "évaluation des agents LLM", attendus: {arxiv-ai-1: 2, arxiv-ai-2: 1}}
+  # ---------------------------------------------------------------- LEX-GUARD (droit)
+  - {id: q23, service: LEX-GUARD/droit-europe, requete: "RGPD sous-traitant clauses du contrat", attendus: {rgpd-28: 2, cnil-2: 2, edpb-1: 2, ce-1: 1}}
+  - {id: q24, service: LEX-GUARD/droit-europe, requete: "obligations de transparence chatbot IA", attendus: {aiact-50: 2, gdelt-2: 1}}
+  - {id: q25, service: LEX-GUARD/droit-europe, requete: "pratiques interdites intelligence artificielle", attendus: {aiact-5: 2}}
+  - {id: q26, service: LEX-GUARD/conformite, requete: "formation du personnel à l'IA maîtrise", attendus: {aiact-4: 2}}
+  - {id: q27, service: LEX-GUARD/droit-france, requete: "obligations publicité poker", attendus: {csi-1: 2, anj-1: 2, anj-2: 2, dgccrf-1: 1, igb-1: 1}}
+  - {id: q28, service: LEX-GUARD/droit-france, requete: "mentions légales site internet", attendus: {lcen-1: 2}}
+  - {id: q29, service: LEX-GUARD/conformite, requete: "base légale intérêt légitime traitement", attendus: {rgpd-6: 2, cnil-n3: 1}}
+  - {id: q30, service: LEX-GUARD/conformite, requete: "information des personnes lors de la collecte", attendus: {rgpd-13: 2}}
+  - {id: q31, service: LEX-GUARD/droit-france, requete: "cookies consentement traceurs", attendus: {cnil-n1: 2}}
+  - {id: q32, service: LEX-GUARD/droit-france, requete: "contrat d'édition clauses droits d'auteur", attendus: {sne-1: 2}}
+  - {id: q33, service: LEX-GUARD/droit-international, requete: "influenceurs placement de produit jeux d'argent", attendus: {dgccrf-1: 2, arpp-1: 2, anj-1: 1}}
+  # ---------------------------------------------------------------- DESIGN-SYSTEM / GREEN-CORE
+  - {id: q34, service: DESIGN-SYSTEM/ui, requete: "accessibilité formulaire étiquettes", attendus: {rgaa-1: 2, wcag-2: 2, nng-1: 1, so-3: 1, smash-1: 1, dsfr-1: 1}}
+  - {id: q35, service: DESIGN-SYSTEM/ui, requete: "contraste des couleurs accessibilité", attendus: {rgaa-3: 2, wcag-1: 2, webaim-1: 1}}
+  - {id: q36, service: DESIGN-SYSTEM/ui, requete: "focus visible navigation clavier", attendus: {rgaa-4: 2, wcag-3: 2}}
+  - {id: q37, service: DESIGN-SYSTEM/ui, requete: "alternative textuelle des images", attendus: {rgaa-5: 2}}
+  - {id: q38, service: DESIGN-SYSTEM/ui, requete: "formulaire de connexion accessible", attendus: {wcag-4: 2, smash-1: 1, rgaa-2: 1}}
+  - {id: q39, service: GREEN-CORE/environnement, requete: "écoconception poids des pages", attendus: {rgesn-1: 2, greenit-1: 1, rgesn-4: 1}}
+  - {id: q40, service: GREEN-CORE/environnement, requete: "hébergement sobre écoconception serveur", attendus: {rgesn-2: 2, dae-2: 1}}
+  - {id: q41, service: GREEN-CORE/rse, requete: "empreinte environnementale du numérique", attendus: {arcep-1: 2, eea-1: 2, shift-1: 1, rf-2: 1}}
+  # ---------------------------------------------------------------- REVENUE / PILOT (cahiers des charges, entreprise)
+  - {id: q42, service: REVENUE-CORE/propositions, requete: "cahier des charges site vitrine", attendus: {dae-4: 2, dae-1: 2, boamp-1: 1, ted-1: 1}}
+  - {id: q43, service: REVENUE-CORE/propositions, requete: "appel d'offres site internet", attendus: {boamp-1: 2, ted-1: 2}}
+  - {id: q44, service: REVENUE-CORE/propositions, requete: "marché public application intelligence artificielle", attendus: {boamp-2: 2}}
+  - {id: q45, service: REVENUE-CORE/propositions, requete: "propriété intellectuelle marché informatique CCAG", attendus: {ccag-2: 2}}
+  - {id: q46, service: PILOT-CORE/etudes, requete: "recette et admission prestations informatiques", attendus: {ccag-1: 2, dae-1: 1}}
+  - {id: q47, service: PILOT-CORE/pilotage, requete: "plafond chiffre d'affaires micro-entreprise", attendus: {sp-1: 2, bofip-1: 1}}
+  - {id: q48, service: PILOT-CORE/etudes, requete: "statut SASU ou EURL", attendus: {sp-2: 2, leurre-8: 1}}
+  - {id: q49, service: REVENUE-CORE/propositions, requete: "rédiger une proposition commerciale", attendus: {hubspot-1: 2}}
+  - {id: q50, service: R&D-PARADOX/veille, requete: "minimisation du regret contrefactuel poker", attendus: {arxiv-gt-1: 2, gtow-1: 1}}
+  # ---------------------------------------------------------------- TENDANCES / MÉDIAS (10)
+  - {id: q51, service: CONTENT-ARENA/redaction, categorie: tendances, requete: "tendances poker réseaux sociaux", attendus: {masto-1: 2, masto-2: 2, masto-3: 2, fi-1: 1, yt-1: 1}}
+  - {id: q52, service: CONTENT-ARENA/redaction, categorie: tendances, requete: "ce que disent les médias des jeux d'argent en ligne", attendus: {lemonde-2: 2, igb-1: 2, fi-1: 1}}
+  - {id: q53, service: R&D-PARADOX/veille, categorie: tendances, requete: "avis sur l'IA générative créateurs", attendus: {lemonde-1: 2, masto-4: 2, masto-5: 1}}
+  - {id: q54, service: CONTENT-ARENA/redaction, categorie: tendances, requete: "buzz bande dessinée Angoulême", attendus: {actuabd-1: 2, bsky-2: 2, rf-1: 1}}
+  - {id: q55, service: CONTENT-ARENA/redaction, categorie: tendances, requete: "vidéos YouTube stratégie poker", attendus: {yt-1: 2, yt-2: 1}}
+  - {id: q56, service: REVENUE-CORE/propositions, categorie: tendances, requete: "tendances agents IA indépendants", attendus: {masto-5: 2, arxiv-ai-1: 1}}
+  - {id: q57, service: CONTENT-ARENA/redaction, categorie: tendances, requete: "marché de la BD et manga", attendus: {actuabd-2: 2, rf-1: 2}}
+  - {id: q58, service: R&D-PARADOX/veille, categorie: tendances, requete: "presse cybersécurité attaques PME", attendus: {gdelt-1: 2}}
+  - {id: q59, service: CONTENT-ARENA/redaction, categorie: tendances, requete: "popularité du poker chez les jeunes", attendus: {fi-1: 2, pnews-2: 1}}
+  - {id: q60, service: CONTENT-ARENA/redaction, categorie: tendances, requete: "tendances vidéos boxe débutants", attendus: {yt-3: 2}}

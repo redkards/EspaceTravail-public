@@ -45,6 +45,7 @@ def _lire() -> dict[str, dict]:
             "description": str(p.get("description") or ""),
             "services": [str(s) for s in (p.get("services") or [])],
             "alias": [str(a).strip().lower() for a in (p.get("alias") or [])],
+            "actif": bool(p.get("actif", False)),  # projet suivi par le pilote hebdomadaire
         }
     if PROJET_DEFAUT not in res:
         raise ValueError(f"projets.yaml : le projet « {PROJET_DEFAUT} » est obligatoire")

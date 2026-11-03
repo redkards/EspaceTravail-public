@@ -85,7 +85,10 @@
 	}
 
 	# Cockpit : mot de passe (basic auth), PUIS en-tête interne secret attendu par
-	# nexus-core (COCKPIT_INTERNAL, généré par install.sh).
+	# nexus-core (COCKPIT_INTERNAL, généré par install.sh). Couvre aussi le cockpit
+	# installable : /cockpit/manifest.webmanifest, /cockpit/sw.js, /cockpit/icones/*,
+	# /cockpit/hors-ligne. L'en-tête de réponse Service-Worker-Allowed (scope /cockpit/)
+	# envoyé par nexus-core n'est jamais retiré par Caddy.
 	@cockpit path /cockpit /cockpit/*
 	handle @cockpit {
 		basic_auth {

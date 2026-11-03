@@ -17,7 +17,7 @@ from pathlib import Path
 
 from sqlalchemy import select, text
 
-from . import cyber, gate, ledger
+from . import bouclier, cyber, gate, ledger
 from . import projets as registre
 from .db import engine, session_scope
 from .models import Connaissance, maintenant
@@ -35,6 +35,10 @@ vous ils elles je tu me te lui eux the and for with""".split())
 
 class SecretRefuse(ValueError):
     pass
+
+
+class InjectionRefusee(ValueError):
+    """Connaissance refusée par le bouclier anti-injection (score ≥ bouclier.SEUIL_HAUT) : HTTP 422."""
 
 
 # --- Index plein texte -----------------------------------------------------------------
@@ -90,25 +94,36 @@ def ajouter(projet: str, titre: str, contenu: str, source: str, auteur: str, ori
             raise SecretRefuse("Connaissance refusée : elle contient un secret (" +
                                ", ".join(sorted(set(secrets_trouves))) + "). Retirez-le puis réessayez.")
         titre, contenu = cyber.masquer(titre), cyber.masquer(contenu)
+    # Bouclier anti-injection : une connaissance est relue plus tard par les agents.
+    d = bouclier.detecter_injection(f"{titre}\n{contenu}")
+    if d.score >= bouclier.SEUIL_HAUT:
+        ledger.journaliser("NEXUS-BOUCLIER", "connaissance_rejetee", None, projet=projet, source=source,
+                           origine=origine, score=d.score, motifs=d.motifs)
+        raise InjectionRefusee(f"Connaissance refusée : elle contient des consignes adressées à l'IA "
+                               f"(score {d.score}/100 ; {', '.join(d.motifs)}). Retirez-les puis réessayez.")
+    suspect = d.score >= bouclier.SEUIL_MOYEN
     e = empreinte(titre, contenu)
     with session_scope() as s:
         k = s.execute(select(Connaissance).where(Connaissance.projet == projet,
                                                  Connaissance.source == source)).scalar_one_or_none()
         if k and k.empreinte == e:
-            return {"id": k.id, "etat": "inchangee", "version": k.version}
+            return {"id": k.id, "etat": "inchangee", "version": k.version} | ({"suspect": True} if k.suspect else {})
         if k:
             k.titre, k.contenu, k.empreinte, k.version = titre, contenu, e, k.version + 1
-            k.date, k.auteur, k.origine = maintenant(), auteur, origine
+            k.date, k.auteur, k.origine, k.suspect = maintenant(), auteur, origine, suspect
             etat = "mise_a_jour"
         else:
             k = Connaissance(projet=projet, titre=titre, contenu=contenu, source=source, auteur=auteur,
-                             origine=origine, empreinte=e, version=1, date=maintenant())
+                             origine=origine, empreinte=e, version=1, date=maintenant(), suspect=suspect)
             s.add(k)
             etat = "ajoutee"
         s.flush()
-        res = {"id": k.id, "etat": etat, "version": k.version}
+        res = {"id": k.id, "etat": etat, "version": k.version} | ({"suspect": True} if suspect else {})
     ledger.journaliser(auteur, f"connaissance_{etat}", None, projet=projet, source=source, origine=origine,
                        secret_masque=bool(secrets_trouves))
+    if suspect:  # stockée, mais marquée : encapsulée et signalée au CHECKER à chaque lecture
+        ledger.journaliser("NEXUS-BOUCLIER", "connaissance_suspecte", None, projet=projet, source=source,
+                           score=d.score, motifs=d.motifs)
     return res
 
 
@@ -117,7 +132,7 @@ def ajouter(projet: str, titre: str, contenu: str, source: str, auteur: str, ori
 def _dico(k: Connaissance, score: float | None = None) -> dict:
     return {"id": k.id, "projet": k.projet, "titre": k.titre, "contenu": k.contenu, "source": k.source,
             "date": k.date.isoformat() if k.date else None, "auteur": k.auteur, "version": k.version,
-            "origine": k.origine, "score": score}
+            "origine": k.origine, "score": score, "suspect": bool(k.suspect)}
 
 
 def rechercher(projet: str, q: str | None = None, limite: int = 10) -> list[dict]:
@@ -168,8 +183,34 @@ def extraits(projet: str, requete: str, niveau: str = "F2", nombre: int = 3) -> 
         if total + len(extrait) > budget:
             break
         total += len(extrait)
-        res.append({"source": k["source"], "titre": k["titre"], "extrait": extrait})
+        res.append({"source": k["source"], "titre": k["titre"], "extrait": extrait, "suspect": k.get("suspect")})
     return res
+
+
+def filtrer_extraits(trouves: list[dict], mission_id: int | None = None) -> tuple[list[dict], list[str]]:
+    """Bouclier sur chaque extrait avant transmission aux agents (bouclier.filtrer_contenu) : rejet si
+    score ≥ SEUIL_HAUT (jamais transmis), sinon texte NETTOYÉ (caché, invisibles, HTML retirés).
+    L'ensemble retenu est ensuite encapsulé en un seul bloc par `formater_protege` (un seul en-tête
+    « données non fiables » : moins de caractères consommés sur le budget du niveau F).
+    Renvoie (extraits retenus, alertes à transmettre au CHECKER et à la carte Décideur)."""
+    retenus, alertes = [], []
+    for e in trouves:
+        source = f"mémoire {e['source']}"
+        brut = f"{e['titre']} : {e['extrait']}"
+        v = bouclier.filtrer_contenu(brut, source, journal=ledger.journaliser, mission_id=mission_id)
+        alertes.extend(v.alertes_transmises)
+        if e.get("suspect") and v.decision == "accepte":
+            alertes.append(f"{source} : connaissance stockée comme suspecte")
+        if v.decision == "rejete":
+            continue
+        propre = bouclier.nettoyer_contenu(e["extrait"], source).texte
+        retenus.append({**e, "titre": bouclier.nettoyer_contenu(e["titre"], source).texte, "extrait": propre})
+    return retenus, alertes
+
+
+def formater_protege(extraits_: list[dict]) -> str:
+    """Extraits formatés dans UN bloc « DONNÉES NON FIABLES » à délimiteurs aléatoires."""
+    return bouclier.encapsuler(formater(extraits_), "mémoire du projet") if extraits_ else ""
 
 
 def formater(extraits_: list[dict]) -> str:
@@ -220,7 +261,7 @@ def decouper(texte: str) -> list[tuple[str, str]]:
 def importer(dossier: str | Path | None = None) -> dict:
     """Importe les .md du dossier (récursif). Idempotent : rien ne change si les fichiers sont identiques."""
     racine = Path(dossier or os.environ.get("NEXUS_CONNAISSANCES_DIR", "").strip() or "/connaissances")
-    stats = {"fichiers": 0, "ajoutees": 0, "mises_a_jour": 0, "inchangees": 0, "supprimees": 0, "ignores": 0}
+    stats = {"fichiers": 0, "ajoutees": 0, "mises_a_jour": 0, "inchangees": 0, "supprimees": 0, "ignores": 0, "rejetees": 0}
     if not racine.is_dir():
         return {**stats, "absent": str(racine)}
     for f in sorted(racine.rglob("*.md")):
@@ -242,8 +283,12 @@ def importer(dossier: str | Path | None = None) -> dict:
         for i, (titre, contenu) in enumerate(decouper(corps), 1):
             source = f"{rel}#{i}"
             sources.add(source)
-            r = ajouter(projet, f"{f.stem} — {titre}" if titre else f.stem, contenu, source, "import",
-                        origine="import", masquer=True)
+            try:
+                r = ajouter(projet, f"{f.stem} — {titre}" if titre else f.stem, contenu, source, "import",
+                            origine="import", masquer=True)
+            except InjectionRefusee:
+                stats["rejetees"] += 1  # morceau non importé (tracé au LEDGER par ajouter)
+                continue
             stats[{"ajoutee": "ajoutees", "mise_a_jour": "mises_a_jour", "inchangee": "inchangees"}[r["etat"]]] += 1
         with session_scope() as s:  # morceaux disparus du fichier
             anciens = s.execute(select(Connaissance).where(Connaissance.origine == "import",
@@ -276,5 +321,14 @@ def memoriser_livrable(mid: int, titre: str, projet: str, livrable: str | None) 
     resume = resume_livrable(livrable)
     if not resume:
         return None
-    return ajouter(projet, f"livrable #{mid} — {titre}", resume, f"livrable #{mid}", "nexus-core",
-                   origine="auto", masquer=True)
+    # Jamais de mémorisation automatique d'un livrable suspect d'injection réussie (les secrets seuls
+    # sont déjà masqués par ajouter(masquer=True) : ils n'empêchent pas la mémorisation).
+    motifs = [m for m in bouclier.verifier_sortie(livrable or "")["motifs"] if not m.startswith("secret")]
+    if motifs:
+        ledger.journaliser("NEXUS-BOUCLIER", "memorisation_refusee", mid, motifs=motifs[:6])
+        return None
+    try:
+        return ajouter(projet, f"livrable #{mid} — {titre}", resume, f"livrable #{mid}", "nexus-core",
+                       origine="auto", masquer=True)
+    except InjectionRefusee:
+        return None

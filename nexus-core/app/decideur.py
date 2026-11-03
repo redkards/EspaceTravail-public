@@ -65,6 +65,32 @@ LIBELLES_RAISON = {"irreversibilite": "action irréversible", "production": "tou
 _ORDRE = {"faible": 0, "moyen": 1, "eleve": 2}
 
 
+def seuil_risque_eleve() -> float:
+    """NEXUS_SEUIL_RISQUE_ELEVE_EUR (défaut 1 000 €) : montant engagé OU cité → risque élevé (code exigé)."""
+    try:
+        return float(os.environ.get("NEXUS_SEUIL_RISQUE_ELEVE_EUR", "") or 1000)
+    except ValueError:
+        return 1000.0
+
+
+def _montant_cite(texte: str) -> float | None:
+    """Plus grand montant cité (« 2 400 € », « 1.500 € », « 3k€ », « 12,5 USD ») ; None si aucun."""
+    meilleur = None
+    for m in gate._MONTANT.finditer(texte or ""):
+        n = m.group("n1") or m.group("n2") or ""
+        n = re.sub(r"[ \u00a0\u202f]", "", n)
+        if re.fullmatch(r"\d{1,3}(?:\.\d{3})+(?:,\d+)?", n):  # 1.500 ou 1.500,50
+            n = n.replace(".", "")
+        try:
+            v = float(n.replace(",", "."))
+        except ValueError:
+            continue
+        if re.search(r"\d\s*k", m.group(0), re.I):
+            v *= 1000
+        meilleur = v if meilleur is None else max(meilleur, v)
+    return meilleur
+
+
 def evaluer_risque(titre: str, consigne: str, livrable: str | None = None, montant_eur: float = 0.0,
                    action: str | None = None, cout_estime_eur: float = 0.0) -> tuple[str, list[str]]:
     """(niveau, raisons). Règles : montant, irréversibilité, tiers, production, données sensibles."""
@@ -76,13 +102,18 @@ def evaluer_risque(titre: str, consigne: str, livrable: str | None = None, monta
             niveau = n
         raisons.append(raison)
 
-    if montant_eur and montant_eur >= 1000:
-        monter("eleve", f"montant engagé {montant_eur:.0f} € (≥ 1 000 €)")
+    seuil = seuil_risque_eleve()
+    if montant_eur and montant_eur >= seuil:
+        monter("eleve", f"montant engagé {montant_eur:.0f} € (≥ {seuil:.0f} €)")
     elif montant_eur and montant_eur > 0:
         monter("moyen", f"montant engagé {montant_eur:.2f} €")
     m = gate.detecter_montant(f"{titre} {consigne}")
     if m and not montant_eur:
-        monter("moyen", f"montant cité dans la consigne ({m})")
+        v = _montant_cite(f"{titre} {consigne}")
+        if v is not None and v >= seuil:
+            monter("eleve", f"montant cité dans la consigne ({m}, ≥ {seuil:.0f} €)")
+        else:
+            monter("moyen", f"montant cité dans la consigne ({m})")
     if cout_estime_eur and cout_estime_eur > 0 and not montant_eur:
         monter("moyen", f"dépense IA estimée {cout_estime_eur:.2f} €")
     texte = gate.normaliser(f"{titre} {consigne} {livrable or ''}")
@@ -117,6 +148,9 @@ def _court(texte: str, n: int = 140) -> str:
 
 
 def resume_3_lignes(m: Mission, d: Decision) -> dict:
+    if d.objet == "plan_semaine":
+        return {"quoi": _court(d.resume), "pourquoi": "Pilote hebdomadaire des projets actifs.",
+                "si_refus": "Aucune mission n'est lancée cette semaine par le pilote."}
     if d.objet == "lancement_f4":
         return {"quoi": _court(f"Lancer « {m.titre} » avec les modèles payants (F4)."),
                 "pourquoi": _court(f"Niveau Expert demandé ; coût estimé {d.cout_estime_eur:.2f} €."),
@@ -154,7 +188,14 @@ def carte(d: Decision, m: Mission, maintenant_utc: datetime | None = None) -> di
         "expire_le": expiration(d).isoformat(), "lien_livrable": f"/cockpit/api/missions/{m.id}",
         "code_requis": d.risque == "eleve",
         "avertissements": json.loads(m.charte_avertissements) if m.charte_avertissements else [],
+        "alertes_bouclier": json.loads(m.alertes_bouclier) if m.alertes_bouclier else [],
+        "propositions": _propositions(d) if d.objet == "plan_semaine" else None,
     }
+
+
+def _propositions(d: Decision) -> list[dict]:
+    from .pilote import propositions_de
+    return propositions_de(d.id)
 
 
 def etat_decideur(maintenant_utc: datetime | None = None) -> dict:

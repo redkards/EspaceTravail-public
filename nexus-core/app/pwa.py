@@ -105,7 +105,7 @@ def icone(nom: str) -> FileResponse:
                         headers={"Cache-Control": "public, max-age=604800"})
 
 
-ENTETE_HTML = """<link rel="manifest" href="/cockpit/manifest.webmanifest">
+ENTETE_HTML = """<link rel="manifest" href="/cockpit/manifest.webmanifest" crossorigin="use-credentials">
 <link rel="icon" href="/cockpit/icones/icone.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/cockpit/icones/apple-touch-icon.png">"""
 ENREGISTREMENT = """<script>

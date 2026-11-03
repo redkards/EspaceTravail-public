@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0b0f14" media="(prefers-color-scheme: dark)">
 <title>Décideur NEXUS</title>
-<link rel="manifest" href="/cockpit/manifest.webmanifest">
+<link rel="manifest" href="/cockpit/manifest.webmanifest" crossorigin="use-credentials">
 <link rel="icon" href="/cockpit/icones/icone.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/cockpit/icones/apple-touch-icon.png">
 <style>
@@ -62,6 +62,10 @@
   .vide { color: var(--doux); font-style: italic; }
   .alerte { border: 2px solid var(--ko); background: var(--ko-fond); color: var(--ko); border-radius: 12px;
             padding: 10px 12px; margin: 10px 0; font-weight: 700; }
+  .prop { display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; border-bottom: 1px solid var(--bord); }
+  .prop input { width: 28px; height: 28px; min-height: 28px; margin: 2px 0 0; flex: 0 0 auto; }
+  .gestes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .favorable { color: var(--ok); } .deconseille { color: var(--ko); }
   .hist { border-bottom: 1px solid var(--bord); padding: 8px 0; font-size: 15px; }
   #message { position: fixed; left: 12px; right: 12px; bottom: 12px; padding: 14px; border-radius: 12px;
              background: var(--texte); color: var(--fond); font-weight: 700; display: none; z-index: 5; }
@@ -76,6 +80,12 @@
   <div id="alertes"></div>
   <h2>Décisions à prendre</h2>
   <div id="cartes"><p class="vide">Chargement…</p></div>
+  <h2>Noter ces livrables</h2>
+  <div id="aNoter"></div>
+  <h2>Leçons de la semaine</h2>
+  <div id="lecons"></div>
+  <h2>Apprentissage de la semaine</h2>
+  <div id="rapport" class="carte"><p class="vide">Chargement…</p></div>
   <h2>20 dernières décisions</h2>
   <div id="historique"></div>
   <p class="meta"><a href="/cockpit" style="color:var(--accent)">Cockpit complet</a></p>
@@ -128,6 +138,9 @@ function rendreCarte(c) {
       <span class="${c.urgent ? "eleve" : ""}"><b>Refus automatique dans ${duree(c.restant_s)}</b></span>
     </div>
     ${c.objet === "lancement_f4" ? "" : `<button class="lien" type="button" data-livrable="${c.mission_id}">Voir le livrable</button><div id="liv${c.id}"></div>`}
+    ${c.propositions ? `<div><b>Missions proposées (cochez celles à lancer)</b>${c.propositions.length ? c.propositions.map((p) => `
+      <label class="prop"><input type="checkbox" data-prop="${p.id}">
+        <span><b>${esc(p.titre)}</b><br><span class="meta">${esc(p.projet)} · ${esc(p.service || "service choisi par PRIME")} · ${esc(p.fonctionnement)}</span><br>${esc(p.consigne)}</span></label>`).join("") : '<p class="vide">Aucune mission proposée.</p>'}</div>` : ""}
     <div class="actions" id="act${c.id}">
       <button class="b-ok" type="button" data-choix="valider">Valider</button>
       <button class="b-ko" type="button" data-choix="refuser">Refuser</button>
@@ -153,8 +166,81 @@ function rendre() {
     : '<p class="vide">Aucune décision pour le moment.</p>';
 }
 
+// --- Note en un geste ---
+function rendreANoter() {
+  const l = ETAT.a_noter || [], motifs = ETAT.motifs_avis || {};
+  $("#aNoter").innerHTML = l.length ? l.map((m) => `<article class="carte" data-avis="${m.mission_id}">
+      <strong>#${m.mission_id} · ${esc(m.titre)}</strong>
+      <div class="meta">${esc(m.projet)} · ${esc(m.service || "")} · ${esc(m.fonctionnement)}</div>
+      <pre>${esc(m.extrait)}</pre>
+      <div class="gestes"><button class="b-ok" type="button" data-geste="positif" aria-label="Bon livrable">👍</button>
+        <button class="b-ko" type="button" data-geste="negatif" aria-label="Livrable à revoir">👎</button></div>
+      <div hidden data-motifs><label>Motif</label>
+        <select>${Object.entries(motifs).map(([k, v]) => `<option value="${k}">${esc(v)}</option>`).join("")}</select>
+        <input maxlength="120" placeholder="Précision (facultatif)">
+        <button class="b-conf" type="button" data-geste="envoyer">Envoyer l'avis</button></div>
+    </article>`).join("") : '<p class="vide">Rien à noter pour le moment.</p>';
+}
+$("#aNoter").addEventListener("click", async (e) => {
+  const b = e.target.closest("button[data-geste]"); if (!b) return;
+  const carte = b.closest("[data-avis]"), mid = carte.dataset.avis;
+  if (b.dataset.geste === "negatif") { carte.querySelector("[data-motifs]").hidden = false; return; }
+  const corps = b.dataset.geste === "positif" ? { valeur: "positif" }
+    : { valeur: "negatif", motif: carte.querySelector("select").value, texte: carte.querySelector("input").value || null };
+  try { await api(`/decideur/avis/${mid}`, corps); message("Merci : avis enregistré."); await charger(); }
+  catch (err) { message(err.message); }
+});
+
+// --- Leçons de la semaine (accepter / rejeter, confirmation intégrée) ---
+function rendreLecons() {
+  const l = ETAT.lecons_proposees || [];
+  $("#lecons").innerHTML = l.length ? l.map((x) => {
+    const f = x.fantome;
+    const test = f ? `<div class="${f.gain < 0 ? "deconseille" : "favorable"}"><b>Test fantôme : ${esc(f.texte)}</b></div>`
+      : '<div class="meta">Test fantôme : prévu la nuit prochaine.</div>';
+    return `<article class="carte" data-lecon="${x.id}">
+      <strong>#${x.id} · [${esc(x.type)}] ${esc(x.texte_llm || x.texte)}</strong>
+      <div class="meta">${esc(x.service || "tous services")} · ${esc(x.projet || "tous projets")} · vue ${x.occurrences} fois${x.texte_llm ? " · reformulée par l'IA" : ""}</div>
+      ${test}
+      <div data-actions><button class="b-ok" type="button" data-l="accepter">Accepter</button>
+        <button class="b-ko" type="button" data-l="rejeter">Rejeter</button></div>
+      <div hidden data-conf>
+        <label>Reformulation (facultatif)</label><input maxlength="300" data-texte>
+        ${f && f.gain < 0 ? '<label class="prop"><input type="checkbox" data-malgre><span>J\'accepte malgré le test défavorable</span></label>' : ""}
+        <button class="b-conf" type="button" data-l="confirmer">Confirmer</button>
+        <button type="button" data-l="annuler">Annuler</button></div></article>`;
+  }).join("") : '<p class="vide">Aucune leçon à examiner.</p>';
+}
+$("#lecons").addEventListener("click", async (e) => {
+  const b = e.target.closest("button[data-l]"); if (!b) return;
+  const carte = b.closest("[data-lecon]"), id = carte.dataset.lecon, conf = carte.querySelector("[data-conf]");
+  if (b.dataset.l === "accepter" || b.dataset.l === "rejeter") {
+    conf.hidden = false; conf.dataset.action = b.dataset.l; carte.querySelector("[data-actions]").hidden = true;
+    conf.querySelector("[data-l=confirmer]").textContent = `Confirmer : ${b.dataset.l} la leçon #${id}`;
+    return;
+  }
+  if (b.dataset.l === "annuler") { conf.hidden = true; carte.querySelector("[data-actions]").hidden = false; return; }
+  const texte = conf.querySelector("[data-texte]").value || null, malgre = conf.querySelector("[data-malgre]");
+  const corps = conf.dataset.action === "accepter" ? { texte, confirmation_fantome: !!(malgre && malgre.checked) }
+    : { motif: texte };
+  try { await api(`/memoire/lecons/${id}/${conf.dataset.action}`, corps); message("Leçon " + (conf.dataset.action === "accepter" ? "acceptée." : "rejetée.")); await charger(); }
+  catch (err) { message(err.message); }
+});
+
+async function chargerRapport() {
+  try {
+    const r = await api("/memoire/rapport?jours=7"), s = r.satisfaction || {};
+    const sat = Object.entries(s.par_service || {}).map(([k, v]) => `${esc(k)} : ${v.satisfaction} % (${v.positifs}👍 / ${v.negatifs}👎)`).join("<br>");
+    $("#rapport").innerHTML = `<div>${r.nouvelles.length} nouvelle(s) leçon(s) · ${r.proposees_en_attente.length} à examiner ·
+        ${r.acceptees.length} acceptée(s) · ${r.suspendues.length} suspendue(s) · ${r.actives} active(s)</div>
+      ${r.erreurs_frequentes.length ? `<div class="meta" style="margin-top:8px"><b>Erreurs les plus fréquentes :</b><br>${r.erreurs_frequentes.map((x) => `${esc(x.texte)} (${x.occurrences})`).join("<br>")}</div>` : ""}
+      ${r.evolution_notes.length ? `<div class="meta" style="margin-top:8px"><b>Notes du banc :</b> ${r.evolution_notes.map((x) => `${esc(x.semaine)} : ${x.note}`).join(" · ")}</div>` : ""}
+      <div class="meta" style="margin-top:8px"><b>Satisfaction (${s.avis || 0} avis) :</b><br>${sat || "aucun avis"}</div>`;
+  } catch (err) { $("#rapport").textContent = err.message; }
+}
+
 async function charger() {
-  try { ETAT = await api("/decideur/etat"); rendre(); }
+  try { ETAT = await api("/decideur/etat"); rendre(); rendreANoter(); rendreLecons(); chargerRapport(); }
   catch (err) { $("#resumeJour").textContent = "Connexion impossible : " + err.message; }
 }
 
@@ -193,8 +279,10 @@ async function demanderConfirmation(id, choix, motif) {
 async function confirmer(id) {
   const zone = $("#conf" + id), code = $("#code" + id);
   try {
+    const cochees = [...document.querySelectorAll(`#carte${id} [data-prop]:checked`)].map((x) => Number(x.dataset.prop));
     const r = await api(`/decideur/decisions/${id}/confirmer`, { choix: zone.dataset.choix, jeton: zone.dataset.jeton,
-      commentaire: zone.dataset.motif || null, code: code ? code.value : null });
+      commentaire: zone.dataset.motif || null, code: code ? code.value : null, missions: cochees });
+    if (r.missions_creees && r.missions_creees.length) message(`${r.missions_creees.length} mission(s) lancée(s).`);
     message(`Décision #${id} : ${LIB[r.statut] || r.statut}.`);
     await charger();
   } catch (err) { message(err.message); if (code) { code.value = ""; code.focus(); } }
@@ -223,7 +311,12 @@ $("#cartes").addEventListener("click", async (e) => {
 });
 
 charger();
-setInterval(() => { if (!document.querySelector(".confirmer:not([hidden])")) charger(); }, 30000);
+// Rafraîchissement : jamais pendant une saisie, une confirmation ou un choix en cours.
+setInterval(() => {
+  const occupe = document.querySelector(".confirmer:not([hidden]), [data-conf]:not([hidden]), [data-motifs]:not([hidden]), [data-prop]:checked")
+    || (document.activeElement && ["INPUT", "SELECT", "TEXTAREA"].includes(document.activeElement.tagName));
+  if (!occupe) charger();
+}, 30000);
 </script>
 <script>
 if ("serviceWorker" in navigator) { navigator.serviceWorker.register("/cockpit/sw.js", { scope: "/cockpit/" }).catch(() => {}); }

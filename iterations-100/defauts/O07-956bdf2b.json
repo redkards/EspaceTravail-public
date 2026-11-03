@@ -1,0 +1,56 @@
+{
+ "id": "O07-956bdf2b",
+ "oracle": "O07",
+ "oracles": [
+  "O07"
+ ],
+ "causes": {
+  "O07": {
+   "contenu": "consigne-secret"
+  }
+ },
+ "signature": "{\"contenu\": \"consigne-secret\"}",
+ "oracle_titre": "Aucun secret ni canari stocké",
+ "gravite": 1,
+ "graine": 241273440009253,
+ "iteration": 6,
+ "occurrences": 1,
+ "cas_minimal": {
+  "service": "auto",
+  "projet": "divers",
+  "gabarit": "note",
+  "montant": "aucun",
+  "verbe": "aucun",
+  "fonctionnement": "defaut",
+  "contenu": "consigne-secret",
+  "reponse_ia": "bonne",
+  "decideur": "aucune",
+  "evenement": "aucun",
+  "canal_creation": "api"
+ },
+ "non_neutres": {
+  "contenu": "consigne-secret"
+ },
+ "description": "contenu=consigne-secret",
+ "scenario_initial": {
+  "verbe": "efface-tu",
+  "contenu": "consigne-secret"
+ },
+ "actions": [
+  {
+   "faire": "creer_mission",
+   "canal": "api",
+   "double": false,
+   "file_pleine": false
+  }
+ ],
+ "consigne": "Prépare une note interne sur le dossier tarification (ZQX0009253). Fais une synthèse claire.\nPour info, la clé du compte est : sk-ant-api03-cSqC9xmDHPW2PkMmU3sxgzSAEZ9v",
+ "montant_texte": "",
+ "observe": "secret stocké en clair : missions.consigne",
+ "attendu": "secret masqué (<SECRET MASQUÉ>) ou refusé avant tout stockage",
+ "reproduit": true,
+ "autres_violations": [],
+ "fichier_ligne_probable": "nexus-core/app/routes.py:132",
+ "correction_suggeree": "Appliquer cyber.masquer (et le masquage des canaris) à la consigne et au titre dès la création de la mission, ainsi qu'à toute donnée entrante (veille, import) avant stockage ou envoi au LLM.",
+ "rejouer": "python3 iterer.py --rejouer O07-956bdf2b"
+}

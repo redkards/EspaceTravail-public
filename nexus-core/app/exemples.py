@@ -9,7 +9,7 @@ import os
 
 from sqlalchemy import select
 
-from . import charte, cyber, ledger
+from . import bouclier, charte, cyber, ledger
 from .db import session_scope
 from .models import Exemple, Mission, maintenant
 
@@ -35,6 +35,13 @@ def _extrait(livrable: str) -> str:
     return texte if len(texte) <= TAILLE_EXEMPLE else texte[: TAILLE_EXEMPLE - 1].rstrip() + "…"
 
 
+def _suspect(texte: str) -> bool:
+    """Bouclier : signes d'injection réussie (hors secrets, traités à part) ou consignes injectées."""
+    if any(not m.startswith("secret") for m in bouclier.verifier_sortie(texte or "")["motifs"]):
+        return True
+    return bouclier.detecter_injection(texte or "").score >= bouclier.SEUIL_MOYEN
+
+
 def proposer(mid: int, origine: str, manuel: bool = False) -> dict | None:
     """Fait d'un livrable un exemple de son service. `manuel=True` : erreurs remontées (ExempleRefuse)."""
     with session_scope() as s:
@@ -52,6 +59,8 @@ def proposer(mid: int, origine: str, manuel: bool = False) -> dict | None:
         motif = "le livrable contient un secret"
     elif charte.verifier(projet, service, livrable)["bloquants"]:
         motif = "le livrable ne respecte pas la charte du projet"
+    elif _suspect(livrable):
+        motif = "le livrable est suspect d'injection de consignes (bouclier)"
     if motif:
         ledger.journaliser("NEXUS-PRIME", "exemple_ecarte", mid, motif=motif, origine=origine)
         if manuel:
@@ -69,6 +78,8 @@ def proposer(mid: int, origine: str, manuel: bool = False) -> dict | None:
         s.flush()
         eid = e.id
     ledger.journaliser("NEXUS-PRIME", "exemple_retenu", mid, exemple_id=eid, service=service, origine=origine)
+    from . import fantome  # exemple actif tout de suite (faible risque), vérifié la nuit, retiré si défavorable
+    fantome.planifier("exemple", eid, {"exemple": f"[exemple #{eid} — {titre}]\n{_extrait(livrable)}"}, service)
     _limiter(service)
     return {"id": eid, "service": service}
 
@@ -110,9 +121,9 @@ def pour_analyst(service: str | None, projet: str | None, maxi: int = TAILLE_INJ
     projet n'est retenu que s'il respecte la charte du projet courant (pas de mélange de marques)."""
     if not service:
         return ""
-    candidats = [e for e in lister(service) if e["projet"] == projet] + \
+    candidats = [e for e in lister(service) if e["projet"] == projet and not _suspect(e["extrait"])] + \
                 [e for e in lister(service) if e["projet"] != projet
-                 and not charte.verifier(projet, service, e["extrait"])["bloquants"]]
+                 and not charte.verifier(projet, service, e["extrait"])["bloquants"] and not _suspect(e["extrait"])]
     blocs, total = [], 0
     for e in candidats:
         reste = maxi - total - 40

@@ -1,0 +1,29 @@
+# Recherche Web à la demande — DÉSACTIVÉE par défaut.
+# Pour activer : actif: true ici ET variable d'environnement VEILLE_WEB=1 (double verrou volontaire).
+actif: false
+connecteurs:
+  searxng:
+    actif: false                  # passer à true une fois le service docker-compose.searxng.yml lancé
+    url: http://127.0.0.1:8888    # SearXNG auto-hébergé, jamais exposé sur Internet
+    langue: fr
+    resultats: 10
+    quota_jour: 200
+    cout: "0 € (auto-hébergé : ≈ 150–250 Mo de RAM, limité à 0,5 CPU / 384 Mo dans le compose fourni)"
+    conditions: "Logiciel libre AGPL-3.0 ; SearXNG interroge des moteurs tiers : rester sous les quotas, limiter les moteurs"
+  wikipedia:
+    actif: false
+    langue: fr
+    resultats: 10
+    quota_jour: 300
+    cout: "0 € (API Wikimédia gratuite, sans clé ; User-Agent identifiable obligatoire)"
+    conditions: "Contenus CC BY-SA 4.0 : extrait court + lien (attribution)"
+# Connecteurs NON implémentés : payants → décision du propriétaire avant toute dépense (vérifié le 2026-11-04)
+payants_non_actives:
+  brave_search_api:
+    statut: "désactivé — plus d'offre gratuite"
+    cout_estime: "≈ 4 à 5 $ pour 1 000 requêtes (≈ 6 à 8 € / mois pour 50 recherches / jour)"
+    validation_requise: true
+  mojeek_api:
+    statut: "désactivé — payant"
+    cout_estime: "≈ 2 £ pour 1 000 requêtes (offre Startup), carte bancaire requise"
+    validation_requise: true

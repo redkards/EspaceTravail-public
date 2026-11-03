@@ -104,7 +104,8 @@ def test_collector_et_checker_recoivent_les_extraits():
     collecteur = [e for r, e in FournisseurFactice.entrees if r == "collector"][0]
     assert collecteur.count("[charte#") == 3  # 3 extraits, avec leur source
     bloc = collecteur.split("Connaissances du projet")[1]
-    assert len(bloc) <= 2000 + 300  # budget F2 ≈ 2 000 caractères (+ intitulés)
+    # budget F2 ≈ 2 000 caractères (+ intitulés) + enveloppe « données non fiables » du bouclier (≈ 500)
+    assert "[DONNÉES NON FIABLES" in bloc and len(bloc) <= 2000 + 300 + 600
     controle = [e for r, e in FournisseurFactice.entrees if r == "checker"][0]
     assert "ne doit PAS les contredire" in controle and "[charte#" in controle
     assert "connaissances_fournies" in [e["action"] for e in ledger.lister(100)]

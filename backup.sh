@@ -3,8 +3,10 @@
 #  backup.sh — sauvegarde du Mini NEXUS MOTHERSHIP dans ./backups/<date>/
 #
 #  Contenu de chaque sauvegarde :
-#    - nexus-core.tar.gz     : livrables + copie COHÉRENTE de la base nexus.db
+#    - nexus-core.tar.gz     : livrables, archive/ (missions archivées), chartes_ajouts/
+#                              (leçons acceptées) + copie COHÉRENTE de la base nexus.db
 #    - nexus-bridge.tar.gz   : mémoire commune des IA (copie cohérente de bridge.db)
+#    - veille.tar.gz         : base de veille data/veille/veille.db (si présente)
 #    Mode complet uniquement :
 #    - nexus.sql.gz / n8n.sql.gz : bases PostgreSQL « nexus » et « n8n »
 #    - n8n-workflows/        : export JSON des workflows n8n
@@ -93,9 +95,14 @@ archiver() {
   ok "$service.tar.gz ($(du -h "$DEST/$service.tar.gz" | cut -f1))"
 }
 
-info "1/4 — nexus-core (livrables et base SQLite) et nexus-bridge (mémoire commune)"
+info "1/4 — nexus-core (livrables, archive, chartes), nexus-bridge (mémoire commune), veille"
 archiver nexus-core nexus.db
+for sous in archive chartes_ajouts; do
+  [ -d "data/nexus-core/$sous" ] && info "    inclus : data/nexus-core/$sous ($(du -sh "data/nexus-core/$sous" | cut -f1))"
+done
 archiver nexus-bridge bridge.db
+# Base de veille (collecteur sur l'hôte) : copie cohérente par python3 de l'hôte
+[ -d data/veille ] && archiver veille veille.db
 
 info "2/4 — Bases PostgreSQL et workflows n8n (mode complet)"
 if service_actif postgres; then

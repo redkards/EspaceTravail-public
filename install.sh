@@ -441,6 +441,11 @@ if ! grep -qE '^COCKPIT_CODE_DECIDEUR=[0-9]{6}$' "$ENV_FILE"; then
   ajoute=1
 fi
 assurer_env NEXUS_SESSIONS_N3 "12:30,19:00" && ajoute=1
+# Secret HMAC des exports vers le QG (webhook signé) ; l'URL NEXUS_WEBHOOK_QG reste à remplir
+assurer_env NEXUS_WEBHOOK_SECRET "$(secret 32)" && ajoute=1
+[ -n "$(lire_env NEXUS_WEBHOOK_SECRET)" ] || { remplacer_env NEXUS_WEBHOOK_SECRET "$(secret 32)"; ajoute=1; }
+assurer_env NEXUS_WEBHOOK_QG "" && ajoute=1
+assurer_env VEILLE_CONTACT "" && ajoute=1
 assurer_env NEXUS_MEMOIRE_AUTO 1 && ajoute=1
 # Alertes N3 sur le téléphone (gratuit). MVP : service public ntfy.sh ; mode complet :
 # serveur ntfy du kit (docker-compose.complet.yml force alors http://ntfy).
@@ -682,6 +687,9 @@ for d in caddy/data caddy/config ollama nexus-core/livrables nexus-bridge postgr
   mkdir -p "$KIT_DIR/data/$d"
 done
 chmod 700 "$KIT_DIR/data"
+# Base de veille : écrite par le collecteur (root, cron sur l'hôte), lue par nexus-core
+mkdir -p "$KIT_DIR/data/veille" "$KIT_DIR/veille/journal"
+chmod 755 "$KIT_DIR/data/veille"
 # Dossier des sauvegardes (backup.sh / restore.sh), lisible par root seulement
 mkdir -p "$KIT_DIR/backups"
 chmod 700 "$KIT_DIR/backups"
@@ -800,6 +808,53 @@ elif demander "Planifier un exercice de restauration chaque mois (1er dimanche, 
 else
   info "Exercice de restauration non planifié. Pour l'ajouter : relancez install.sh et répondez « o »."
 fi
+
+# Tâche planifiée proposée (o/N) : $1 fichier cron.d, $2 question, $3 ligne cron,
+# $4 script requis, $5 message de succès. Idempotent : un fichier existant est conservé.
+proposer_cron() {
+  local fichier="$1" question="$2" ligne="$3" requis="$4" succes="$5"
+  if [ ! -e "$requis" ]; then
+    info "$(basename "$fichier") : $requis absent, étape ignorée."
+  elif [ -f "$fichier" ]; then
+    ok "Déjà planifié : $fichier"
+  elif demander "$question" n; then
+    printf '%s\n' "# Créé par install.sh (Mini NEXUS MOTHERSHIP) — supprimé par uninstall.sh --purge" "$ligne" > "$fichier"
+    chmod 644 "$fichier"
+    ok "$succes"
+  else
+    info "Non planifié ($(basename "$fichier")). Pour l'ajouter : relancez install.sh et répondez « o »."
+  fi
+}
+
+# Banc d'essai hebdomadaire (dimanche 04:17, après la veille cyber de 03:17)
+proposer_cron /etc/cron.d/nexus-banc-hebdo \
+  "Planifier le banc d'essai chaque dimanche à 4 h 17 (qualité des agents, gratuit) ?" \
+  "17 4 * * 0 root /bin/bash $KIT_DIR/banc-essai/hebdo.sh >/dev/null 2>&1" \
+  "$KIT_DIR/banc-essai/hebdo.sh" "Banc d'essai hebdomadaire planifié (tableau : banc-essai/tableau.html)"
+
+# Attaque simulée mensuelle (2e dimanche, 05:17) : teste le bouclier anti-injection.
+# « 8-14 * * » + test du dimanche dans la commande (en cron, jour du mois ET jour de la
+# semaine renseignés = l'un OU l'autre).
+proposer_cron /etc/cron.d/nexus-attaque-simulee \
+  "Planifier l'attaque simulée du bouclier chaque mois (2e dimanche, 5 h 17) ?" \
+  "17 5 8-14 * * root [ \"\$(date +\%u)\" = 7 ] && /usr/bin/python3 $KIT_DIR/securite-ia/attaque_simulee.py --mode complet >> /var/log/nexus-securite-ia.log 2>&1" \
+  "$KIT_DIR/securite-ia/attaque_simulee.py" "Attaque simulée mensuelle planifiée (rapports : securite-ia/resultats)"
+
+# Veille toutes les 6 h (commande de veille/README.md ; base dans data/veille, sauvegardée)
+if [ -f "$KIT_DIR/veille/collecteur.py" ] && [ ! -f /etc/cron.d/nexus-veille ]; then
+  python3 -c 'import yaml' 2>/dev/null \
+    || avert "Veille : PyYAML manque sur le VPS (apt-get install -y python3-yaml) avant de la planifier."
+  if [ -z "$(lire_env VEILLE_CONTACT)" ] && [ "$OUI" -eq 0 ] && [ -t 0 ]; then
+    echo "    La veille s'annonce aux sites lus avec une adresse de contact (page web, pas d'e-mail personnel)."
+    rep="$(lire_saisie "    Page de contact [https://github.com/redkards/espacetravail-public] : ")"
+    remplacer_env VEILLE_CONTACT "${rep:-https://github.com/redkards/espacetravail-public}"
+  fi
+fi
+CONTACT_VEILLE="$(lire_env VEILLE_CONTACT)"; CONTACT_VEILLE="${CONTACT_VEILLE:-https://github.com/redkards/espacetravail-public}"
+proposer_cron /etc/cron.d/nexus-veille \
+  "Planifier la veille (sources officielles, toutes les 6 h, gratuit) ?" \
+  "17 */6 * * * root cd $KIT_DIR/veille && VEILLE_DB=$KIT_DIR/data/veille/veille.db VEILLE_CONTACT=\"$CONTACT_VEILLE\" /usr/bin/python3 collecteur.py collecter >> $KIT_DIR/veille/journal/cron.log 2>&1" \
+  "$KIT_DIR/veille/collecteur.py" "Veille planifiée toutes les 6 h (base : data/veille/veille.db)"
 
 # Veille cyber hebdomadaire (dimanche 03:17) : missions CYBER-FORTRESS veille + audit
 CRON_CYBER="/etc/cron.d/nexus-veille-cyber"

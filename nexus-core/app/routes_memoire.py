@@ -55,6 +55,11 @@ def lecture() -> APIRouter:
         from . import avis
         return {**lecons.rapport(jours), "satisfaction": avis.statistiques(jours)}
 
+    @r.get("/memoire/fantome")
+    def etat_fantome():
+        from . import fantome
+        return fantome.etat()
+
     @r.get("/archive/verifier")
     def verifier_archive():
         return archive.verifier()
@@ -95,6 +100,21 @@ def rejeter(lid: int, corps: Motif, request: Request):
         raise HTTPException(404, str(e))
     except PermissionError as e:
         raise HTTPException(409, str(e))
+
+
+class Fantome(BaseModel):
+    type: str = Field(pattern="^(charte|modeles)$")
+    valeur: str = Field(min_length=1, max_length=500)  # dossier de chartes candidat ou NEXUS_MODELES_ROLES
+    service: str | None = Field(default=None, max_length=80)
+    projet: str | None = Field(default=None, max_length=40)
+
+
+@cockpit.post("/fantome")
+def planifier_fantome(corps: Fantome):
+    """Évaluer une charte modifiée ou un changement de modèles AVANT de l'appliquer (test de nuit)."""
+    from . import fantome
+    variante = {"charte_dir": corps.valeur} if corps.type == "charte" else {"modeles_roles": corps.valeur}
+    return fantome.planifier(corps.type, corps.valeur[:60], variante, corps.service, corps.projet)
 
 
 @cockpit.post("/archive/effacer/{mid}")

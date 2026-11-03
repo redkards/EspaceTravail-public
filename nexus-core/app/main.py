@@ -62,6 +62,16 @@ def tick_decideur() -> None:
     except Exception:
         log.exception("Erreur pendant la tâche des sessions de décision")
     try:
+        from . import pilote
+        pilote.tick()
+    except Exception:
+        log.exception("Erreur pendant le pilote hebdomadaire")
+    try:
+        from . import fantome
+        fantome.tick()
+    except Exception:
+        log.exception("Erreur pendant le test fantôme")
+    try:
         from . import lecons
         lecons.revue_hebdo()
     except Exception:

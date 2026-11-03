@@ -40,6 +40,9 @@
   button, label.fichier { font: inherit; color: var(--texte-1); background: var(--surface-1);
          border: 1px solid var(--bordure); border-radius: 8px; padding: 6px 12px; cursor: pointer; }
   button:focus-visible, label.fichier:focus-within, svg:focus-visible { outline: 2px solid var(--serie-1); outline-offset: 2px; }
+  select { font: inherit; color: var(--texte-1); background: var(--surface-1); border: 1px solid var(--bordure);
+           border-radius: 8px; padding: 6px 10px; max-width: 100%; }
+  label.filtre { display: inline-flex; gap: 6px; align-items: center; color: var(--texte-2); }
   label.fichier input { position: absolute; opacity: 0; width: 1px; height: 1px; }
   .tuiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 16px; }
   .tuile { background: var(--surface-1); border: 1px solid var(--bordure); border-radius: 10px; padding: 10px 12px; }
@@ -78,6 +81,7 @@
     <button type="button" id="recharger">Recharger</button>
     <label class="fichier">Ouvrir un tableau.json…<input type="file" id="fichier" accept="application/json,.json"></label>
     <button type="button" id="theme" aria-pressed="false">Thème : auto</button>
+    <label class="filtre">Service <select id="service"><option value="">Tous les services</option></select></label>
   </div>
   <section id="tuiles" class="tuiles" aria-label="Dernière semaine"></section>
   <section id="graphiques" class="grille" aria-label="Tendances"></section>
@@ -208,16 +212,39 @@ function tuile(lib, v, avant, unite, sens, d = 1) {
   return t;
 }
 
+/* Filtre par service : notes et nombre de missions tirés de « par_service » (facultatif : absent des
+   semaines enregistrées avant son ajout → valeurs vides, la semaine reste affichée). */
+let DONNEES = null, SOURCE = "";
+function remplirServices(semaines) {
+  const sel = document.getElementById("service"), garde = sel.value;
+  const noms = [...new Set(semaines.flatMap(s => Object.keys(s.par_service || {})))].sort();
+  sel.replaceChildren(el("option", { value: "" }, "Tous les services"));
+  noms.forEach(n => sel.append(el("option", { value: n }, n)));
+  sel.value = noms.includes(garde) ? garde : "";
+}
+function vueService(semaines, service) {
+  if (!service) return semaines;
+  return semaines.map(s => {
+    const p = (s.par_service || {})[service] || {};
+    return { ...s, note_livrable: p.note_livrable ?? null, note_systeme: p.note_systeme ?? null,
+             missions: p.missions ?? null, executees: p.missions ?? null };
+  });
+}
 function afficher(donnees, source) {
-  const semaines = (donnees && Array.isArray(donnees.semaines) ? donnees.semaines : [])
+  DONNEES = donnees; SOURCE = source;
+  const toutes = (donnees && Array.isArray(donnees.semaines) ? donnees.semaines : [])
     .filter(s => s && typeof s.semaine === "string").sort((a, b) => a.semaine.localeCompare(b.semaine));
+  remplirServices(toutes);
+  const service = document.getElementById("service").value;
+  const semaines = vueService(toutes, service);
   const tuiles = document.getElementById("tuiles"), graph = document.getElementById("graphiques"), tab = document.getElementById("tableau");
   tuiles.replaceChildren(); graph.replaceChildren(); tab.replaceChildren();
   const sous = document.getElementById("sous");
   if (!semaines.length) { sous.textContent = "Aucune semaine mesurée pour l'instant : lancez banc-essai/hebdo.sh."; return; }
   const d = semaines[semaines.length - 1], p = semaines.length > 1 ? semaines[semaines.length - 2] : {};
   sous.textContent = `${semaines.length} semaine(s) · dernière : ${d.semaine} (${d.fonctionnement || "?"}, ${d.modele || "modèle ?"}) · source : ${source}` +
-    (donnees.mis_a_jour ? ` · mis à jour le ${donnees.mis_a_jour}` : "");
+    (donnees.mis_a_jour ? ` · mis à jour le ${donnees.mis_a_jour}` : "") +
+    (service ? ` · filtre : ${service} (notes et missions de ce service ; tokens, durée, pièges et N3 restent globaux)` : "");
   if (d.llm_factice) sous.append(el("span", { class: "alerte" }, " · LLM factice : notes non représentatives."));
   tuiles.append(
     tuile("Note livrable", val(d, "note_livrable"), val(p, "note_livrable"), "", 1),
@@ -250,6 +277,7 @@ async function charger() {
     "tableau.json introuvable ici (ou page ouverte en file://). Utilisez « Ouvrir un tableau.json… ».";
 }
 document.getElementById("recharger").addEventListener("click", charger);
+document.getElementById("service").addEventListener("change", () => { if (DONNEES) afficher(DONNEES, SOURCE); });
 document.getElementById("fichier").addEventListener("change", ev => {
   const f = ev.target.files && ev.target.files[0]; if (!f) return;
   f.text().then(t => afficher(JSON.parse(t), f.name)).catch(() => {

@@ -86,6 +86,9 @@ COLONNES_AJOUTEES = [
     ("missions", "charte_avertissements", "TEXT"),
     ("missions", "note", "INTEGER"),
     ("missions", "fantome", "BOOLEAN NOT NULL DEFAULT {FAUX}"),
+    ("missions", "pilote_semaine", "VARCHAR(10)"),
+    ("missions", "alertes_bouclier", "TEXT"),
+    ("connaissances", "suspect", "BOOLEAN NOT NULL DEFAULT {FAUX}"),
 ]
 
 

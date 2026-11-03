@@ -1,0 +1,63 @@
+{
+ "id": "O04-6530815c",
+ "oracle": "O04",
+ "oracles": [
+  "O04"
+ ],
+ "causes": {
+  "O04": {
+   "montant": "grand-lettres"
+  }
+ },
+ "signature": "{\"fonctionnement\": \"F4-disponible\", \"montant\": \"grand-lettres\"}",
+ "oracle_titre": "Montant ≥ seuil ⇒ risque élevé (code exigé)",
+ "gravite": 2,
+ "graine": 71070151806516,
+ "iteration": 7,
+ "occurrences": 1,
+ "cas_minimal": {
+  "service": "auto",
+  "projet": "divers",
+  "gabarit": "note",
+  "montant": "grand-lettres",
+  "verbe": "aucun",
+  "fonctionnement": "F4-disponible",
+  "contenu": "aucun",
+  "reponse_ia": "bonne",
+  "decideur": "aucune",
+  "evenement": "aucun",
+  "canal_creation": "api"
+ },
+ "non_neutres": {
+  "montant": "grand-lettres",
+  "fonctionnement": "F4-disponible"
+ },
+ "description": "montant=grand-lettres, fonctionnement=F4-disponible",
+ "scenario_initial": {
+  "projet": "syfer-alias",
+  "gabarit": "franglais",
+  "montant": "grand-lettres",
+  "verbe": "vire-tu",
+  "fonctionnement": "F4-disponible",
+  "contenu": "import-canari",
+  "decideur": "valider-api",
+  "canal_creation": "cockpit"
+ },
+ "actions": [
+  {
+   "faire": "creer_mission",
+   "canal": "api",
+   "double": false,
+   "file_pleine": false
+  }
+ ],
+ "consigne": "Prépare une note interne sur le dossier tarification (ZQX1806516). Fais une synthèse claire. Budget évoqué : mille cinq cents euros.",
+ "montant_texte": "mille cinq cents euros",
+ "observe": "décision #1 (lancement_f4) risque « moyen » pour mille cinq cents euros",
+ "attendu": "risque « eleve » (montant 1500 € ≥ 1000 €) et code exigé",
+ "reproduit": true,
+ "autres_violations": [],
+ "fichier_ligne_probable": "nexus-core/app/decideur.py:76",
+ "correction_suggeree": "Faire comprendre à _montant_cite / _MONTANT les formats manquants (séparateur anglais « 2,000 », « M€ », montants en lettres) ; à défaut, risque « eleve » par prudence quand un montant est ambigu.",
+ "rejouer": "python3 iterer.py --rejouer O04-6530815c"
+}

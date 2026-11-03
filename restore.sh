@@ -75,15 +75,18 @@ mkdir -p "$KIT_DIR/data" "$STAGING"
 chmod 700 "$KIT_DIR/data"
 trap 'rm -rf "$STAGING"' EXIT
 services_fichiers=()
-for service in nexus-core nexus-bridge; do
+for service in nexus-core nexus-bridge veille; do
   archive="$SRC/$service.tar.gz"
-  [ -f "$archive" ] || { avert "$service.tar.gz absent de la sauvegarde : $service ne sera pas modifié."; continue; }
+  if [ ! -f "$archive" ]; then
+    [ "$service" = veille ] || avert "$service.tar.gz absent de la sauvegarde : $service ne sera pas modifié."
+    continue
+  fi
   tar -tzf "$archive" >/dev/null 2>&1 || erreur "Archive abîmée : $archive (rien n'a été modifié)."
   tar -C "$STAGING" -xzf "$archive"
   services_fichiers+=("$service")
 done
 # Anciennes sauvegardes : la copie cohérente s'appelait <base>-sauvegarde.db
-for paire in nexus-core:nexus.db nexus-bridge:bridge.db; do
+for paire in nexus-core:nexus.db nexus-bridge:bridge.db veille:veille.db; do
   service="${paire%%:*}"; base="${paire#*:}"
   d="$STAGING/$service"
   [ -d "$d" ] || continue
@@ -167,6 +170,12 @@ mkdir -p "$COTE"; chmod 700 "$COTE"
 for service in "${services_fichiers[@]}"; do
   if [ -d "data/$service" ]; then mv "data/$service" "$COTE/$service"; fi
   mv "$STAGING/$service" "data/$service"
+  if [ "$service" = veille ]; then
+    # Écrite par le collecteur (root, sur l'hôte), lue par nexus-core (UID 10001)
+    chmod 755 "data/$service"; chmod 644 "data/$service"/*.db 2>/dev/null || true
+    ok "data/$service restauré (lisible par nexus-core)"
+    continue
+  fi
   chown -R "$UID_NEXUS:$UID_NEXUS" "data/$service"
   chmod 750 "data/$service"
   ok "data/$service restauré (propriétaire UID $UID_NEXUS)"

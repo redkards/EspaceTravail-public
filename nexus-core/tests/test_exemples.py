@@ -67,7 +67,13 @@ def test_pas_de_melange_de_marques_entre_projets():
 
 
 def test_anti_secret_et_charte(client, entetes):
-    mid = _terminee(service="OPS-CORE/projets", projet="nexus", livrable="BROUILLON\n- Jeton : sk-" + "Ab1" * 10)
+    secret = "sk-" + "Ab1" * 10
+    mid = _terminee(service="OPS-CORE/projets", projet="nexus", livrable="BROUILLON\n- Jeton : " + secret)
+    assert secret not in lire_mission(mid).livrable_texte  # masqué par le pipeline (tous services)
+    from app.db import session_scope
+    from app.models import Mission
+    with session_scope() as s:  # livrable en clair injecté directement en base : refus anti-secret
+        s.get(Mission, mid).livrable_texte = "BROUILLON\n- Jeton : " + secret
     r = client.post(f"/api/missions/{mid}/exemple", headers=entetes)
     assert r.status_code == 422 and "secret" in r.json()["detail"]
     assert exemples.proposer(mid, "note") is None  # automatique : écarté sans erreur

@@ -1,66 +1,77 @@
 # Registre des projets servis par le Mini NEXUS MOTHERSHIP.
 # Rechargeable sans redémarrage : GET /api/projets?recharger=1 (avec la clé X-Nexus-Key).
-# Champs : code (minuscules, chiffres, tirets), nom, description, services (services conseillés),
+# Champs : code (minuscules, chiffres, tirets), actif (pilote hebdomadaire), nom, description, services (services conseillés),
 #          alias (facultatif, autres noms acceptés à la création d'une mission).
 # Le projet « divers » est obligatoire : c'est le projet par défaut.
 
 projets:
   - code: paradoxx
+    actif: false
     nom: PARADOXX SYSTÈME
     description: Structure de pilotage multi-projets et VPS Hostinger dédié.
     services: [OPS-CORE/projets, PILOT-CORE/pilotage, CODE-CORE/conception, CODE-CORE/revue, GREEN-CORE/environnement, CYBER-FORTRESS/audit, CYBER-FORTRESS/veille]
 
   - code: nexus
+    actif: true
     nom: NEXUS MOTHERSHIP
     alias: [syfer, nexus-mothership]
     description: Organisation d'agents IA en départements, un seul humain valide.
     services: [AGENT-FACTORY/evaluation, CODE-CORE/conception, CODE-CORE/revue, LEX-GUARD/droit-europe, CYBER-FORTRESS/audit, CYBER-FORTRESS/veille]
 
   - code: poker-winners
+    actif: true
     nom: Poker Winners
     alias: [poker-vitrine, poker vitrine]
     description: Site vitrine poker et bêta privée.
     services: [LEX-GUARD/droit-france, CONTENT-ARENA/redaction, DESIGN-SYSTEM/ui, CODE-CORE/revue, REVENUE-CORE/propositions, CYBER-FORTRESS/audit]
 
   - code: poker-feeling
+    actif: true
     nom: Poker Feeling
     description: Livre de poker « Poker Feeling ».
     services: [CONTENT-ARENA/redaction, DESIGN-SYSTEM/ui, R&D-PARADOX/veille, LEX-GUARD/droit-france]
 
   - code: redkards
+    actif: true
     nom: REDKARDS / Red Card
     alias: [red-card, redcard]
     description: Bande dessinée REDKARDS.
     services: [DESIGN-SYSTEM/ui, CONTENT-ARENA/redaction, OPS-CORE/projets, LEX-GUARD/droit-france]
 
   - code: top-solver
+    actif: true
     nom: Top Solver
     alias: [solver, pw-solver]
     description: Solver GTO de poker en français, outil d'analyse de main.
     services: [CODE-CORE/conception, CODE-CORE/revue, DESIGN-SYSTEM/ui, LEX-GUARD/droit-france, R&D-PARADOX/veille]
 
   - code: youtube-poker-winner
+    actif: false
     nom: Chaîne YouTube Poker Winner
     description: Chaîne YouTube de poker éducatif.
     services: [CONTENT-ARENA/redaction, R&D-PARADOX/veille, PILOT-CORE/pilotage, LEX-GUARD/droit-france]
 
   - code: freelance-ia
+    actif: false
     nom: Freelance IA
     description: Activité freelance de développeur d'applications et d'automatisation IA.
     services: [PILOT-CORE/etudes, PILOT-CORE/pilotage, REVENUE-CORE/propositions, LEX-GUARD/droit-france, LEX-GUARD/droit-europe, CODE-CORE/conception, CYBER-FORTRESS/audit]
 
   - code: esct-boxe
+    actif: false
     nom: Site ESCT Boxe
     alias: [siteesctboxe]
     description: Site web du club ESCT Boxe.
     services: [DESIGN-SYSTEM/ui, CODE-CORE/conception, CODE-CORE/revue, CONTENT-ARENA/redaction, LEX-GUARD/droit-europe]
 
   - code: turf
+    actif: false
     nom: TURF
     description: Projet TURF.
     services: [R&D-PARADOX/veille, PILOT-CORE/etudes, LEX-GUARD/droit-france, OPS-CORE/projets]
 
   - code: divers
+    actif: false
     nom: Divers
     description: Projet par défaut pour les missions non rattachées.
     services: [OPS-CORE/projets]

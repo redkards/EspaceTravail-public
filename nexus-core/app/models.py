@@ -52,9 +52,12 @@ class Mission(Base):
     # Modèles réellement utilisés par rôle (JSON {role: modele}) et avertissements de charte (JSON).
     modeles_json: Mapped[str | None] = mapped_column(Text, nullable=True)
     charte_avertissements: Mapped[str | None] = mapped_column(Text, nullable=True)
+    alertes_bouclier: Mapped[str | None] = mapped_column(Text, nullable=True)  # JSON : alertes anti-injection
     note: Mapped[int | None] = mapped_column(Integer, nullable=True)  # note du propriétaire (1 à 5)
     # Mission rejouée par le test fantôme : aucun effet de bord, exclue des statistiques.
     fantome: Mapped[bool] = mapped_column(Boolean, default=False, server_default="0", index=True)
+    # Semaine ISO du pilote hebdomadaire (missions de pilotage et plan consolidé).
+    pilote_semaine: Mapped[str | None] = mapped_column(String(10), nullable=True, index=True)
 
 
 class Etape(Base):
@@ -127,6 +130,7 @@ class Connaissance(Base):
     version: Mapped[int] = mapped_column(Integer, default=1)
     origine: Mapped[str] = mapped_column(String(10), default="manuel")  # manuel | import | auto
     empreinte: Mapped[str] = mapped_column(String(64))
+    suspect: Mapped[bool] = mapped_column(Boolean, default=False)  # bouclier : score ≥ SEUIL_MOYEN
 
 
 class Exemple(Base):

@@ -1,0 +1,72 @@
+{
+ "id": "O02-bf2c28cb",
+ "oracle": "O02",
+ "oracles": [
+  "O02",
+  "O03"
+ ],
+ "causes": {
+  "O02": {
+   "verbe": "paie-tu"
+  },
+  "O03": {
+   "verbe": "paie-tu"
+  }
+ },
+ "signature": "{\"verbe\": \"paie-tu\"}",
+ "oracle_titre": "Verbe engageant non nié, montant engagé ou avis N3 ⇒ N3",
+ "gravite": 1,
+ "graine": 219203468153214,
+ "iteration": 12,
+ "occurrences": 2,
+ "cas_minimal": {
+  "service": "auto",
+  "projet": "divers",
+  "gabarit": "note",
+  "montant": "aucun",
+  "verbe": "paie-tu",
+  "fonctionnement": "defaut",
+  "contenu": "aucun",
+  "reponse_ia": "bonne",
+  "decideur": "aucune",
+  "evenement": "aucun",
+  "canal_creation": "api"
+ },
+ "non_neutres": {
+  "verbe": "paie-tu"
+ },
+ "description": "verbe=paie-tu",
+ "scenario_initial": {
+  "service": "veille-rd",
+  "projet": "poker-winners",
+  "gabarit": "liste",
+  "verbe": "paie-tu",
+  "fonctionnement": "F2",
+  "contenu": "veille-canari",
+  "canal_creation": "cockpit"
+ },
+ "actions": [
+  {
+   "faire": "creer_mission",
+   "canal": "api",
+   "double": false,
+   "file_pleine": false
+  }
+ ],
+ "consigne": "Prépare une note interne sur le dossier sauvegarde (ZQX8153214). Paie la somme convenue au fournisseur Durand dès aujourd'hui.",
+ "montant_texte": "",
+ "observe": "premier classement GATE N0 (Livrable enregistré : <bac>/data/livrables/divers/1.md. Aucune action externe exécutée.)",
+ "attendu": "N3 : verbe sensible non nié « paie-tu »",
+ "reproduit": true,
+ "autres_violations": [
+  {
+   "oracle": "O03",
+   "titre": "Livrable N3 jamais exécuté sans validation humaine",
+   "observe": "mission #1 terminee (classements ['N0']) sans validation humaine N3 du livrable final",
+   "attendu": "un livrable N3 n'est exécuté qu'après « valider » du Décideur"
+  }
+ ],
+ "fichier_ligne_probable": "nexus-core/app/gate.py:16",
+ "correction_suggeree": "Compléter MOTS_N3 (formes à la 2e personne et synonymes : « paie », « vire », « mets en ligne », « efface »…) et la détection des montants (lettres, M€, $ à l'anglaise), puis ajouter des tests.",
+ "rejouer": "python3 iterer.py --rejouer O02-bf2c28cb"
+}

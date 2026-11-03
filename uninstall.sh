@@ -61,8 +61,9 @@ if [ "$PURGE" -eq 1 ]; then
   fi
   rm -rf --one-file-system "${KIT_DIR:?}/data"
   rm -f "$KIT_DIR/.env" "$KIT_DIR/install.log"
-  rm -f /etc/cron.d/nexus-mothership-sauvegarde /etc/cron.d/nexus-veille-cyber /etc/cron.d/nexus-exercice-restauration
-  ok "Données, .env, install.log et tâches planifiées (sauvegarde, veille cyber, exercice de restauration) supprimés"
+  rm -f /etc/cron.d/nexus-mothership-sauvegarde /etc/cron.d/nexus-veille-cyber /etc/cron.d/nexus-exercice-restauration \
+        /etc/cron.d/nexus-banc-hebdo /etc/cron.d/nexus-attaque-simulee /etc/cron.d/nexus-veille
+  ok "Données, .env, install.log et tâches planifiées (sauvegarde, veille cyber, exercice, banc, attaque simulée, veille) supprimés"
   if [ -d "$KIT_DIR/backups" ]; then
     avert "Il reste les SAUVEGARDES : $KIT_DIR/backups ($(du -sh "$KIT_DIR/backups" | cut -f1))."
     avert "Sans elles, plus aucun retour en arrière n'est possible."

@@ -1,0 +1,9014 @@
+{
+ "parametres_execution": {
+  "tirages": 20,
+  "jours": 30,
+  "graine": 2026,
+  "sensibilite": 6,
+  "candidats": 3,
+  "rapide": true,
+  "processus": 2
+ },
+ "duree_calcul_s": 133.9,
+ "calage": [
+  {
+   "mission": "checklist N1",
+   "duree_s": 124.2,
+   "mesure_s": 131,
+   "tokens": 1596,
+   "mesure_tokens": 1611,
+   "ecart_duree": -0.052,
+   "ecart_tokens": -0.009
+  },
+  {
+   "mission": "post Poker Feeling",
+   "duree_s": 486.2,
+   "mesure_s": 480,
+   "tokens": 6412,
+   "mesure_tokens": 6396,
+   "ecart_duree": 0.013,
+   "ecart_tokens": 0.003
+  }
+ ],
+ "recommandation": "S2",
+ "classement": [
+  "S3",
+  "S2",
+  "S16",
+  "S13",
+  "S14",
+  "S7",
+  "S1",
+  "S5",
+  "S6",
+  "S4",
+  "S2L",
+  "S1L"
+ ],
+ "capacite": {
+  "S1L": {
+   "points": [
+    {
+     "charge": 1,
+     "livrees_jour": 8.586666666666666,
+     "attente_p90_s": 1340.823717481206,
+     "ratio": 0.7891423578400447,
+     "cpu_llm": 0.07003524930327773,
+     "soutenable": false
+    },
+    {
+     "charge": 3,
+     "livrees_jour": 17.39,
+     "attente_p90_s": 664.6766563188532,
+     "ratio": 0.8057428339752718,
+     "cpu_llm": 0.12184287140700989,
+     "soutenable": false
+    },
+    {
+     "charge": 6,
+     "livrees_jour": 31.389999999999997,
+     "attente_p90_s": 686.5707881395854,
+     "ratio": 0.8070821475194887,
+     "cpu_llm": 0.20306405492283167,
+     "soutenable": false
+    },
+    {
+     "charge": 10,
+     "livrees_jour": 49.00666666666667,
+     "attente_p90_s": 1294.4718414182041,
+     "ratio": 0.8084216074805128,
+     "cpu_llm": 0.3091182214362789,
+     "soutenable": false
+    },
+    {
+     "charge": 15,
+     "livrees_jour": 71.2,
+     "attente_p90_s": 4378.903917288098,
+     "ratio": 0.8088376255506164,
+     "cpu_llm": 0.43825257642460025,
+     "soutenable": false
+    },
+    {
+     "charge": 25,
+     "livrees_jour": 113.72666666666666,
+     "attente_p90_s": 32011.81237924561,
+     "ratio": 0.8007109740345891,
+     "cpu_llm": 0.6875354613390049,
+     "soutenable": false
+    },
+    {
+     "charge": 40,
+     "livrees_jour": 147.89,
+     "attente_p90_s": 370340.90274306585,
+     "ratio": 0.6858245198157158,
+     "cpu_llm": 0.8916786865362791,
+     "soutenable": false
+    }
+   ],
+   "soutenable_jour": 0.0,
+   "sature_au_dela": true
+  },
+  "S2": {
+   "points": [
+    {
+     "charge": 1,
+     "livrees_jour": 10.176666666666666,
+     "attente_p90_s": 73.70183835734858,
+     "ratio": 0.9427030077376239,
+     "cpu_llm": 0.007493388524422953,
+     "soutenable": true
+    },
+    {
+     "charge": 3,
+     "livrees_jour": 20.21,
+     "attente_p90_s": 7.732579964081981,
+     "ratio": 0.9440741041257533,
+     "cpu_llm": 0.012976988377440263,
+     "soutenable": true
+    },
+    {
+     "charge": 6,
+     "livrees_jour": 36.17666666666666,
+     "attente_p90_s": 0.0,
+     "ratio": 0.9408114345704384,
+     "cpu_llm": 0.02297979780396151,
+     "soutenable": true
+    },
+    {
+     "charge": 10,
+     "livrees_jour": 56.223333333333336,
+     "attente_p90_s": 0.0,
+     "ratio": 0.9393268564331876,
+     "cpu_llm": 0.0339569380374319,
+     "soutenable": true
+    },
+    {
+     "charge": 15,
+     "livrees_jour": 81.53333333333333,
+     "attente_p90_s": 0.0,
+     "ratio": 0.9358284249788724,
+     "cpu_llm": 0.04835523168950163,
+     "soutenable": true
+    },
+    {
+     "charge": 25,
+     "livrees_jour": 131.58333333333331,
+     "attente_p90_s": 0.20581654028589477,
+     "ratio": 0.9343529117049965,
+     "cpu_llm": 0.07752548093091387,
+     "soutenable": true
+    },
+    {
+     "charge": 40,
+     "livrees_jour": 204.55,
+     "attente_p90_s": 1959.9911528181929,
+     "ratio": 0.9189885559904832,
+     "cpu_llm": 0.15774668447233958,
+     "soutenable": true
+    }
+   ],
+   "soutenable_jour": 204.55,
+   "sature_au_dela": false
+  },
+  "S3": {
+   "points": [
+    {
+     "charge": 1,
+     "livrees_jour": 10.203333333333333,
+     "attente_p90_s": 73.68831432760524,
+     "ratio": 0.9421785268732707,
+     "cpu_llm": 0.008757565050602345,
+     "soutenable": true
+    },
+    {
+     "charge": 3,
+     "livrees_jour": 20.316666666666666,
+     "attente_p90_s": 10.211667528517287,
+     "ratio": 0.9478903806974713,
+     "cpu_llm": 0.015402073495182345,
+     "soutenable": true
+    },
+    {
+     "charge": 6,
+     "livrees_jour": 36.123333333333335,
+     "attente_p90_s": 0.0,
+     "ratio": 0.9400908677672242,
+     "cpu_llm": 0.02669504854067121,
+     "soutenable": true
+    },
+    {
+     "charge": 10,
+     "livrees_jour": 56.21333333333333,
+     "attente_p90_s": 0.0,
+     "ratio": 0.9405257606673004,
+     "cpu_llm": 0.03967034324262762,
+     "soutenable": true
+    },
+    {
+     "charge": 15,
+     "livrees_jour": 81.52000000000001,
+     "attente_p90_s": 0.0,
+     "ratio": 0.9370123797022943,
+     "cpu_llm": 0.055996100190622934,
+     "soutenable": true
+    },
+    {
+     "charge": 25,
+     "livrees_jour": 131.6,
+     "attente_p90_s": 2.194511697674463,
+     "ratio": 0.9346987501289664,
+     "cpu_llm": 0.08843356596337787,
+     "soutenable": true
+    },
+    {
+     "charge": 40,
+     "livrees_jour": 205.67333333333332,
+     "attente_p90_s": 2096.6446870302243,
+     "ratio": 0.923640592538485,
+     "cpu_llm": 0.17268444435714042,
+     "soutenable": true
+    }
+   ],
+   "soutenable_jour": 205.67333333333332,
+   "sature_au_dela": false
+  },
+  "S5": {
+   "points": [
+    {
+     "charge": 1,
+     "livrees_jour": 9.43,
+     "attente_p90_s": 333.6932663046625,
+     "ratio": 0.8698462935099951,
+     "cpu_llm": 0.03272320870418062,
+     "soutenable": true
+    },
+    {
+     "charge": 3,
+     "livrees_jour": 19.023333333333333,
+     "attente_p90_s": 60.0642772612767,
+     "ratio": 0.8799374755284013,
+     "cpu_llm": 0.05735381277615363,
+     "soutenable": true
+    },
+    {
+     "charge": 6,
+     "livrees_jour": 34.22,
+     "attente_p90_s": 0.0,
+     "ratio": 0.8845190316941498,
+     "cpu_llm": 0.09604652831569863,
+     "soutenable": true
+    },
+    {
+     "charge": 10,
+     "livrees_jour": 53.67,
+     "attente_p90_s": 6.828977802418308,
+     "ratio": 0.8889778307754825,
+     "cpu_llm": 0.1435619488550584,
+     "soutenable": true
+    },
+    {
+     "charge": 15,
+     "livrees_jour": 77.82333333333334,
+     "attente_p90_s": 91.02166715713717,
+     "ratio": 0.8870307623383921,
+     "cpu_llm": 0.19963535067728327,
+     "soutenable": true
+    },
+    {
+     "charge": 25,
+     "livrees_jour": 125.07333333333334,
+     "attente_p90_s": 431.85011336818286,
+     "ratio": 0.8809033938862976,
+     "cpu_llm": 0.307636468978033,
+     "soutenable": true
+    },
+    {
+     "charge": 40,
+     "livrees_jour": 195.22333333333333,
+     "attente_p90_s": 4327.97034050491,
+     "ratio": 0.867150595947977,
+     "cpu_llm": 0.4701136258358355,
+     "soutenable": false
+    }
+   ],
+   "soutenable_jour": 125.07333333333334,
+   "sature_au_dela": true
+  },
+  "S13": {
+   "points": [
+    {
+     "charge": 1,
+     "livrees_jour": 10.256666666666666,
+     "attente_p90_s": 18.23344101735031,
+     "ratio": 0.9551945163638864,
+     "cpu_llm": 0.005757150548021695,
+     "soutenable": true
+    },
+    {
+     "charge": 3,
+     "livrees_jour": 20.619999999999997,
+     "attente_p90_s": 1.6964279510267075,
+     "ratio": 0.9613065132564167,
+     "cpu_llm": 0.010328368454921185,
+     "soutenable": true
+    },
+    {
+     "charge": 6,
+     "livrees_jour": 36.663333333333334,
+     "attente_p90_s": 0.0,
+     "ratio": 0.9517540106506569,
+     "cpu_llm": 0.018198684935277248,
+     "soutenable": true
+    },
+    {
+     "charge": 10,
+     "livrees_jour": 56.92,
+     "attente_p90_s": 0.0,
+     "ratio": 0.9515840054390494,
+     "cpu_llm": 0.026838404961220967,
+     "soutenable": true
+    },
+    {
+     "charge": 15,
+     "livrees_jour": 82.9,
+     "attente_p90_s": 0.0,
+     "ratio": 0.9514331813309074,
+     "cpu_llm": 0.03774412935681399,
+     "soutenable": true
+    },
+    {
+     "charge": 25,
+     "livrees_jour": 133.67333333333335,
+     "attente_p90_s": 0.0,
+     "ratio": 0.9484160552222793,
+     "cpu_llm": 0.05931951480282867,
+     "soutenable": true
+    },
+    {
+     "charge": 40,
+     "livrees_jour": 209.97333333333336,
+     "attente_p90_s": 180.9372254067683,
+     "ratio": 0.9421355582812707,
+     "cpu_llm": 0.11483539684182346,
+     "soutenable": true
+    }
+   ],
+   "soutenable_jour": 209.97333333333336,
+   "sature_au_dela": false
+  },
+  "S16": {
+   "points": [
+    {
+     "charge": 1,
+     "livrees_jour": 10.18,
+     "attente_p90_s": 13.686818663619928,
+     "ratio": 0.9425722394823761,
+     "cpu_llm": 0.004790083326258097,
+     "soutenable": true
+    },
+    {
+     "charge": 3,
+     "livrees_jour": 20.41,
+     "attente_p90_s": 4.69650650504788,
+     "ratio": 0.9444758140056679,
+     "cpu_llm": 0.008640146433180576,
+     "soutenable": true
+    },
+    {
+     "charge": 6,
+     "livrees_jour": 36.010000000000005,
+     "attente_p90_s": 0.0,
+     "ratio": 0.935362999145181,
+     "cpu_llm": 0.015799758627960868,
+     "soutenable": true
+    },
+    {
+     "charge": 10,
+     "livrees_jour": 55.92,
+     "attente_p90_s": 0.0,
+     "ratio": 0.9353842182553448,
+     "cpu_llm": 0.02349571663956758,
+     "soutenable": true
+    },
+    {
+     "charge": 15,
+     "livrees_jour": 81.34666666666666,
+     "attente_p90_s": 0.0,
+     "ratio": 0.9334553215760799,
+     "cpu_llm": 0.03319805487304962,
+     "soutenable": true
+    },
+    {
+     "charge": 25,
+     "livrees_jour": 131.32,
+     "attente_p90_s": 0.0,
+     "ratio": 0.9322663308605568,
+     "cpu_llm": 0.053272677788484366,
+     "soutenable": true
+    },
+    {
+     "charge": 40,
+     "livrees_jour": 203.73,
+     "attente_p90_s": 660.0242034182663,
+     "ratio": 0.9163952751513348,
+     "cpu_llm": 0.11486587119042777,
+     "soutenable": true
+    }
+   ],
+   "soutenable_jour": 203.73,
+   "sature_au_dela": false
+  }
+ },
+ "sensibilite": {
+  "candidats": [
+   "S2",
+   "S3",
+   "S16"
+  ],
+  "tirages": 6,
+  "base": {
+   "S2": 94.56367166128821,
+   "S3": 94.92381923469277,
+   "S16": 94.7247851662775
+  },
+  "parametres": [
+   {
+    "parametre": "modele.cloud.q",
+    "gagnant_min": "S16",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 2.567846741775952,
+    "delta_score_max": 2.567846741775952,
+    "scores": {
+     "S2": {
+      "min": 93.08690485888133,
+      "max": 95.65475160065728
+     },
+     "S3": {
+      "min": 93.56855193831836,
+      "max": 96.06993737637909
+     },
+     "S16": {
+      "min": 93.58177240836754,
+      "max": 95.9237405135513
+     }
+    },
+    "min": 0.65,
+    "max": 0.88,
+    "unite": "probabilité"
+   },
+   {
+    "parametre": "modele.3b.q",
+    "gagnant_min": "S3",
+    "gagnant_max": "S2",
+    "change_conclusion": true,
+    "delta_score_recommande": 1.4795387232222623,
+    "delta_score_max": 1.4795387232222623,
+    "scores": {
+     "S2": {
+      "min": 93.88266097620341,
+      "max": 95.36219969942567
+     },
+     "S3": {
+      "min": 94.92381923469277,
+      "max": 94.92381923469277
+     },
+     "S16": {
+      "min": 94.7247851662775,
+      "max": 94.7247851662775
+     }
+    },
+    "min": 0.3,
+    "max": 0.6,
+    "unite": "probabilité"
+   },
+   {
+    "parametre": "v2.gabarit_gain_q",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 1.3627622303032183,
+    "delta_score_max": 1.962018325473423,
+    "scores": {
+     "S2": {
+      "min": 93.73997699407262,
+      "max": 95.10273922437584
+     },
+     "S3": {
+      "min": 93.93398471802021,
+      "max": 95.75777494661766
+     },
+     "S16": {
+      "min": 93.78855943331524,
+      "max": 95.75057775878867
+     }
+    },
+    "min": 0.03,
+    "max": 0.15,
+    "unite": "probabilité"
+   },
+   {
+    "parametre": "modele.3b.fp",
+    "gagnant_min": "S16",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 1.276219960507035,
+    "delta_score_max": 1.276219960507035,
+    "scores": {
+     "S2": {
+      "min": 95.07838119855067,
+      "max": 93.80216123804364
+     },
+     "S3": {
+      "min": 94.92381923469277,
+      "max": 94.92381923469277
+     },
+     "S16": {
+      "min": 95.38077599577632,
+      "max": 94.13897563678704
+     }
+    },
+    "min": 0.08,
+    "max": 0.25,
+    "unite": "probabilité"
+   },
+   {
+    "parametre": "qualite.gain_revision",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 1.0375328650422517,
+    "delta_score_max": 1.0375328650422517,
+    "scores": {
+     "S2": {
+      "min": 93.87647309987813,
+      "max": 94.91400596492038
+     },
+     "S3": {
+      "min": 94.59032683064487,
+      "max": 95.55466438477076
+     },
+     "S16": {
+      "min": 94.44988392716489,
+      "max": 95.15686890756206
+     }
+    },
+    "min": 0.05,
+    "max": 0.2,
+    "unite": "probabilité"
+   },
+   {
+    "parametre": "cloud.pannes_mois",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.9413677479484335,
+    "delta_score_max": 0.9413677479484335,
+    "scores": {
+     "S2": {
+      "min": 94.88703257115702,
+      "max": 93.94566482320859
+     },
+     "S3": {
+      "min": 95.12463291614011,
+      "max": 94.85806112491787
+     },
+     "S16": {
+      "min": 94.77699993749918,
+      "max": 94.15175413693065
+     }
+    },
+    "min": 0.5,
+    "max": 6.0,
+    "unite": "épisodes/mois"
+   },
+   {
+    "parametre": "cloud.duree_panne_h",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.8764953447603716,
+    "delta_score_max": 0.8764953447603716,
+    "scores": {
+     "S2": {
+      "min": 94.90229829888868,
+      "max": 94.02580295412831
+     },
+     "S3": {
+      "min": 95.1016301294109,
+      "max": 94.65811267666272
+     },
+     "S16": {
+      "min": 94.81377057751472,
+      "max": 94.50932969956877
+     }
+    },
+    "min": 0.5,
+    "max": 12.0,
+    "unite": "h"
+   },
+   {
+    "parametre": "offre.KVM2.prix_eur_mois",
+    "gagnant_min": "S2",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.7999999999999972,
+    "delta_score_max": 0.7999999999999972,
+    "scores": {
+     "S2": {
+      "min": 94.96987959098355,
+      "max": 94.16987959098356
+     },
+     "S3": {
+      "min": 94.92381923469277,
+      "max": 94.92381923469277
+     },
+     "S16": {
+      "min": 94.7247851662775,
+      "max": 94.7247851662775
+     }
+    },
+    "min": 6.99,
+    "max": 14.99,
+    "unite": "€/mois"
+   },
+   {
+    "parametre": "v2.detection_code",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.729593318122923,
+    "delta_score_max": 0.729593318122923,
+    "scores": {
+     "S2": {
+      "min": 94.25350580378927,
+      "max": 94.98309912191219
+     },
+     "S3": {
+      "min": 94.8396857128093,
+      "max": 95.45352544016582
+     },
+     "S16": {
+      "min": 94.75130711045477,
+      "max": 95.3474941463889
+     }
+    },
+    "min": 0.2,
+    "max": 0.5,
+    "unite": "probabilité"
+   },
+   {
+    "parametre": "modele.cloud.fp",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.6746350670177037,
+    "delta_score_max": 0.6746350670177037,
+    "scores": {
+     "S2": {
+      "min": 94.60067628469513,
+      "max": 93.92604121767742
+     },
+     "S3": {
+      "min": 95.2804510527826,
+      "max": 94.84455518428297
+     },
+     "S16": {
+      "min": 95.09589677086304,
+      "max": 94.45318541369288
+     }
+    },
+    "min": 0.04,
+    "max": 0.14,
+    "unite": "probabilité"
+   },
+   {
+    "parametre": "modele.3b.se",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.6215966200056613,
+    "delta_score_max": 0.6215966200056613,
+    "scores": {
+     "S2": {
+      "min": 94.13813014663994,
+      "max": 94.7597267666456
+     },
+     "S3": {
+      "min": 94.92381923469277,
+      "max": 94.92381923469277
+     },
+     "S16": {
+      "min": 94.546802016416,
+      "max": 94.88655019355878
+     }
+    },
+    "min": 0.3,
+    "max": 0.65,
+    "unite": "probabilité"
+   },
+   {
+    "parametre": "modele.cloud.se",
+    "gagnant_min": "S3",
+    "gagnant_max": "S16",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.5991967681719359,
+    "delta_score_max": 0.5991967681719359,
+    "scores": {
+     "S2": {
+      "min": 94.03428783815737,
+      "max": 94.6334846063293
+     },
+     "S3": {
+      "min": 94.58601434906569,
+      "max": 94.9997168187168
+     },
+     "S16": {
+      "min": 94.49455385612482,
+      "max": 95.0145406217009
+     }
+    },
+    "min": 0.6,
+    "max": 0.85,
+    "unite": "probabilité"
+   },
+   {
+    "parametre": "tokens.analyst.sortie",
+    "gagnant_min": "S3",
+    "gagnant_max": "S16",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.46837749789717975,
+    "delta_score_max": 0.5371706322555667,
+    "scores": {
+     "S2": {
+      "min": 94.71249165099084,
+      "max": 94.24411415309366
+     },
+     "S3": {
+      "min": 95.3570556499459,
+      "max": 94.81988501769034
+     },
+     "S16": {
+      "min": 95.34708140035214,
+      "max": 94.86122929733047
+     }
+    },
+    "min": 280,
+    "max": 520,
+    "unite": "tokens"
+   },
+   {
+    "parametre": "mix.p_F1",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.45161438555925315,
+    "delta_score_max": 0.5122143739598357,
+    "scores": {
+     "S2": {
+      "min": 94.8358523489213,
+      "max": 94.38423796336205
+     },
+     "S3": {
+      "min": 95.2100774597421,
+      "max": 94.86521669691776
+     },
+     "S16": {
+      "min": 94.96396504595351,
+      "max": 94.45175067199368
+     }
+    },
+    "min": 0.1,
+    "max": 0.3,
+    "unite": "probabilité"
+   },
+   {
+    "parametre": "qualite.auto_biais",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.4078214041392556,
+    "delta_score_max": 0.5232786943399219,
+    "scores": {
+     "S2": {
+      "min": 94.31331060944973,
+      "max": 94.72113201358898
+     },
+     "S3": {
+      "min": 94.73469044377896,
+      "max": 95.25796913811888
+     },
+     "S16": {
+      "min": 94.71577431371436,
+      "max": 95.11806407101643
+     }
+    },
+    "min": 0.65,
+    "max": 0.95,
+    "unite": "facteur"
+   },
+   {
+    "parametre": "v2.cache_taux",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.3523695762537642,
+    "delta_score_max": 0.3523695762537642,
+    "scores": {
+     "S2": {
+      "min": 94.69773925182147,
+      "max": 94.34536967556771
+     },
+     "S3": {
+      "min": 95.14868157015793,
+      "max": 95.16987501172308
+     },
+     "S16": {
+      "min": 94.8674084043323,
+      "max": 95.03067404330368
+     }
+    },
+    "min": 0.05,
+    "max": 0.3,
+    "unite": "probabilité"
+   },
+   {
+    "parametre": "decideur.p_reviser",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.3329119572843666,
+    "delta_score_max": 0.3329119572843666,
+    "scores": {
+     "S2": {
+      "min": 94.66508440149153,
+      "max": 94.33217244420716
+     },
+     "S3": {
+      "min": 94.9301669895649,
+      "max": 94.85538687298212
+     },
+     "S16": {
+      "min": 94.53598349431199,
+      "max": 94.76616405964062
+     }
+    },
+    "min": 0.05,
+    "max": 0.2,
+    "unite": "probabilité"
+   },
+   {
+    "parametre": "mix.p_F4",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.3269941681636084,
+    "delta_score_max": 0.3269941681636084,
+    "scores": {
+     "S2": {
+      "min": 94.60602797565339,
+      "max": 94.27903380748978
+     },
+     "S3": {
+      "min": 94.99024353437561,
+      "max": 94.90462985562682
+     },
+     "S16": {
+      "min": 94.92062378792588,
+      "max": 94.63739036831055
+     }
+    },
+    "min": 0.02,
+    "max": 0.1,
+    "unite": "probabilité"
+   },
+   {
+    "parametre": "tokens.checker.entree",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.30119732159101886,
+    "delta_score_max": 0.30119732159101886,
+    "scores": {
+     "S2": {
+      "min": 94.37552291645204,
+      "max": 94.67672023804306
+     },
+     "S3": {
+      "min": 94.98926509634748,
+      "max": 95.17589520920048
+     },
+     "S16": {
+      "min": 94.94656877574177,
+      "max": 95.15777577638084
+     }
+    },
+    "min": 280,
+    "max": 500,
+    "unite": "tokens"
+   },
+   {
+    "parametre": "vitesse.gen_ref_tok_s",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.23503318975535592,
+    "delta_score_max": 0.5100155876524468,
+    "scores": {
+     "S2": {
+      "min": 94.18399796152408,
+      "max": 94.41903115127944
+     },
+     "S3": {
+      "min": 94.83493977737209,
+      "max": 95.34495536502453
+     },
+     "S16": {
+      "min": 94.53821311595676,
+      "max": 94.94550395954894
+     }
+    },
+    "min": 3.8,
+    "max": 6.5,
+    "unite": "tokens/s"
+   },
+   {
+    "parametre": "tokens.directeur.sortie",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.21853264736179767,
+    "delta_score_max": 0.21853264736179767,
+    "scores": {
+     "S2": {
+      "min": 94.64654429067836,
+      "max": 94.42801164331657
+     },
+     "S3": {
+      "min": 95.04261830601915,
+      "max": 95.08885635087461
+     },
+     "S16": {
+      "min": 94.57540370503692,
+      "max": 94.63271338126457
+     }
+    },
+    "min": 80,
+    "max": 180,
+    "unite": "tokens"
+   },
+   {
+    "parametre": "arrivees.manuel_jour_ouvre",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.2122034692944652,
+    "delta_score_max": 0.30474517991467565,
+    "scores": {
+     "S2": {
+      "min": 94.95557699410875,
+      "max": 94.74337352481429
+     },
+     "S3": {
+      "min": 95.35441577524911,
+      "max": 95.04967059533443
+     },
+     "S16": {
+      "min": 94.7872063231531,
+      "max": 94.73118507441616
+     }
+    },
+    "min": 3,
+    "max": 12,
+    "unite": "missions/jour"
+   },
+   {
+    "parametre": "arrivees.fantome_p_nuit",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.2031982422730465,
+    "delta_score_max": 0.2721489962741259,
+    "scores": {
+     "S2": {
+      "min": 94.43541439896562,
+      "max": 94.23221615669257
+     },
+     "S3": {
+      "min": 94.90493888452546,
+      "max": 95.17708788079959
+     },
+     "S16": {
+      "min": 94.85871698604905,
+      "max": 94.7163273551348
+     }
+    },
+    "min": 0.05,
+    "max": 0.4,
+    "unite": "probabilité/nuit"
+   },
+   {
+    "parametre": "arrivees.manuel_weekend",
+    "gagnant_min": "S16",
+    "gagnant_max": "S16",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.20238811412986024,
+    "delta_score_max": 0.20238811412986024,
+    "scores": {
+     "S2": {
+      "min": 94.60161606930491,
+      "max": 94.39922795517505
+     },
+     "S3": {
+      "min": 94.84435710964563,
+      "max": 94.88128334905154
+     },
+     "S16": {
+      "min": 95.06930112721432,
+      "max": 94.92048794067215
+     }
+    },
+    "min": 0,
+    "max": 5,
+    "unite": "missions/jour"
+   },
+   {
+    "parametre": "v2.cache_prefixe",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.2021222383942245,
+    "delta_score_max": 0.2021222383942245,
+    "scores": {
+     "S2": {
+      "min": 94.4008359321307,
+      "max": 94.60295817052493
+     },
+     "S3": {
+      "min": 95.16795609259822,
+      "max": 95.03193723912857
+     },
+     "S16": {
+      "min": 94.7033395410681,
+      "max": 94.89305253636401
+     }
+    },
+    "min": 0.1,
+    "max": 0.4,
+    "unite": "part des tokens d'entrée"
+   },
+   {
+    "parametre": "tokens.prime.sortie",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.16104508910734694,
+    "delta_score_max": 0.18563794052317917,
+    "scores": {
+     "S2": {
+      "min": 94.40953483385067,
+      "max": 94.57057992295802
+     },
+     "S3": {
+      "min": 95.12556829582532,
+      "max": 94.93993035530214
+     },
+     "S16": {
+      "min": 94.87272275350144,
+      "max": 94.9354488330306
+     }
+    },
+    "min": 5,
+    "max": 20,
+    "unite": "tokens"
+   },
+   {
+    "parametre": "pannes.redemarrages_mois",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.15596207952494012,
+    "delta_score_max": 0.15596207952494012,
+    "scores": {
+     "S2": {
+      "min": 94.56367166128821,
+      "max": 94.71963374081315
+     },
+     "S3": {
+      "min": 94.92381923469277,
+      "max": 94.94674746368514
+     },
+     "S16": {
+      "min": 94.7247851662775,
+      "max": 94.78790733704083
+     }
+    },
+    "min": 0.2,
+    "max": 3.0,
+    "unite": "épisodes/mois"
+   },
+   {
+    "parametre": "vitesse.surcout_appel_s",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.15255963402761097,
+    "delta_score_max": 0.15255963402761097,
+    "scores": {
+     "S2": {
+      "min": 94.34101056496242,
+      "max": 94.49357019899003
+     },
+     "S3": {
+      "min": 94.99464044783856,
+      "max": 95.09071671072026
+     },
+     "S16": {
+      "min": 94.89642803280776,
+      "max": 94.85902990021172
+     }
+    },
+    "min": 2.0,
+    "max": 6.0,
+    "unite": "s/appel"
+   },
+   {
+    "parametre": "vitesse.disque_go_s",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.1520201720241232,
+    "delta_score_max": 0.23747222034637616,
+    "scores": {
+     "S2": {
+      "min": 94.60814680021092,
+      "max": 94.4561266281868
+     },
+     "S3": {
+      "min": 95.04782426868611,
+      "max": 95.28529648903249
+     },
+     "S16": {
+      "min": 94.70516162259362,
+      "max": 94.83421663613503
+     }
+    },
+    "min": 0.3,
+    "max": 1.5,
+    "unite": "Go/s"
+   },
+   {
+    "parametre": "v2.collector_extra_in",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.12575581816578563,
+    "delta_score_max": 0.32731225539727404,
+    "scores": {
+     "S2": {
+      "min": 94.41496407435822,
+      "max": 94.54071989252401
+     },
+     "S3": {
+      "min": 95.17854401566285,
+      "max": 94.85123176026558
+     },
+     "S16": {
+      "min": 94.9331612639409,
+      "max": 94.78888942956847
+     }
+    },
+    "min": 100,
+    "max": 350,
+    "unite": "tokens"
+   },
+   {
+    "parametre": "decideur.p_presence",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.11923787010346132,
+    "delta_score_max": 0.33946820806913536,
+    "scores": {
+     "S2": {
+      "min": 94.44485537795644,
+      "max": 94.5640932480599
+     },
+     "S3": {
+      "min": 95.04594832066948,
+      "max": 94.70648011260035
+     },
+     "S16": {
+      "min": 94.72897850668767,
+      "max": 94.67270461379076
+     }
+    },
+    "min": 0.7,
+    "max": 0.95,
+    "unite": "probabilité/session"
+   },
+   {
+    "parametre": "gate.p_publication",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.11721616995720296,
+    "delta_score_max": 0.2642703588442714,
+    "scores": {
+     "S2": {
+      "min": 94.45096549970346,
+      "max": 94.56818166966066
+     },
+     "S3": {
+      "min": 94.89977815303955,
+      "max": 95.16404851188382
+     },
+     "S16": {
+      "min": 94.8824922691556,
+      "max": 94.97174762034791
+     }
+    },
+    "min": 0.08,
+    "max": 0.3,
+    "unite": "probabilité"
+   },
+   {
+    "parametre": "pilote.p_coche",
+    "gagnant_min": "S3",
+    "gagnant_max": "S16",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.11552255910676479,
+    "delta_score_max": 0.11552255910676479,
+    "scores": {
+     "S2": {
+      "min": 94.46862537390253,
+      "max": 94.35310281479576
+     },
+     "S3": {
+      "min": 94.92500411750359,
+      "max": 94.81006221065867
+     },
+     "S16": {
+      "min": 94.8167672072841,
+      "max": 94.8612654872325
+     }
+    },
+    "min": 0.2,
+    "max": 0.6,
+    "unite": "probabilité"
+   },
+   {
+    "parametre": "cloud.delai_bascule_s",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.107702736745523,
+    "delta_score_max": 0.19846323448746261,
+    "scores": {
+     "S2": {
+      "min": 94.65389542042298,
+      "max": 94.54619268367746
+     },
+     "S3": {
+      "min": 95.20896502288711,
+      "max": 95.01050178839965
+     },
+     "S16": {
+      "min": 94.88558110528881,
+      "max": 94.80451133763806
+     }
+    },
+    "min": 10,
+    "max": 60,
+    "unite": "s"
+   },
+   {
+    "parametre": "tokens.taille_sigma",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.10237115481818648,
+    "delta_score_max": 0.20726534147935638,
+    "scores": {
+     "S2": {
+      "min": 94.51471615953024,
+      "max": 94.41234500471205
+     },
+     "S3": {
+      "min": 95.15040328388909,
+      "max": 94.94313794240973
+     },
+     "S16": {
+      "min": 94.83982995098192,
+      "max": 94.68537026546068
+     }
+    },
+    "min": 0.3,
+    "max": 0.6,
+    "unite": "écart-type log"
+   },
+   {
+    "parametre": "gate.p_preclassement",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.09856210675808086,
+    "delta_score_max": 0.1464966829807821,
+    "scores": {
+     "S2": {
+      "min": 94.40836133934427,
+      "max": 94.50692344610235
+     },
+     "S3": {
+      "min": 94.95318219300192,
+      "max": 94.90539028891759
+     },
+     "S16": {
+      "min": 94.58351804082226,
+      "max": 94.73001472380304
+     }
+    },
+    "min": 0.6,
+    "max": 0.9,
+    "unite": "probabilité"
+   },
+   {
+    "parametre": "arrivees.p_prime_llm",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.08849493070337644,
+    "delta_score_max": 0.10916787844213616,
+    "scores": {
+     "S2": {
+      "min": 94.41285389451222,
+      "max": 94.5013488252156
+     },
+     "S3": {
+      "min": 95.19101863041574,
+      "max": 95.17567629474824
+     },
+     "S16": {
+      "min": 94.82008628141119,
+      "max": 94.71091840296906
+     }
+    },
+    "min": 0.1,
+    "max": 0.4,
+    "unite": "probabilité"
+   },
+   {
+    "parametre": "mix.p_F3",
+    "gagnant_min": "S16",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.07857611859435565,
+    "delta_score_max": 0.3518411620054849,
+    "scores": {
+     "S2": {
+      "min": 94.32875833534001,
+      "max": 94.40733445393437
+     },
+     "S3": {
+      "min": 94.93013262440172,
+      "max": 94.95615534159687
+     },
+     "S16": {
+      "min": 95.03653937429063,
+      "max": 94.68469821228514
+     }
+    },
+    "min": 0.05,
+    "max": 0.2,
+    "unite": "probabilité"
+   },
+   {
+    "parametre": "pilote.proposees_par_projet",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.0766256486672603,
+    "delta_score_max": 0.26627402762066765,
+    "scores": {
+     "S2": {
+      "min": 94.38052688676969,
+      "max": 94.45715253543695
+     },
+     "S3": {
+      "min": 95.12066758432496,
+      "max": 94.8543935567043
+     },
+     "S16": {
+      "min": 94.97971018477442,
+      "max": 94.84226338151507
+     }
+    },
+    "min": 1,
+    "max": 5,
+    "unite": "missions"
+   },
+   {
+    "parametre": "arrivees.audit_periode_j",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.07386260200109973,
+    "delta_score_max": 0.12475659387268934,
+    "scores": {
+     "S2": {
+      "min": 94.49735148502532,
+      "max": 94.57121408702642
+     },
+     "S3": {
+      "min": 94.8927193247989,
+      "max": 94.84058168029411
+     },
+     "S16": {
+      "min": 94.62089432183296,
+      "max": 94.74565091570565
+     }
+    },
+    "min": 7,
+    "max": 30,
+    "unite": "jours"
+   },
+   {
+    "parametre": "vitesse.prefill_ref_tok_s",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.06423023776665104,
+    "delta_score_max": 0.16638504803475485,
+    "scores": {
+     "S2": {
+      "min": 94.33865281648069,
+      "max": 94.27442257871404
+     },
+     "S3": {
+      "min": 95.13232661891051,
+      "max": 95.04973029118952
+     },
+     "S16": {
+      "min": 94.71879505314782,
+      "max": 94.88518010118257
+     }
+    },
+    "min": 22,
+    "max": 40,
+    "unite": "tokens/s"
+   },
+   {
+    "parametre": "cloud.gen_tok_s",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.048171877631489224,
+    "delta_score_max": 0.1775722100019692,
+    "scores": {
+     "S2": {
+      "min": 94.72595625769627,
+      "max": 94.67778438006478
+     },
+     "S3": {
+      "min": 94.9208589191468,
+      "max": 94.83030186107027
+     },
+     "S16": {
+      "min": 94.60760268107151,
+      "max": 94.78517489107348
+     }
+    },
+    "min": 30,
+    "max": 120,
+    "unite": "tokens/s"
+   },
+   {
+    "parametre": "cloud.latence_s",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.03742919883947593,
+    "delta_score_max": 0.2799312112953203,
+    "scores": {
+     "S2": {
+      "min": 94.47482379751266,
+      "max": 94.43739459867318
+     },
+     "S3": {
+      "min": 94.9335218912487,
+      "max": 95.21345310254402
+     },
+     "S16": {
+      "min": 94.7841799974892,
+      "max": 94.81471998300617
+     }
+    },
+    "min": 0.8,
+    "max": 4.0,
+    "unite": "s/appel"
+   },
+   {
+    "parametre": "arrivees.veille_jour",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.034684669493273645,
+    "delta_score_max": 0.15298246803567395,
+    "scores": {
+     "S2": {
+      "min": 94.53606861724893,
+      "max": 94.5707532867422
+     },
+     "S3": {
+      "min": 95.18210729459902,
+      "max": 95.02912482656335
+     },
+     "S16": {
+      "min": 94.82340619250853,
+      "max": 94.8268455402371
+     }
+    },
+    "min": 1,
+    "max": 3,
+    "unite": "missions/jour"
+   },
+   {
+    "parametre": "tokens.checker.sortie",
+    "gagnant_min": "S3",
+    "gagnant_max": "S16",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.03267975553838198,
+    "delta_score_max": 0.4915180580895253,
+    "scores": {
+     "S2": {
+      "min": 94.54699473574759,
+      "max": 94.57967449128597
+     },
+     "S3": {
+      "min": 95.17273870907734,
+      "max": 94.76789534203884
+     },
+     "S16": {
+      "min": 94.42442950901939,
+      "max": 94.91594756710892
+     }
+    },
+    "min": 40,
+    "max": 120,
+    "unite": "tokens"
+   },
+   {
+    "parametre": "v2.gabarit_sortie",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.030014853975956157,
+    "delta_score_max": 0.1675481701777528,
+    "scores": {
+     "S2": {
+      "min": 94.4438929278133,
+      "max": 94.47390778178925
+     },
+     "S3": {
+      "min": 95.0720694382098,
+      "max": 94.92083750546719
+     },
+     "S16": {
+      "min": 95.01750484241889,
+      "max": 94.84995667224113
+     }
+    },
+    "min": 0.75,
+    "max": 0.95,
+    "unite": "facteur"
+   },
+   {
+    "parametre": "qualite.p_relance_directeur",
+    "gagnant_min": "S16",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.028869009358217568,
+    "delta_score_max": 0.29512415807188574,
+    "scores": {
+     "S2": {
+      "min": 94.39950424377918,
+      "max": 94.4283732531374
+     },
+     "S3": {
+      "min": 94.95473022678927,
+      "max": 94.889890422615
+     },
+     "S16": {
+      "min": 95.00587460825716,
+      "max": 94.71075045018527
+     }
+    },
+    "min": 0.2,
+    "max": 0.5,
+    "unite": "probabilité"
+   },
+   {
+    "parametre": "cloud.prefill_tok_s",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.018879246837855135,
+    "delta_score_max": 0.14295829670003002,
+    "scores": {
+     "S2": {
+      "min": 94.42780203726068,
+      "max": 94.44668128409853
+     },
+     "S3": {
+      "min": 95.07225038928658,
+      "max": 95.21520868598661
+     },
+     "S16": {
+      "min": 94.98916284699847,
+      "max": 94.89393236391489
+     }
+    },
+    "min": 500,
+    "max": 3000,
+    "unite": "tokens/s"
+   },
+   {
+    "parametre": "modele.3b.ram_go",
+    "gagnant_min": "S3",
+    "gagnant_max": "S16",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.014729162117419037,
+    "delta_score_max": 0.32321829789839285,
+    "scores": {
+     "S2": {
+      "min": 94.54817894669434,
+      "max": 94.53344978457692
+     },
+     "S3": {
+      "min": 94.92381923469277,
+      "max": 94.92381923469277
+     },
+     "S16": {
+      "min": 94.68055247410575,
+      "max": 95.00377077200415
+     }
+    },
+    "min": 2.0,
+    "max": 3.0,
+    "unite": "Go"
+   },
+   {
+    "parametre": "decideur.capacite_session",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.013989196524363479,
+    "delta_score_max": 0.20921008270551056,
+    "scores": {
+     "S2": {
+      "min": 94.57766085781257,
+      "max": 94.56367166128821
+     },
+     "S3": {
+      "min": 94.71460915198726,
+      "max": 94.92381923469277
+     },
+     "S16": {
+      "min": 94.63384275238873,
+      "max": 94.7247851662775
+     }
+    },
+    "min": 6,
+    "max": 20,
+    "unite": "décisions/session"
+   },
+   {
+    "parametre": "tokens.prime.entree",
+    "gagnant_min": "S3",
+    "gagnant_max": "S16",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.01368462497438827,
+    "delta_score_max": 0.09508341522374053,
+    "scores": {
+     "S2": {
+      "min": 94.54000019855441,
+      "max": 94.52631557358002
+     },
+     "S3": {
+      "min": 94.9694998905663,
+      "max": 94.87441647534256
+     },
+     "S16": {
+      "min": 94.93444983798018,
+      "max": 94.98096593773339
+     }
+    },
+    "min": 160,
+    "max": 300,
+    "unite": "tokens"
+   },
+   {
+    "parametre": "tokens.analyst.entree",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.005687085383812018,
+    "delta_score_max": 0.31383467905162377,
+    "scores": {
+     "S2": {
+      "min": 94.32450951837434,
+      "max": 94.31882243299053
+     },
+     "S3": {
+      "min": 95.105890308794,
+      "max": 95.0519949501682
+     },
+     "S16": {
+      "min": 95.07274276634182,
+      "max": 94.7589080872902
+     }
+    },
+    "min": 320,
+    "max": 560,
+    "unite": "tokens"
+   },
+   {
+    "parametre": "decideur.p_valider",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.0024555973052287072,
+    "delta_score_max": 0.2317448153144568,
+    "scores": {
+     "S2": {
+      "min": 94.46768856358172,
+      "max": 94.47014416088695
+     },
+     "S3": {
+      "min": 95.28947163536604,
+      "max": 95.05772682005158
+     },
+     "S16": {
+      "min": 94.79858834839587,
+      "max": 94.71441752796575
+     }
+    },
+    "min": 0.7,
+    "max": 0.9,
+    "unite": "probabilité"
+   },
+   {
+    "parametre": "tokens.directeur.entree",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.0017578011241141667,
+    "delta_score_max": 0.10636614992885995,
+    "scores": {
+     "S2": {
+      "min": 94.5619138601641,
+      "max": 94.56367166128821
+     },
+     "S3": {
+      "min": 95.04897646561322,
+      "max": 94.96767849629778
+     },
+     "S16": {
+      "min": 94.74505543654777,
+      "max": 94.63868928661891
+     }
+    },
+    "min": 300,
+    "max": 520,
+    "unite": "tokens"
+   },
+   {
+    "parametre": "cloud.quota_tokens_jour",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.0,
+    "delta_score_max": 0.0,
+    "scores": {
+     "S2": {
+      "min": 94.56367166128821,
+      "max": 94.56367166128821
+     },
+     "S3": {
+      "min": 94.92381923469277,
+      "max": 94.92381923469277
+     },
+     "S16": {
+      "min": 94.7247851662775,
+      "max": 94.7247851662775
+     }
+    },
+    "min": 300000,
+    "max": 3000000,
+    "unite": "tokens/jour"
+   },
+   {
+    "parametre": "modele.7b.fp",
+    "gagnant_min": "S3",
+    "gagnant_max": "S16",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.0,
+    "delta_score_max": 1.0714520415137798,
+    "scores": {
+     "S2": {
+      "min": 94.56367166128821,
+      "max": 94.56367166128821
+     },
+     "S3": {
+      "min": 95.5981311404147,
+      "max": 94.52667909890091
+     },
+     "S16": {
+      "min": 94.7247851662775,
+      "max": 94.7247851662775
+     }
+    },
+    "min": 0.05,
+    "max": 0.18,
+    "unite": "probabilité"
+   },
+   {
+    "parametre": "modele.7b.q",
+    "gagnant_min": "S2",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.0,
+    "delta_score_max": 1.0826676150629169,
+    "scores": {
+     "S2": {
+      "min": 94.56367166128821,
+      "max": 94.56367166128821
+     },
+     "S3": {
+      "min": 94.51163368652531,
+      "max": 95.59430130158823
+     },
+     "S16": {
+      "min": 94.56069967062426,
+      "max": 95.47281350869463
+     }
+    },
+    "min": 0.5,
+    "max": 0.72,
+    "unite": "probabilité"
+   },
+   {
+    "parametre": "modele.7b.ram_go",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.0,
+    "delta_score_max": 0.10832597126889709,
+    "scores": {
+     "S2": {
+      "min": 94.56367166128821,
+      "max": 94.56367166128821
+     },
+     "S3": {
+      "min": 95.08488479921725,
+      "max": 94.97655882794835
+     },
+     "S16": {
+      "min": 94.76290128993129,
+      "max": 94.76419268287383
+     }
+    },
+    "min": 4.8,
+    "max": 6.5,
+    "unite": "Go"
+   },
+   {
+    "parametre": "modele.7b.se",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.0,
+    "delta_score_max": 0.40757844781569474,
+    "scores": {
+     "S2": {
+      "min": 94.56367166128821,
+      "max": 94.56367166128821
+     },
+     "S3": {
+      "min": 94.84816632986553,
+      "max": 95.25574477768123
+     },
+     "S16": {
+      "min": 94.7247851662775,
+      "max": 94.7247851662775
+     }
+    },
+    "min": 0.5,
+    "max": 0.78,
+    "unite": "probabilité"
+   },
+   {
+    "parametre": "modele.8b.fp",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.0,
+    "delta_score_max": 0.0,
+    "scores": {
+     "S2": {
+      "min": 94.56367166128821,
+      "max": 94.56367166128821
+     },
+     "S3": {
+      "min": 94.92381923469277,
+      "max": 94.92381923469277
+     },
+     "S16": {
+      "min": 94.7247851662775,
+      "max": 94.7247851662775
+     }
+    },
+    "min": 0.05,
+    "max": 0.18,
+    "unite": "probabilité"
+   },
+   {
+    "parametre": "modele.8b.q",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.0,
+    "delta_score_max": 0.0,
+    "scores": {
+     "S2": {
+      "min": 94.56367166128821,
+      "max": 94.56367166128821
+     },
+     "S3": {
+      "min": 94.92381923469277,
+      "max": 94.92381923469277
+     },
+     "S16": {
+      "min": 94.7247851662775,
+      "max": 94.7247851662775
+     }
+    },
+    "min": 0.48,
+    "max": 0.7,
+    "unite": "probabilité"
+   },
+   {
+    "parametre": "modele.8b.ram_go",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.0,
+    "delta_score_max": 0.0,
+    "scores": {
+     "S2": {
+      "min": 94.56367166128821,
+      "max": 94.56367166128821
+     },
+     "S3": {
+      "min": 94.92381923469277,
+      "max": 94.92381923469277
+     },
+     "S16": {
+      "min": 94.7247851662775,
+      "max": 94.7247851662775
+     }
+    },
+    "min": 5.4,
+    "max": 7.0,
+    "unite": "Go"
+   },
+   {
+    "parametre": "modele.8b.se",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.0,
+    "delta_score_max": 0.0,
+    "scores": {
+     "S2": {
+      "min": 94.56367166128821,
+      "max": 94.56367166128821
+     },
+     "S3": {
+      "min": 94.92381923469277,
+      "max": 94.92381923469277
+     },
+     "S16": {
+      "min": 94.7247851662775,
+      "max": 94.7247851662775
+     }
+    },
+    "min": 0.52,
+    "max": 0.78,
+    "unite": "probabilité"
+   },
+   {
+    "parametre": "modele.haiku.fp",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.0,
+    "delta_score_max": 0.0,
+    "scores": {
+     "S2": {
+      "min": 94.56367166128821,
+      "max": 94.56367166128821
+     },
+     "S3": {
+      "min": 94.92381923469277,
+      "max": 94.92381923469277
+     },
+     "S16": {
+      "min": 94.7247851662775,
+      "max": 94.7247851662775
+     }
+    },
+    "min": 0.03,
+    "max": 0.12,
+    "unite": "probabilité"
+   },
+   {
+    "parametre": "modele.haiku.q",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.0,
+    "delta_score_max": 0.0,
+    "scores": {
+     "S2": {
+      "min": 94.56367166128821,
+      "max": 94.56367166128821
+     },
+     "S3": {
+      "min": 94.92381923469277,
+      "max": 94.92381923469277
+     },
+     "S16": {
+      "min": 94.7247851662775,
+      "max": 94.7247851662775
+     }
+    },
+    "min": 0.68,
+    "max": 0.88,
+    "unite": "probabilité"
+   },
+   {
+    "parametre": "modele.haiku.se",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.0,
+    "delta_score_max": 0.0,
+    "scores": {
+     "S2": {
+      "min": 94.56367166128821,
+      "max": 94.56367166128821
+     },
+     "S3": {
+      "min": 94.92381923469277,
+      "max": 94.92381923469277
+     },
+     "S16": {
+      "min": 94.7247851662775,
+      "max": 94.7247851662775
+     }
+    },
+    "min": 0.62,
+    "max": 0.85,
+    "unite": "probabilité"
+   },
+   {
+    "parametre": "modele.sonnet.fp",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.0,
+    "delta_score_max": 0.0,
+    "scores": {
+     "S2": {
+      "min": 94.56367166128821,
+      "max": 94.56367166128821
+     },
+     "S3": {
+      "min": 94.92381923469277,
+      "max": 94.92381923469277
+     },
+     "S16": {
+      "min": 94.7247851662775,
+      "max": 94.7247851662775
+     }
+    },
+    "min": 0.02,
+    "max": 0.1,
+    "unite": "probabilité"
+   },
+   {
+    "parametre": "modele.sonnet.q",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.0,
+    "delta_score_max": 0.0,
+    "scores": {
+     "S2": {
+      "min": 94.56367166128821,
+      "max": 94.56367166128821
+     },
+     "S3": {
+      "min": 94.92381923469277,
+      "max": 94.92381923469277
+     },
+     "S16": {
+      "min": 94.7247851662775,
+      "max": 94.7247851662775
+     }
+    },
+    "min": 0.82,
+    "max": 0.95,
+    "unite": "probabilité"
+   },
+   {
+    "parametre": "modele.sonnet.se",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.0,
+    "delta_score_max": 0.0,
+    "scores": {
+     "S2": {
+      "min": 94.56367166128821,
+      "max": 94.56367166128821
+     },
+     "S3": {
+      "min": 94.92381923469277,
+      "max": 94.92381923469277
+     },
+     "S16": {
+      "min": 94.7247851662775,
+      "max": 94.7247851662775
+     }
+    },
+    "min": 0.75,
+    "max": 0.92,
+    "unite": "probabilité"
+   },
+   {
+    "parametre": "offre.KVM4.cpus_llm",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.0,
+    "delta_score_max": 0.26452784703442944,
+    "scores": {
+     "S2": {
+      "min": 94.56367166128821,
+      "max": 94.56367166128821
+     },
+     "S3": {
+      "min": 94.88261144590238,
+      "max": 95.14550829120327
+     },
+     "S16": {
+      "min": 94.65178194856499,
+      "max": 94.91630979559942
+     }
+    },
+    "min": 2.4,
+    "max": 3.2,
+    "unite": "vCPU"
+   },
+   {
+    "parametre": "offre.KVM4.prix_eur_mois",
+    "gagnant_min": "S3",
+    "gagnant_max": "S2",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.0,
+    "delta_score_max": 1.5999999999999943,
+    "scores": {
+     "S2": {
+      "min": 94.56367166128821,
+      "max": 94.56367166128821
+     },
+     "S3": {
+      "min": 95.47838223391103,
+      "max": 93.87838223391104
+     },
+     "S16": {
+      "min": 95.27934816549573,
+      "max": 93.67934816549575
+     }
+    },
+    "min": 9.99,
+    "max": 25.99,
+    "unite": "€/mois"
+   },
+   {
+    "parametre": "offre.KVM4.ram_p1_go",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.0,
+    "delta_score_max": 0.053475998568728755,
+    "scores": {
+     "S2": {
+      "min": 94.56367166128821,
+      "max": 94.56367166128821
+     },
+     "S3": {
+      "min": 94.92381923469277,
+      "max": 94.92381923469277
+     },
+     "S16": {
+      "min": 94.77826116484623,
+      "max": 94.7247851662775
+     }
+    },
+    "min": 9.0,
+    "max": 12.0,
+    "unite": "Go"
+   },
+   {
+    "parametre": "offre.KVM8.cpus_llm",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.0,
+    "delta_score_max": 0.0,
+    "scores": {
+     "S2": {
+      "min": 94.56367166128821,
+      "max": 94.56367166128821
+     },
+     "S3": {
+      "min": 94.92381923469277,
+      "max": 94.92381923469277
+     },
+     "S16": {
+      "min": 94.7247851662775,
+      "max": 94.7247851662775
+     }
+    },
+    "min": 5.5,
+    "max": 7.0,
+    "unite": "vCPU"
+   },
+   {
+    "parametre": "offre.KVM8.prix_eur_mois",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.0,
+    "delta_score_max": 0.0,
+    "scores": {
+     "S2": {
+      "min": 94.56367166128821,
+      "max": 94.56367166128821
+     },
+     "S3": {
+      "min": 94.92381923469277,
+      "max": 94.92381923469277
+     },
+     "S16": {
+      "min": 94.7247851662775,
+      "max": 94.7247851662775
+     }
+    },
+    "min": 19.99,
+    "max": 45.99,
+    "unite": "€/mois"
+   },
+   {
+    "parametre": "offre.KVM8.ram_p1_go",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.0,
+    "delta_score_max": 0.0,
+    "scores": {
+     "S2": {
+      "min": 94.56367166128821,
+      "max": 94.56367166128821
+     },
+     "S3": {
+      "min": 94.92381923469277,
+      "max": 94.92381923469277
+     },
+     "S16": {
+      "min": 94.7247851662775,
+      "max": 94.7247851662775
+     }
+    },
+    "min": 18.0,
+    "max": 26.0,
+    "unite": "Go"
+   },
+   {
+    "parametre": "pannes.duree_redemarrage_min",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.0,
+    "delta_score_max": 0.0,
+    "scores": {
+     "S2": {
+      "min": 94.56367166128821,
+      "max": 94.56367166128821
+     },
+     "S3": {
+      "min": 94.92381923469277,
+      "max": 94.92381923469277
+     },
+     "S16": {
+      "min": 94.7247851662775,
+      "max": 94.7247851662775
+     }
+    },
+    "min": 1,
+    "max": 15,
+    "unite": "min"
+   },
+   {
+    "parametre": "payant.haiku_gen_tok_s",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.0,
+    "delta_score_max": 0.0,
+    "scores": {
+     "S2": {
+      "min": 94.56367166128821,
+      "max": 94.56367166128821
+     },
+     "S3": {
+      "min": 94.92381923469277,
+      "max": 94.92381923469277
+     },
+     "S16": {
+      "min": 94.7247851662775,
+      "max": 94.7247851662775
+     }
+    },
+    "min": 80,
+    "max": 250,
+    "unite": "tokens/s"
+   },
+   {
+    "parametre": "payant.haiku_latence_s",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.0,
+    "delta_score_max": 0.0,
+    "scores": {
+     "S2": {
+      "min": 94.56367166128821,
+      "max": 94.56367166128821
+     },
+     "S3": {
+      "min": 94.92381923469277,
+      "max": 94.92381923469277
+     },
+     "S16": {
+      "min": 94.7247851662775,
+      "max": 94.7247851662775
+     }
+    },
+    "min": 0.5,
+    "max": 2.0,
+    "unite": "s"
+   },
+   {
+    "parametre": "payant.sonnet_gen_tok_s",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.0,
+    "delta_score_max": 0.0,
+    "scores": {
+     "S2": {
+      "min": 94.56367166128821,
+      "max": 94.56367166128821
+     },
+     "S3": {
+      "min": 94.92381923469277,
+      "max": 94.92381923469277
+     },
+     "S16": {
+      "min": 94.7247851662775,
+      "max": 94.7247851662775
+     }
+    },
+    "min": 40,
+    "max": 110,
+    "unite": "tokens/s"
+   },
+   {
+    "parametre": "payant.sonnet_latence_s",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.0,
+    "delta_score_max": 0.0,
+    "scores": {
+     "S2": {
+      "min": 94.56367166128821,
+      "max": 94.56367166128821
+     },
+     "S3": {
+      "min": 94.92381923469277,
+      "max": 94.92381923469277
+     },
+     "S16": {
+      "min": 94.7247851662775,
+      "max": 94.7247851662775
+     }
+    },
+    "min": 1.0,
+    "max": 3.0,
+    "unite": "s"
+   },
+   {
+    "parametre": "ram.services_go",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.0,
+    "delta_score_max": 0.0048764738092614834,
+    "scores": {
+     "S2": {
+      "min": 94.56367166128821,
+      "max": 94.56367166128821
+     },
+     "S3": {
+      "min": 94.92381923469277,
+      "max": 94.92381923469277
+     },
+     "S16": {
+      "min": 94.7247851662775,
+      "max": 94.72966164008676
+     }
+    },
+    "min": 0.5,
+    "max": 1.0,
+    "unite": "Go"
+   },
+   {
+    "parametre": "tokens.collector.entree",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.0,
+    "delta_score_max": 0.0,
+    "scores": {
+     "S2": {
+      "min": 94.56367166128821,
+      "max": 94.56367166128821
+     },
+     "S3": {
+      "min": 94.92381923469277,
+      "max": 94.92381923469277
+     },
+     "S16": {
+      "min": 94.7247851662775,
+      "max": 94.7247851662775
+     }
+    },
+    "min": 200,
+    "max": 350,
+    "unite": "tokens"
+   },
+   {
+    "parametre": "tokens.collector.sortie",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.0,
+    "delta_score_max": 0.0,
+    "scores": {
+     "S2": {
+      "min": 94.56367166128821,
+      "max": 94.56367166128821
+     },
+     "S3": {
+      "min": 94.92381923469277,
+      "max": 94.92381923469277
+     },
+     "S16": {
+      "min": 94.7247851662775,
+      "max": 94.7247851662775
+     }
+    },
+    "min": 110,
+    "max": 230,
+    "unite": "tokens"
+   },
+   {
+    "parametre": "tokens.gate.entree",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.0,
+    "delta_score_max": 0.0,
+    "scores": {
+     "S2": {
+      "min": 94.56367166128821,
+      "max": 94.56367166128821
+     },
+     "S3": {
+      "min": 94.92381923469277,
+      "max": 94.92381923469277
+     },
+     "S16": {
+      "min": 94.7247851662775,
+      "max": 94.7247851662775
+     }
+    },
+    "min": 220,
+    "max": 400,
+    "unite": "tokens"
+   },
+   {
+    "parametre": "tokens.gate.sortie",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.0,
+    "delta_score_max": 0.0,
+    "scores": {
+     "S2": {
+      "min": 94.56367166128821,
+      "max": 94.56367166128821
+     },
+     "S3": {
+      "min": 94.92381923469277,
+      "max": 94.92381923469277
+     },
+     "S16": {
+      "min": 94.7247851662775,
+      "max": 94.7247851662775
+     }
+    },
+    "min": 8,
+    "max": 25,
+    "unite": "tokens"
+   },
+   {
+    "parametre": "vitesse.expo_cpu_gen",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.0,
+    "delta_score_max": 0.15759366936752883,
+    "scores": {
+     "S2": {
+      "min": 94.56367166128821,
+      "max": 94.56367166128821
+     },
+     "S3": {
+      "min": 94.96282171882451,
+      "max": 95.12041538819204
+     },
+     "S16": {
+      "min": 94.86082695616331,
+      "max": 94.77333576762953
+     }
+    },
+    "min": 0.45,
+    "max": 0.8,
+    "unite": "exposant"
+   },
+   {
+    "parametre": "vitesse.expo_cpu_prefill",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.0,
+    "delta_score_max": 0.16561429874172973,
+    "scores": {
+     "S2": {
+      "min": 94.56367166128821,
+      "max": 94.56367166128821
+     },
+     "S3": {
+      "min": 95.11258547279893,
+      "max": 94.9469711740572
+     },
+     "S16": {
+      "min": 94.85493684773134,
+      "max": 94.85625408014988
+     }
+    },
+    "min": 0.7,
+    "max": 0.95,
+    "unite": "exposant"
+   },
+   {
+    "parametre": "vitesse.expo_partage",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.0,
+    "delta_score_max": 0.127483538862748,
+    "scores": {
+     "S2": {
+      "min": 94.56367166128821,
+      "max": 94.56367166128821
+     },
+     "S3": {
+      "min": 94.92381923469277,
+      "max": 94.92381923469277
+     },
+     "S16": {
+      "min": 94.92261596531687,
+      "max": 94.79513242645412
+     }
+    },
+    "min": 0.8,
+    "max": 1.0,
+    "unite": "exposant"
+   },
+   {
+    "parametre": "vitesse.expo_taille",
+    "gagnant_min": "S3",
+    "gagnant_max": "S3",
+    "change_conclusion": true,
+    "delta_score_recommande": 0.0,
+    "delta_score_max": 0.4989508683542425,
+    "scores": {
+     "S2": {
+      "min": 94.56367166128821,
+      "max": 94.56367166128821
+     },
+     "S3": {
+      "min": 95.2048774964647,
+      "max": 94.95813258440099
+     },
+     "S16": {
+      "min": 95.07775471167497,
+      "max": 94.57880384332073
+     }
+    },
+    "min": 0.85,
+    "max": 1.1,
+    "unite": "exposant"
+   }
+  ]
+ },
+ "scenarios": {
+  "S1": {
+   "scenario": {
+    "offre": "KVM2",
+    "vitrine_kvm2": false,
+    "modele_principal": "3b",
+    "modele_controleur": "3b",
+    "cloud_gratuit": true,
+    "max_missions": 2,
+    "v2": false,
+    "priorite_jour": false,
+    "payant_plafond_eur": 0,
+    "payant_f3": false,
+    "charge": 1.0,
+    "panne_cloud_debut_j": 0,
+    "panne_cloud_duree_j": 0,
+    "absence_debut_j": 0,
+    "absence_duree_j": 0,
+    "pic_lundi": 0,
+    "nuit_chargee": false,
+    "id": "S1",
+    "nom": "V1 actuelle",
+    "description": "KVM 2, qwen2.5 3B, Ollama Cloud gratuit + repli local, sans optimisations (configuration V1 prévue).",
+    "surcharges": {}
+   },
+   "resume": {
+    "livrees_jour": {
+     "moy": 10.135,
+     "p10": 8.423333333333334,
+     "p90": 12.400000000000002
+    },
+    "ratio_livraison": {
+     "moy": 0.9255159034982974,
+     "p10": 0.888142911010558,
+     "p90": 0.9575124485819442
+    },
+    "attente_moy_s": {
+     "moy": 27.230096692434955,
+     "p10": 13.034012823993951,
+     "p90": 53.977947007863435
+    },
+    "attente_p90_s": {
+     "moy": 73.68024552517227,
+     "p10": 0.0,
+     "p90": 148.67814161230825
+    },
+    "attente_nuit_moy_s": {
+     "moy": 103.44707273419701,
+     "p10": 77.26120017555198,
+     "p90": 128.04524931628077
+    },
+    "cpu_llm": {
+     "moy": 0.009314856085168997,
+     "p10": 0.007008448657049047,
+     "p90": 0.010999331331807681
+    },
+    "cpu_total": {
+     "moy": 0.08012317084684295,
+     "p10": 0.07885464676137698,
+     "p90": 0.08104963223249423
+    },
+    "ram_pic_go": {
+     "moy": 3.1214731250704117,
+     "p10": 2.8712153877111533,
+     "p90": 3.4600066486150487
+    },
+    "taux_plafond": {
+     "moy": 0.03274727749067943,
+     "p10": 0.013333233245255826,
+     "p90": 0.05648958461728091
+    },
+    "n3_jour": {
+     "moy": 2.795,
+     "p10": 2.0900000000000003,
+     "p90": 3.370000000000001
+    },
+    "part_au_dessus_plafond": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "decisions_expirees": {
+     "moy": 4.0,
+     "p10": 0.0,
+     "p90": 8.600000000000009
+    },
+    "delai_decision_p50_h": {
+     "moy": 8.26998474649115,
+     "p10": 6.502447510565822,
+     "p90": 9.218121033462545
+    },
+    "tokens_mois_local": {
+     "moy": 420425.84423613956,
+     "p10": 326888.9530250923,
+     "p90": 506114.8676876914
+    },
+    "tokens_mois_cloud": {
+     "moy": 2152117.844356447,
+     "p10": 1729285.3800849824,
+     "p90": 2506251.574988235
+    },
+    "tokens_mois_payant": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "cout_api_eur": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "cout_total_eur": {
+     "moy": 10.415016961784668,
+     "p10": 8.70233229851091,
+     "p90": 12.569509434963198
+    },
+    "cout_par_mission_eur": {
+     "moy": 0.035162646521822494,
+     "p10": 0.026504217337369015,
+     "p90": 0.0440279387679564
+    },
+    "qualite": {
+     "moy": 0.8984620419705293,
+     "p10": 0.8639387260304167,
+     "p90": 0.9404286032713108
+    },
+    "score": {
+     "moy": 93.67783666788634,
+     "p10": 92.36733491917654,
+     "p90": 95.11573884943813
+    },
+    "echecs_escalade": {
+     "moy": 15.0,
+     "p10": 8.9,
+     "p90": 19.500000000000007
+    },
+    "echecs_budget": {
+     "moy": 0.55,
+     "p10": 0.0,
+     "p90": 2.0
+    },
+    "echecs_delai": {
+     "moy": 12.55,
+     "p10": 5.0,
+     "p90": 22.200000000000003
+    },
+    "redemarrages": {
+     "moy": 1.65,
+     "p10": 0.0,
+     "p90": 3.1000000000000014
+    },
+    "delai_p50": {
+     "F1": {
+      "moy": 148.32736590794775,
+      "p10": 122.61331380032789,
+      "p90": 170.74872264709848
+     },
+     "F2": {
+      "moy": 23.9726532968265,
+      "p10": 18.72598873001407,
+      "p90": 29.171222909698557
+     },
+     "F3": {
+      "moy": 116.42431511513624,
+      "p10": 91.61292062557477,
+      "p90": 135.0423403448658
+     },
+     "F4": null
+    },
+    "delai_p90": {
+     "F1": {
+      "moy": 163.719969575201,
+      "p10": 154.60911096321652,
+      "p90": 175.61277643286158
+     },
+     "F2": {
+      "moy": 73.35898263471564,
+      "p10": 33.368184725110765,
+      "p90": 187.83547675186864
+     },
+     "F3": {
+      "moy": 332.50125468223666,
+      "p10": 254.87000701151354,
+      "p90": 398.0384581172091
+     },
+     "F4": null
+    },
+    "ram_ok_part": 1.0,
+    "ram_limite_go": 5.0,
+    "modeles_simultanes": 1,
+    "nb_par_f": {
+     "F1": 2.55,
+     "F2": 82.05,
+     "F3": 123.4,
+     "F4": 0.0
+    },
+    "score_panne_cloud": 86.85002237359045,
+    "score_robuste": 91.97088309431236
+   }
+  },
+  "S1L": {
+   "scenario": {
+    "offre": "KVM2",
+    "vitrine_kvm2": false,
+    "modele_principal": "3b",
+    "modele_controleur": "3b",
+    "cloud_gratuit": false,
+    "max_missions": 1,
+    "v2": false,
+    "priorite_jour": false,
+    "payant_plafond_eur": 0,
+    "payant_f3": false,
+    "charge": 1.0,
+    "panne_cloud_debut_j": 0,
+    "panne_cloud_duree_j": 0,
+    "absence_debut_j": 0,
+    "absence_duree_j": 0,
+    "pic_lundi": 0,
+    "nuit_chargee": false,
+    "id": "S1L",
+    "nom": "V1 locale (mesurée)",
+    "description": "KVM 2, 3B local seul, 1 mission à la fois — la configuration des deux mesures réelles.",
+    "surcharges": {}
+   },
+   "resume": {
+    "livrees_jour": {
+     "moy": 8.671666666666667,
+     "p10": 7.1866666666666665,
+     "p90": 10.719999999999999
+    },
+    "ratio_livraison": {
+     "moy": 0.7872820089253745,
+     "p10": 0.7127762707866493,
+     "p90": 0.8646426804269457
+    },
+    "attente_moy_s": {
+     "moy": 294.3390913335219,
+     "p10": 168.95890462351048,
+     "p90": 451.51084386131095
+    },
+    "attente_p90_s": {
+     "moy": 1136.1819001333395,
+     "p10": 616.9792661902497,
+     "p90": 1803.9243222321634
+    },
+    "attente_nuit_moy_s": {
+     "moy": 1381.5000455140776,
+     "p10": 1130.624902669669,
+     "p90": 1628.7554224507032
+    },
+    "cpu_llm": {
+     "moy": 0.07119293044315753,
+     "p10": 0.06154654094133038,
+     "p90": 0.0868123620651459
+    },
+    "cpu_total": {
+     "moy": 0.11415611174373663,
+     "p10": 0.1088505975177317,
+     "p90": 0.12274679913583025
+    },
+    "ram_pic_go": {
+     "moy": 3.1214731250704117,
+     "p10": 2.8712153877111533,
+     "p90": 3.4600066486150487
+    },
+    "taux_plafond": {
+     "moy": 0.1263879337034203,
+     "p10": 0.07104865096819181,
+     "p90": 0.17820616883116885
+    },
+    "n3_jour": {
+     "moy": 2.4033333333333333,
+     "p10": 1.76,
+     "p90": 3.1033333333333335
+    },
+    "part_au_dessus_plafond": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "decisions_expirees": {
+     "moy": 2.4,
+     "p10": 0.0,
+     "p90": 6.100000000000001
+    },
+    "delai_decision_p50_h": {
+     "moy": 7.764387972781533,
+     "p10": 6.04290206990659,
+     "p90": 9.064613811872396
+    },
+    "tokens_mois_local": {
+     "moy": 2549595.262546066,
+     "p10": 2200284.0655169315,
+     "p90": 3076898.806796135
+    },
+    "tokens_mois_cloud": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "tokens_mois_payant": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "cout_api_eur": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "cout_total_eur": {
+     "moy": 10.415016961784668,
+     "p10": 8.70233229851091,
+     "p90": 12.569509434963198
+    },
+    "cout_par_mission_eur": {
+     "moy": 0.04163992885971317,
+     "p10": 0.029373298020464688,
+     "p90": 0.0569065688496652
+    },
+    "qualite": {
+     "moy": 0.5533686342061925,
+     "p10": 0.4161614608952287,
+     "p90": 0.6811510890543149
+    },
+    "score": {
+     "moy": 76.60541568390431,
+     "p10": 70.20765605085315,
+     "p90": 80.55731517291632
+    },
+    "echecs_escalade": {
+     "moy": 30.6,
+     "p10": 16.6,
+     "p90": 42.400000000000006
+    },
+    "echecs_budget": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "echecs_delai": {
+     "moy": 49.4,
+     "p10": 32.5,
+     "p90": 72.4
+    },
+    "redemarrages": {
+     "moy": 1.65,
+     "p10": 0.0,
+     "p90": 3.1000000000000014
+    },
+    "delai_p50": {
+     "F1": {
+      "moy": 181.20135288209187,
+      "p10": 122.3737766160295,
+      "p90": 226.21399723700026
+     },
+     "F2": {
+      "moy": 286.69764774385874,
+      "p10": 243.4996049084628,
+      "p90": 329.33258317991283
+     },
+     "F3": {
+      "moy": 573.3157853385623,
+      "p10": 464.6654619915993,
+      "p90": 761.0882835112395
+     },
+     "F4": null
+    },
+    "delai_p90": {
+     "F1": {
+      "moy": 568.6447218758339,
+      "p10": 144.58486725789726,
+      "p90": 904.0367064021531
+     },
+     "F2": {
+      "moy": 910.2903502004662,
+      "p10": 460.44133806675,
+      "p90": 1757.9411604688116
+     },
+     "F3": {
+      "moy": 1969.1771045939,
+      "p10": 1464.7751287048184,
+      "p90": 2761.675735093819
+     },
+     "F4": null
+    },
+    "ram_ok_part": 1.0,
+    "ram_limite_go": 5.0,
+    "modeles_simultanes": 1,
+    "nb_par_f": {
+     "F1": 3.25,
+     "F2": 73.45,
+     "F3": 109.45,
+     "F4": 0.0
+    },
+    "score_panne_cloud": 76.60541568390431,
+    "score_robuste": 76.60541568390431
+   }
+  },
+  "S2": {
+   "scenario": {
+    "offre": "KVM2",
+    "vitrine_kvm2": false,
+    "modele_principal": "3b",
+    "modele_controleur": "3b",
+    "cloud_gratuit": true,
+    "max_missions": 2,
+    "v2": true,
+    "priorite_jour": true,
+    "payant_plafond_eur": 0,
+    "payant_f3": false,
+    "charge": 1.0,
+    "panne_cloud_debut_j": 0,
+    "panne_cloud_duree_j": 0,
+    "absence_debut_j": 0,
+    "absence_duree_j": 0,
+    "pic_lundi": 0,
+    "nuit_chargee": false,
+    "id": "S2",
+    "nom": "KVM 2 + optim. V2",
+    "description": "S1 + COLLECTOR sans LLM, contrôles par code, cache, gabarits, priorité jour/nuit.",
+    "surcharges": {}
+   },
+   "resume": {
+    "livrees_jour": {
+     "moy": 10.401666666666667,
+     "p10": 8.98,
+     "p90": 12.683333333333334
+    },
+    "ratio_livraison": {
+     "moy": 0.9438683735948731,
+     "p10": 0.9246621621621621,
+     "p90": 0.9647043340140685
+    },
+    "attente_moy_s": {
+     "moy": 20.878038862974776,
+     "p10": 9.393889041974548,
+     "p90": 47.62276092087109
+    },
+    "attente_p90_s": {
+     "moy": 59.96313985926763,
+     "p10": 0.0,
+     "p90": 193.99772945046163
+    },
+    "attente_nuit_moy_s": {
+     "moy": 79.26998506618656,
+     "p10": 60.29960725121672,
+     "p90": 99.12758315125423
+    },
+    "cpu_llm": {
+     "moy": 0.00731746232686938,
+     "p10": 0.006132952676132544,
+     "p90": 0.008454097684536891
+    },
+    "cpu_total": {
+     "moy": 0.07902460427977816,
+     "p10": 0.0783731239718729,
+     "p90": 0.07964975372649528
+    },
+    "ram_pic_go": {
+     "moy": 3.1214731250704117,
+     "p10": 2.8712153877111533,
+     "p90": 3.4600066486150487
+    },
+    "taux_plafond": {
+     "moy": 0.013222043204533244,
+     "p10": 0.0022784810126582284,
+     "p90": 0.026052299087179345
+    },
+    "n3_jour": {
+     "moy": 2.833333333333333,
+     "p10": 2.256666666666667,
+     "p90": 3.5166666666666675
+    },
+    "part_au_dessus_plafond": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "decisions_expirees": {
+     "moy": 2.5,
+     "p10": 0.0,
+     "p90": 6.0
+    },
+    "delai_decision_p50_h": {
+     "moy": 8.27620870039455,
+     "p10": 6.506015865626085,
+     "p90": 10.019606592607232
+    },
+    "tokens_mois_local": {
+     "moy": 387708.57260486356,
+     "p10": 314807.05007315334,
+     "p90": 487300.05743921
+    },
+    "tokens_mois_cloud": {
+     "moy": 1332770.2224931102,
+     "p10": 1095156.6171576432,
+     "p90": 1568986.41567894
+    },
+    "tokens_mois_payant": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "cout_api_eur": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "cout_total_eur": {
+     "moy": 10.415016961784668,
+     "p10": 8.70233229851091,
+     "p90": 12.569509434963198
+    },
+    "cout_par_mission_eur": {
+     "moy": 0.03422502206491701,
+     "p10": 0.025718592436817848,
+     "p90": 0.04183841977905182
+    },
+    "qualite": {
+     "moy": 0.9470236130091649,
+     "p10": 0.9259948810313774,
+     "p90": 0.970869093539055
+    },
+    "score": {
+     "moy": 95.68525790194266,
+     "p10": 94.2791157992577,
+     "p90": 96.62108640274597
+    },
+    "echecs_escalade": {
+     "moy": 16.15,
+     "p10": 5.9,
+     "p90": 22.0
+    },
+    "echecs_budget": {
+     "moy": 0.2,
+     "p10": 0.0,
+     "p90": 1.0
+    },
+    "echecs_delai": {
+     "moy": 4.85,
+     "p10": 0.9000000000000001,
+     "p90": 10.100000000000001
+    },
+    "redemarrages": {
+     "moy": 1.65,
+     "p10": 0.0,
+     "p90": 3.1000000000000014
+    },
+    "delai_p50": {
+     "F1": {
+      "moy": 103.61667864234187,
+      "p10": 73.59542536357185,
+      "p90": 128.3421700687992
+     },
+     "F2": {
+      "moy": 15.669842583379795,
+      "p10": 12.51510486457264,
+      "p90": 19.46650934320642
+     },
+     "F3": {
+      "moy": 89.7845925116766,
+      "p10": 73.6501042508171,
+      "p90": 101.58878687407997
+     },
+     "F4": null
+    },
+    "delai_p90": {
+     "F1": {
+      "moy": 133.87083082018793,
+      "p10": 102.64317380554857,
+      "p90": 162.6792252278264
+     },
+     "F2": {
+      "moy": 81.57736381320257,
+      "p10": 29.517711877342084,
+      "p90": 221.25305622129235
+     },
+     "F3": {
+      "moy": 262.98300146125,
+      "p10": 197.74760851140937,
+      "p90": 342.45134213520026
+     },
+     "F4": null
+    },
+    "ram_ok_part": 1.0,
+    "ram_limite_go": 5.0,
+    "modeles_simultanes": 1,
+    "nb_par_f": {
+     "F1": 5.5,
+     "F2": 84.85,
+     "F3": 125.4,
+     "F4": 0.0
+    },
+    "score_panne_cloud": 91.86089103121977,
+    "score_robuste": 94.72916618426193
+   }
+  },
+  "S2L": {
+   "scenario": {
+    "offre": "KVM2",
+    "vitrine_kvm2": false,
+    "modele_principal": "3b",
+    "modele_controleur": "3b",
+    "cloud_gratuit": false,
+    "max_missions": 1,
+    "v2": true,
+    "priorite_jour": true,
+    "payant_plafond_eur": 0,
+    "payant_f3": false,
+    "charge": 1.0,
+    "panne_cloud_debut_j": 0,
+    "panne_cloud_duree_j": 0,
+    "absence_debut_j": 0,
+    "absence_duree_j": 0,
+    "pic_lundi": 0,
+    "nuit_chargee": false,
+    "id": "S2L",
+    "nom": "KVM 2 V2 locale",
+    "description": "S2 sans cloud gratuit (tout en local 3B) — effet des optimisations seules.",
+    "surcharges": {}
+   },
+   "resume": {
+    "livrees_jour": {
+     "moy": 9.32,
+     "p10": 7.606666666666667,
+     "p90": 11.333333333333334
+    },
+    "ratio_livraison": {
+     "moy": 0.8403300643425069,
+     "p10": 0.773531573017195,
+     "p90": 0.8935786315526294
+    },
+    "attente_moy_s": {
+     "moy": 179.74494423851692,
+     "p10": 91.79167781080145,
+     "p90": 320.31039368429225
+    },
+    "attente_p90_s": {
+     "moy": 686.1809494190894,
+     "p10": 291.30187758454605,
+     "p90": 1262.526984570958
+    },
+    "attente_nuit_moy_s": {
+     "moy": 912.8320269330791,
+     "p10": 757.4460889922644,
+     "p90": 1072.1395485738053
+    },
+    "cpu_llm": {
+     "moy": 0.04517650908338827,
+     "p10": 0.038585545038000726,
+     "p90": 0.05514629001383219
+    },
+    "cpu_total": {
+     "moy": 0.09984707999586355,
+     "p10": 0.0962220497709004,
+     "p90": 0.10533045950760771
+    },
+    "ram_pic_go": {
+     "moy": 3.1214731250704117,
+     "p10": 2.8712153877111533,
+     "p90": 3.4600066486150487
+    },
+    "taux_plafond": {
+     "moy": 0.03237859482369102,
+     "p10": 0.006823875132479044,
+     "p90": 0.05700700700700701
+    },
+    "n3_jour": {
+     "moy": 2.6,
+     "p10": 1.8299999999999998,
+     "p90": 3.210000000000001
+    },
+    "part_au_dessus_plafond": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "decisions_expirees": {
+     "moy": 3.2,
+     "p10": 0.0,
+     "p90": 9.0
+    },
+    "delai_decision_p50_h": {
+     "moy": 8.148155579474288,
+     "p10": 6.215270595102597,
+     "p90": 9.259507077172804
+    },
+    "tokens_mois_local": {
+     "moy": 1877970.991224569,
+     "p10": 1558032.385575584,
+     "p90": 2305517.0684629013
+    },
+    "tokens_mois_cloud": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "tokens_mois_payant": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "cout_api_eur": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "cout_total_eur": {
+     "moy": 10.415016961784668,
+     "p10": 8.70233229851091,
+     "p90": 12.569509434963198
+    },
+    "cout_par_mission_eur": {
+     "moy": 0.03833376925544725,
+     "p10": 0.028152482849361372,
+     "p90": 0.05026978444648996
+    },
+    "qualite": {
+     "moy": 0.7126247877178823,
+     "p10": 0.6211617102957132,
+     "p90": 0.7991621521585518
+    },
+    "score": {
+     "moy": 84.43689716181647,
+     "p10": 81.45075126804576,
+     "p90": 87.13624667773391
+    },
+    "echecs_escalade": {
+     "moy": 50.7,
+     "p10": 35.0,
+     "p90": 72.2
+    },
+    "echecs_budget": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "echecs_delai": {
+     "moy": 12.45,
+     "p10": 2.9000000000000004,
+     "p90": 24.200000000000003
+    },
+    "redemarrages": {
+     "moy": 1.65,
+     "p10": 0.0,
+     "p90": 3.1000000000000014
+    },
+    "delai_p50": {
+     "F1": {
+      "moy": 140.81319604245783,
+      "p10": 71.09345692728239,
+      "p90": 156.41238006112417
+     },
+     "F2": {
+      "moy": 164.89817286338348,
+      "p10": 117.83159556514583,
+      "p90": 207.61763429273276
+     },
+     "F3": {
+      "moy": 351.7006304969902,
+      "p10": 268.08055559246134,
+      "p90": 466.77541293674733
+     },
+     "F4": null
+    },
+    "delai_p90": {
+     "F1": {
+      "moy": 430.12799856496986,
+      "p10": 108.97366950806988,
+      "p90": 977.8063294658498
+     },
+     "F2": {
+      "moy": 575.2218320587169,
+      "p10": 296.64445115350657,
+      "p90": 878.0431354020637
+     },
+     "F3": {
+      "moy": 1261.7724569529298,
+      "p10": 764.8915052147536,
+      "p90": 1820.7915065270304
+     },
+     "F4": null
+    },
+    "ram_ok_part": 1.0,
+    "ram_limite_go": 5.0,
+    "modeles_simultanes": 1,
+    "nb_par_f": {
+     "F1": 6.4,
+     "F2": 77.1,
+     "F3": 115.2,
+     "F4": 0.0
+    },
+    "score_panne_cloud": 84.43689716181647,
+    "score_robuste": 84.43689716181647
+   }
+  },
+  "S3": {
+   "scenario": {
+    "offre": "KVM4",
+    "vitrine_kvm2": false,
+    "modele_principal": "7b",
+    "modele_controleur": "7b",
+    "cloud_gratuit": true,
+    "max_missions": 2,
+    "v2": true,
+    "priorite_jour": true,
+    "payant_plafond_eur": 0,
+    "payant_f3": false,
+    "charge": 1.0,
+    "panne_cloud_debut_j": 0,
+    "panne_cloud_duree_j": 0,
+    "absence_debut_j": 0,
+    "absence_duree_j": 0,
+    "pic_lundi": 0,
+    "nuit_chargee": false,
+    "id": "S3",
+    "nom": "KVM 4 + 7B",
+    "description": "KVM 4, qwen2.5 7B local (repli et double contrôle), cloud gratuit, V2.",
+    "surcharges": {}
+   },
+   "resume": {
+    "livrees_jour": {
+     "moy": 10.468333333333334,
+     "p10": 8.92,
+     "p90": 12.733333333333333
+    },
+    "ratio_livraison": {
+     "moy": 0.9461971350706959,
+     "p10": 0.923626463604356,
+     "p90": 0.9589912280701754
+    },
+    "attente_moy_s": {
+     "moy": 23.17182648772542,
+     "p10": 11.256776758905776,
+     "p90": 48.01292708491891
+    },
+    "attente_p90_s": {
+     "moy": 64.07706062963084,
+     "p10": 0.0,
+     "p90": 186.17507976911267
+    },
+    "attente_nuit_moy_s": {
+     "moy": 91.61373657193971,
+     "p10": 68.78293096800041,
+     "p90": 113.03518387078313
+    },
+    "cpu_llm": {
+     "moy": 0.008544340215701413,
+     "p10": 0.007618334454532826,
+     "p90": 0.010560006461298104
+    },
+    "cpu_total": {
+     "moy": 0.04350925094851489,
+     "p10": 0.04249068163408438,
+     "p90": 0.0448523829570013
+    },
+    "ram_pic_go": {
+     "moy": 6.350719872708993,
+     "p10": 5.921190636574284,
+     "p90": 6.8618467079386685
+    },
+    "taux_plafond": {
+     "moy": 0.019222658531210503,
+     "p10": 0.00720174340427505,
+     "p90": 0.031017220664797767
+    },
+    "n3_jour": {
+     "moy": 2.8850000000000002,
+     "p10": 2.066666666666667,
+     "p90": 3.6433333333333344
+    },
+    "part_au_dessus_plafond": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "decisions_expirees": {
+     "moy": 1.9,
+     "p10": 0.0,
+     "p90": 6.100000000000001
+    },
+    "delai_decision_p50_h": {
+     "moy": 8.251502915918909,
+     "p10": 6.392337885163574,
+     "p90": 9.637243827622372
+    },
+    "tokens_mois_local": {
+     "moy": 361478.8578296072,
+     "p10": 281491.6659898765,
+     "p90": 444214.8169525282
+    },
+    "tokens_mois_cloud": {
+     "moy": 1275517.0226868303,
+     "p10": 1013732.2714283171,
+     "p90": 1611151.1832428453
+    },
+    "tokens_mois_payant": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "cout_api_eur": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "cout_total_eur": {
+     "moy": 16.458852549343128,
+     "p10": 11.54944275138244,
+     "p90": 22.126101763141165
+    },
+    "cout_par_mission_eur": {
+     "moy": 0.05426680045775244,
+     "p10": 0.03739683470346141,
+     "p90": 0.08443805597544178
+    },
+    "qualite": {
+     "moy": 0.9621440085203196,
+     "p10": 0.9387723102585488,
+     "p90": 0.9819970193740686
+    },
+    "score": {
+     "moy": 95.60434905279615,
+     "p10": 94.32383393083221,
+     "p90": 96.61525464021284
+    },
+    "echecs_escalade": {
+     "moy": 12.0,
+     "p10": 6.9,
+     "p90": 17.400000000000006
+    },
+    "echecs_budget": {
+     "moy": 0.2,
+     "p10": 0.0,
+     "p90": 1.0
+    },
+    "echecs_delai": {
+     "moy": 7.4,
+     "p10": 2.9000000000000004,
+     "p90": 12.0
+    },
+    "redemarrages": {
+     "moy": 1.65,
+     "p10": 0.0,
+     "p90": 3.1000000000000014
+    },
+    "delai_p50": {
+     "F1": {
+      "moy": 156.96677145444656,
+      "p10": 79.64591950795148,
+      "p90": 149.46018916567556
+     },
+     "F2": {
+      "moy": 15.36011344823146,
+      "p10": 12.069799246796174,
+      "p90": 18.508345655514862
+     },
+     "F3": {
+      "moy": 102.35748376217416,
+      "p10": 81.40539073636755,
+      "p90": 130.33810631537636
+     },
+     "F4": null
+    },
+    "delai_p90": {
+     "F1": {
+      "moy": 193.197929020778,
+      "p10": 112.79755139407585,
+      "p90": 178.71667400958796
+     },
+     "F2": {
+      "moy": 70.58055781942213,
+      "p10": 24.148979587015933,
+      "p90": 182.203394820937
+     },
+     "F3": {
+      "moy": 299.7957718007089,
+      "p10": 207.54078122856228,
+      "p90": 417.3795614476272
+     },
+     "F4": null
+    },
+    "ram_ok_part": 1.0,
+    "ram_limite_go": 9.980280040049855,
+    "modeles_simultanes": 1,
+    "nb_par_f": {
+     "F1": 4.75,
+     "F2": 85.65,
+     "F3": 126.4,
+     "F4": 0.0
+    },
+    "score_panne_cloud": 93.48897806574566,
+    "score_robuste": 95.07550630603353
+   }
+  },
+  "S4": {
+   "scenario": {
+    "offre": "KVM8",
+    "vitrine_kvm2": false,
+    "modele_principal": "7b",
+    "modele_controleur": "7b",
+    "cloud_gratuit": false,
+    "max_missions": 2,
+    "v2": true,
+    "priorite_jour": true,
+    "payant_plafond_eur": 0,
+    "payant_f3": false,
+    "charge": 1.0,
+    "panne_cloud_debut_j": 0,
+    "panne_cloud_duree_j": 0,
+    "absence_debut_j": 0,
+    "absence_duree_j": 0,
+    "pic_lundi": 0,
+    "nuit_chargee": false,
+    "id": "S4",
+    "nom": "KVM 8 + 7B local seul",
+    "description": "KVM 8, qwen2.5 7B, aucune IA externe, V2.",
+    "surcharges": {}
+   },
+   "resume": {
+    "livrees_jour": {
+     "moy": 9.913333333333334,
+     "p10": 8.22,
+     "p90": 12.02
+    },
+    "ratio_livraison": {
+     "moy": 0.9022748258687845,
+     "p10": 0.878100500119076,
+     "p90": 0.9360199909132212
+    },
+    "attente_moy_s": {
+     "moy": 78.60157174596542,
+     "p10": 35.47713496071592,
+     "p90": 154.0596418724034
+    },
+    "attente_p90_s": {
+     "moy": 271.4038281382237,
+     "p10": 0.0,
+     "p90": 687.2585781559941
+    },
+    "attente_nuit_moy_s": {
+     "moy": 498.39005972718843,
+     "p10": 444.7889512882486,
+     "p90": 573.2125585386203
+    },
+    "cpu_llm": {
+     "moy": 0.031101359432918314,
+     "p10": 0.027083451837812637,
+     "p90": 0.03622888905665845
+    },
+    "cpu_total": {
+     "moy": 0.043055436398622735,
+     "p10": 0.040416169947196254,
+     "p90": 0.04823881290586915
+    },
+    "ram_pic_go": {
+     "moy": 6.350719872708993,
+     "p10": 5.921190636574284,
+     "p90": 6.8618467079386685
+    },
+    "taux_plafond": {
+     "moy": 0.0425769589486105,
+     "p10": 0.01678791795213875,
+     "p90": 0.05856360769910432
+    },
+    "n3_jour": {
+     "moy": 2.7600000000000002,
+     "p10": 2.0766666666666667,
+     "p90": 3.396666666666668
+    },
+    "part_au_dessus_plafond": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "decisions_expirees": {
+     "moy": 4.0,
+     "p10": 0.9000000000000001,
+     "p90": 9.100000000000001
+    },
+    "delai_decision_p50_h": {
+     "moy": 8.586761526492337,
+     "p10": 7.131337985256857,
+     "p90": 9.28184545774832
+    },
+    "tokens_mois_local": {
+     "moy": 1686143.2331180633,
+     "p10": 1343318.3387125588,
+     "p90": 2124638.776034853
+    },
+    "tokens_mois_cloud": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "tokens_mois_payant": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "cout_api_eur": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "cout_total_eur": {
+     "moy": 32.60211278765555,
+     "p10": 23.742935571826933,
+     "p90": 40.205283622227434
+    },
+    "cout_par_mission_eur": {
+     "moy": 0.11288899637167815,
+     "p10": 0.06803516251255336,
+     "p90": 0.1455614373165644
+    },
+    "qualite": {
+     "moy": 0.8884254545981491,
+     "p10": 0.853510101010101,
+     "p90": 0.9134923175416133
+    },
+    "score": {
+     "moy": 89.9920136218216,
+     "p10": 88.12047661190292,
+     "p90": 92.76117567887542
+    },
+    "echecs_escalade": {
+     "moy": 21.3,
+     "p10": 13.9,
+     "p90": 31.1
+    },
+    "echecs_budget": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "echecs_delai": {
+     "moy": 16.3,
+     "p10": 8.0,
+     "p90": 21.400000000000006
+    },
+    "redemarrages": {
+     "moy": 1.65,
+     "p10": 0.0,
+     "p90": 3.1000000000000014
+    },
+    "delai_p50": {
+     "F1": {
+      "moy": 95.78860448358901,
+      "p10": 77.96787006434752,
+      "p90": 117.22390990117567
+     },
+     "F2": {
+      "moy": 128.73758179945344,
+      "p10": 101.00158005950507,
+      "p90": 161.54094399530442
+     },
+     "F3": {
+      "moy": 261.7051914603151,
+      "p10": 201.48503502560487,
+      "p90": 366.2484962523683
+     },
+     "F4": null
+    },
+    "delai_p90": {
+     "F1": {
+      "moy": 206.08670969431728,
+      "p10": 109.30043922936078,
+      "p90": 476.09618852788805
+     },
+     "F2": {
+      "moy": 390.96210240234893,
+      "p10": 204.8568327376806,
+      "p90": 752.6666097257862
+     },
+     "F3": {
+      "moy": 858.6422452628252,
+      "p10": 555.821352700649,
+      "p90": 1332.9327453253425
+     },
+     "F4": null
+    },
+    "ram_ok_part": 1.0,
+    "ram_limite_go": 21.818447331355173,
+    "modeles_simultanes": 1,
+    "nb_par_f": {
+     "F1": 7.35,
+     "F2": 81.0,
+     "F3": 124.15,
+     "F4": 0.0
+    },
+    "trace_file": {
+     "moy": [
+      0.0,
+      1.6,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      1.2,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      2.4,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      2.85,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.2,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      2.4,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      1.2,
+      8.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.4,
+      0.4,
+      0.4,
+      0.4,
+      0.4,
+      0.4,
+      0.55,
+      0.55,
+      0.55,
+      0.55,
+      0.55,
+      0.55,
+      3.5,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.15,
+      0.15,
+      0.15,
+      0.15,
+      0.15
+     ],
+     "p10": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      8.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "p90": [
+      0.0,
+      8.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.10000000000000142,
+      0.10000000000000142,
+      0.10000000000000142,
+      0.10000000000000142,
+      0.10000000000000142,
+      0.10000000000000142,
+      3.4000000000000057,
+      0.10000000000000142,
+      0.10000000000000142,
+      0.10000000000000142,
+      0.10000000000000142,
+      0.10000000000000142,
+      8.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.10000000000000142,
+      0.10000000000000142,
+      0.10000000000000142,
+      0.10000000000000142,
+      0.10000000000000142,
+      0.10000000000000142,
+      8.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      8.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      8.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      8.0,
+      8.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.1000000000000014,
+      1.1000000000000014,
+      1.1000000000000014,
+      1.1000000000000014,
+      1.1000000000000014,
+      1.1000000000000014,
+      9.100000000000001,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    "score_panne_cloud": 89.9920136218216,
+    "score_robuste": 89.9920136218216
+   }
+  },
+  "S5": {
+   "scenario": {
+    "offre": "KVM8",
+    "vitrine_kvm2": false,
+    "modele_principal": "7b",
+    "modele_controleur": "8b",
+    "cloud_gratuit": false,
+    "max_missions": 2,
+    "v2": true,
+    "priorite_jour": true,
+    "payant_plafond_eur": 0,
+    "payant_f3": false,
+    "charge": 1.0,
+    "panne_cloud_debut_j": 0,
+    "panne_cloud_duree_j": 0,
+    "absence_debut_j": 0,
+    "absence_duree_j": 0,
+    "pic_lundi": 0,
+    "nuit_chargee": false,
+    "id": "S5",
+    "nom": "KVM 8 double modèle",
+    "description": "S4 + contrôleur sur un 2e modèle (llama3.1 8B) chargé en même temps.",
+    "surcharges": {}
+   },
+   "resume": {
+    "livrees_jour": {
+     "moy": 9.758333333333333,
+     "p10": 8.15,
+     "p90": 12.276666666666667
+    },
+    "ratio_livraison": {
+     "moy": 0.8799963294230239,
+     "p10": 0.8300000000000001,
+     "p90": 0.9135352485297296
+    },
+    "attente_moy_s": {
+     "moy": 80.55242810123302,
+     "p10": 40.052038514900325,
+     "p90": 142.20083634719148
+    },
+    "attente_p90_s": {
+     "moy": 284.9684943594114,
+     "p10": 0.0,
+     "p90": 621.7598556638045
+    },
+    "attente_nuit_moy_s": {
+     "moy": 496.47523530617593,
+     "p10": 437.68881946527904,
+     "p90": 578.1322235777396
+    },
+    "cpu_llm": {
+     "moy": 0.03346231925016024,
+     "p10": 0.029036954544918232,
+     "p90": 0.038122710647488955
+    },
+    "cpu_total": {
+     "moy": 0.0449009443860752,
+     "p10": 0.041876444073766804,
+     "p90": 0.050136821917224475
+    },
+    "ram_pic_go": {
+     "moy": 12.608295269120282,
+     "p10": 12.002110715011556,
+     "p90": 13.282706211602068
+    },
+    "taux_plafond": {
+     "moy": 0.04782570401554262,
+     "p10": 0.015878743068391866,
+     "p90": 0.08609875203472601
+    },
+    "n3_jour": {
+     "moy": 2.6983333333333333,
+     "p10": 1.9966666666666666,
+     "p90": 3.243333333333334
+    },
+    "part_au_dessus_plafond": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "decisions_expirees": {
+     "moy": 3.7,
+     "p10": 0.0,
+     "p90": 12.100000000000001
+    },
+    "delai_decision_p50_h": {
+     "moy": 8.12900442475998,
+     "p10": 6.229428735305416,
+     "p90": 9.23137971138255
+    },
+    "tokens_mois_local": {
+     "moy": 1763511.9081088714,
+     "p10": 1438024.0020259211,
+     "p90": 2162430.6154306033
+    },
+    "tokens_mois_cloud": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "tokens_mois_payant": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "cout_api_eur": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "cout_total_eur": {
+     "moy": 32.60211278765555,
+     "p10": 23.742935571826933,
+     "p90": 40.205283622227434
+    },
+    "cout_par_mission_eur": {
+     "moy": 0.11480037526306708,
+     "p10": 0.0703283328348162,
+     "p90": 0.14323550440957414
+    },
+    "qualite": {
+     "moy": 0.9362527260988586,
+     "p10": 0.9073075279157985,
+     "p90": 0.9611513045459725
+    },
+    "score": {
+     "moy": 91.18035215584845,
+     "p10": 89.14230959632403,
+     "p90": 93.02065451695336
+    },
+    "echecs_escalade": {
+     "moy": 29.9,
+     "p10": 20.9,
+     "p90": 41.0
+    },
+    "echecs_budget": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "echecs_delai": {
+     "moy": 18.15,
+     "p10": 8.0,
+     "p90": 30.200000000000003
+    },
+    "redemarrages": {
+     "moy": 1.65,
+     "p10": 0.0,
+     "p90": 3.1000000000000014
+    },
+    "delai_p50": {
+     "F1": {
+      "moy": 110.43392769995117,
+      "p10": 73.71387070729106,
+      "p90": 145.2882315769093
+     },
+     "F2": {
+      "moy": 143.0940766641379,
+      "p10": 111.06746490538353,
+      "p90": 181.5520508091897
+     },
+     "F3": {
+      "moy": 281.78545636546477,
+      "p10": 202.52348046899425,
+      "p90": 387.48448677255186
+     },
+     "F4": null
+    },
+    "delai_p90": {
+     "F1": {
+      "moy": 203.59444387095633,
+      "p10": 109.75069896417727,
+      "p90": 200.9826404523854
+     },
+     "F2": {
+      "moy": 362.34881755644864,
+      "p10": 233.08247595245487,
+      "p90": 573.4649308208039
+     },
+     "F3": {
+      "moy": 874.1825751403134,
+      "p10": 667.7425129171812,
+      "p90": 1265.1413284761786
+     },
+     "F4": null
+    },
+    "ram_ok_part": 1.0,
+    "ram_limite_go": 21.818447331355173,
+    "modeles_simultanes": 2,
+    "nb_par_f": {
+     "F1": 6.6,
+     "F2": 80.85,
+     "F3": 122.25,
+     "F4": 0.0
+    },
+    "score_panne_cloud": 91.18035215584845,
+    "score_robuste": 91.18035215584845
+   }
+  },
+  "S6": {
+   "scenario": {
+    "offre": "KVM8",
+    "vitrine_kvm2": false,
+    "modele_principal": "7b",
+    "modele_controleur": "8b",
+    "cloud_gratuit": false,
+    "max_missions": 2,
+    "v2": true,
+    "priorite_jour": true,
+    "payant_plafond_eur": 30,
+    "payant_f3": false,
+    "charge": 1.0,
+    "panne_cloud_debut_j": 0,
+    "panne_cloud_duree_j": 0,
+    "absence_debut_j": 0,
+    "absence_duree_j": 0,
+    "pic_lundi": 0,
+    "nuit_chargee": false,
+    "id": "S6",
+    "nom": "S5 + F4 payant 30 €",
+    "description": "S5 + API Anthropic plafonnée à 30 €/mois pour F4.",
+    "surcharges": {}
+   },
+   "resume": {
+    "livrees_jour": {
+     "moy": 9.723333333333333,
+     "p10": 8.226666666666667,
+     "p90": 12.110000000000001
+    },
+    "ratio_livraison": {
+     "moy": 0.8763004263994179,
+     "p10": 0.8488610548290046,
+     "p90": 0.9075607708591867
+    },
+    "attente_moy_s": {
+     "moy": 1105.2869208211646,
+     "p10": 305.9531087503707,
+     "p90": 2040.8553840935956
+    },
+    "attente_p90_s": {
+     "moy": 523.5538894732363,
+     "p10": 223.47231401904713,
+     "p90": 911.4734304837898
+    },
+    "attente_nuit_moy_s": {
+     "moy": 499.5360259184542,
+     "p10": 445.9224580242908,
+     "p90": 565.3629724375701
+    },
+    "cpu_llm": {
+     "moy": 0.03255077575770066,
+     "p10": 0.027444293730833676,
+     "p90": 0.037663790823212306
+    },
+    "cpu_total": {
+     "moy": 0.044184342947435305,
+     "p10": 0.04102452344121778,
+     "p90": 0.04887969487816612
+    },
+    "ram_pic_go": {
+     "moy": 12.608295269120282,
+     "p10": 12.002110715011556,
+     "p90": 13.282706211602068
+    },
+    "taux_plafond": {
+     "moy": 0.047080617681039424,
+     "p10": 0.016415254412647174,
+     "p90": 0.08988891407844027
+    },
+    "n3_jour": {
+     "moy": 3.1133333333333333,
+     "p10": 2.4099999999999997,
+     "p90": 4.180000000000001
+    },
+    "part_au_dessus_plafond": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "decisions_expirees": {
+     "moy": 4.65,
+     "p10": 0.0,
+     "p90": 8.600000000000009
+    },
+    "delai_decision_p50_h": {
+     "moy": 7.7580855222906635,
+     "p10": 6.291620786138146,
+     "p90": 9.20292116435532
+    },
+    "tokens_mois_local": {
+     "moy": 1717752.8295880016,
+     "p10": 1357817.289032985,
+     "p90": 2063073.2077790522
+    },
+    "tokens_mois_cloud": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "tokens_mois_payant": {
+     "moy": 30121.774817935162,
+     "p10": 15573.255760617258,
+     "p90": 46889.31572792846
+    },
+    "cout_api_eur": {
+     "moy": 0.09904940162429834,
+     "p10": 0.05272886938337291,
+     "p90": 0.15727311292714968
+    },
+    "cout_total_eur": {
+     "moy": 32.701162189279856,
+     "p10": 23.8022813401923,
+     "p90": 40.27774874620353
+    },
+    "cout_par_mission_eur": {
+     "moy": 0.11528027003016454,
+     "p10": 0.07219203527288247,
+     "p90": 0.14833114348273208
+    },
+    "qualite": {
+     "moy": 0.9374616372859366,
+     "p10": 0.9048486692015208,
+     "p90": 0.9660753729897307
+    },
+    "score": {
+     "moy": 90.6257470523792,
+     "p10": 88.57343496807466,
+     "p90": 92.65568774700078
+    },
+    "echecs_escalade": {
+     "moy": 28.65,
+     "p10": 20.0,
+     "p90": 37.2
+    },
+    "echecs_budget": {
+     "moy": 0.05,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "echecs_delai": {
+     "moy": 17.85,
+     "p10": 7.800000000000001,
+     "p90": 30.400000000000006
+    },
+    "redemarrages": {
+     "moy": 1.65,
+     "p10": 0.0,
+     "p90": 3.1000000000000014
+    },
+    "delai_p50": {
+     "F1": {
+      "moy": 113.2019963299288,
+      "p10": 86.42181462742155,
+      "p90": 154.31137025740463
+     },
+     "F2": {
+      "moy": 142.37771513639672,
+      "p10": 111.73308029159088,
+      "p90": 180.1518681076821
+     },
+     "F3": {
+      "moy": 292.28482457266074,
+      "p10": 225.16239596884697,
+      "p90": 382.8532741122763
+     },
+     "F4": {
+      "moy": 19423.607513447638,
+      "p10": 4636.723415731141,
+      "p90": 46874.27568404102
+     }
+    },
+    "delai_p90": {
+     "F1": {
+      "moy": 357.30622473430356,
+      "p10": 116.86444775672513,
+      "p90": 608.7809261990649
+     },
+     "F2": {
+      "moy": 437.99436419772337,
+      "p10": 215.47444936054757,
+      "p90": 639.3759550622439
+     },
+     "F3": {
+      "moy": 867.6741100439483,
+      "p10": 680.188046853981,
+      "p90": 1174.4980388046708
+     },
+     "F4": {
+      "moy": 52854.071041962154,
+      "p10": 24902.54284978631,
+      "p90": 66923.08279131877
+     }
+    },
+    "ram_ok_part": 1.0,
+    "ram_limite_go": 21.818447331355173,
+    "modeles_simultanes": 2,
+    "nb_par_f": {
+     "F1": 6.85,
+     "F2": 81.25,
+     "F3": 111.2,
+     "F4": 9.0
+    },
+    "score_panne_cloud": 90.6257470523792,
+    "score_robuste": 90.6257470523792
+   }
+  },
+  "S7": {
+   "scenario": {
+    "offre": "KVM8",
+    "vitrine_kvm2": true,
+    "modele_principal": "7b",
+    "modele_controleur": "8b",
+    "cloud_gratuit": true,
+    "max_missions": 3,
+    "v2": true,
+    "priorite_jour": true,
+    "payant_plafond_eur": 70,
+    "payant_f3": true,
+    "charge": 1.0,
+    "panne_cloud_debut_j": 0,
+    "panne_cloud_duree_j": 0,
+    "absence_debut_j": 0,
+    "absence_duree_j": 0,
+    "pic_lundi": 0,
+    "nuit_chargee": false,
+    "id": "S7",
+    "nom": "Max perf ≤ 150 €",
+    "description": "KVM 8 + KVM 2 vitrine + double modèle + cloud gratuit + API 70 €/mois (F3 via Haiku, F4 Sonnet).",
+    "surcharges": {}
+   },
+   "resume": {
+    "livrees_jour": {
+     "moy": 10.508333333333335,
+     "p10": 8.516666666666667,
+     "p90": 13.073333333333332
+    },
+    "ratio_livraison": {
+     "moy": 0.949951424366675,
+     "p10": 0.925566784123396,
+     "p90": 0.9683659321454597
+    },
+    "attente_moy_s": {
+     "moy": 1098.7055989939092,
+     "p10": 379.5861585273207,
+     "p90": 1952.028238073964
+    },
+    "attente_p90_s": {
+     "moy": 44.62839638492843,
+     "p10": 0.0,
+     "p90": 115.781406383057
+    },
+    "attente_nuit_moy_s": {
+     "moy": 36.28368515509804,
+     "p10": 29.69469646353643,
+     "p90": 43.333607276532135
+    },
+    "cpu_llm": {
+     "moy": 0.005509434344276842,
+     "p10": 0.004678767681579925,
+     "p90": 0.0068368342573496875
+    },
+    "cpu_total": {
+     "moy": 0.023056458445278934,
+     "p10": 0.022447614756122353,
+     "p90": 0.02415201067894425
+    },
+    "ram_pic_go": {
+     "moy": 12.608295269120282,
+     "p10": 12.002110715011556,
+     "p90": 13.282706211602068
+    },
+    "taux_plafond": {
+     "moy": 0.009336725720313426,
+     "p10": 0.0,
+     "p90": 0.017644146438069375
+    },
+    "n3_jour": {
+     "moy": 3.3033333333333332,
+     "p10": 2.466666666666667,
+     "p90": 4.333333333333334
+    },
+    "part_au_dessus_plafond": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "decisions_expirees": {
+     "moy": 4.3,
+     "p10": 0.0,
+     "p90": 9.100000000000001
+    },
+    "delai_decision_p50_h": {
+     "moy": 8.274823102251808,
+     "p10": 6.51917382196306,
+     "p90": 9.240318995898528
+    },
+    "tokens_mois_local": {
+     "moy": 360597.45530305244,
+     "p10": 263807.4522529991,
+     "p90": 431798.26333132613
+    },
+    "tokens_mois_cloud": {
+     "moy": 394552.24275736534,
+     "p10": 307795.64543182857,
+     "p90": 513503.82095926057
+    },
+    "tokens_mois_payant": {
+     "moy": 853363.6315960083,
+     "p10": 668790.739316165,
+     "p90": 985248.122248646
+    },
+    "cout_api_eur": {
+     "moy": 0.22996345031565113,
+     "p10": 0.1564069445748534,
+     "p90": 0.29119592634083546
+    },
+    "cout_total_eur": {
+     "moy": 43.247093199755874,
+     "p10": 35.20437886579553,
+     "p90": 51.870505495551576
+    },
+    "cout_par_mission_eur": {
+     "moy": 0.14073472132263615,
+     "p10": 0.09497507085633078,
+     "p90": 0.17385597639823114
+    },
+    "qualite": {
+     "moy": 0.9665168991068332,
+     "p10": 0.957405931122449,
+     "p90": 0.9792605168836069
+    },
+    "score": {
+     "moy": 93.16934038422966,
+     "p10": 92.07574281626249,
+     "p90": 94.05910093162646
+    },
+    "echecs_escalade": {
+     "moy": 11.1,
+     "p10": 6.0,
+     "p90": 18.200000000000003
+    },
+    "echecs_budget": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "echecs_delai": {
+     "moy": 3.6,
+     "p10": 0.0,
+     "p90": 6.100000000000001
+    },
+    "redemarrages": {
+     "moy": 1.65,
+     "p10": 0.0,
+     "p90": 3.1000000000000014
+    },
+    "delai_p50": {
+     "F1": {
+      "moy": 108.13195208962279,
+      "p10": 83.01601468022564,
+      "p90": 139.9386470082216
+     },
+     "F2": {
+      "moy": 15.346113894505834,
+      "p10": 12.35824932771211,
+      "p90": 18.50484015884358
+     },
+     "F3": {
+      "moy": 66.25261599934602,
+      "p10": 53.9285956042615,
+      "p90": 84.75574103391264
+     },
+     "F4": {
+      "moy": 19926.31122466281,
+      "p10": 7697.711345574277,
+      "p90": 30887.58063314142
+     }
+    },
+    "delai_p90": {
+     "F1": {
+      "moy": 143.54153735891782,
+      "p10": 109.28710748655139,
+      "p90": 171.53507475219084
+     },
+     "F2": {
+      "moy": 49.49124048503087,
+      "p10": 24.3778983666678,
+      "p90": 126.39321426123661
+     },
+     "F3": {
+      "moy": 190.07393496743654,
+      "p10": 141.15185373663033,
+      "p90": 261.4678848227712
+     },
+     "F4": {
+      "moy": 54599.63450961034,
+      "p10": 30778.616158144025,
+      "p90": 65920.58109145374
+     }
+    },
+    "ram_ok_part": 1.0,
+    "ram_limite_go": 21.818447331355173,
+    "modeles_simultanes": 2,
+    "nb_par_f": {
+     "F1": 6.95,
+     "F2": 84.75,
+     "F3": 117.2,
+     "F4": 9.25
+    },
+    "score_panne_cloud": 92.69850395968656,
+    "score_robuste": 93.05163127809388
+   }
+  },
+  "S8": {
+   "scenario": {
+    "offre": "KVM8",
+    "vitrine_kvm2": false,
+    "modele_principal": "7b",
+    "modele_controleur": "8b",
+    "cloud_gratuit": false,
+    "max_missions": 2,
+    "v2": true,
+    "priorite_jour": true,
+    "payant_plafond_eur": 0,
+    "payant_f3": false,
+    "charge": 3.0,
+    "panne_cloud_debut_j": 0,
+    "panne_cloud_duree_j": 0,
+    "absence_debut_j": 0,
+    "absence_duree_j": 0,
+    "pic_lundi": 0,
+    "nuit_chargee": false,
+    "id": "S8",
+    "nom": "S5 charge ×3",
+    "description": "S5 avec 3 fois plus de missions manuelles (montée en activité, premier client).",
+    "surcharges": {}
+   },
+   "resume": {
+    "livrees_jour": {
+     "moy": 20.331666666666667,
+     "p10": 13.89,
+     "p90": 25.330000000000002
+    },
+    "ratio_livraison": {
+     "moy": 0.8899186563652947,
+     "p10": 0.8711740961740961,
+     "p90": 0.9189147309763996
+    },
+    "attente_moy_s": {
+     "moy": 36.64832615161779,
+     "p10": 15.117340419956165,
+     "p90": 71.94199331696196
+    },
+    "attente_p90_s": {
+     "moy": 30.03213863063835,
+     "p10": 0.0,
+     "p90": 25.94205500016948
+    },
+    "attente_nuit_moy_s": {
+     "moy": 480.0552654119013,
+     "p10": 393.65342360934255,
+     "p90": 552.9930634709525
+    },
+    "cpu_llm": {
+     "moy": 0.060522650481816764,
+     "p10": 0.04535105774767941,
+     "p90": 0.07487120543145262
+    },
+    "cpu_total": {
+     "moy": 0.06600670142010852,
+     "p10": 0.05625419249423651,
+     "p90": 0.0779690212339815
+    },
+    "ram_pic_go": {
+     "moy": 12.608295269120282,
+     "p10": 12.002110715011556,
+     "p90": 13.282706211602068
+    },
+    "taux_plafond": {
+     "moy": 0.03582728984875008,
+     "p10": 0.015993125232255666,
+     "p90": 0.05014457242333191
+    },
+    "n3_jour": {
+     "moy": 5.996666666666667,
+     "p10": 3.9766666666666666,
+     "p90": 7.3866666666666685
+    },
+    "part_au_dessus_plafond": {
+     "moy": 0.0023514688617996306,
+     "p10": 0.0,
+     "p90": 0.00809671518332936
+    },
+    "decisions_expirees": {
+     "moy": 7.15,
+     "p10": 0.0,
+     "p90": 17.80000000000001
+    },
+    "delai_decision_p50_h": {
+     "moy": 6.512022412624477,
+     "p10": 5.623322900755722,
+     "p90": 8.280523391926323
+    },
+    "tokens_mois_local": {
+     "moy": 3153989.184831333,
+     "p10": 2357055.886700177,
+     "p90": 3850762.8034443124
+    },
+    "tokens_mois_cloud": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "tokens_mois_payant": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "cout_api_eur": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "cout_total_eur": {
+     "moy": 32.60211278765555,
+     "p10": 23.742935571826933,
+     "p90": 40.205283622227434
+    },
+    "cout_par_mission_eur": {
+     "moy": 0.056450647955220944,
+     "p10": 0.03218457380709826,
+     "p90": 0.07482268291467727
+    },
+    "qualite": {
+     "moy": 0.9301913783068109,
+     "p10": 0.9136364065375722,
+     "p90": 0.9544258282338046
+    },
+    "score": {
+     "moy": 91.34308976139761,
+     "p10": 89.52293646013763,
+     "p90": 92.9513887717439
+    },
+    "echecs_escalade": {
+     "moy": 56.1,
+     "p10": 38.0,
+     "p90": 78.9
+    },
+    "echecs_budget": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "echecs_delai": {
+     "moy": 25.65,
+     "p10": 14.8,
+     "p90": 36.400000000000006
+    },
+    "redemarrages": {
+     "moy": 1.65,
+     "p10": 0.0,
+     "p90": 3.1000000000000014
+    },
+    "delai_p50": {
+     "F1": {
+      "moy": 97.39649201245557,
+      "p10": 75.73145321962329,
+      "p90": 119.24680095960211
+     },
+     "F2": {
+      "moy": 136.7329605219107,
+      "p10": 116.78332968889735,
+      "p90": 159.00305935016368
+     },
+     "F3": {
+      "moy": 244.3398693248324,
+      "p10": 196.22522619165247,
+      "p90": 327.2705518420786
+     },
+     "F4": null
+    },
+    "delai_p90": {
+     "F1": {
+      "moy": 146.44332693233395,
+      "p10": 131.3469812138792,
+      "p90": 161.53723284548064
+     },
+     "F2": {
+      "moy": 305.0258612583328,
+      "p10": 244.65509802555897,
+      "p90": 361.15931245187704
+     },
+     "F3": {
+      "moy": 625.9394416756829,
+      "p10": 446.58636119765,
+      "p90": 898.0380979266138
+     },
+     "F4": null
+    },
+    "ram_ok_part": 1.0,
+    "ram_limite_go": 21.818447331355173,
+    "modeles_simultanes": 2,
+    "nb_par_f": {
+     "F1": 19.3,
+     "F2": 221.9,
+     "F3": 285.9,
+     "F4": 0.0
+    },
+    "trace_file": {
+     "moy": [
+      0.0,
+      2.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.05,
+      0.0,
+      0.0,
+      0.0,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      1.15,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      2.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      4.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      2.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      1.2,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.6,
+      8.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.4,
+      0.4,
+      0.4,
+      0.4,
+      0.4,
+      0.4,
+      0.6,
+      0.6,
+      0.6,
+      0.6,
+      0.6,
+      0.6,
+      1.65,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05
+     ],
+     "p10": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      8.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "p90": [
+      0.0,
+      8.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      3.4000000000000057,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      8.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      8.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      8.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      8.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      8.0,
+      8.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.1000000000000014,
+      1.1000000000000014,
+      1.1000000000000014,
+      1.1000000000000014,
+      1.1000000000000014,
+      1.1000000000000014,
+      8.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ]
+    }
+   }
+  },
+  "S9": {
+   "scenario": {
+    "offre": "KVM4",
+    "vitrine_kvm2": false,
+    "modele_principal": "7b",
+    "modele_controleur": "7b",
+    "cloud_gratuit": true,
+    "max_missions": 2,
+    "v2": true,
+    "priorite_jour": true,
+    "payant_plafond_eur": 0,
+    "payant_f3": false,
+    "charge": 1.0,
+    "panne_cloud_debut_j": 5,
+    "panne_cloud_duree_j": 10,
+    "absence_debut_j": 0,
+    "absence_duree_j": 0,
+    "pic_lundi": 0,
+    "nuit_chargee": false,
+    "id": "S9",
+    "nom": "S3 panne cloud 10 j",
+    "description": "S3 avec le cloud gratuit indisponible du jour 5 au jour 15 (repli local 7B).",
+    "surcharges": {}
+   },
+   "resume": {
+    "livrees_jour": {
+     "moy": 9.983333333333333,
+     "p10": 8.35,
+     "p90": 11.776666666666667
+    },
+    "ratio_livraison": {
+     "moy": 0.9027846923890644,
+     "p10": 0.8661153714648562,
+     "p90": 0.941085184771687
+    },
+    "attente_moy_s": {
+     "moy": 69.85128431302279,
+     "p10": 33.91611128918793,
+     "p90": 140.25968179017087
+    },
+    "attente_p90_s": {
+     "moy": 129.40813367367915,
+     "p10": 0.0,
+     "p90": 350.0470255918387
+    },
+    "attente_nuit_moy_s": {
+     "moy": 377.45481713800854,
+     "p10": 288.54725849039426,
+     "p90": 453.4966929160942
+    },
+    "cpu_llm": {
+     "moy": 0.022685065708284408,
+     "p10": 0.018617221920222284,
+     "p90": 0.027453697636569616
+    },
+    "cpu_total": {
+     "moy": 0.0534573891699097,
+     "p10": 0.05055595517951934,
+     "p90": 0.056429903158496296
+    },
+    "ram_pic_go": {
+     "moy": 6.350719872708993,
+     "p10": 5.921190636574284,
+     "p90": 6.8618467079386685
+    },
+    "taux_plafond": {
+     "moy": 0.07027051624341445,
+     "p10": 0.03519831502638894,
+     "p90": 0.10773333333333335
+    },
+    "n3_jour": {
+     "moy": 2.7016666666666667,
+     "p10": 2.1233333333333335,
+     "p90": 3.3400000000000003
+    },
+    "part_au_dessus_plafond": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "decisions_expirees": {
+     "moy": 2.85,
+     "p10": 0.0,
+     "p90": 8.0
+    },
+    "delai_decision_p50_h": {
+     "moy": 8.24537511757431,
+     "p10": 6.482155012505769,
+     "p90": 9.340701970187329
+    },
+    "tokens_mois_local": {
+     "moy": 781481.7721303477,
+     "p10": 615463.6942496038,
+     "p90": 963059.7674809038
+    },
+    "tokens_mois_cloud": {
+     "moy": 812522.1337851468,
+     "p10": 677046.4752825623,
+     "p90": 993793.107591237
+    },
+    "tokens_mois_payant": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "cout_api_eur": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "cout_total_eur": {
+     "moy": 16.458852549343128,
+     "p10": 11.54944275138244,
+     "p90": 22.126101763141165
+    },
+    "cout_par_mission_eur": {
+     "moy": 0.05713128927816239,
+     "p10": 0.040961672394731044,
+     "p90": 0.09033106284863214
+    },
+    "qualite": {
+     "moy": 0.9350440849669346,
+     "p10": 0.9136320506062203,
+     "p90": 0.9626460481099657
+    },
+    "score": {
+     "moy": 93.48897806574566,
+     "p10": 91.70629618735522,
+     "p90": 94.88277605778794
+    },
+    "echecs_escalade": {
+     "moy": 12.05,
+     "p10": 5.800000000000001,
+     "p90": 17.200000000000003
+    },
+    "echecs_budget": {
+     "moy": 0.1,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "echecs_delai": {
+     "moy": 27.4,
+     "p10": 15.8,
+     "p90": 39.0
+    },
+    "redemarrages": {
+     "moy": 1.65,
+     "p10": 0.0,
+     "p90": 3.1000000000000014
+    },
+    "delai_p50": {
+     "F1": {
+      "moy": 113.36348450532732,
+      "p10": 90.52465257572476,
+      "p90": 136.59392294595017
+     },
+     "F2": {
+      "moy": 19.975388920005752,
+      "p10": 13.866275787221094,
+      "p90": 24.852646448382803
+     },
+     "F3": {
+      "moy": 153.2959274273381,
+      "p10": 100.39080627980874,
+      "p90": 199.9587822468893
+     },
+     "F4": null
+    },
+    "delai_p90": {
+     "F1": {
+      "moy": 148.41723840651332,
+      "p10": 125.31416572023647,
+      "p90": 174.0143165295024
+     },
+     "F2": {
+      "moy": 343.2968745233493,
+      "p10": 259.8720150763495,
+      "p90": 466.16777275198257
+     },
+     "F3": {
+      "moy": 722.7002869775637,
+      "p10": 587.6903260665531,
+      "p90": 890.200961020811
+     },
+     "F4": null
+    },
+    "ram_ok_part": 1.0,
+    "ram_limite_go": 9.980280040049855,
+    "modeles_simultanes": 1,
+    "nb_par_f": {
+     "F1": 5.2,
+     "F2": 81.3,
+     "F3": 123.75,
+     "F4": 0.0
+    }
+   }
+  },
+  "S10": {
+   "scenario": {
+    "offre": "KVM8",
+    "vitrine_kvm2": false,
+    "modele_principal": "7b",
+    "modele_controleur": "8b",
+    "cloud_gratuit": false,
+    "max_missions": 2,
+    "v2": true,
+    "priorite_jour": true,
+    "payant_plafond_eur": 0,
+    "payant_f3": false,
+    "charge": 1.0,
+    "panne_cloud_debut_j": 0,
+    "panne_cloud_duree_j": 0,
+    "absence_debut_j": 9,
+    "absence_duree_j": 3,
+    "pic_lundi": 0,
+    "nuit_chargee": false,
+    "id": "S10",
+    "nom": "S5 Décideur absent 3 j",
+    "description": "S5, aucune session de décision du jour 9 au jour 12.",
+    "surcharges": {}
+   },
+   "resume": {
+    "livrees_jour": {
+     "moy": 9.771666666666667,
+     "p10": 8.149999999999999,
+     "p90": 12.426666666666668
+    },
+    "ratio_livraison": {
+     "moy": 0.8786827524425631,
+     "p10": 0.8351633986928105,
+     "p90": 0.9146151560579663
+    },
+    "attente_moy_s": {
+     "moy": 84.77278026320857,
+     "p10": 41.042212995102986,
+     "p90": 155.24719480589377
+    },
+    "attente_p90_s": {
+     "moy": 311.3049398443764,
+     "p10": 0.0,
+     "p90": 737.8440533458534
+    },
+    "attente_nuit_moy_s": {
+     "moy": 495.0911401798932,
+     "p10": 433.2161096156675,
+     "p90": 555.3860455111865
+    },
+    "cpu_llm": {
+     "moy": 0.033398919499791895,
+     "p10": 0.029656025711488135,
+     "p90": 0.03920290843428603
+    },
+    "cpu_total": {
+     "moy": 0.04485702481936751,
+     "p10": 0.04122563445250394,
+     "p90": 0.05022364905763705
+    },
+    "ram_pic_go": {
+     "moy": 12.608295269120282,
+     "p10": 12.002110715011556,
+     "p90": 13.282706211602068
+    },
+    "taux_plafond": {
+     "moy": 0.04642275807594542,
+     "p10": 0.017860795454545456,
+     "p90": 0.07480829015544044
+    },
+    "n3_jour": {
+     "moy": 2.695,
+     "p10": 2.036666666666667,
+     "p90": 3.3166666666666673
+    },
+    "part_au_dessus_plafond": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "decisions_expirees": {
+     "moy": 10.05,
+     "p10": 5.0,
+     "p90": 16.80000000000001
+    },
+    "delai_decision_p50_h": {
+     "moy": 8.56871710130366,
+     "p10": 6.433792754158575,
+     "p90": 10.06676812340173
+    },
+    "tokens_mois_local": {
+     "moy": 1756609.4574132052,
+     "p10": 1391664.312321787,
+     "p90": 2067024.4626434396
+    },
+    "tokens_mois_cloud": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "tokens_mois_payant": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "cout_api_eur": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "cout_total_eur": {
+     "moy": 32.60211278765555,
+     "p10": 23.742935571826933,
+     "p90": 40.205283622227434
+    },
+    "cout_par_mission_eur": {
+     "moy": 0.11467486753580507,
+     "p10": 0.07145859451856365,
+     "p90": 0.14418164998825425
+    },
+    "qualite": {
+     "moy": 0.9343192071628724,
+     "p10": 0.8945104697226939,
+     "p90": 0.9584482961914869
+    },
+    "score": {
+     "moy": 90.7020840495214,
+     "p10": 88.24619083903009,
+     "p90": 93.07853238287046
+    },
+    "echecs_escalade": {
+     "moy": 30.1,
+     "p10": 20.6,
+     "p90": 37.100000000000016
+    },
+    "echecs_budget": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "echecs_delai": {
+     "moy": 17.9,
+     "p10": 7.9,
+     "p90": 30.200000000000003
+    },
+    "redemarrages": {
+     "moy": 1.65,
+     "p10": 0.0,
+     "p90": 3.1000000000000014
+    },
+    "delai_p50": {
+     "F1": {
+      "moy": 106.4462800082969,
+      "p10": 83.48134451662045,
+      "p90": 147.7438966024318
+     },
+     "F2": {
+      "moy": 142.59839039056516,
+      "p10": 113.09566345736057,
+      "p90": 184.28600537745518
+     },
+     "F3": {
+      "moy": 283.5207325232544,
+      "p10": 217.58621406196616,
+      "p90": 409.99693947375056
+     },
+     "F4": null
+    },
+    "delai_p90": {
+     "F1": {
+      "moy": 153.93561792987026,
+      "p10": 126.35095069077084,
+      "p90": 169.89865326797124
+     },
+     "F2": {
+      "moy": 397.81784795660354,
+      "p10": 227.4629604870826,
+      "p90": 775.8834380543866
+     },
+     "F3": {
+      "moy": 909.6639110140417,
+      "p10": 651.327724603559,
+      "p90": 1192.2609213775143
+     },
+     "F4": null
+    },
+    "ram_ok_part": 1.0,
+    "ram_limite_go": 21.818447331355173,
+    "modeles_simultanes": 2,
+    "nb_par_f": {
+     "F1": 6.85,
+     "F2": 80.5,
+     "F3": 122.5,
+     "F4": 0.0
+    }
+   }
+  },
+  "S11": {
+   "scenario": {
+    "offre": "KVM8",
+    "vitrine_kvm2": false,
+    "modele_principal": "7b",
+    "modele_controleur": "8b",
+    "cloud_gratuit": false,
+    "max_missions": 2,
+    "v2": true,
+    "priorite_jour": true,
+    "payant_plafond_eur": 0,
+    "payant_f3": false,
+    "charge": 1.0,
+    "panne_cloud_debut_j": 0,
+    "panne_cloud_duree_j": 0,
+    "absence_debut_j": 0,
+    "absence_duree_j": 0,
+    "pic_lundi": 15,
+    "nuit_chargee": false,
+    "id": "S11",
+    "nom": "S5 pic du lundi",
+    "description": "S5 + 15 missions manuelles chaque lundi matin en plus du pilote hebdomadaire.",
+    "surcharges": {}
+   },
+   "resume": {
+    "livrees_jour": {
+     "moy": 11.873333333333333,
+     "p10": 10.209999999999999,
+     "p90": 14.133333333333333
+    },
+    "ratio_livraison": {
+     "moy": 0.8831265008446986,
+     "p10": 0.8459996144206671,
+     "p90": 0.9157756916996047
+    },
+    "attente_moy_s": {
+     "moy": 76.18833660253696,
+     "p10": 39.53253267604417,
+     "p90": 146.29003247351696
+    },
+    "attente_p90_s": {
+     "moy": 249.0566687215894,
+     "p10": 4.421100950593246,
+     "p90": 591.2071840504262
+    },
+    "attente_nuit_moy_s": {
+     "moy": 485.62213198262606,
+     "p10": 376.6392556456912,
+     "p90": 571.3328225087242
+    },
+    "cpu_llm": {
+     "moy": 0.0382551269291386,
+     "p10": 0.03187836000382806,
+     "p90": 0.04475407278414644
+    },
+    "cpu_total": {
+     "moy": 0.04869676395196661,
+     "p10": 0.042207841190998914,
+     "p90": 0.0554293139959582
+    },
+    "ram_pic_go": {
+     "moy": 12.608295269120282,
+     "p10": 12.002110715011556,
+     "p90": 13.282706211602068
+    },
+    "taux_plafond": {
+     "moy": 0.050186977986766024,
+     "p10": 0.02585812356979405,
+     "p90": 0.07477615360337576
+    },
+    "n3_jour": {
+     "moy": 3.4333333333333336,
+     "p10": 2.6233333333333335,
+     "p90": 4.126666666666667
+    },
+    "part_au_dessus_plafond": {
+     "moy": 0.0011450381679389313,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "decisions_expirees": {
+     "moy": 3.55,
+     "p10": 0.0,
+     "p90": 8.200000000000003
+    },
+    "delai_decision_p50_h": {
+     "moy": 7.132646128460911,
+     "p10": 4.820141605489219,
+     "p90": 9.246472330511407
+    },
+    "tokens_mois_local": {
+     "moy": 2018436.3601198632,
+     "p10": 1637731.24035812,
+     "p90": 2319876.310432617
+    },
+    "tokens_mois_cloud": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "tokens_mois_payant": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "cout_api_eur": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "cout_total_eur": {
+     "moy": 32.60211278765555,
+     "p10": 23.742935571826933,
+     "p90": 40.205283622227434
+    },
+    "cout_par_mission_eur": {
+     "moy": 0.09326541388689386,
+     "p10": 0.05992511248033741,
+     "p90": 0.11766398118841329
+    },
+    "qualite": {
+     "moy": 0.9324791439846487,
+     "p10": 0.9030744416873449,
+     "p90": 0.95956776345159
+    },
+    "score": {
+     "moy": 91.20795806611486,
+     "p10": 90.01564253953404,
+     "p90": 92.55800229707542
+    },
+    "echecs_escalade": {
+     "moy": 32.95,
+     "p10": 21.9,
+     "p90": 45.50000000000001
+    },
+    "echecs_budget": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "echecs_delai": {
+     "moy": 23.5,
+     "p10": 11.7,
+     "p90": 35.50000000000001
+    },
+    "redemarrages": {
+     "moy": 1.65,
+     "p10": 0.0,
+     "p90": 3.1000000000000014
+    },
+    "delai_p50": {
+     "F1": {
+      "moy": 104.66476558387839,
+      "p10": 83.70182912764722,
+      "p90": 129.45631625097016
+     },
+     "F2": {
+      "moy": 145.79674245036114,
+      "p10": 122.71882299371646,
+      "p90": 172.7739938005776
+     },
+     "F3": {
+      "moy": 279.90641738092273,
+      "p10": 209.89312191053068,
+      "p90": 376.80636928940083
+     },
+     "F4": null
+    },
+    "delai_p90": {
+     "F1": {
+      "moy": 231.02138649378463,
+      "p10": 121.08061651782947,
+      "p90": 332.27189842097835
+     },
+     "F2": {
+      "moy": 395.61963969011737,
+      "p10": 288.87201987289825,
+      "p90": 577.9377167038039
+     },
+     "F3": {
+      "moy": 862.3290949451823,
+      "p10": 578.7132621274775,
+      "p90": 1164.314380859456
+     },
+     "F4": null
+    },
+    "ram_ok_part": 1.0,
+    "ram_limite_go": 21.818447331355173,
+    "modeles_simultanes": 2,
+    "nb_par_f": {
+     "F1": 8.45,
+     "F2": 111.9,
+     "F3": 152.7,
+     "F4": 0.0
+    },
+    "trace_file": {
+     "moy": [
+      0.0,
+      2.8,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.05,
+      0.05,
+      0.0,
+      0.0,
+      0.2,
+      0.15,
+      0.15,
+      0.15,
+      0.15,
+      0.15,
+      1.45,
+      0.2,
+      0.15,
+      0.15,
+      0.15,
+      0.15,
+      2.45,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      1.2,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      2.1,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      1.65,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      2.4,
+      8.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.25,
+      0.25,
+      0.25,
+      0.25,
+      0.25,
+      0.25,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      0.5,
+      3.05,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      0.15,
+      0.15,
+      0.15,
+      0.15,
+      0.15
+     ],
+     "p10": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      8.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "p90": [
+      0.0,
+      8.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      5.300000000000004,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      8.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.10000000000000142,
+      0.10000000000000142,
+      0.10000000000000142,
+      0.10000000000000142,
+      0.10000000000000142,
+      0.10000000000000142,
+      0.10000000000000142,
+      0.10000000000000142,
+      0.10000000000000142,
+      0.10000000000000142,
+      0.10000000000000142,
+      0.10000000000000142,
+      8.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.10000000000000142,
+      0.10000000000000142,
+      0.10000000000000142,
+      0.10000000000000142,
+      0.10000000000000142,
+      0.10000000000000142,
+      0.10000000000000142,
+      0.10000000000000142,
+      0.10000000000000142,
+      0.10000000000000142,
+      0.10000000000000142,
+      0.10000000000000142,
+      8.100000000000001,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      8.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.10000000000000142,
+      0.10000000000000142,
+      0.10000000000000142,
+      0.10000000000000142,
+      0.10000000000000142,
+      0.10000000000000142,
+      0.10000000000000142,
+      0.10000000000000142,
+      0.10000000000000142,
+      0.10000000000000142,
+      0.10000000000000142,
+      0.10000000000000142,
+      8.0,
+      8.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.1000000000000014,
+      1.1000000000000014,
+      1.1000000000000014,
+      1.1000000000000014,
+      1.1000000000000014,
+      1.1000000000000014,
+      9.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.10000000000000142,
+      0.10000000000000142,
+      0.10000000000000142,
+      0.10000000000000142,
+      0.10000000000000142,
+      0.10000000000000142,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ]
+    }
+   }
+  },
+  "S12": {
+   "scenario": {
+    "offre": "KVM8",
+    "vitrine_kvm2": false,
+    "modele_principal": "7b",
+    "modele_controleur": "8b",
+    "cloud_gratuit": false,
+    "max_missions": 2,
+    "v2": true,
+    "priorite_jour": true,
+    "payant_plafond_eur": 0,
+    "payant_f3": false,
+    "charge": 1.0,
+    "panne_cloud_debut_j": 0,
+    "panne_cloud_duree_j": 0,
+    "absence_debut_j": 0,
+    "absence_duree_j": 0,
+    "pic_lundi": 0,
+    "nuit_chargee": true,
+    "id": "S12",
+    "nom": "S5 nuit chargée",
+    "description": "S5 + chaque dimanche banc 30 missions, audit SYFER 10 missions, veille ×3.",
+    "surcharges": {}
+   },
+   "resume": {
+    "livrees_jour": {
+     "moy": 12.633333333333333,
+     "p10": 10.959999999999999,
+     "p90": 14.873333333333335
+    },
+    "ratio_livraison": {
+     "moy": 0.8324578086186072,
+     "p10": 0.7825508742467648,
+     "p90": 0.8826441730076091
+    },
+    "attente_moy_s": {
+     "moy": 76.95019989924951,
+     "p10": 34.531087764958265,
+     "p90": 148.8379030890444
+    },
+    "attente_p90_s": {
+     "moy": 263.47039946888685,
+     "p10": 0.0,
+     "p90": 643.564067633209
+    },
+    "attente_nuit_moy_s": {
+     "moy": 1286.678646915862,
+     "p10": 1019.1414187343449,
+     "p90": 1500.755068496824
+    },
+    "cpu_llm": {
+     "moy": 0.042466268419431415,
+     "p10": 0.037099555070980485,
+     "p90": 0.04839033871904042
+    },
+    "cpu_total": {
+     "moy": 0.051942444771312976,
+     "p10": 0.04811337886039811,
+     "p90": 0.0569853562437237
+    },
+    "ram_pic_go": {
+     "moy": 12.608295269120282,
+     "p10": 12.002110715011556,
+     "p90": 13.282706211602068
+    },
+    "taux_plafond": {
+     "moy": 0.08889799653698469,
+     "p10": 0.043243881325253794,
+     "p90": 0.14410606338157175
+    },
+    "n3_jour": {
+     "moy": 3.4899999999999998,
+     "p10": 2.78,
+     "p90": 4.220000000000001
+    },
+    "part_au_dessus_plafond": {
+     "moy": 0.0008241758241758242,
+     "p10": 0.0,
+     "p90": 0.0007936507936508049
+    },
+    "decisions_expirees": {
+     "moy": 6.35,
+     "p10": 0.0,
+     "p90": 13.0
+    },
+    "delai_decision_p50_h": {
+     "moy": 9.311038751694635,
+     "p10": 8.120245612363583,
+     "p90": 10.270206433010827
+    },
+    "tokens_mois_local": {
+     "moy": 2250836.1302935285,
+     "p10": 1949195.6702434917,
+     "p90": 2576672.3616205435
+    },
+    "tokens_mois_cloud": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "tokens_mois_payant": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "cout_api_eur": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "cout_total_eur": {
+     "moy": 32.60211278765555,
+     "p10": 23.742935571826933,
+     "p90": 40.205283622227434
+    },
+    "cout_par_mission_eur": {
+     "moy": 0.08798920083682336,
+     "p10": 0.05606559067952375,
+     "p90": 0.11344663223489436
+    },
+    "qualite": {
+     "moy": 0.931457948362717,
+     "p10": 0.9064021261921984,
+     "p90": 0.9574311319619873
+    },
+    "score": {
+     "moy": 89.15603116118828,
+     "p10": 85.75558882260886,
+     "p90": 92.26758725558726
+    },
+    "echecs_escalade": {
+     "moy": 38.95,
+     "p10": 24.7,
+     "p90": 51.400000000000006
+    },
+    "echecs_budget": {
+     "moy": 0.05,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "echecs_delai": {
+     "moy": 45.2,
+     "p10": 27.5,
+     "p90": 69.60000000000001
+    },
+    "redemarrages": {
+     "moy": 1.65,
+     "p10": 0.0,
+     "p90": 3.1000000000000014
+    },
+    "delai_p50": {
+     "F1": {
+      "moy": 104.88788894635327,
+      "p10": 68.14966047315393,
+      "p90": 122.77044472413402
+     },
+     "F2": {
+      "moy": 145.57377294471007,
+      "p10": 111.57382151061611,
+      "p90": 179.55528184685684
+     },
+     "F3": {
+      "moy": 279.5450319885498,
+      "p10": 197.02866702643806,
+      "p90": 369.3341781316093
+     },
+     "F4": null
+    },
+    "delai_p90": {
+     "F1": {
+      "moy": 214.19475588656397,
+      "p10": 105.56382021055441,
+      "p90": 410.37765900735974
+     },
+     "F2": {
+      "moy": 416.27620897682874,
+      "p10": 212.47004887859805,
+      "p90": 554.7056150895868
+     },
+     "F3": {
+      "moy": 853.4230273659666,
+      "p10": 601.499949678338,
+      "p90": 1202.2684632128667
+     },
+     "F4": null
+    },
+    "ram_ok_part": 1.0,
+    "ram_limite_go": 21.818447331355173,
+    "modeles_simultanes": 2,
+    "nb_par_f": {
+     "F1": 7.6,
+     "F2": 80.55,
+     "F3": 119.35,
+     "F4": 0.0
+    }
+   }
+  },
+  "S13": {
+   "scenario": {
+    "offre": "KVM8",
+    "vitrine_kvm2": false,
+    "modele_principal": "7b",
+    "modele_controleur": "8b",
+    "cloud_gratuit": true,
+    "max_missions": 3,
+    "v2": true,
+    "priorite_jour": true,
+    "payant_plafond_eur": 0,
+    "payant_f3": false,
+    "charge": 1.0,
+    "panne_cloud_debut_j": 0,
+    "panne_cloud_duree_j": 0,
+    "absence_debut_j": 0,
+    "absence_duree_j": 0,
+    "pic_lundi": 0,
+    "nuit_chargee": false,
+    "id": "S13",
+    "nom": "KVM 8 hybride gratuit",
+    "description": "KVM 8 double modèle local + cloud gratuit pour F2/F3, 3 missions simultanées, V2, 0 € d'IA.",
+    "surcharges": {}
+   },
+   "resume": {
+    "livrees_jour": {
+     "moy": 10.526666666666667,
+     "p10": 8.806666666666667,
+     "p90": 13.036666666666667
+    },
+    "ratio_livraison": {
+     "moy": 0.9579279537894854,
+     "p10": 0.9360892597534504,
+     "p90": 0.9728609367455336
+    },
+    "attente_moy_s": {
+     "moy": 8.75834621726774,
+     "p10": 3.253238922546325,
+     "p90": 19.583745862199198
+    },
+    "attente_p90_s": {
+     "moy": 14.975609288330261,
+     "p10": 0.0,
+     "p90": 59.584929050573955
+    },
+    "attente_nuit_moy_s": {
+     "moy": 40.07516096392824,
+     "p10": 29.502488863436216,
+     "p90": 48.303258498301894
+    },
+    "cpu_llm": {
+     "moy": 0.005818469164915169,
+     "p10": 0.004606462284928337,
+     "p90": 0.007113066412866324
+    },
+    "cpu_total": {
+     "moy": 0.023294762247726197,
+     "p10": 0.02252863792983282,
+     "p90": 0.024510208088983156
+    },
+    "ram_pic_go": {
+     "moy": 12.608295269120282,
+     "p10": 12.002110715011556,
+     "p90": 13.282706211602068
+    },
+    "taux_plafond": {
+     "moy": 0.010200487695476193,
+     "p10": 0.0,
+     "p90": 0.020309933194611763
+    },
+    "n3_jour": {
+     "moy": 2.8649999999999998,
+     "p10": 2.186666666666667,
+     "p90": 3.470000000000001
+    },
+    "part_au_dessus_plafond": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "decisions_expirees": {
+     "moy": 4.95,
+     "p10": 0.0,
+     "p90": 15.100000000000001
+    },
+    "delai_decision_p50_h": {
+     "moy": 8.233180303306002,
+     "p10": 6.515932304022702,
+     "p90": 9.395470161712193
+    },
+    "tokens_mois_local": {
+     "moy": 376849.4044503126,
+     "p10": 281980.76772205794,
+     "p90": 481228.35950125154
+    },
+    "tokens_mois_cloud": {
+     "moy": 1261262.5534869344,
+     "p10": 1001316.510332705,
+     "p90": 1451664.6808554628
+    },
+    "tokens_mois_payant": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "cout_api_eur": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "cout_total_eur": {
+     "moy": 32.60211278765555,
+     "p10": 23.742935571826933,
+     "p90": 40.205283622227434
+    },
+    "cout_par_mission_eur": {
+     "moy": 0.10595807495094796,
+     "p10": 0.06539706521472956,
+     "p90": 0.13468063071550437
+    },
+    "qualite": {
+     "moy": 0.9666850927781535,
+     "p10": 0.9486734693877551,
+     "p90": 0.9857543564980055
+    },
+    "score": {
+     "moy": 94.47818011826361,
+     "p10": 92.83854308825941,
+     "p90": 95.66034703186365
+    },
+    "echecs_escalade": {
+     "moy": 11.65,
+     "p10": 5.9,
+     "p90": 17.1
+    },
+    "echecs_budget": {
+     "moy": 0.05,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "echecs_delai": {
+     "moy": 3.85,
+     "p10": 0.0,
+     "p90": 8.0
+    },
+    "redemarrages": {
+     "moy": 1.65,
+     "p10": 0.0,
+     "p90": 3.1000000000000014
+    },
+    "delai_p50": {
+     "F1": {
+      "moy": 100.05176822718822,
+      "p10": 81.23311780162912,
+      "p90": 130.2952791263233
+     },
+     "F2": {
+      "moy": 15.461716200709997,
+      "p10": 12.2841923678061,
+      "p90": 18.44754605071503
+     },
+     "F3": {
+      "moy": 74.88852531139328,
+      "p10": 60.31810905467137,
+      "p90": 90.4916235532728
+     },
+     "F4": null
+    },
+    "delai_p90": {
+     "F1": {
+      "moy": 136.79954191501892,
+      "p10": 114.48744621891528,
+      "p90": 166.41414134815335
+     },
+     "F2": {
+      "moy": 50.59773581151531,
+      "p10": 24.846456862817323,
+      "p90": 117.329422812781
+     },
+     "F3": {
+      "moy": 197.40365215950624,
+      "p10": 146.66861964913787,
+      "p90": 252.12330754013345
+     },
+     "F4": null
+    },
+    "ram_ok_part": 1.0,
+    "ram_limite_go": 21.818447331355173,
+    "modeles_simultanes": 2,
+    "nb_par_f": {
+     "F1": 7.0,
+     "F2": 84.85,
+     "F3": 126.9,
+     "F4": 0.0
+    },
+    "trace_file": {
+     "moy": [
+      0.0,
+      1.4,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      1.05,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      2.1,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      2.5,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.05,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      2.1,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      1.05,
+      7.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.2,
+      0.2,
+      0.2,
+      0.2,
+      0.2,
+      0.2,
+      0.55,
+      0.55,
+      0.55,
+      0.55,
+      0.55,
+      0.55,
+      3.05,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05
+     ],
+     "p10": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      7.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "p90": [
+      0.0,
+      7.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.10000000000000142,
+      0.10000000000000142,
+      0.10000000000000142,
+      0.10000000000000142,
+      0.10000000000000142,
+      0.10000000000000142,
+      2.4000000000000057,
+      0.10000000000000142,
+      0.10000000000000142,
+      0.10000000000000142,
+      0.10000000000000142,
+      0.10000000000000142,
+      7.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.10000000000000142,
+      0.10000000000000142,
+      0.10000000000000142,
+      0.10000000000000142,
+      0.10000000000000142,
+      0.10000000000000142,
+      7.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      7.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      7.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      7.0,
+      7.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      2.0,
+      2.0,
+      2.0,
+      2.0,
+      2.0,
+      2.0,
+      8.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ]
+    },
+    "score_panne_cloud": 93.21315253364588,
+    "score_robuste": 94.16192322210918
+   }
+  },
+  "S14": {
+   "scenario": {
+    "offre": "KVM8",
+    "vitrine_kvm2": false,
+    "modele_principal": "7b",
+    "modele_controleur": "8b",
+    "cloud_gratuit": true,
+    "max_missions": 3,
+    "v2": true,
+    "priorite_jour": true,
+    "payant_plafond_eur": 30,
+    "payant_f3": false,
+    "charge": 1.0,
+    "panne_cloud_debut_j": 0,
+    "panne_cloud_duree_j": 0,
+    "absence_debut_j": 0,
+    "absence_duree_j": 0,
+    "pic_lundi": 0,
+    "nuit_chargee": false,
+    "id": "S14",
+    "nom": "S13 + F4 payant 30 €",
+    "description": "S13 + API Anthropic plafonnée à 30 €/mois pour F4.",
+    "surcharges": {}
+   },
+   "resume": {
+    "livrees_jour": {
+     "moy": 10.47,
+     "p10": 8.826666666666668,
+     "p90": 12.850000000000001
+    },
+    "ratio_livraison": {
+     "moy": 0.9485445337696128,
+     "p10": 0.9221522515150437,
+     "p90": 0.9670430107526882
+    },
+    "attente_moy_s": {
+     "moy": 958.1143701772186,
+     "p10": 178.73683926354929,
+     "p90": 1873.679465125694
+    },
+    "attente_p90_s": {
+     "moy": 45.619905713248514,
+     "p10": 0.0,
+     "p90": 105.46461413010606
+    },
+    "attente_nuit_moy_s": {
+     "moy": 40.30075674133595,
+     "p10": 31.16570784285212,
+     "p90": 46.912134072786806
+    },
+    "cpu_llm": {
+     "moy": 0.005699238413680557,
+     "p10": 0.004486247038807256,
+     "p90": 0.007159117831167407
+    },
+    "cpu_total": {
+     "moy": 0.02320375419011338,
+     "p10": 0.02241834707915659,
+     "p90": 0.02453756664637441
+    },
+    "ram_pic_go": {
+     "moy": 12.608295269120282,
+     "p10": 12.002110715011556,
+     "p90": 13.282706211602068
+    },
+    "taux_plafond": {
+     "moy": 0.009567246420967429,
+     "p10": 0.0,
+     "p90": 0.017254237288135597
+    },
+    "n3_jour": {
+     "moy": 3.2783333333333333,
+     "p10": 2.53,
+     "p90": 4.44
+    },
+    "part_au_dessus_plafond": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "decisions_expirees": {
+     "moy": 4.7,
+     "p10": 0.0,
+     "p90": 13.0
+    },
+    "delai_decision_p50_h": {
+     "moy": 7.972539031999908,
+     "p10": 6.507605362467309,
+     "p90": 9.239600027162266
+    },
+    "tokens_mois_local": {
+     "moy": 368465.2184300783,
+     "p10": 292934.4666333542,
+     "p90": 473979.1525704241
+    },
+    "tokens_mois_cloud": {
+     "moy": 1237286.5947929348,
+     "p10": 1001287.441328026,
+     "p90": 1495948.999331238
+    },
+    "tokens_mois_payant": {
+     "moy": 28488.13517071099,
+     "p10": 11391.692660110788,
+     "p90": 48538.8159405121
+    },
+    "cout_api_eur": {
+     "moy": 0.09469329370601094,
+     "p10": 0.03409811993553502,
+     "p90": 0.15918194420414408
+    },
+    "cout_total_eur": {
+     "moy": 32.696806081361565,
+     "p10": 23.80999576458791,
+     "p90": 40.299075455565095
+    },
+    "cout_par_mission_eur": {
+     "moy": 0.10676412093754606,
+     "p10": 0.06716656669009576,
+     "p90": 0.1322315316481698
+    },
+    "qualite": {
+     "moy": 0.9630347804638166,
+     "p10": 0.9441233766233766,
+     "p90": 0.9862841945288754
+    },
+    "score": {
+     "moy": 94.07769881886672,
+     "p10": 92.84978956121847,
+     "p90": 94.96753215799444
+    },
+    "echecs_escalade": {
+     "moy": 12.1,
+     "p10": 6.9,
+     "p90": 19.1
+    },
+    "echecs_budget": {
+     "moy": 0.05,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "echecs_delai": {
+     "moy": 3.7,
+     "p10": 0.0,
+     "p90": 7.100000000000001
+    },
+    "redemarrages": {
+     "moy": 1.65,
+     "p10": 0.0,
+     "p90": 3.1000000000000014
+    },
+    "delai_p50": {
+     "F1": {
+      "moy": 95.52727444969568,
+      "p10": 67.10703571385821,
+      "p90": 116.41993297099835
+     },
+     "F2": {
+      "moy": 15.30203163453989,
+      "p10": 12.166390701779164,
+      "p90": 17.828162544354566
+     },
+     "F3": {
+      "moy": 76.29814262560176,
+      "p10": 61.38790191860171,
+      "p90": 95.42712215010542
+     },
+     "F4": {
+      "moy": 13993.061245159613,
+      "p10": 4001.23689111445,
+      "p90": 25432.950596060753
+     }
+    },
+    "delai_p90": {
+     "F1": {
+      "moy": 135.34499815609007,
+      "p10": 102.88849272066116,
+      "p90": 156.7222849547805
+     },
+     "F2": {
+      "moy": 45.72683215164102,
+      "p10": 23.650451547395203,
+      "p90": 79.54335675055442
+     },
+     "F3": {
+      "moy": 207.53015278681974,
+      "p10": 173.98051777400767,
+      "p90": 258.29338052309214
+     },
+     "F4": {
+      "moy": 49031.03190866257,
+      "p10": 15005.950908908486,
+      "p90": 68877.28206089982
+     }
+    },
+    "ram_ok_part": 1.0,
+    "ram_limite_go": 21.818447331355173,
+    "modeles_simultanes": 2,
+    "nb_par_f": {
+     "F1": 6.5,
+     "F2": 85.45,
+     "F3": 116.1,
+     "F4": 9.2
+    },
+    "score_panne_cloud": 92.671726512056,
+    "score_robuste": 93.72620574216404
+   }
+  },
+  "S15": {
+   "scenario": {
+    "offre": "KVM8",
+    "vitrine_kvm2": false,
+    "modele_principal": "7b",
+    "modele_controleur": "8b",
+    "cloud_gratuit": true,
+    "max_missions": 3,
+    "v2": true,
+    "priorite_jour": true,
+    "payant_plafond_eur": 0,
+    "payant_f3": false,
+    "charge": 3.0,
+    "panne_cloud_debut_j": 0,
+    "panne_cloud_duree_j": 0,
+    "absence_debut_j": 0,
+    "absence_duree_j": 0,
+    "pic_lundi": 0,
+    "nuit_chargee": false,
+    "id": "S15",
+    "nom": "S13 charge ×3",
+    "description": "S13 avec 3 fois plus de missions manuelles.",
+    "surcharges": {}
+   },
+   "resume": {
+    "livrees_jour": {
+     "moy": 21.851666666666667,
+     "p10": 14.766666666666667,
+     "p90": 26.906666666666666
+    },
+    "ratio_livraison": {
+     "moy": 0.9583394052185532,
+     "p10": 0.944912828519386,
+     "p90": 0.9737740182441612
+    },
+    "attente_moy_s": {
+     "moy": 3.669486623294776,
+     "p10": 1.194419545912274,
+     "p90": 7.7999898237365075
+    },
+    "attente_p90_s": {
+     "moy": 0.8482139755133538,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "attente_nuit_moy_s": {
+     "moy": 38.54139336517046,
+     "p10": 29.83006106092793,
+     "p90": 45.225362355576365
+    },
+    "cpu_llm": {
+     "moy": 0.010752613271296329,
+     "p10": 0.008042921621819816,
+     "p90": 0.014131003818829297
+    },
+    "cpu_total": {
+     "moy": 0.027136669391955033,
+     "p10": 0.024750411106084395,
+     "p90": 0.02961667030179403
+    },
+    "ram_pic_go": {
+     "moy": 12.608295269120282,
+     "p10": 12.002110715011556,
+     "p90": 13.282706211602068
+    },
+    "taux_plafond": {
+     "moy": 0.010243182125788132,
+     "p10": 0.004891938250428817,
+     "p90": 0.019170061916524976
+    },
+    "n3_jour": {
+     "moy": 6.376666666666667,
+     "p10": 4.126666666666667,
+     "p90": 7.9700000000000015
+    },
+    "part_au_dessus_plafond": {
+     "moy": 0.0029916527215775915,
+     "p10": 0.0,
+     "p90": 0.009329030822298877
+    },
+    "decisions_expirees": {
+     "moy": 9.45,
+     "p10": 1.9000000000000001,
+     "p90": 16.100000000000016
+    },
+    "delai_decision_p50_h": {
+     "moy": 6.49930573852473,
+     "p10": 5.588756896868782,
+     "p90": 8.268502175821373
+    },
+    "tokens_mois_local": {
+     "moy": 668464.1199327593,
+     "p10": 477668.5658200599,
+     "p90": 849936.935326712
+    },
+    "tokens_mois_cloud": {
+     "moy": 2268832.448966416,
+     "p10": 1724843.4744164888,
+     "p90": 2782761.718109603
+    },
+    "tokens_mois_payant": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "cout_api_eur": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "cout_total_eur": {
+     "moy": 32.60211278765555,
+     "p10": 23.742935571826933,
+     "p90": 40.205283622227434
+    },
+    "cout_par_mission_eur": {
+     "moy": 0.05206001851312754,
+     "p10": 0.02953759183183084,
+     "p90": 0.07024394553521479
+    },
+    "qualite": {
+     "moy": 0.9647728345997371,
+     "p10": 0.9508749455775478,
+     "p90": 0.983790473938552
+    },
+    "score": {
+     "moy": 94.43315591578315,
+     "p10": 93.58650186842284,
+     "p90": 95.46343676281779
+    },
+    "echecs_escalade": {
+     "moy": 22.8,
+     "p10": 10.0,
+     "p90": 31.80000000000001
+    },
+    "echecs_budget": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "echecs_delai": {
+     "moy": 7.6,
+     "p10": 3.0,
+     "p90": 14.0
+    },
+    "redemarrages": {
+     "moy": 1.65,
+     "p10": 0.0,
+     "p90": 3.1000000000000014
+    },
+    "delai_p50": {
+     "F1": {
+      "moy": 102.66678199881099,
+      "p10": 85.94573982974688,
+      "p90": 130.87201231839134
+     },
+     "F2": {
+      "moy": 14.982813172513852,
+      "p10": 11.630486114180531,
+      "p90": 18.25554825362633
+     },
+     "F3": {
+      "moy": 68.79950793120243,
+      "p10": 57.362214357763875,
+      "p90": 81.26137628621255
+     },
+     "F4": null
+    },
+    "delai_p90": {
+     "F1": {
+      "moy": 147.429971110625,
+      "p10": 133.03374824881058,
+      "p90": 161.9813523288653
+     },
+     "F2": {
+      "moy": 30.367015194893185,
+      "p10": 24.00749808121764,
+      "p90": 36.96534276330963
+     },
+     "F3": {
+      "moy": 152.2386195281611,
+      "p10": 117.46292787108513,
+      "p90": 204.4319697417206
+     },
+     "F4": null
+    },
+    "ram_ok_part": 1.0,
+    "ram_limite_go": 21.818447331355173,
+    "modeles_simultanes": 2,
+    "nb_par_f": {
+     "F1": 18.85,
+     "F2": 236.6,
+     "F3": 303.05,
+     "F4": 0.0
+    },
+    "trace_file": {
+     "moy": [
+      0.0,
+      1.75,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      1.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      1.75,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      3.5,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.75,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.05,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.4,
+      7.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.55,
+      0.55,
+      0.55,
+      0.55,
+      0.55,
+      0.55,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      0.7,
+      1.45,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      0.1,
+      0.1,
+      0.1,
+      0.1
+     ],
+     "p10": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      7.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "p90": [
+      0.0,
+      7.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      2.4000000000000057,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      7.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      7.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      7.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      7.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      7.0,
+      7.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.1000000000000014,
+      1.1000000000000014,
+      1.1000000000000014,
+      1.1000000000000014,
+      1.1000000000000014,
+      1.1000000000000014,
+      7.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.10000000000000142,
+      0.10000000000000142,
+      0.10000000000000142,
+      0.10000000000000142,
+      0.10000000000000142
+     ]
+    }
+   }
+  },
+  "S16": {
+   "scenario": {
+    "offre": "KVM4",
+    "vitrine_kvm2": false,
+    "modele_principal": "7b",
+    "modele_controleur": "3b",
+    "cloud_gratuit": true,
+    "max_missions": 3,
+    "v2": true,
+    "priorite_jour": true,
+    "payant_plafond_eur": 0,
+    "payant_f3": false,
+    "charge": 1.0,
+    "panne_cloud_debut_j": 0,
+    "panne_cloud_duree_j": 0,
+    "absence_debut_j": 0,
+    "absence_duree_j": 0,
+    "pic_lundi": 0,
+    "nuit_chargee": false,
+    "id": "S16",
+    "nom": "KVM 4 hybride 3B+7B",
+    "description": "KVM 4, 7B analyste + 3B contrôleur (double modèle léger), cloud gratuit, V2.",
+    "surcharges": {}
+   },
+   "resume": {
+    "livrees_jour": {
+     "moy": 10.365,
+     "p10": 8.81,
+     "p90": 12.376666666666669
+    },
+    "ratio_livraison": {
+     "moy": 0.9419465158263737,
+     "p10": 0.9078748786673764,
+     "p90": 0.9637863315003928
+    },
+    "attente_moy_s": {
+     "moy": 7.128150281655718,
+     "p10": 2.759538320550166,
+     "p90": 14.853124589446796
+    },
+    "attente_p90_s": {
+     "moy": 11.929385551807666,
+     "p10": 0.0,
+     "p90": 54.57238590427389
+    },
+    "attente_nuit_moy_s": {
+     "moy": 33.90125301275784,
+     "p10": 25.265043248821115,
+     "p90": 40.72607908686033
+    },
+    "cpu_llm": {
+     "moy": 0.004769696736893557,
+     "p10": 0.0038526289535030667,
+     "p90": 0.005686274625804954
+    },
+    "cpu_total": {
+     "moy": 0.04085811460151981,
+     "p10": 0.04001500080898012,
+     "p90": 0.04150803481612273
+    },
+    "ram_pic_go": {
+     "moy": 8.807589282804502,
+     "p10": 8.308198358593446,
+     "p90": 9.301686344570422
+    },
+    "taux_plafond": {
+     "moy": 0.016932443257238014,
+     "p10": 0.0022500000000000003,
+     "p90": 0.03243243243243244
+    },
+    "n3_jour": {
+     "moy": 2.8316666666666666,
+     "p10": 2.3066666666666666,
+     "p90": 3.370000000000001
+    },
+    "part_au_dessus_plafond": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "decisions_expirees": {
+     "moy": 3.25,
+     "p10": 0.0,
+     "p90": 8.100000000000001
+    },
+    "delai_decision_p50_h": {
+     "moy": 8.698982991585922,
+     "p10": 6.557705632844982,
+     "p90": 10.077055761885035
+    },
+    "tokens_mois_local": {
+     "moy": 381270.64877362945,
+     "p10": 311631.38142135745,
+     "p90": 446005.6847685724
+    },
+    "tokens_mois_cloud": {
+     "moy": 1296679.7016441263,
+     "p10": 1050808.5646221144,
+     "p90": 1523930.19788764
+    },
+    "tokens_mois_payant": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "cout_api_eur": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "cout_total_eur": {
+     "moy": 16.458852549343128,
+     "p10": 11.54944275138244,
+     "p90": 22.126101763141165
+    },
+    "cout_par_mission_eur": {
+     "moy": 0.054749184528826364,
+     "p10": 0.0383958764532064,
+     "p90": 0.08366136976172725
+    },
+    "qualite": {
+     "moy": 0.9551566182885922,
+     "p10": 0.9393353555521425,
+     "p90": 0.9692171926910299
+    },
+    "score": {
+     "moy": 95.26720876851466,
+     "p10": 94.25654844341477,
+     "p90": 96.30207769186796
+    },
+    "echecs_escalade": {
+     "moy": 14.95,
+     "p10": 7.6000000000000005,
+     "p90": 24.500000000000007
+    },
+    "echecs_budget": {
+     "moy": 0.1,
+     "p10": 0.0,
+     "p90": 0.10000000000000142
+    },
+    "echecs_delai": {
+     "moy": 6.45,
+     "p10": 0.9000000000000001,
+     "p90": 13.0
+    },
+    "redemarrages": {
+     "moy": 1.65,
+     "p10": 0.0,
+     "p90": 3.1000000000000014
+    },
+    "delai_p50": {
+     "F1": {
+      "moy": 110.1367490172848,
+      "p10": 75.42281017540954,
+      "p90": 150.86506882228423
+     },
+     "F2": {
+      "moy": 15.081027951377473,
+      "p10": 11.939271844399627,
+      "p90": 16.91718921418069
+     },
+     "F3": {
+      "moy": 59.526649140815245,
+      "p10": 47.47858580037719,
+      "p90": 70.41437051974644
+     },
+     "F4": null
+    },
+    "delai_p90": {
+     "F1": {
+      "moy": 144.7549939903898,
+      "p10": 123.9748940359382,
+      "p90": 166.47197249890945
+     },
+     "F2": {
+      "moy": 42.93447993681673,
+      "p10": 22.951676192046143,
+      "p90": 88.97483769209133
+     },
+     "F3": {
+      "moy": 154.32220741450692,
+      "p10": 115.7490373383241,
+      "p90": 208.88755024246066
+     },
+     "F4": null
+    },
+    "ram_ok_part": 1.0,
+    "ram_limite_go": 9.980280040049855,
+    "modeles_simultanes": 2,
+    "nb_par_f": {
+     "F1": 5.55,
+     "F2": 84.55,
+     "F3": 125.15,
+     "F4": 0.0
+    },
+    "score_panne_cloud": 92.38305112048076,
+    "score_robuste": 94.5461693565062
+   }
+  },
+  "S17": {
+   "scenario": {
+    "offre": "KVM8",
+    "vitrine_kvm2": false,
+    "modele_principal": "7b",
+    "modele_controleur": "8b",
+    "cloud_gratuit": true,
+    "max_missions": 3,
+    "v2": true,
+    "priorite_jour": true,
+    "payant_plafond_eur": 0,
+    "payant_f3": false,
+    "charge": 1.0,
+    "panne_cloud_debut_j": 5,
+    "panne_cloud_duree_j": 10,
+    "absence_debut_j": 0,
+    "absence_duree_j": 0,
+    "pic_lundi": 0,
+    "nuit_chargee": false,
+    "id": "S17",
+    "nom": "S13 panne cloud 10 j",
+    "description": "S13 avec le cloud gratuit indisponible du jour 5 au jour 15 (robustesse de l'hybride).",
+    "surcharges": {}
+   },
+   "resume": {
+    "livrees_jour": {
+     "moy": 10.231666666666666,
+     "p10": 8.780000000000001,
+     "p90": 12.186666666666667
+    },
+    "ratio_livraison": {
+     "moy": 0.9274346068846864,
+     "p10": 0.9046165030897856,
+     "p90": 0.9554965594197508
+    },
+    "attente_moy_s": {
+     "moy": 28.33961345239315,
+     "p10": 11.66369081069264,
+     "p90": 72.66940769926555
+    },
+    "attente_p90_s": {
+     "moy": 28.168430595193723,
+     "p10": 0.0,
+     "p90": 110.22196930359746
+    },
+    "attente_nuit_moy_s": {
+     "moy": 195.75983886930496,
+     "p10": 148.58382563033376,
+     "p90": 253.35996134588845
+    },
+    "cpu_llm": {
+     "moy": 0.015311915607020391,
+     "p10": 0.012811903712738706,
+     "p90": 0.018173924848652406
+    },
+    "cpu_total": {
+     "moy": 0.030719785295049228,
+     "p10": 0.028697848724924403,
+     "p90": 0.033109645962653034
+    },
+    "ram_pic_go": {
+     "moy": 12.608295269120282,
+     "p10": 12.002110715011556,
+     "p90": 13.282706211602068
+    },
+    "taux_plafond": {
+     "moy": 0.040050766089327186,
+     "p10": 0.019992553983618766,
+     "p90": 0.06178406044357789
+    },
+    "n3_jour": {
+     "moy": 2.808333333333333,
+     "p10": 2.2233333333333336,
+     "p90": 3.3433333333333337
+    },
+    "part_au_dessus_plafond": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "decisions_expirees": {
+     "moy": 3.35,
+     "p10": 0.0,
+     "p90": 8.0
+    },
+    "delai_decision_p50_h": {
+     "moy": 8.24514476706094,
+     "p10": 6.4932931880911084,
+     "p90": 9.266790063643422
+    },
+    "tokens_mois_local": {
+     "moy": 847725.5642566612,
+     "p10": 633354.424378134,
+     "p90": 1021786.6775872873
+    },
+    "tokens_mois_cloud": {
+     "moy": 813353.676791244,
+     "p10": 700472.0945245432,
+     "p90": 1000874.8939161958
+    },
+    "tokens_mois_payant": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "cout_api_eur": {
+     "moy": 0.0,
+     "p10": 0.0,
+     "p90": 0.0
+    },
+    "cout_total_eur": {
+     "moy": 32.60211278765555,
+     "p10": 23.742935571826933,
+     "p90": 40.205283622227434
+    },
+    "cout_par_mission_eur": {
+     "moy": 0.10889241135741363,
+     "p10": 0.06737541464877203,
+     "p90": 0.13856959882778624
+    },
+    "qualite": {
+     "moy": 0.9550108535290285,
+     "p10": 0.9337582375802637,
+     "p90": 0.9781549815498155
+    },
+    "score": {
+     "moy": 93.21315253364588,
+     "p10": 92.03603927346539,
+     "p90": 94.94778963825662
+    },
+    "echecs_escalade": {
+     "moy": 15.8,
+     "p10": 8.9,
+     "p90": 21.60000000000001
+    },
+    "echecs_budget": {
+     "moy": 0.1,
+     "p10": 0.0,
+     "p90": 0.10000000000000142
+    },
+    "echecs_delai": {
+     "moy": 15.6,
+     "p10": 8.9,
+     "p90": 24.0
+    },
+    "redemarrages": {
+     "moy": 1.65,
+     "p10": 0.0,
+     "p90": 3.1000000000000014
+    },
+    "delai_p50": {
+     "F1": {
+      "moy": 104.73723247840026,
+      "p10": 79.29035973197897,
+      "p90": 122.88062106665895
+     },
+     "F2": {
+      "moy": 20.71429624814773,
+      "p10": 14.842681131191785,
+      "p90": 25.83853430972231
+     },
+     "F3": {
+      "moy": 109.35728343285709,
+      "p10": 83.41992792449564,
+      "p90": 143.47730774936502
+     },
+     "F4": null
+    },
+    "delai_p90": {
+     "F1": {
+      "moy": 164.0963199285662,
+      "p10": 102.75115312067152,
+      "p90": 181.91327624356404
+     },
+     "F2": {
+      "moy": 276.18309385115487,
+      "p10": 197.5029565290676,
+      "p90": 362.409465241006
+     },
+     "F3": {
+      "moy": 568.1031414735138,
+      "p10": 461.35187722025796,
+      "p90": 682.5314875305659
+     },
+     "F4": null
+    },
+    "ram_ok_part": 1.0,
+    "ram_limite_go": 21.818447331355173,
+    "modeles_simultanes": 2,
+    "nb_par_f": {
+     "F1": 6.85,
+     "F2": 83.85,
+     "F3": 124.3,
+     "F4": 0.0
+    }
+   }
+  }
+ }
+}

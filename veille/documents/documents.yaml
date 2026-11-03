@@ -1,0 +1,220 @@
+# DOCUMENTS DE RÉFÉRENCE à découper en sections citables (python documents/ingestion.py).
+# Champs : id, source (id du catalogue), titre, ref_court (préfixe des citations), url, format (auto|html|txt|md|pdf),
+# licence (sinon celle de la source), stockage demandé (plafonné par la licence), type_doc, langue, domaines, verifie.
+# Le stockage EFFECTIF est le plus restrictif entre la demande et la licence (voir `--lister`).
+version: 1
+documents:
+  # ---------------------------------------------------------------- sécurité / authentification
+  - id: nist-sp800-63b-4
+    source: nist-sp800-documents
+    titre: Digital Identity Guidelines — Authentication and Authenticator Management
+    ref_court: NIST SP 800-63B-4
+    url: https://pages.nist.gov/800-63-4/sp800-63b.html
+    format: html
+    licence: domaine-public-us
+    stockage: integral
+    type_doc: norme
+    langue: en
+    verifie: '2026-11-04'
+  - id: owasp-password-storage
+    source: owasp-cheatsheets
+    titre: Password Storage Cheat Sheet
+    ref_court: OWASP Password Storage CS
+    url: https://raw.githubusercontent.com/OWASP/CheatSheetSeries/master/cheatsheets/Password_Storage_Cheat_Sheet.md
+    format: md
+    licence: cc-by-sa
+    stockage: integral
+    type_doc: guide
+    langue: en
+    verifie: non_verifie
+  - id: owasp-authentication
+    source: owasp-cheatsheets
+    titre: Authentication Cheat Sheet
+    ref_court: OWASP Authentication CS
+    url: https://raw.githubusercontent.com/OWASP/CheatSheetSeries/master/cheatsheets/Authentication_Cheat_Sheet.md
+    format: md
+    licence: cc-by-sa
+    stockage: integral
+    type_doc: guide
+    langue: en
+    verifie: non_verifie
+  - id: owasp-session
+    source: owasp-cheatsheets
+    titre: Session Management Cheat Sheet
+    ref_court: OWASP Session CS
+    url: https://raw.githubusercontent.com/OWASP/CheatSheetSeries/master/cheatsheets/Session_Management_Cheat_Sheet.md
+    format: md
+    licence: cc-by-sa
+    stockage: integral
+    type_doc: guide
+    langue: en
+    verifie: non_verifie
+  - id: anssi-mfa-mots-de-passe
+    source: anssi-guides
+    titre: Recommandations relatives à l'authentification multifacteur et aux mots de passe
+    ref_court: ANSSI Guide authentification
+    url: https://cyber.gouv.fr/publications/recommandations-relatives-lauthentification-multifacteur-et-aux-mots-de-passe
+    format: auto
+    licence: etalab-2.0
+    stockage: integral
+    type_doc: guide
+    langue: fr
+    verifie: non_verifie
+  # ---------------------------------------------------------------- protocoles (RFC, licence IETF : reproduction intégrale)
+  - id: rfc9110
+    source: rfc-documents
+    titre: HTTP Semantics
+    ref_court: RFC 9110
+    url: https://www.rfc-editor.org/rfc/rfc9110.txt
+    format: txt
+    stockage: integral
+    type_doc: norme
+    langue: en
+    verifie: non_verifie
+  - id: rfc6749
+    source: rfc-documents
+    titre: The OAuth 2.0 Authorization Framework
+    ref_court: RFC 6749
+    url: https://www.rfc-editor.org/rfc/rfc6749.txt
+    format: txt
+    stockage: integral
+    type_doc: norme
+    langue: en
+    verifie: non_verifie
+  - id: rfc9116
+    source: rfc-documents
+    titre: A File Format to Aid in Security Vulnerability Disclosure (security.txt)
+    ref_court: RFC 9116
+    url: https://www.rfc-editor.org/rfc/rfc9116.txt
+    format: txt
+    stockage: integral
+    type_doc: norme
+    langue: en
+    verifie: non_verifie
+  # ---------------------------------------------------------------- accessibilité, écoconception
+  - id: wcag22
+    source: w3c-tr
+    titre: Web Content Accessibility Guidelines (WCAG) 2.2
+    ref_court: WCAG 2.2
+    url: https://www.w3.org/TR/WCAG22/
+    format: html
+    stockage: integral
+    type_doc: norme
+    langue: en
+    verifie: non_verifie
+  - id: rgaa-criteres
+    source: rgaa
+    titre: RGAA 4.1 — critères et tests
+    ref_court: RGAA 4.1
+    url: https://accessibilite.numerique.gouv.fr/methode/criteres-et-tests/
+    format: html
+    stockage: integral
+    type_doc: norme
+    langue: fr
+    verifie: non_verifie
+  - id: rgesn-2024
+    source: rgesn
+    titre: Référentiel général d'écoconception de services numériques (version 2024)
+    ref_court: RGESN 2024
+    url: https://ecoresponsable.numerique.gouv.fr/docs/2024/rgesn-mai2024/referentiel_general_ecoconception_des_services_numeriques_version_2024.pdf
+    format: pdf
+    stockage: integral
+    type_doc: norme
+    langue: fr
+    verifie: '2026-11-04'
+    description: Référentiel de 78 critères d'écoconception (stratégie, UX/UI, contenus, frontend, backend, hébergement, algorithmie).
+  # ---------------------------------------------------------------- droit européen (réutilisation autorisée)
+  - id: rgpd
+    source: eurlex-rss
+    titre: Règlement (UE) 2016/679 (RGPD)
+    ref_court: RGPD
+    url: https://eur-lex.europa.eu/legal-content/FR/TXT/HTML/?uri=CELEX:32016R0679
+    format: html
+    stockage: integral
+    type_doc: loi
+    langue: fr
+    verifie: non_verifie
+  - id: ai-act
+    source: eurlex-rss
+    titre: Règlement (UE) 2024/1689 sur l'intelligence artificielle
+    ref_court: AI Act
+    url: https://eur-lex.europa.eu/legal-content/FR/TXT/HTML/?uri=CELEX:32024R1689
+    format: html
+    stockage: integral
+    type_doc: loi
+    langue: fr
+    verifie: non_verifie
+  # ---------------------------------------------------------------- documentation de la pile
+  - id: sqlite-fts5
+    source: sqlite-docs
+    titre: SQLite FTS5 Extension
+    ref_court: SQLite FTS5
+    url: https://www.sqlite.org/fts5.html
+    format: html
+    stockage: integral
+    type_doc: documentation
+    langue: en
+    verifie: non_verifie
+  - id: fastapi-security
+    source: fastapi-docs
+    titre: FastAPI — Security (tutorial)
+    ref_court: FastAPI Security
+    url: https://fastapi.tiangolo.com/tutorial/security/
+    format: html
+    stockage: integral
+    type_doc: documentation
+    langue: en
+    verifie: non_verifie
+  - id: caddy-reverse-proxy
+    source: caddy-docs
+    titre: Caddyfile directive reverse_proxy
+    ref_court: Caddy reverse_proxy
+    url: https://caddyserver.com/docs/caddyfile/directives/reverse_proxy
+    format: html
+    stockage: integral
+    type_doc: documentation
+    langue: en
+    verifie: non_verifie
+  - id: ollama-api
+    source: ollama-docs
+    titre: Ollama API
+    ref_court: Ollama API
+    url: https://raw.githubusercontent.com/ollama/ollama/main/docs/api.md
+    format: md
+    stockage: integral
+    type_doc: documentation
+    langue: en
+    verifie: non_verifie
+  - id: python-sqlite3
+    source: python-docs
+    titre: sqlite3 — DB-API 2.0 interface for SQLite databases
+    ref_court: Python sqlite3
+    url: https://docs.python.org/3/library/sqlite3.html
+    format: html
+    stockage: integral        # plafonné à « extrait » par la licence de la documentation PSF
+    type_doc: documentation
+    langue: en
+    verifie: non_verifie
+  # ---------------------------------------------------------------- normes payantes / restreintes : métadonnées seulement
+  - id: iso-27001-2022
+    source: iso-metadonnees
+    titre: ISO/IEC 27001:2022 — Systèmes de management de la sécurité de l'information — Exigences
+    ref_court: ISO/IEC 27001:2022
+    url: https://www.iso.org/standard/27001
+    format: html
+    stockage: integral        # plafonné à « metadonnees » (norme payante)
+    type_doc: norme
+    langue: en
+    verifie: non_verifie
+    description: Norme payante ; seules les métadonnées sont enregistrées.
+  - id: etsi-en-303-645
+    source: etsi-standards
+    titre: ETSI EN 303 645 — Cyber Security for Consumer Internet of Things
+    ref_court: ETSI EN 303 645
+    url: https://www.etsi.org/deliver/etsi_en/303600_303699/303645/
+    format: html
+    stockage: integral        # plafonné à « metadonnees »
+    type_doc: norme
+    langue: en
+    verifie: non_verifie
+    description: Téléchargement gratuit sur etsi.org ; reproduction soumise à autorisation.

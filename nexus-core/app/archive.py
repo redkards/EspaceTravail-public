@@ -205,9 +205,58 @@ def effacer(mid: int, demandeur: str, motif: str = "droit à l'effacement") -> i
         with session_scope() as s:
             for x in s.execute(select(ArchiveIndex).where(ArchiveIndex.mission_id == mid)).scalars():
                 x.texte, x.efface = "", True
-    if n:
-        ledger.journaliser("NEXUS-LEDGER", "archive_effacement", mid, lignes=n, demandeur=demandeur, motif=motif)
+    cascade = _effacer_cascade(mid, demandeur)
+    if n or any(cascade.values()):
+        ledger.journaliser("NEXUS-LEDGER", "archive_effacement", mid, lignes=n, demandeur=demandeur, motif=motif,
+                           **cascade)
     return n
+
+
+def _effacer_cascade(mid: int, demandeur: str) -> dict:
+    """Effacement en cascade hors archive : mémoire du projet (résumé du livrable, index FTS par
+    déclencheur), exemple, références dans les leçons, commentaire de note, contenu de la mission,
+    de ses étapes et fichier du livrable. Le LEDGER garde la trace (sans contenu)."""
+    from .models import Avis, Connaissance, Exemple, Lecon
+    mention = f"effacée le {maintenant().strftime('%Y-%m-%d')} à la demande de {demandeur}"
+    res = {"memoire": 0, "exemples": 0, "lecons": 0, "avis": 0, "etapes": 0, "mission": 0, "fichier": 0}
+    with session_scope() as s:
+        for k in s.execute(select(Connaissance).where(Connaissance.source == f"livrable #{mid}")).scalars():
+            s.delete(k)
+            res["memoire"] += 1
+        for e in s.execute(select(Exemple).where(Exemple.mission_id == mid)).scalars():
+            s.delete(e)
+            res["exemples"] += 1
+        for l in s.execute(select(Lecon)).scalars():
+            sources = json.loads(l.sources_json or "[]")
+            if mid in sources:
+                sources = [x for x in sources if x != mid]
+                res["lecons"] += 1
+                if not sources and l.statut in ("candidate", "proposee"):
+                    s.delete(l)  # leçon née de cette seule mission et jamais validée
+                else:
+                    l.sources_json = json.dumps(sources)
+        for a in s.execute(select(Avis).where(Avis.mission_id == mid)).scalars():
+            if a.texte:
+                a.texte, res["avis"] = None, res["avis"] + 1
+        for e in s.execute(select(Etape).where(Etape.mission_id == mid)).scalars():
+            e.entree, e.sortie = "", mention
+            res["etapes"] += 1
+        m = s.get(Mission, mid)
+        projet = m.projet if m else None
+        if m is not None:
+            m.titre = f"Mission #{mid} (effacée)"
+            m.consigne, m.livrable_texte, m.message = mention, mention if m.livrable_texte else None, mention
+            res["mission"] = 1
+        for d in s.execute(select(Decision).where(Decision.mission_id == mid)).scalars():
+            d.resume, d.commentaire = mention, None
+    f = cfg().data_dir / "livrables" / (projet or "divers") / f"{mid}.md"
+    try:
+        if f.is_file():
+            f.unlink()
+            res["fichier"] = 1
+    except OSError:
+        pass
+    return res
 
 
 def rechercher(q: str, projet: str | None = None, service: str | None = None, limite: int = 10) -> list[dict]:

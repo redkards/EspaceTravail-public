@@ -158,3 +158,11 @@ Serveur MCP « Streamable HTTP » (spécification 2025-06-18, réponses JSON, sa
 - Garde-fous : 8 Ko par champ, 60 appels/min par jeton (429 + Retry-After), refus des contenus ressemblant à des secrets (clés API, mots de passe, cartes — Luhn —, jetons du Mothership).
 - Caddy : `/mcp*` → nexus-bridge sans basic auth ; `/bridge*` → page HTML lecture seule avec le basic auth du cockpit. `bridge-connecteurs.sh` affiche les URL à coller dans chaque IA.
 
+## V2 — ajouts INFRA
+- nexus-core (env) : NEXUS_API_PEUT_DECIDER=0 (1 = tests uniquement ; décisions via le cockpit seulement), NEXUS_SEUIL_RISQUE_ELEVE_EUR=1000, NEXUS_MODELES_ROLES, NEXUS_MODELES_CLOUD, NEXUS_RESUME_QUOTIDIEN=19:00, NEXUS_WEBHOOK_QG (vide), NEXUS_WEBHOOK_SECRET (généré par install.sh), NEXUS_EXEMPLES_SEUIL=4, NEXUS_LECONS_SEUIL=3, NEXUS_LECONS_MESURES_MIN=3, NEXUS_LECONS_BAISSE=10, NEXUS_LECONS_REFORMULER=0, NEXUS_ARCHIVE_DIR=/data/archive, NEXUS_BANC_RESULTATS=/banc/tableau.json, NEXUS_BANC_DIR=/banc-essai, NEXUS_ECHANTILLON_NOTE=0.2, NEXUS_FANTOME_K=5, NEXUS_FENETRE_NUIT=01:00-06:00, NEXUS_PILOTE_HEBDO=07:30, NEXUS_CHARTES_DIR (facultatif), VEILLE_DB=/veille-donnees/veille.db (à confirmer côté noyau).
+- Montages nexus-core (:ro, compatibles read_only) : ./nexus-core/chartes:/config/chartes, ./banc-essai/resultats:/banc, ./banc-essai:/banc-essai, ./veille:/veille, ./data/veille:/veille-donnees.
+- backup.sh / restore.sh : data/nexus-core (dont archive/ et chartes_ajouts/), data/veille/veille.db (copie cohérente par python3 de l'hôte ; restaurée en 755/644, lisible par l'UID 10001).
+- Caddy : PWA (/cockpit/manifest.webmanifest, /cockpit/sw.js, /cockpit/icones/*, /cockpit/hors-ligne) sous le basic auth de /cockpit* ; Service-Worker-Allowed transmis tel quel.
+- n8n : aucun workflow ne décide (lecture seule de /api/decisions dans « Rapport du soir »).
+- install.sh, crons proposés (o/N, retirés par uninstall --purge) : /etc/cron.d/nexus-banc-hebdo (`17 4 * * 0`), /etc/cron.d/nexus-attaque-simulee (`17 5 8-14 * *` + test dimanche), /etc/cron.d/nexus-veille (`17 */6 * * *`, VEILLE_DB=data/veille/veille.db, VEILLE_CONTACT du .env), en plus de sauvegarde, veille cyber et exercice de restauration.
+- Passerelle : 20 outils (+ memoire_collective_rechercher, lecons_lister).

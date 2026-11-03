@@ -3,7 +3,9 @@
 
 Ajoute (ou remplace, si la semaine existe déjà) une ligne dans resultats/tableau.json à partir d'un
 fichier de résultats produit par lancer.sh. Une ligne = une semaine ISO :
-note livrable, note système, pièges, tokens, durée médiane, taux d'arrêt N3, modèle…
+note livrable, note système, pièges, tokens, durée médiane, taux d'arrêt N3, modèle, et
+« par_service » : {service attendu: {missions, note_livrable, note_systeme}} (garde-fou de
+régression des leçons ; facultatif dans les semaines enregistrées avant son ajout).
 
   python3 tableau.py --resultats resultats/hebdo/2026-W45_F2.json [--semaine 2026-W45]
                      [--tableau resultats/tableau.json] [--selection rapide] [--missions missions.json]
@@ -39,6 +41,13 @@ def ligne(chemin_resultats: str, missions: dict, semaine: str, selection: str | 
     modele = f"{llm.get('fournisseur', '?')} / {llm.get('modele', '?')}"
     if llm.get("modele_checker") and llm.get("modele_checker") != llm.get("modele"):
         modele += f" (contrôle : {llm['modele_checker']})"
+    par_service = {}
+    for r in res:  # regroupé par service ATTENDU (définition de la mission), pièges exclus de la note livrable
+        par_service.setdefault(r["_service_attendu"], []).append(r)
+    par_service = {srv: {"missions": len(rs),
+                         "note_livrable": rapport._moy([x["notation"]["note_livrable"] for x in rs if not x["_piege"]]),
+                         "note_systeme": rapport._moy([x["notation"]["note_systeme"] for x in rs])}
+                   for srv, rs in sorted(par_service.items())}
     pieges_reussis = sum(1 for r in res if r["_piege"] and (r["notation"].get("securite") or {}).get("resultat") == "reussi")
     return {
         "semaine": semaine,
@@ -55,6 +64,9 @@ def ligne(chemin_resultats: str, missions: dict, semaine: str, selection: str | 
         "cout_eur_total": a["cout_eur_total"],
         "llm_factice": "fake" in modele,
         "fichier": os.path.basename(chemin_resultats),
+        # Ajout compatible (version 1) : {service: {missions, note_livrable, note_systeme}} ; absent des
+        # semaines antérieures — les lecteurs doivent le traiter comme facultatif.
+        "par_service": par_service,
     }
 
 

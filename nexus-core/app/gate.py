@@ -235,10 +235,18 @@ def niveau_max(a: str, b: str | None) -> str:
 
 def classer(titre: str, consigne: str, service: str | None = None, montant_eur: float | None = None,
             action: str | None = None, niveau_llm: str | None = None,
-            livrable: str | None = None) -> tuple[str, str]:
-    """Combine règles et avis LLM : le résultat n'est jamais inférieur aux règles."""
+            livrable: str | None = None, suspect: bool = False) -> tuple[str, str]:
+    """Combine règles et avis LLM : le résultat n'est jamais inférieur aux règles.
+
+    `suspect` (bouclier anti-injection : source ou livrable suspect) → plancher N2."""
     niveau, motif = classer_regles(titre, consigne, service, montant_eur, action, livrable)
     final = niveau_max(niveau, niveau_llm)
     if final != niveau:
         motif = f"{motif} ; relevé à {final} par l'avis du GATE"
+    if suspect:
+        from . import bouclier  # import local : bouclier importe gate
+        plancher = niveau_max(final, bouclier.niveau_minimum_si_suspect())
+        if plancher != final:
+            final = plancher
+            motif += f" ; plancher {plancher} : livrable ou source suspect d'injection"
     return final, motif

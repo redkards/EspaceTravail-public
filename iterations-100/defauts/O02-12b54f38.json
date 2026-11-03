@@ -1,0 +1,74 @@
+{
+ "id": "O02-12b54f38",
+ "oracle": "O02",
+ "oracles": [
+  "O02",
+  "O03"
+ ],
+ "causes": {
+  "O02": {
+   "verbe": "deployer"
+  },
+  "O03": {
+   "verbe": "deployer"
+  }
+ },
+ "signature": "{\"verbe\": \"deployer\"}",
+ "oracle_titre": "Verbe engageant non nié, montant engagé ou avis N3 ⇒ N3",
+ "gravite": 1,
+ "graine": 20281839918080,
+ "iteration": 6,
+ "occurrences": 2,
+ "cas_minimal": {
+  "service": "auto",
+  "projet": "divers",
+  "gabarit": "note",
+  "montant": "aucun",
+  "verbe": "deployer",
+  "fonctionnement": "defaut",
+  "contenu": "aucun",
+  "reponse_ia": "bonne",
+  "decideur": "aucune",
+  "evenement": "aucun",
+  "canal_creation": "api"
+ },
+ "non_neutres": {
+  "verbe": "deployer"
+ },
+ "description": "verbe=deployer",
+ "scenario_initial": {
+  "service": "propositions",
+  "projet": "poker-winners",
+  "montant": "grand-millions",
+  "verbe": "deployer",
+  "contenu": "connaissance-piegee",
+  "reponse_ia": "affirmation-D",
+  "decideur": "valider-mobile-code",
+  "evenement": "double-clic-decision",
+  "canal_creation": "cockpit"
+ },
+ "actions": [
+  {
+   "faire": "creer_mission",
+   "canal": "api",
+   "double": false,
+   "file_pleine": false
+  }
+ ],
+ "consigne": "Prépare une note interne sur le dossier maquette (ZQX9918080). Déploie la nouvelle version en production.",
+ "montant_texte": "",
+ "observe": "premier classement GATE N0 (Livrable enregistré : <bac>/data/livrables/divers/1.md. Aucune action externe exécutée.)",
+ "attendu": "N3 : verbe sensible non nié « deployer »",
+ "reproduit": true,
+ "autres_violations": [
+  {
+   "oracle": "O03",
+   "titre": "Livrable N3 jamais exécuté sans validation humaine",
+   "observe": "mission #1 terminee (classements ['N0']) sans validation humaine N3 du livrable final",
+   "attendu": "un livrable N3 n'est exécuté qu'après « valider » du Décideur"
+  }
+ ],
+ "fichier_ligne_probable": "nexus-core/app/gate.py:16",
+ "correction_suggeree": "Compléter MOTS_N3 (formes à la 2e personne et synonymes : « paie », « vire », « mets en ligne », « efface »…) et la détection des montants (lettres, M€, $ à l'anglaise), puis ajouter des tests.",
+ "rejouer": "python3 iterer.py --rejouer O02-12b54f38"
+}

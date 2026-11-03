@@ -1,0 +1,928 @@
+{
+ "_lisez_moi": "Hypothèses du jumeau numérique SYFER V2. Chaque paramètre : min / probable / max, unité, source. Monte Carlo : chaque tirage prend une valeur dans une loi triangulaire (min, probable, max). Les « MESURE » viennent du VPS réel ; tout le reste est une HYPOTHÈSE à confirmer.",
+ "parametres": {
+  "vitesse.prefill_ref_tok_s": {
+   "min": 22,
+   "probable": 30,
+   "max": 40,
+   "unite": "tokens/s",
+   "source": "MESURE réelle VPS KVM 2 (qwen2.5:3b, conteneur ollama limité à 1,1 vCPU) : checklist N1 = 131 s / 1 611 tokens ; post Poker Feeling ≈ 480 s / 6 396 tokens. Calage : avec 30 tok/s en lecture et 5 tok/s en écriture, le jumeau retrouve 131 s et 480 s à ±10 %. Référence = 3B sur 1,1 vCPU."
+  },
+  "vitesse.gen_ref_tok_s": {
+   "min": 3.8,
+   "probable": 5.0,
+   "max": 6.5,
+   "unite": "tokens/s",
+   "source": "MESURE réelle VPS KVM 2 (qwen2.5:3b, conteneur ollama limité à 1,1 vCPU) : checklist N1 = 131 s / 1 611 tokens ; post Poker Feeling ≈ 480 s / 6 396 tokens. Génération CPU limitée par la bande passante mémoire ; ordre de grandeur publié pour un 3B Q4 sur 1 cœur : 4 à 7 tok/s."
+  },
+  "vitesse.surcout_appel_s": {
+   "min": 2.0,
+   "probable": 3.5,
+   "max": 6.0,
+   "unite": "s/appel",
+   "source": "Raisonnement : requête HTTP, tokenisation, assemblage du prompt et écriture SQLite/LEDGER entre deux appels. Calé avec les 2 mesures."
+  },
+  "vitesse.expo_cpu_prefill": {
+   "min": 0.7,
+   "probable": 0.85,
+   "max": 0.95,
+   "unite": "exposant",
+   "source": "Lecture du prompt = calcul matriciel, s'étend presque linéairement avec les vCPU (llama.cpp). Vitesse ∝ (vCPU/1,1)^expo."
+  },
+  "vitesse.expo_cpu_gen": {
+   "min": 0.45,
+   "probable": 0.6,
+   "max": 0.8,
+   "unite": "exposant",
+   "source": "Écriture = limitée par la mémoire ; sur un VPS partagé, doubler les vCPU donne +40 à +70 %."
+  },
+  "vitesse.expo_taille": {
+   "min": 0.85,
+   "probable": 1.0,
+   "max": 1.1,
+   "unite": "exposant",
+   "source": "Vitesse ∝ (3 Md / taille)^expo : un 7–8B Q4 lit 2,4 à 2,6 fois plus de poids qu'un 3B."
+  },
+  "vitesse.expo_partage": {
+   "min": 0.8,
+   "probable": 0.9,
+   "max": 1.0,
+   "unite": "exposant",
+   "source": "Deux appels locaux simultanés (2 modèles chargés) se partagent le CPU : chacun va à n^-expo ; 1,0 = aucun gain global."
+  },
+  "vitesse.disque_go_s": {
+   "min": 0.3,
+   "probable": 0.8,
+   "max": 1.5,
+   "unite": "Go/s",
+   "source": "Chargement d'un modèle depuis le disque NVMe du VPS (Hostinger annonce du NVMe ; débit réel partagé inconnu)."
+  },
+  "vitesse.keep_alive_min": {
+   "min": 10,
+   "probable": 10,
+   "max": 10,
+   "unite": "min",
+   "source": "docker-compose.yml : OLLAMA_KEEP_ALIVE=10m (valeur fixe)."
+  },
+  "offre.KVM2.prix_eur_mois": {
+   "min": 6.99,
+   "probable": 8.99,
+   "max": 14.99,
+   "unite": "€/mois",
+   "source": "Hostinger KVM 2 (2 vCPU, 8 Go) : prix d'appel avec engagement long → prix de renouvellement. NON vérifié en ligne : à confirmer."
+  },
+  "offre.KVM4.prix_eur_mois": {
+   "min": 9.99,
+   "probable": 12.99,
+   "max": 25.99,
+   "unite": "€/mois",
+   "source": "Hostinger KVM 4 (4 vCPU, 16 Go), même logique. À confirmer."
+  },
+  "offre.KVM8.prix_eur_mois": {
+   "min": 19.99,
+   "probable": 25.99,
+   "max": 45.99,
+   "unite": "€/mois",
+   "source": "Hostinger KVM 8 (8 vCPU, 32 Go), même logique. À confirmer."
+  },
+  "offre.KVM2.cpus_llm": {
+   "min": 1.1,
+   "probable": 1.1,
+   "max": 1.1,
+   "unite": "vCPU",
+   "source": "docker-compose.yml : ollama cpus 1.1 (plafond P1 1,5 vCPU)."
+  },
+  "offre.KVM4.cpus_llm": {
+   "min": 2.4,
+   "probable": 2.8,
+   "max": 3.2,
+   "unite": "vCPU",
+   "source": "Hypothèse : P1 prioritaire garde ~75 % des 4 vCPU, moins 0,4 vCPU pour nexus-core/caddy/bridge."
+  },
+  "offre.KVM8.cpus_llm": {
+   "min": 5.5,
+   "probable": 6.4,
+   "max": 7.0,
+   "unite": "vCPU",
+   "source": "Hypothèse : P1 garde ~85 % des 8 vCPU, moins 0,4 vCPU de services."
+  },
+  "offre.KVM2.ram_p1_go": {
+   "min": 5.0,
+   "probable": 5.0,
+   "max": 5.0,
+   "unite": "Go",
+   "source": "docker-compose.yml : budget P1 ≤ 5 Go."
+  },
+  "offre.KVM4.ram_p1_go": {
+   "min": 9.0,
+   "probable": 10.0,
+   "max": 12.0,
+   "unite": "Go",
+   "source": "Hypothèse : P1 = 60–75 % de 16 Go (partitions P2–P4 gardent le reste)."
+  },
+  "offre.KVM8.ram_p1_go": {
+   "min": 18.0,
+   "probable": 22.0,
+   "max": 26.0,
+   "unite": "Go",
+   "source": "Hypothèse : P1 = 55–80 % de 32 Go."
+  },
+  "ram.services_go": {
+   "min": 0.5,
+   "probable": 0.6,
+   "max": 1.0,
+   "unite": "Go",
+   "source": "docker-compose.yml : MVP sans ollama = 576 Mo (nexus-core 384 + caddy 64 + bridge 128)."
+  },
+  "modele.3b.ram_go": {
+   "min": 2.0,
+   "probable": 2.4,
+   "max": 3.0,
+   "unite": "Go",
+   "source": "qwen2.5:3b Q4_K_M ≈ 1,9 Go de poids + cache de contexte 8 192."
+  },
+  "modele.7b.ram_go": {
+   "min": 4.8,
+   "probable": 5.6,
+   "max": 6.5,
+   "unite": "Go",
+   "source": "qwen2.5:7b Q4_K_M ≈ 4,7 Go + contexte 8 192."
+  },
+  "modele.8b.ram_go": {
+   "min": 5.4,
+   "probable": 6.2,
+   "max": 7.0,
+   "unite": "Go",
+   "source": "llama3.1:8b Q4_K_M ≈ 4,9 Go + contexte 8 192 (cache plus gros)."
+  },
+  "modele.3b.q": {
+   "min": 0.3,
+   "probable": 0.45,
+   "max": 0.6,
+   "unite": "probabilité",
+   "source": "Hypothèse ordonnée par taille de modèle (pas de mesure SYFER) ; à mesurer avec banc-essai/noter.py (note ≥ seuil = « bon »)."
+  },
+  "modele.3b.se": {
+   "min": 0.3,
+   "probable": 0.5,
+   "max": 0.65,
+   "unite": "probabilité",
+   "source": "Part des mauvais livrables refusés par ce modèle en CHECKER. Hypothèse ordonnée par taille de modèle (pas de mesure SYFER) ; à mesurer avec banc-essai/noter.py (note ≥ seuil = « bon »)."
+  },
+  "modele.3b.fp": {
+   "min": 0.08,
+   "probable": 0.15,
+   "max": 0.25,
+   "unite": "probabilité",
+   "source": "Part des bons livrables refusés à tort (fausse alerte). Hypothèse ordonnée par taille de modèle (pas de mesure SYFER) ; à mesurer avec banc-essai/noter.py (note ≥ seuil = « bon »)."
+  },
+  "modele.7b.q": {
+   "min": 0.5,
+   "probable": 0.62,
+   "max": 0.72,
+   "unite": "probabilité",
+   "source": "Hypothèse ordonnée par taille de modèle (pas de mesure SYFER) ; à mesurer avec banc-essai/noter.py (note ≥ seuil = « bon »)."
+  },
+  "modele.7b.se": {
+   "min": 0.5,
+   "probable": 0.65,
+   "max": 0.78,
+   "unite": "probabilité",
+   "source": "Part des mauvais livrables refusés par ce modèle en CHECKER. Hypothèse ordonnée par taille de modèle (pas de mesure SYFER) ; à mesurer avec banc-essai/noter.py (note ≥ seuil = « bon »)."
+  },
+  "modele.7b.fp": {
+   "min": 0.05,
+   "probable": 0.1,
+   "max": 0.18,
+   "unite": "probabilité",
+   "source": "Part des bons livrables refusés à tort (fausse alerte). Hypothèse ordonnée par taille de modèle (pas de mesure SYFER) ; à mesurer avec banc-essai/noter.py (note ≥ seuil = « bon »)."
+  },
+  "modele.8b.q": {
+   "min": 0.48,
+   "probable": 0.6,
+   "max": 0.7,
+   "unite": "probabilité",
+   "source": "Hypothèse ordonnée par taille de modèle (pas de mesure SYFER) ; à mesurer avec banc-essai/noter.py (note ≥ seuil = « bon »)."
+  },
+  "modele.8b.se": {
+   "min": 0.52,
+   "probable": 0.66,
+   "max": 0.78,
+   "unite": "probabilité",
+   "source": "Part des mauvais livrables refusés par ce modèle en CHECKER. Hypothèse ordonnée par taille de modèle (pas de mesure SYFER) ; à mesurer avec banc-essai/noter.py (note ≥ seuil = « bon »)."
+  },
+  "modele.8b.fp": {
+   "min": 0.05,
+   "probable": 0.1,
+   "max": 0.18,
+   "unite": "probabilité",
+   "source": "Part des bons livrables refusés à tort (fausse alerte). Hypothèse ordonnée par taille de modèle (pas de mesure SYFER) ; à mesurer avec banc-essai/noter.py (note ≥ seuil = « bon »)."
+  },
+  "modele.cloud.q": {
+   "min": 0.65,
+   "probable": 0.78,
+   "max": 0.88,
+   "unite": "probabilité",
+   "source": "Hypothèse ordonnée par taille de modèle (pas de mesure SYFER) ; à mesurer avec banc-essai/noter.py (note ≥ seuil = « bon »)."
+  },
+  "modele.cloud.se": {
+   "min": 0.6,
+   "probable": 0.75,
+   "max": 0.85,
+   "unite": "probabilité",
+   "source": "Part des mauvais livrables refusés par ce modèle en CHECKER. Hypothèse ordonnée par taille de modèle (pas de mesure SYFER) ; à mesurer avec banc-essai/noter.py (note ≥ seuil = « bon »)."
+  },
+  "modele.cloud.fp": {
+   "min": 0.04,
+   "probable": 0.08,
+   "max": 0.14,
+   "unite": "probabilité",
+   "source": "Part des bons livrables refusés à tort (fausse alerte). Hypothèse ordonnée par taille de modèle (pas de mesure SYFER) ; à mesurer avec banc-essai/noter.py (note ≥ seuil = « bon »)."
+  },
+  "modele.haiku.q": {
+   "min": 0.68,
+   "probable": 0.8,
+   "max": 0.88,
+   "unite": "probabilité",
+   "source": "Hypothèse ordonnée par taille de modèle (pas de mesure SYFER) ; à mesurer avec banc-essai/noter.py (note ≥ seuil = « bon »)."
+  },
+  "modele.haiku.se": {
+   "min": 0.62,
+   "probable": 0.75,
+   "max": 0.85,
+   "unite": "probabilité",
+   "source": "Part des mauvais livrables refusés par ce modèle en CHECKER. Hypothèse ordonnée par taille de modèle (pas de mesure SYFER) ; à mesurer avec banc-essai/noter.py (note ≥ seuil = « bon »)."
+  },
+  "modele.haiku.fp": {
+   "min": 0.03,
+   "probable": 0.07,
+   "max": 0.12,
+   "unite": "probabilité",
+   "source": "Part des bons livrables refusés à tort (fausse alerte). Hypothèse ordonnée par taille de modèle (pas de mesure SYFER) ; à mesurer avec banc-essai/noter.py (note ≥ seuil = « bon »)."
+  },
+  "modele.sonnet.q": {
+   "min": 0.82,
+   "probable": 0.9,
+   "max": 0.95,
+   "unite": "probabilité",
+   "source": "Hypothèse ordonnée par taille de modèle (pas de mesure SYFER) ; à mesurer avec banc-essai/noter.py (note ≥ seuil = « bon »)."
+  },
+  "modele.sonnet.se": {
+   "min": 0.75,
+   "probable": 0.85,
+   "max": 0.92,
+   "unite": "probabilité",
+   "source": "Part des mauvais livrables refusés par ce modèle en CHECKER. Hypothèse ordonnée par taille de modèle (pas de mesure SYFER) ; à mesurer avec banc-essai/noter.py (note ≥ seuil = « bon »)."
+  },
+  "modele.sonnet.fp": {
+   "min": 0.02,
+   "probable": 0.05,
+   "max": 0.1,
+   "unite": "probabilité",
+   "source": "Part des bons livrables refusés à tort (fausse alerte). Hypothèse ordonnée par taille de modèle (pas de mesure SYFER) ; à mesurer avec banc-essai/noter.py (note ≥ seuil = « bon »)."
+  },
+  "qualite.auto_biais": {
+   "min": 0.65,
+   "probable": 0.8,
+   "max": 0.95,
+   "unite": "facteur",
+   "source": "Un modèle qui contrôle son propre texte détecte moins d'erreurs (biais d'auto-évaluation documenté) : sensibilité × facteur."
+  },
+  "qualite.gain_revision": {
+   "min": 0.05,
+   "probable": 0.12,
+   "max": 0.2,
+   "unite": "probabilité",
+   "source": "Une correction guidée par la liste de problèmes du CHECKER améliore la chance d'un bon livrable."
+  },
+  "qualite.p_relance_directeur": {
+   "min": 0.2,
+   "probable": 0.35,
+   "max": 0.5,
+   "unite": "probabilité",
+   "source": "pipeline.escalader : le directeur peut demander une relance automatique au niveau supérieur ; sinon à reformuler / échec."
+  },
+  "cloud.latence_s": {
+   "min": 0.8,
+   "probable": 1.5,
+   "max": 4.0,
+   "unite": "s/appel",
+   "source": "Ollama Cloud (offre gratuite) : latence réseau + file côté service. Non mesuré."
+  },
+  "cloud.gen_tok_s": {
+   "min": 30,
+   "probable": 60,
+   "max": 120,
+   "unite": "tokens/s",
+   "source": "Gros modèle hébergé sur GPU, ordre de grandeur public."
+  },
+  "cloud.prefill_tok_s": {
+   "min": 500,
+   "probable": 1500,
+   "max": 3000,
+   "unite": "tokens/s",
+   "source": "Lecture GPU."
+  },
+  "cloud.quota_tokens_jour": {
+   "min": 300000,
+   "probable": 1000000,
+   "max": 3000000,
+   "unite": "tokens/jour",
+   "source": "Offre gratuite Ollama Cloud : limites horaires/hebdomadaires non publiées en chiffres → plage large, à mesurer."
+  },
+  "cloud.pannes_mois": {
+   "min": 0.5,
+   "probable": 2.0,
+   "max": 6.0,
+   "unite": "épisodes/mois",
+   "source": "Service gratuit sans engagement de disponibilité."
+  },
+  "cloud.duree_panne_h": {
+   "min": 0.5,
+   "probable": 2.0,
+   "max": 12.0,
+   "unite": "h",
+   "source": "Service gratuit sans engagement de disponibilité : durée d'un épisode (loi log-normale centrée ici)."
+  },
+  "cloud.delai_bascule_s": {
+   "min": 10,
+   "probable": 30,
+   "max": 60,
+   "unite": "s",
+   "source": "llm.py : un nouvel essai puis repli sur Ollama local (délai d'expiration + essai)."
+  },
+  "payant.haiku_latence_s": {
+   "min": 0.5,
+   "probable": 0.8,
+   "max": 2.0,
+   "unite": "s",
+   "source": "API Anthropic, ordre de grandeur."
+  },
+  "payant.haiku_gen_tok_s": {
+   "min": 80,
+   "probable": 150,
+   "max": 250,
+   "unite": "tokens/s",
+   "source": "API Anthropic, ordre de grandeur public de vitesse d'écriture."
+  },
+  "payant.sonnet_latence_s": {
+   "min": 1.0,
+   "probable": 1.5,
+   "max": 3.0,
+   "unite": "s",
+   "source": "API Anthropic, ordre de grandeur de latence au premier token."
+  },
+  "payant.sonnet_gen_tok_s": {
+   "min": 40,
+   "probable": 70,
+   "max": 110,
+   "unite": "tokens/s",
+   "source": "API Anthropic, ordre de grandeur public de vitesse d'écriture."
+  },
+  "v2.cache_taux": {
+   "min": 0.05,
+   "probable": 0.12,
+   "max": 0.3,
+   "unite": "probabilité",
+   "source": "Cache de résultats (PRIME, COLLECTOR, GATE, directeur, 1er jet ANALYST) : missions répétées (banc hebdo, veille, pilote). À mesurer."
+  },
+  "v2.cache_prefixe": {
+   "min": 0.1,
+   "probable": 0.25,
+   "max": 0.4,
+   "unite": "part des tokens d'entrée",
+   "source": "Préfixe de prompt (consignes d'agent, charte) déjà en mémoire du modèle chaud : non relu."
+  },
+  "v2.detection_code": {
+   "min": 0.2,
+   "probable": 0.35,
+   "max": 0.5,
+   "unite": "probabilité",
+   "source": "Part des mauvais livrables attrapés par les contrôles par code (sections, longueur, mots obligatoires/interdits, charte) avant le CHECKER LLM — cf. banc-essai/noter.py."
+  },
+  "v2.gabarit_gain_q": {
+   "min": 0.03,
+   "probable": 0.08,
+   "max": 0.15,
+   "unite": "probabilité",
+   "source": "Gabarits de livrable (sections imposées, exemples) : meilleur 1er jet."
+  },
+  "v2.gabarit_sortie": {
+   "min": 0.75,
+   "probable": 0.85,
+   "max": 0.95,
+   "unite": "facteur",
+   "source": "Gabarits : sortie ANALYST plus courte (moins de remplissage)."
+  },
+  "v2.collector_extra_in": {
+   "min": 100,
+   "probable": 200,
+   "max": 350,
+   "unite": "tokens",
+   "source": "COLLECTOR sans LLM : extraits bruts ajoutés à l'entrée de l'ANALYST au lieu d'un résumé."
+  },
+  "tokens.prime.entree": {
+   "min": 160,
+   "probable": 220,
+   "max": 300,
+   "unite": "tokens",
+   "source": "Hypothèse calée sur les 2 mesures (checklist ≈ taille 0,55 ; post Poker Feeling ≈ taille 1,25) et sur les gabarits de messages de pipeline.py. Le CHECKER, le GATE et le directeur relisent aussi le livrable (sortie ANALYST ajoutée)."
+  },
+  "tokens.prime.sortie": {
+   "min": 5,
+   "probable": 10,
+   "max": 20,
+   "unite": "tokens",
+   "source": "Hypothèse calée sur les 2 mesures (checklist ≈ taille 0,55 ; post Poker Feeling ≈ taille 1,25) et sur les gabarits de messages de pipeline.py."
+  },
+  "tokens.collector.entree": {
+   "min": 200,
+   "probable": 260,
+   "max": 350,
+   "unite": "tokens",
+   "source": "Hypothèse calée sur les 2 mesures (checklist ≈ taille 0,55 ; post Poker Feeling ≈ taille 1,25) et sur les gabarits de messages de pipeline.py. Le CHECKER, le GATE et le directeur relisent aussi le livrable (sortie ANALYST ajoutée)."
+  },
+  "tokens.collector.sortie": {
+   "min": 110,
+   "probable": 160,
+   "max": 230,
+   "unite": "tokens",
+   "source": "Hypothèse calée sur les 2 mesures (checklist ≈ taille 0,55 ; post Poker Feeling ≈ taille 1,25) et sur les gabarits de messages de pipeline.py."
+  },
+  "tokens.analyst.entree": {
+   "min": 320,
+   "probable": 420,
+   "max": 560,
+   "unite": "tokens",
+   "source": "Hypothèse calée sur les 2 mesures (checklist ≈ taille 0,55 ; post Poker Feeling ≈ taille 1,25) et sur les gabarits de messages de pipeline.py. Le CHECKER, le GATE et le directeur relisent aussi le livrable (sortie ANALYST ajoutée)."
+  },
+  "tokens.analyst.sortie": {
+   "min": 280,
+   "probable": 380,
+   "max": 520,
+   "unite": "tokens",
+   "source": "Hypothèse calée sur les 2 mesures (checklist ≈ taille 0,55 ; post Poker Feeling ≈ taille 1,25) et sur les gabarits de messages de pipeline.py."
+  },
+  "tokens.checker.entree": {
+   "min": 280,
+   "probable": 380,
+   "max": 500,
+   "unite": "tokens",
+   "source": "Hypothèse calée sur les 2 mesures (checklist ≈ taille 0,55 ; post Poker Feeling ≈ taille 1,25) et sur les gabarits de messages de pipeline.py. Le CHECKER, le GATE et le directeur relisent aussi le livrable (sortie ANALYST ajoutée)."
+  },
+  "tokens.checker.sortie": {
+   "min": 40,
+   "probable": 70,
+   "max": 120,
+   "unite": "tokens",
+   "source": "Hypothèse calée sur les 2 mesures (checklist ≈ taille 0,55 ; post Poker Feeling ≈ taille 1,25) et sur les gabarits de messages de pipeline.py."
+  },
+  "tokens.gate.entree": {
+   "min": 220,
+   "probable": 300,
+   "max": 400,
+   "unite": "tokens",
+   "source": "Hypothèse calée sur les 2 mesures (checklist ≈ taille 0,55 ; post Poker Feeling ≈ taille 1,25) et sur les gabarits de messages de pipeline.py. Le CHECKER, le GATE et le directeur relisent aussi le livrable (sortie ANALYST ajoutée)."
+  },
+  "tokens.gate.sortie": {
+   "min": 8,
+   "probable": 12,
+   "max": 25,
+   "unite": "tokens",
+   "source": "Hypothèse calée sur les 2 mesures (checklist ≈ taille 0,55 ; post Poker Feeling ≈ taille 1,25) et sur les gabarits de messages de pipeline.py."
+  },
+  "tokens.directeur.entree": {
+   "min": 300,
+   "probable": 400,
+   "max": 520,
+   "unite": "tokens",
+   "source": "Hypothèse calée sur les 2 mesures (checklist ≈ taille 0,55 ; post Poker Feeling ≈ taille 1,25) et sur les gabarits de messages de pipeline.py. Le CHECKER, le GATE et le directeur relisent aussi le livrable (sortie ANALYST ajoutée)."
+  },
+  "tokens.directeur.sortie": {
+   "min": 80,
+   "probable": 120,
+   "max": 180,
+   "unite": "tokens",
+   "source": "Hypothèse calée sur les 2 mesures (checklist ≈ taille 0,55 ; post Poker Feeling ≈ taille 1,25) et sur les gabarits de messages de pipeline.py."
+  },
+  "tokens.taille_sigma": {
+   "min": 0.3,
+   "probable": 0.45,
+   "max": 0.6,
+   "unite": "écart-type log",
+   "source": "Dispersion de la taille des missions (loi log-normale de médiane 1 × facteur du service)."
+  },
+  "arrivees.manuel_jour_ouvre": {
+   "min": 3,
+   "probable": 6,
+   "max": 12,
+   "unite": "missions/jour",
+   "source": "Hypothèse : un propriétaire seul + passerelle Claude/ChatGPT/Gemini ; V2 = usage quotidien."
+  },
+  "arrivees.manuel_weekend": {
+   "min": 0,
+   "probable": 2,
+   "max": 5,
+   "unite": "missions/jour",
+   "source": "Hypothèse : usage réduit le week-end."
+  },
+  "arrivees.p_prime_llm": {
+   "min": 0.1,
+   "probable": 0.25,
+   "max": 0.4,
+   "unite": "probabilité",
+   "source": "pipeline.choisir_service : avis LLM seulement en cas d'égalité ou sans mot-clé (simulations : 4 scénarios sur 12 de routage)."
+  },
+  "arrivees.veille_jour": {
+   "min": 1,
+   "probable": 1,
+   "max": 3,
+   "unite": "missions/jour",
+   "source": "Veille cyber quotidienne 03:17 (banc-essai/hebdo.sh) ; catalogue veille 244 sources, fiches regroupées."
+  },
+  "arrivees.fantome_p_nuit": {
+   "min": 0.05,
+   "probable": 0.15,
+   "max": 0.4,
+   "unite": "probabilité/nuit",
+   "source": "fantome.py : test fantôme d'une leçon/charte = K=5 missions rejouées avant ET après (10 exécutions), la nuit 01:00–06:00."
+  },
+  "arrivees.audit_periode_j": {
+   "min": 7,
+   "probable": 30,
+   "max": 30,
+   "unite": "jours",
+   "source": "banc-essai/audit-syfer : 10 missions ; fréquence supposée mensuelle."
+  },
+  "pilote.p_coche": {
+   "min": 0.2,
+   "probable": 0.35,
+   "max": 0.6,
+   "unite": "probabilité",
+   "source": "pilote.py : 1 à 5 missions proposées par projet, tout décoché par défaut ; part cochée par le Décideur."
+  },
+  "pilote.proposees_par_projet": {
+   "min": 1,
+   "probable": 3,
+   "max": 5,
+   "unite": "missions",
+   "source": "pilote.py : MAX_PAR_PROJET = 5."
+  },
+  "mix.p_F1": {
+   "min": 0.1,
+   "probable": 0.2,
+   "max": 0.3,
+   "unite": "probabilité",
+   "source": "Niveau demandé (défaut F2 dans fonctionnement.yaml). Hypothèse."
+  },
+  "mix.p_F3": {
+   "min": 0.05,
+   "probable": 0.1,
+   "max": 0.2,
+   "unite": "probabilité",
+   "source": "Hypothèse (F2 = le reste)."
+  },
+  "mix.p_F4": {
+   "min": 0.02,
+   "probable": 0.05,
+   "max": 0.1,
+   "unite": "probabilité",
+   "source": "Hypothèse : F4 réservé aux missions à fort enjeu."
+  },
+  "gate.p_publication": {
+   "min": 0.08,
+   "probable": 0.15,
+   "max": 0.3,
+   "unite": "probabilité",
+   "source": "Missions manuelles de publication/envoi (posts, mails) → N3 en plus du mix du service."
+  },
+  "gate.p_preclassement": {
+   "min": 0.6,
+   "probable": 0.75,
+   "max": 0.9,
+   "unite": "probabilité",
+   "source": "pipeline.appliquer_planchers : la consigne suffit à classer N2/N3 avant exécution ; sinon relèvement F1→F2 après le GATE (2e boucle qualité)."
+  },
+  "decideur.p_presence": {
+   "min": 0.7,
+   "probable": 0.85,
+   "max": 0.95,
+   "unite": "probabilité/session",
+   "source": "Sessions 12:30 et 19:00 (NEXUS_SESSIONS_N3). Hypothèse."
+  },
+  "decideur.capacite_session": {
+   "min": 6,
+   "probable": 12,
+   "max": 20,
+   "unite": "décisions/session",
+   "source": "Hypothèse : ~1,5 min par décision, session de 15–30 min."
+  },
+  "decideur.p_valider": {
+   "min": 0.7,
+   "probable": 0.8,
+   "max": 0.9,
+   "unite": "probabilité",
+   "source": "Hypothèse : part des décisions N3 validées par le propriétaire."
+  },
+  "decideur.p_reviser": {
+   "min": 0.05,
+   "probable": 0.1,
+   "max": 0.2,
+   "unite": "probabilité",
+   "source": "« Demander une révision » (2 fois max par mission). Refus = le reste."
+  },
+  "pannes.redemarrages_mois": {
+   "min": 0.2,
+   "probable": 1.0,
+   "max": 3.0,
+   "unite": "épisodes/mois",
+   "source": "Mises à jour, OOM, redémarrage du VPS. Missions en cours relancées (reprendre_au_demarrage), modèles déchargés."
+  },
+  "pannes.duree_redemarrage_min": {
+   "min": 1,
+   "probable": 3,
+   "max": 15,
+   "unite": "min",
+   "source": "Hypothèse : redémarrage Docker Compose + santé des conteneurs."
+  }
+ },
+ "fixes": {
+  "_source_fonctionnement": "Copie de nexus-core/fonctionnement.yaml (lecture seule, 2026-11-04).",
+  "fonctionnement": {
+   "F1": {
+    "budget_tokens": 6000,
+    "revisions_max": 0,
+    "double_controle": false,
+    "delai_max_s": 180,
+    "cout_max_eur": 0
+   },
+   "F2": {
+    "budget_tokens": 20000,
+    "revisions_max": 1,
+    "double_controle": false,
+    "delai_max_s": 600,
+    "cout_max_eur": 0
+   },
+   "F3": {
+    "budget_tokens": 40000,
+    "revisions_max": 2,
+    "double_controle": true,
+    "delai_max_s": 1200,
+    "cout_max_eur": 0
+   },
+   "F4": {
+    "budget_tokens": 80000,
+    "revisions_max": 3,
+    "double_controle": true,
+    "delai_max_s": 1800,
+    "cout_max_eur": 0.5
+   }
+  },
+  "tarifs_usd_par_mtok": {
+   "haiku": {
+    "entree": 0.1,
+    "sortie": 0.5
+   },
+   "sonnet": {
+    "entree": 2.0,
+    "sortie": 10.0
+   }
+  },
+  "eur_par_usd": 0.92,
+  "f4_modeles": {
+   "analyst": "sonnet",
+   "checker": "sonnet",
+   "defaut": "haiku"
+  },
+  "f4_cout_estime_eur": 0.15,
+  "n3": {
+   "plafond_jour": 15,
+   "expiration_h": 24,
+   "sessions_h": [
+    12.5,
+    19.0
+   ]
+  },
+  "nuit": {
+   "debut_h": 1,
+   "fin_h": 6
+  },
+  "pilote": {
+   "projets_actifs": 5,
+   "heure": 7.5,
+   "_source": "nexus-core/projets.yaml : 5 projets actifs ; pilote.py lundi 07:30, plancher F3."
+  },
+  "banc": {
+   "missions": 8,
+   "heure": 4.283,
+   "_source": "banc-essai/hebdo.sh : sélection rapide 8 missions, dimanche 04:17, F2 si cloud sinon F1."
+  },
+  "audit": {
+   "missions": 10,
+   "heure": 2.0
+  },
+  "fantome": {
+   "executions": 10
+  },
+  "veille": {
+   "heure": 3.283
+  },
+  "taille_modele_md": {
+   "3b": 3.1,
+   "7b": 7.6,
+   "8b": 8.0
+  },
+  "profil_horaire_manuel": {
+   "_source": "Hypothèse : soirée et fin d'après-midi (propriétaire en activité le jour).",
+   "heures": [
+    [
+     8,
+     12,
+     0.3
+    ],
+    [
+     12,
+     14,
+     0.1
+    ],
+    [
+     14,
+     19,
+     0.35
+    ],
+    [
+     19,
+     24,
+     0.25
+    ]
+   ]
+  },
+  "offres": {
+   "KVM2": {
+    "vcpu": 2,
+    "ram_go": 8
+   },
+   "KVM4": {
+    "vcpu": 4,
+    "ram_go": 16
+   },
+   "KVM8": {
+    "vcpu": 8,
+    "ram_go": 32
+   }
+  },
+  "familles": {
+   "_source": "banc-essai/missions.json (30 missions : services attendus et niveaux N attendus) ; audit-syfer (10 missions, 5 N3). Planchers F3 : pipeline.appliquer_planchers (droit-*, PILOT-CORE, CYBER). Taille et difficulté : hypothèses.",
+   "CONTENT-ARENA": {
+    "poids": 4,
+    "plancher_f3": 0.0,
+    "taille": 1.15,
+    "dq": 0.0,
+    "N": [
+     0.0,
+     0.1,
+     0.9,
+     0.0
+    ]
+   },
+   "LEX-GUARD": {
+    "poids": 5,
+    "plancher_f3": 0.8,
+    "taille": 1.35,
+    "dq": -0.08,
+    "N": [
+     0.0,
+     0.0,
+     0.9,
+     0.1
+    ]
+   },
+   "CYBER-FORTRESS": {
+    "poids": 6,
+    "plancher_f3": 1.0,
+    "taille": 1.3,
+    "dq": -0.06,
+    "N": [
+     0.0,
+     0.0,
+     0.8,
+     0.2
+    ]
+   },
+   "PILOT-CORE": {
+    "poids": 2,
+    "plancher_f3": 1.0,
+    "taille": 1.25,
+    "dq": -0.03,
+    "N": [
+     0.0,
+     0.8,
+     0.0,
+     0.2
+    ]
+   },
+   "GREEN-CORE": {
+    "poids": 2,
+    "plancher_f3": 0.0,
+    "taille": 1.0,
+    "dq": 0.0,
+    "N": [
+     0.0,
+     0.9,
+     0.0,
+     0.1
+    ]
+   },
+   "OPS-CORE": {
+    "poids": 2,
+    "plancher_f3": 0.0,
+    "taille": 0.9,
+    "dq": 0.0,
+    "N": [
+     0.1,
+     0.9,
+     0.0,
+     0.0
+    ]
+   },
+   "AGENT-FACTORY": {
+    "poids": 1,
+    "plancher_f3": 0.0,
+    "taille": 0.9,
+    "dq": 0.0,
+    "N": [
+     0.6,
+     0.4,
+     0.0,
+     0.0
+    ]
+   },
+   "CODE-CORE": {
+    "poids": 2,
+    "plancher_f3": 0.0,
+    "taille": 1.2,
+    "dq": -0.05,
+    "N": [
+     0.0,
+     0.5,
+     0.5,
+     0.0
+    ]
+   },
+   "DESIGN-SYSTEM": {
+    "poids": 2,
+    "plancher_f3": 0.0,
+    "taille": 0.9,
+    "dq": 0.0,
+    "N": [
+     0.4,
+     0.6,
+     0.0,
+     0.0
+    ]
+   },
+   "R&D-PARADOX": {
+    "poids": 2,
+    "plancher_f3": 0.0,
+    "taille": 1.0,
+    "dq": 0.0,
+    "N": [
+     0.4,
+     0.6,
+     0.0,
+     0.0
+    ]
+   },
+   "REVENUE-CORE": {
+    "poids": 2,
+    "plancher_f3": 0.0,
+    "taille": 1.0,
+    "dq": 0.0,
+    "N": [
+     0.0,
+     0.5,
+     0.0,
+     0.5
+    ]
+   }
+  },
+  "mix_audit": {
+   "CYBER-FORTRESS": 6,
+   "CODE-CORE": 2,
+   "LEX-GUARD": 2,
+   "_p_n3": 0.5
+  },
+  "score": {
+   "_doc": "score = 100 × (0,30·Débit + 0,25·Délai + 0,30·Qualité + 0,15·Coût) ; ×0,5 si la RAM dépasse la limite P1.",
+   "poids": {
+    "debit": 0.3,
+    "delai": 0.25,
+    "qualite": 0.3,
+    "cout": 0.15
+   },
+   "delai_bon_s": 600,
+   "delai_nul_s": 14400,
+   "cout_nul_eur": 150
+  }
+ }
+}

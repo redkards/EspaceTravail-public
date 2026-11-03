@@ -20,6 +20,9 @@ def environnement(tmp_path, monkeypatch):
     monkeypatch.setenv("LLM_PROVIDER", "fake")
     monkeypatch.setenv("NEXUS_API_KEY", CLE)
     monkeypatch.setenv("NEXUS_TACHES_FOND", "0")
+    # Tests historiques : décisions par l'API à clé (option de test ; défaut en production = 0 → 403).
+    monkeypatch.setenv("NEXUS_API_PEUT_DECIDER", "1")
+    monkeypatch.setenv("VEILLE_DB", str(tmp_path / "veille-absente.db"))  # aucune vraie base de veille
     monkeypatch.setenv("COCKPIT_INTERNAL", COCKPIT_INTERNE)
     monkeypatch.setenv("NEXUS_HOST", "nexus.exemple.fr")
     monkeypatch.setenv("BUDGET_TASK_TOKENS", "20000")

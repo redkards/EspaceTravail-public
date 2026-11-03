@@ -88,7 +88,7 @@ FACTEUR_MENTION = 0.25      # poids d'un motif cité (guillemets, contexte méta
 BONUS_COMBINAISON = 15      # au moins deux familles d'injonctions distinctes
 BONUS_CACHE = 25
 PLAFOND_MENTIONS = 25       # contribution maximale de l'ensemble des motifs cités            # injonction trouvée dans un canal caché (HTML masqué, base64, tags Unicode)
-CANARI = re.compile(r"\bCANARI-[A-Z0-9]{4,}\b")
+CANARI = re.compile(r"\bCANARI-(?=[A-Z0-9-]{4,})[A-Z0-9]+(?:-[A-Z0-9]+)*\b")  # ex. CANARI-7F3A, CANARI-SIM-4821
 
 
 def niveau_minimum_si_suspect() -> str:
@@ -286,17 +286,17 @@ def nettoyer_contenu(texte: str, source: str = "inconnue", max_caracteres: int =
 
 _VERBES_SECRET = (r"(?:envoie|envoyez|envoyer|affiche|affichez|afficher|donne|donnez|donner|revele|revelez|reveler"
                   r"|ecris|ecrivez|ecrire|copie|copiez|copier|recopie|recopiez|recopier|inclus|incluez|inclure"
-                  r"|communique|communiquez|transmets|transmettez|transmettre|imprime|divulgue"
+                  r"|communique|communiquez|transmets|transmettez|transmettre|imprime|divulgue|remplace|remplacez|remplacant|replace|replacing|recopiant|affichant|revelant|e-?mail|mail|post"
                   r"|send|show|print|reveal|output|leak|display|give|include|share|repeat|tell me|dump|paste|echo)")
 _OBJETS_SECRET = (r"(?:cles? (?:d'?api|api|ssh|privees?|secretes?|d'acces|du serveur|de chiffrement)|(?:ta|votre) cle\b"
                   r"|mots? de passe|jetons? (?:d'acces|d'api|api|secrets?|d'authentification)|(?:api|access|auth|bearer|secret) tokens?"
-                  r"|tokens? (?:d'acces|d'api|secrets?)|api[ _-]?keys?"
+                  r"|tokens? (?:d'acces|d'api|secrets?)|api[ _-]?keys?|configuration (?:complete|secrete|interne)|(?:admin|root) password"
                   r"|secrets?|passwords?|credentials?|identifiants?|nexus_api_key|\.env|variables? d'environnement"
                   r"|environment variables?|prompt (?:systeme|system)|system prompt|consignes? (?:systeme|internes?)"
                   r"|instructions? (?:systeme|internes?|initiales?)|canari-\w+)")
 _OBJETS_DECISION = (r"(?:(?:la |cette |ta |les |ces |toutes? les )(?:decisions?|missions?|depenses?|publications?|transactions?|n3)"
                     r"|(?:le |ce |ton |les |ces )(?:livrables?|virements?|paiements? n3)|(?:ce |cet )(?:paiement|achat|envoi)"
-                    r"|(?:the |this |all |any |pending )(?:decisions?|requests?|payments?|transfers?|transactions?|actions?)"
+                    r"|(?:the |this |all |any )?(?:pending )?(?:decisions?|requests?|payments?|transfers?|transactions?)\b"
                     r"|this\b|cette operation|l'operation|n3)")
 _N3 = "|".join(sorted(gate.ACTIONS_N3))
 
@@ -304,18 +304,26 @@ _N3 = "|".join(sorted(gate.ACTIONS_N3))
 MOTIFS: list[tuple[str, int, re.Pattern]] = [(f, p, re.compile(m, re.M)) for f, p, m in [
     ("ignorer_consignes", 45,
      r"\b(?:ignore[rsz]?|oublie[rsz]?|ne tiens? (?:pas|plus) compte d[eu']s?|ne tenez (?:pas|plus) compte d[eu']s?"
-     r"|fais abstraction d[eu']s?|outrepasse[rsz]?|annule[rsz]?)\s+(?:de\s+|d')?(?:toutes?\s+|tous\s+)?(?:les |tes |vos |ces |la |ta |votre )?"
+     r"|fais abstraction d[eu']s?|outrepasse[rsz]?|annule[rsz]?)\s+(?:\w+ment\s+|ensuite\s+|donc\s+|alors\s+|vite\s+)?(?:de\s+|d')?(?:toutes?\s+|tous\s+)?(?:les |tes |vos |ces |la |ta |votre )?"
      r"(?:instructions?|consignes?|regles?|directives?|restrictions?|garde-fous?|charte)"),
     ("ignorer_consignes", 45,
      r"\b(?:ignore|disregard|forget|override|bypass|skip)\s+(?:all\s+|any\s+|every\s+)?(?:of\s+)?(?:the\s+|your\s+|my\s+|these\s+)?"
      r"(?:previous|prior|above|earlier|preceding|initial|original|system|safety)?\s*(?:instructions?|prompts?|rules?|guidelines?|directives?|guardrails?)"),
+    ("ignorer_consignes", 45,
+     r"\bne (?:plus|pas|jamais) (?:suivre|respecter|appliquer|tenir compte d[eu']s?) (?:les |tes |vos |ces |la |ta )?(?:regles?|consignes?|instructions?|charte)"
+     r"|\b(?:stop|cesse[rsz]?|arrete[rsz]?) (?:de )?(?:suivre|following|obeying|respecter) (?:les |tes |vos |your |the )?(?:regles?|consignes?|instructions?|rules)"
+     r"|\b(?:les |tes |vos |the |your )?(?:consignes?|instructions?|orders) (?:ci-dessus |precedentes |initiales |above |previous |prior )?"
+     r"(?:sont|est|are|is) (?:desormais |maintenant |now )?(?:obsoletes?|annulees?|caduques?|remplacees?|suspendues?|obsolete|void|cancel+ed|revoked|no longer valid)"
+     r"|\bforget (?:everything|all|what) (?:you (?:were|have been) told|above|before|previously)"),
     ("ignorer_consignes", 40,
      r"\b(?:nouvelles? (?:instructions?|consignes?)|new instructions?|updated instructions?|instructions? prioritaires?)\s*:"),
     ("changement_role", 35,
      r"\b(?:tu es (?:desormais|maintenant|a present)|vous etes (?:desormais|maintenant|a present)|a partir de maintenant,? tu"
      r"|you are now|from now on,? you|you will now act|act as (?:an? )?(?:unrestricted|admin|root|dan)|agis (?:desormais )?en tant que"
-     r"|joue (?:desormais )?le role d|ton nouveau role|your new role|mode (?:developpeur|developer|dan|sans restrictions?|god)"
-     r"|developer mode|jailbreak|do anything now|sans (?:aucune )?restrictions?|without (?:any )?restrictions)"),
+     r"|joues? (?:desormais )?le role d|ton nouveau role|your new role|mode (?:developpeur|developer|dan|sans restrictions?|god)"
+     r"|developer mode|jailbreak|do anything now|sans (?:aucune )?(?:restrictions?|limites?|filtres?)|without (?:any )?(?:restrictions|limits|filters)"
+     r"|pretend (?:you are|to be|you're)|fais comme si tu etais|fait comme si vous etiez"
+     r"|(?:agir|agis|agissez|act|behave) (?:desormais )?(?:comme|as) (?:un |une |l'|le |la |an? |the )?(?:administrateur|admin|proprietaire|owner|root|superutilisateur|system))"),
     ("balise_role", 30,
      r"(?:^\s*(?:#+\s*)?(?:system|assistant)\s*:|<\|?(?:im_start|im_end|system|endoftext)\|?>|\[/?(?:inst|system|sys)\]"
      r"|<</?sys>>|</?(?:system|instructions?)>|^\s*###\s*(?:instruction|system|new task))"),
@@ -323,14 +331,18 @@ MOTIFS: list[tuple[str, int, re.Pattern]] = [(f, p, re.compile(m, re.M)) for f, 
      r"\b(?:en tant qu'(?:administrateur|admin|developpeur|proprietaire)|as (?:an|the) (?:administrator|admin|developer|owner)"
      r"|message (?:de |du |de l')(?:administrateur|systeme|proprietaire|developpeur|support anthropic|equipe securite)"
      r"|admin override|ordre du proprietaire|autorise par le proprietaire|le proprietaire (?:a autorise|autorise|demande que tu)"
-     r"|instruction officielle|this is (?:an? )?(?:official|authorized) (?:instruction|request)|priorite absolue)"),
+     r"|instruction officielle|this is (?:an? )?(?:official|authorized) (?:instruction|request)|priorite absolue"
+     r"|(?:authori[sz]ed|approved|requested) by the (?:owner|administrator|admin|developers?))"),
     ("approbation", 40,
-     rf"\b(?:valide[rsz]?|approuve[rsz]?|approve[sd]?|authori[sz]e)\s+"
-     rf"(?:automatiquement\s+|directement\s+|immediatement\s+|automatically\s+|immediately\s+)?{_OBJETS_DECISION}"),
+     rf"\b(?:valide[rsz]?|approuve[rsz]?|approve|authori[sz]e)\s+(?:toi-meme\s+|vous-meme\s+|yourself\s+|ensuite\s+|donc\s+)?"
+     rf"(?:\w+ment\s+|automatically\s+|immediately\s+|now\s+)?{_OBJETS_DECISION}"),
     ("approbation", 40,
      r"\b(?:marque[rsz]?|considere[rsz]?|mark|treat)\s+(?:la decision |cette decision |ce livrable |it |this )?(?:comme |as )?"
-     r"(?:valide|validee|approuve|approuvee|approved|validated)\b|\bauto-?approu?v\w*|\bvalid(?:er|ation) automatique"),
-    ("secret", 45, rf"\b{_VERBES_SECRET}\b[^.\n]{{0,60}}?\b{_OBJETS_SECRET}"),
+     r"(?:valide|validee|approuve|approuvee|approved|validated)\b|\bauto-?approu?v\w*|\bvalid(?:er|ation) automatique"
+     r"|\b(?:considere[rsz]?|traite[rsz]?|treat|consider) (?:tout|toutes? les? \w+|everything|all \w+) (?:comme |as )(?:valide|validee?s?|approuvee?s?|approved|accepted)"
+     r"|\b(?:la )?validation humaine (?:est |a ete )?(?:desactivee|suspendue|inutile|supprimee)|\bhuman (?:approval|review|validation) (?:is )?(?:disabled|off|not (?:required|needed))"
+     r"|\bgreen-?light (?:the |this |all )?(?:pending )?\w+"),
+    ("secret", 45, rf"\b{_VERBES_SECRET}\b(?:[^.!?\n]|\.(?!\s)){{0,60}}?(?<![a-z0-9]){_OBJETS_SECRET}"),
     ("outil", 35,
      rf"\b(?:appelle[rsz]?|declenche[rsz]?|call|invoke|trigger)\s+(?:l'|le |la |the )?(?:outil|tool|fonction|function|webhook|executor|workflow)\b"
      rf"|\b(?:utilise[rsz]?|execute[rsz]?|lance[rsz]?|use|run|execute)\s+(?:l'|le |la |the )?(?:outil|tool|executor|webhook) (?:de |d')?(?:{_N3}|publication|envoi|paiement|suppression|publish|send|delete|pay)"
@@ -356,6 +368,7 @@ MOTIFS: list[tuple[str, int, re.Pattern]] = [(f, p, re.compile(m, re.M)) for f, 
      r"\b(?:si tu es une? (?:ia|intelligence artificielle|assistant|agent|modele|llm)|if you are an? (?:ai|llm|assistant|agent|language model)"
      r"|(?:a|pour) l'(?:ia|agent|assistant) qui (?:lit|lis|traite)|note (?:pour|a) (?:l'ia|l'agent|l'assistant|les agents|les ia)"
      r"|(?:ai|llm) (?:agents?|assistants?|models?) reading this|note to (?:the )?(?:ai|llm|assistant|agent)"
+     r"|(?:toute|chaque|any|every) (?:ia|ai|agent|assistant|llm) (?:qui (?:lit|traite)|reading|processing)"
      r"|(?:cher|chere|dear) (?:ia|ai|assistant|agent|claude|chatgpt|gpt)\b|\b(?:collector|analyst|checker|executor|gate)\s*[,:]\s*(?:tu|ignore|valide|publie|envoie|you))"),
     ("charte", 35,
      r"\b(?:la |cette )?charte (?:ne s'applique (?:pas|plus)|est (?:suspendue|levee|desactivee|obsolete)|n'est plus valable)"

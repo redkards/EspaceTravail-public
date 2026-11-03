@@ -43,6 +43,7 @@ class Preparation(BaseModel):
 class Confirmation(Preparation):
     jeton: str = Field(min_length=10, max_length=64)
     code: str | None = Field(default=None, max_length=12)
+    missions: list[int] = Field(default_factory=list, max_length=50)  # plan de la semaine : cases cochées
 
 
 def utilisateur(request: Request) -> str:
@@ -63,8 +64,8 @@ def _controles(d: Decision, corps: Preparation) -> None:
     if d.statut != "en_attente":
         raise HTTPException(409, f"Décision déjà traitée ({d.statut}).")
     if corps.choix == "reviser":
-        if d.objet == "lancement_f4":
-            raise HTTPException(409, "Révision impossible pour un lancement F4 : valider ou refuser.")
+        if d.objet in ("lancement_f4", "plan_semaine"):
+            raise HTTPException(409, "Révision impossible pour ce type de décision : valider ou refuser.")
         if len((corps.commentaire or "").strip()) < 3:
             raise HTTPException(422, "Indiquez un motif court pour la révision (3 à 200 caractères).")
 
@@ -121,7 +122,7 @@ def confirmer(did: int, corps: Confirmation, request: Request, taches: Backgroun
     if not decideur.consommer(corps.jeton, did, corps.choix):
         raise HTTPException(409, "Confirmation déjà utilisée ou expirée.")
     try:
-        res = pipeline.decider(did, corps.choix, (corps.commentaire or "").strip() or None)
+        res = pipeline.decider(did, corps.choix, (corps.commentaire or "").strip() or None, corps.missions)
     except PermissionError as e:
         raise HTTPException(409, str(e))
     ledger.journaliser("DECIDEUR", "decideur_action", res["mission_id"], decision_id=did, choix=corps.choix,
@@ -131,4 +132,6 @@ def confirmer(did: int, corps: Confirmation, request: Request, taches: Backgroun
         taches.add_task(FILE.executer, res["mission_id"], pipeline.relancer_revision, corps.commentaire)
     if res.get("lancer"):
         taches.add_task(FILE.executer, res["mission_id"], pipeline.traiter)
+    for mid in res.get("missions_creees") or []:  # missions cochées du plan de la semaine
+        taches.add_task(FILE.executer, mid, pipeline.traiter)
     return res

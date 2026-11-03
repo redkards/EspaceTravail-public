@@ -1,0 +1,28 @@
+# SearXNG auto-hébergé pour la veille SYFER — FICHIER OPTIONNEL, à intégrer plus tard par l'agent INFRA.
+# Lancement isolé : docker compose -f veille/recherche-web/docker-compose.searxng.yml up -d
+# Accessible UNIQUEMENT depuis le VPS (127.0.0.1:8888) ; ne jamais l'exposer derrière Caddy sans authentification.
+services:
+  searxng:
+    image: searxng/searxng:latest   # agent INFRA : épingler un tag daté ou un digest (@sha256:…) avant la mise en production
+    container_name: syfer-searxng
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8888:8080"
+    volumes:
+      - ./searxng:/etc/searxng:ro               # settings.yml + limiter.toml (lecture seule)
+    environment:
+      SEARXNG_BASE_URL: "http://127.0.0.1:8888/"
+      SEARXNG_SECRET: "${SEARXNG_SECRET:?définir SEARXNG_SECRET (openssl rand -hex 32) dans .env}"
+    cap_drop: [ALL]
+    cap_add: [CHOWN, SETGID, SETUID]
+    security_opt: ["no-new-privileges:true"]
+    read_only: true
+    tmpfs: ["/tmp:size=32m", "/var/cache/searxng:size=64m"]
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 384M
+    logging:
+      driver: json-file
+      options: {max-size: "1m", max-file: "1"}   # pas d'historique de requêtes conservé

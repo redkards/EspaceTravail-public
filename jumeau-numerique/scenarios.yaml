@@ -1,0 +1,228 @@
+# Scénarios de conception du jumeau numérique SYFER V2.
+# Chaque scénario part des valeurs « defaut » ci-dessous puis applique ses propres champs.
+# Champs :
+#   offre              KVM2 | KVM4 | KVM8 (Hostinger) — vCPU, RAM P1 et prix dans hypotheses.json
+#   vitrine_kvm2       true = un 2e VPS KVM 2 pour la vitrine (coût seulement, aucune charge SYFER)
+#   modele_principal   3b | 7b | 8b : modèle local de l'ANALYST et des autres rôles
+#   modele_controleur  modèle local du CHECKER et du double contrôle (différent = « double modèle »)
+#   cloud_gratuit      true = F2/F3 vont sur Ollama Cloud gratuit (repli local si panne ou quota)
+#   max_missions       NEXUS_MAX_MISSIONS (missions simultanées)
+#   v2                 optimisations V2 : COLLECTOR sans LLM, contrôles par code (et GATE sans avis LLM),
+#                      cache, gabarits
+#   priorite_jour      V2 : missions de nuit (banc, audit, veille, fantôme) lancées seulement 01:00–06:00,
+#                      missions du jour prioritaires
+#   payant_plafond_eur plafond mensuel de l'API payante (0 = aucune IA payante ; F4 replié en F3)
+#   payant_f3          true = F3 passe aussi par Haiku (payant) tant que le plafond le permet
+#   charge             multiplicateur des missions manuelles
+#   panne_cloud_debut_j / panne_cloud_duree_j    panne prolongée imposée du cloud gratuit
+#   absence_debut_j / absence_duree_j            Décideur absent (aucune session)
+#   pic_lundi          missions manuelles supplémentaires chaque lundi 08:00–10:00
+#   nuit_chargee       chaque dimanche : banc 30 missions + audit SYFER 10 + veille ×3
+#   surcharges         valeurs imposées pour des paramètres de hypotheses.json
+
+defaut:
+  offre: KVM2
+  vitrine_kvm2: false
+  modele_principal: 3b
+  modele_controleur: 3b
+  cloud_gratuit: true
+  max_missions: 2
+  v2: false
+  priorite_jour: false
+  payant_plafond_eur: 0
+  payant_f3: false
+  charge: 1.0
+  panne_cloud_debut_j: 0
+  panne_cloud_duree_j: 0
+  absence_debut_j: 0
+  absence_duree_j: 0
+  pic_lundi: 0
+  nuit_chargee: false
+
+scenarios:
+  - id: S1
+    nom: V1 actuelle
+    description: KVM 2, qwen2.5 3B, Ollama Cloud gratuit + repli local, sans optimisations (configuration V1 prévue).
+
+  - id: S1L
+    nom: V1 locale (mesurée)
+    description: KVM 2, 3B local seul, 1 mission à la fois — la configuration des deux mesures réelles.
+    cloud_gratuit: false
+    max_missions: 1
+
+  - id: S2
+    nom: KVM 2 + optim. V2
+    description: S1 + COLLECTOR sans LLM, contrôles par code, cache, gabarits, priorité jour/nuit.
+    v2: true
+    priorite_jour: true
+
+  - id: S2L
+    nom: KVM 2 V2 locale
+    description: S2 sans cloud gratuit (tout en local 3B) — effet des optimisations seules.
+    v2: true
+    priorite_jour: true
+    cloud_gratuit: false
+    max_missions: 1
+
+  - id: S3
+    nom: KVM 4 + 7B
+    description: KVM 4, qwen2.5 7B local (repli et double contrôle), cloud gratuit, V2.
+    offre: KVM4
+    modele_principal: 7b
+    modele_controleur: 7b
+    v2: true
+    priorite_jour: true
+
+  - id: S4
+    nom: KVM 8 + 7B local seul
+    description: KVM 8, qwen2.5 7B, aucune IA externe, V2.
+    offre: KVM8
+    modele_principal: 7b
+    modele_controleur: 7b
+    cloud_gratuit: false
+    v2: true
+    priorite_jour: true
+
+  - id: S5
+    nom: KVM 8 double modèle
+    description: S4 + contrôleur sur un 2e modèle (llama3.1 8B) chargé en même temps.
+    offre: KVM8
+    modele_principal: 7b
+    modele_controleur: 8b
+    cloud_gratuit: false
+    v2: true
+    priorite_jour: true
+
+  - id: S6
+    nom: S5 + F4 payant 30 €
+    description: S5 + API Anthropic plafonnée à 30 €/mois pour F4.
+    offre: KVM8
+    modele_principal: 7b
+    modele_controleur: 8b
+    cloud_gratuit: false
+    v2: true
+    priorite_jour: true
+    payant_plafond_eur: 30
+
+  - id: S7
+    nom: Max perf ≤ 150 €
+    description: KVM 8 + KVM 2 vitrine + double modèle + cloud gratuit + API 70 €/mois (F3 via Haiku, F4 Sonnet).
+    offre: KVM8
+    vitrine_kvm2: true
+    modele_principal: 7b
+    modele_controleur: 8b
+    max_missions: 3
+    v2: true
+    priorite_jour: true
+    payant_plafond_eur: 70
+    payant_f3: true
+
+  - id: S8
+    nom: S5 charge ×3
+    description: S5 avec 3 fois plus de missions manuelles (montée en activité, premier client).
+    offre: KVM8
+    modele_principal: 7b
+    modele_controleur: 8b
+    cloud_gratuit: false
+    v2: true
+    priorite_jour: true
+    charge: 3.0
+
+  - id: S9
+    nom: S3 panne cloud 10 j
+    description: S3 avec le cloud gratuit indisponible du jour 5 au jour 15 (repli local 7B).
+    offre: KVM4
+    modele_principal: 7b
+    modele_controleur: 7b
+    v2: true
+    priorite_jour: true
+    panne_cloud_debut_j: 5
+    panne_cloud_duree_j: 10
+
+  - id: S10
+    nom: S5 Décideur absent 3 j
+    description: S5, aucune session de décision du jour 9 au jour 12.
+    offre: KVM8
+    modele_principal: 7b
+    modele_controleur: 8b
+    cloud_gratuit: false
+    v2: true
+    priorite_jour: true
+    absence_debut_j: 9
+    absence_duree_j: 3
+
+  - id: S11
+    nom: S5 pic du lundi
+    description: S5 + 15 missions manuelles chaque lundi matin en plus du pilote hebdomadaire.
+    offre: KVM8
+    modele_principal: 7b
+    modele_controleur: 8b
+    cloud_gratuit: false
+    v2: true
+    priorite_jour: true
+    pic_lundi: 15
+
+  - id: S12
+    nom: S5 nuit chargée
+    description: S5 + chaque dimanche banc 30 missions, audit SYFER 10 missions, veille ×3.
+    offre: KVM8
+    modele_principal: 7b
+    modele_controleur: 8b
+    cloud_gratuit: false
+    v2: true
+    priorite_jour: true
+    nuit_chargee: true
+
+  - id: S13
+    nom: KVM 8 hybride gratuit
+    description: KVM 8 double modèle local + cloud gratuit pour F2/F3, 3 missions simultanées, V2, 0 € d'IA.
+    offre: KVM8
+    modele_principal: 7b
+    modele_controleur: 8b
+    max_missions: 3
+    v2: true
+    priorite_jour: true
+
+  - id: S14
+    nom: S13 + F4 payant 30 €
+    description: S13 + API Anthropic plafonnée à 30 €/mois pour F4.
+    offre: KVM8
+    modele_principal: 7b
+    modele_controleur: 8b
+    max_missions: 3
+    v2: true
+    priorite_jour: true
+    payant_plafond_eur: 30
+
+  - id: S15
+    nom: S13 charge ×3
+    description: S13 avec 3 fois plus de missions manuelles.
+    offre: KVM8
+    modele_principal: 7b
+    modele_controleur: 8b
+    max_missions: 3
+    v2: true
+    priorite_jour: true
+    charge: 3.0
+
+  - id: S16
+    nom: KVM 4 hybride 3B+7B
+    description: KVM 4, 7B analyste + 3B contrôleur (double modèle léger), cloud gratuit, V2.
+    offre: KVM4
+    modele_principal: 7b
+    modele_controleur: 3b
+    max_missions: 3
+    v2: true
+    priorite_jour: true
+
+  - id: S17
+    nom: S13 panne cloud 10 j
+    description: S13 avec le cloud gratuit indisponible du jour 5 au jour 15 (robustesse de l'hybride).
+    offre: KVM8
+    modele_principal: 7b
+    modele_controleur: 8b
+    max_missions: 3
+    v2: true
+    priorite_jour: true
+    panne_cloud_debut_j: 5
+    panne_cloud_duree_j: 10

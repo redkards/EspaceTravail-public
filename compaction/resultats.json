@@ -1,0 +1,245 @@
+{
+  "corpus": {
+    "missions": 10000,
+    "jours": 250
+  },
+  "brut_octets": 91627157,
+  "actuel": {
+    "octets": 26524260,
+    "temps_s": 2.707745227000032,
+    "index_octets": 34381824,
+    "recherche_ms": 15.572791500005678,
+    "lecture_ms": 74.40110756667006
+  },
+  "methodes": [
+    {
+      "methode": "zlib ligne",
+      "octets": 26315278,
+      "ratio": 3.48,
+      "compaction_s": 1.84,
+      "lecture_ms": 0.101,
+      "note": "accès direct si l'offset est indexé"
+    },
+    {
+      "methode": "zlib ligne + dict",
+      "octets": 21319945,
+      "ratio": 4.3,
+      "compaction_s": 2.45,
+      "lecture_ms": 0.081,
+      "note": "accès direct si l'offset est indexé"
+    },
+    {
+      "methode": "zlib bloc",
+      "octets": 9908882,
+      "ratio": 9.25,
+      "compaction_s": 2.0,
+      "lecture_ms": 1.573,
+      "note": "93 blocs"
+    },
+    {
+      "methode": "zlib bloc + dict",
+      "octets": 9828597,
+      "ratio": 9.32,
+      "compaction_s": 2.06,
+      "lecture_ms": 2.08,
+      "note": "93 blocs"
+    },
+    {
+      "methode": "lzma bloc",
+      "octets": 6691659,
+      "ratio": 13.69,
+      "compaction_s": 31.74,
+      "lecture_ms": 6.483,
+      "note": "93 blocs"
+    },
+    {
+      "methode": "zlib bloc + dict + dédup",
+      "octets": 11185601,
+      "ratio": 8.19,
+      "compaction_s": 7.74,
+      "lecture_ms": 2.181,
+      "note": "82 blocs, 19314 fragments dédupliqués"
+    },
+    {
+      "methode": "lzma bloc + dédup",
+      "octets": 8683095,
+      "ratio": 10.55,
+      "compaction_s": 35.26,
+      "lecture_ms": 5.236,
+      "note": "82 blocs, 19314 fragments dédupliqués"
+    }
+  ],
+  "paliers": {
+    "stats": {
+      "paliers": {
+        "froid": {
+          "blocs": 9,
+          "enregistrements": 2800,
+          "avant_octets": 25632951,
+          "serialise_octets": 8247528,
+          "fichiers_octets": 1107300,
+          "ratio": 23.15
+        },
+        "tiede": {
+          "blocs": 32,
+          "enregistrements": 6000,
+          "avant_octets": 54998813,
+          "serialise_octets": 30256606,
+          "fichiers_octets": 4254634,
+          "ratio": 12.93
+        }
+      },
+      "avant_octets": 80631764,
+      "fichiers_octets": 5361934,
+      "index_octets": 3289088,
+      "dictionnaires_octets": 2662,
+      "apres_octets": 8653684,
+      "ratio": 9.32,
+      "ratio_hors_index": 15.0,
+      "dedup": {
+        "fragments": 251,
+        "fragments_octets": 11758,
+        "references": 8907,
+        "octets_evites": 1021860
+      },
+      "effaces": 0,
+      "dictionnaire_version": 1
+    },
+    "tiede_s": 11.55,
+    "froid_s": 0.01,
+    "verifier_s": 1.57,
+    "verifier_valide": true,
+    "verifier_un_ms": 4.14,
+    "lecture_ms": {
+      "tiede": 2.237,
+      "froid": 10.8
+    },
+    "lecture_p95_ms": {
+      "tiede": 6.561,
+      "froid": 17.529
+    },
+    "recherche_ms": 8.04,
+    "recherche_extrait_ms": 13.26,
+    "effacement_ms": 439.4,
+    "index_fts_octets": 1101824,
+    "index_composition": {
+      "agregats": 245760,
+      "blocs": 12288,
+      "cfts_config": 4096,
+      "cfts_data": 1003520,
+      "cfts_docsize": 90112,
+      "cfts_idx": 4096,
+      "dictionnaires": 4096,
+      "enregs": 1216512,
+      "enregs_bloc": 118784,
+      "enregs_mission": 102400,
+      "enregs_seq": 102400,
+      "fragments": 40960,
+      "journal": 20480,
+      "meta": 4096,
+      "sqlite_autoindex_agregats_1": 139264,
+      "sqlite_autoindex_enregs_1": 143360,
+      "sqlite_autoindex_fragments_1": 24576,
+      "sqlite_autoindex_meta_1": 4096,
+      "sqlite_schema": 4096
+    },
+    "entretien": {
+      "base": "/tmp/syfer-mesure-tezmt3ec/compact/compaction.db",
+      "avant": 4263936,
+      "vacuum": true,
+      "fts": [
+        "cfts"
+      ],
+      "erreur": null,
+      "apres": 3153920
+    },
+    "dossier_octets": 8518460,
+    "ajoutes": 8800,
+    "migres": 0
+  },
+  "variantes": {
+    "tiède en lzma (COMPACTION_ALGO_TIEDE=lzma)": {
+      "dossier_octets": 7270638,
+      "index_apres": 3153920,
+      "fichiers": 4114112,
+      "tiede_s": 24.35,
+      "lecture_tiede_ms": 9.718,
+      "recherche_ms": 19.84
+    },
+    "FTS5 detail=full, classement bm25 (COMPACTION_FTS_DETAIL=full)": {
+      "dossier_octets": 11094844,
+      "index_apres": 5730304,
+      "fichiers": 5361934,
+      "tiede_s": 15.24,
+      "lecture_tiede_ms": 3.347,
+      "recherche_ms": 7.73
+    }
+  },
+  "veille": {
+    "fiches": 5000,
+    "base_avant_octets": 5967872,
+    "archivees": 2500,
+    "base_apres_octets": 3022848,
+    "froid_fichiers_octets": 381572,
+    "froid_avant_octets": 2829580,
+    "froid_ratio_hors_index": 7.42,
+    "froid_total_octets": 1139332,
+    "temps_s": 2.55
+  },
+  "connaissances": {
+    "connaissances": 2000,
+    "quasi_doublons_injectes": 400,
+    "fusionnees": 293,
+    "evincees_plafond_250": 207,
+    "base_avant_octets": 2965504,
+    "base_apres_octets": 2183168,
+    "archive_octets": 339514,
+    "temps_s": 7.26,
+    "verification": true
+  },
+  "par_mission": {
+    "chaud": 6090.6084,
+    "tiede": 1067.5056666666667,
+    "froid": 753.8642857142856
+  },
+  "missions_chaudes_non_compactees": 1200,
+  "projection": {
+    "nominal (40/j)": {
+      "1an": {
+        "missions": 14600,
+        "sans_compaction_mo": 88.9,
+        "avec_compaction_mo": 19.3,
+        "gain_x": 4.6,
+        "veille_actuel_mo": 6.0,
+        "veille_avec_archivage_mo": 8.4
+      },
+      "3an": {
+        "missions": 43800,
+        "sans_compaction_mo": 266.8,
+        "avec_compaction_mo": 41.3,
+        "gain_x": 6.5,
+        "veille_actuel_mo": 6.0,
+        "veille_avec_archivage_mo": 17.7
+      }
+    },
+    "200 % (80/j)": {
+      "1an": {
+        "missions": 29200,
+        "sans_compaction_mo": 177.8,
+        "avec_compaction_mo": 38.6,
+        "gain_x": 4.6,
+        "veille_actuel_mo": 12.0,
+        "veille_avec_archivage_mo": 16.8
+      },
+      "3an": {
+        "missions": 87600,
+        "sans_compaction_mo": 533.5,
+        "avec_compaction_mo": 82.6,
+        "gain_x": 6.5,
+        "veille_actuel_mo": 12.0,
+        "veille_avec_archivage_mo": 35.4
+      }
+    }
+  },
+  "graphique": "resultats.png"
+}

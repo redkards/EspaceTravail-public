@@ -1,0 +1,5 @@
+veille.db
+veille.db-*
+journal/
+__pycache__/
+.pytest_cache/

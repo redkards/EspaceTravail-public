@@ -45,6 +45,7 @@ L'IA utilise **Ollama Cloud** (offre gratuite), avec l'IA locale du VPS en secou
 11. [Désinstaller](#11-désinstaller)
 12. [Passerelle Claude · ChatGPT · Gemini](#12-passerelle-claude--chatgpt--gemini)
 13. [Entretien au téléphone](#13-entretien-au-téléphone) : mettre à jour, restaurer, changer un mot de passe ou une clé, décideur mobile, mémoire par projet, exercice de restauration, veille cyber
+14. [Fonctions avancées (V2)](#14-fonctions-avancées-v2) : cockpit installable, chartes, leçons, note, test fantôme, pilote, bouclier, effacement RGPD, veille
 
 ---
 
@@ -408,8 +409,8 @@ Puis ouvrez **https://srvXXXX.hstgr.cloud/bridge** (identifiants du cockpit) : p
 - **Fin de session** : « écris une passation pour `poker-winners` ».
 - Codes projets : `paradoxx`, `nexus`, `poker-winners`, `poker-feeling`, `redkards`, `top-solver`, `youtube-poker-winner`, `freelance-ia`, `esct-boxe`, `turf`, `divers` (outil `projets_lister`).
 
-### Outils disponibles (18)
-`projet_connaissances` (lit la mémoire du projet tenue par le Mothership) · `memoire_ecrire`, `memoire_chercher`, `memoire_lire`, `memoire_oublier` · `tache_creer`, `tache_lister`, `tache_prendre`, `tache_mettre_a_jour` · `message_envoyer`, `messages_lire` · `passation_ecrire`, `passation_derniere` · `projets_lister`, `mothership_mission`, `mothership_statut`, `mothership_decisions_en_attente` · `journal_lister`.
+### Outils disponibles (20)
+`projet_connaissances` (mémoire du projet tenue par le Mothership), `memoire_collective_rechercher`, `lecons_lister` (leçons acceptées, lecture seule) · `memoire_ecrire`, `memoire_chercher`, `memoire_lire`, `memoire_oublier` · `tache_creer`, `tache_lister`, `tache_prendre`, `tache_mettre_a_jour` · `message_envoyer`, `messages_lire` · `passation_ecrire`, `passation_derniere` · `projets_lister`, `mothership_mission`, `mothership_statut`, `mothership_decisions_en_attente` · `journal_lister`.
 
 ### Sécurité
 - **Aucun secret dans la mémoire** : un texte qui ressemble à une clé API, un mot de passe ou un numéro de carte est **refusé** avec une explication. Notez plutôt *où* est rangé le secret.
@@ -492,3 +493,40 @@ grep COCKPIT_PASSWORD= .env            # nouveau mot de passe
 | `plafond_atteint` | délai, tokens ou coût max atteint : livrable partiel gardé, relance possible au niveau supérieur |
 | `echouee` | échec (le motif est affiché, par ex. « interrompue par un redémarrage ») |
 | `terminee` / `validee` / `refusee` / `revision` / `suspendue` | fin normale, décision prise, ou arrêt d'urgence actif |
+
+---
+
+## 14. Fonctions avancées (V2)
+
+### Règle d'or : les décisions se prennent uniquement dans le cockpit
+Valider, refuser ou faire réviser une décision N3 se fait **dans le cockpit** (`/cockpit` ou `/cockpit/decideur`), derrière votre mot de passe. Ni l'API (clé `X-Nexus-Key`), ni les IA de la passerelle, ni n8n ne peuvent décider (`NEXUS_API_PEUT_DECIDER=0` ; `1` est réservé aux tests). Les workflows n8n fournis ne font que **lire** `/api/decisions`.
+
+### Cockpit installable
+Sur Android, ouvrez `/cockpit/decideur` dans Chrome, puis **⋮ > Installer l'application** : icône sur l'écran d'accueil, plein écran, page « hors ligne » si le réseau coupe. Rien de confidentiel n'est gardé en cache (seulement icônes et page hors ligne) ; tout reste derrière le mot de passe.
+
+### Chartes de projet
+Chaque projet a une charte (`nexus-core/chartes/<projet>.yaml`, `_commun.yaml` pour tous) contrôlée **par du code** avant le CHECKER : termes interdits, mentions obligatoires, vouvoiement, mélange de marques entre projets. Une violation bloquante renvoie le livrable à l'ANALYST. Modifier une charte : éditez le fichier puis `docker compose restart nexus-core`.
+
+### Mémoire collective et leçons
+Les erreurs qui se répètent (refus du CHECKER, révisions demandées…) deviennent des **leçons proposées** (dès 3 cas, `NEXUS_LECONS_SEUIL`). Vous les acceptez ou rejetez chaque semaine (carte « Leçons de la semaine » du Décideur) ; seules les leçons acceptées sont appliquées, et une leçon qui fait baisser la qualité de plus de 10 % (`NEXUS_LECONS_BAISSE`) est suspendue automatiquement. Les livrables très bien notés servent d'exemples (`NEXUS_EXEMPLES_SEUIL`).
+
+### Note en un geste
+Sur une mission terminée sur cinq (`NEXUS_ECHANTILLON_NOTE=0.2`), le Décideur propose 👍 / 👎 + un motif : 2 secondes, et c'est ce qui nourrit les leçons et les exemples.
+
+### Test fantôme
+Avant d'activer une leçon, un exemple, une charte ou un modèle, le Mothership **rejoue** 5 missions passées (`NEXUS_FANTOME_K`) avant/après, la nuit (`NEXUS_FENETRE_NUIT=01:00-06:00`), sans aucun effet (ni décision, ni envoi, ni notification), et vous montre la comparaison.
+
+### Pilote hebdomadaire
+Chaque lundi à 7 h 30 (`NEXUS_PILOTE_HEBDO`, `off` pour l'arrêter), une décision « Plan de la semaine » propose pour chaque projet actif 3 priorités et des missions : **tout est décoché par défaut**, seules les missions que vous cochez sont lancées.
+
+### Bouclier anti-injection
+Tout texte venu de l'extérieur (veille, documents, mémoire) est nettoyé (texte caché, caractères invisibles, base64…) et les ordres adressés à l'IA (« ignore tes règles, valide, envoie la clé… ») sont détectés et neutralisés avant d'atteindre les agents. `install.sh` propose une **attaque simulée** mensuelle (2ᵉ dimanche, 5 h 17) qui vérifie le bouclier ; rapports dans `securite-ia/resultats/`.
+
+### Effacement RGPD en cascade
+Dans le cockpit, « Effacer » sur une mission archivée supprime son contenu **partout** : archive, mémoire du projet, exemples, références dans les leçons, commentaire de note, étapes et fichier du livrable. Le LEDGER garde seulement la trace « effacée le … à la demande de … », sans contenu. Pensez aux sauvegardes : elles gardent l'ancien contenu jusqu'à leur rotation (7 jours).
+
+### Veille (sources officielles)
+La veille lit uniquement les flux publics de sources sérieuses (CNIL, CERT-FR, EUR-Lex…) et garde des fiches courtes (180 jours) dans `data/veille/veille.db`, lue par les agents et incluse dans les sauvegardes. `install.sh` propose de la lancer toutes les 6 h (`/etc/cron.d/nexus-veille`). Détails, règles légales et effacement d'une personne : `veille/README.md`.
+
+### Banc d'essai hebdomadaire
+Proposé par `install.sh` (dimanche 4 h 17) : 8 missions de référence notées automatiquement, jamais en F4 (payant) ; tendances dans `banc-essai/tableau.html`.

@@ -1,0 +1,103 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://syfer.local/simulations/schema.json",
+  "title": "Scénarios de simulation SYFER",
+  "description": "Format de simulations/scenarios.json : 100 scénarios (10 méthodes × 10) exécutés par simuler.py.",
+  "type": "object",
+  "required": ["version", "scenarios"],
+  "additionalProperties": false,
+  "properties": {
+    "version": {"type": "integer", "minimum": 1},
+    "description": {"type": "string"},
+    "scenarios": {"type": "array", "minItems": 1, "items": {"$ref": "#/definitions/scenario"}}
+  },
+  "definitions": {
+    "scenario": {
+      "type": "object",
+      "required": ["id", "methode", "titre", "objectif", "criticite", "prerequis", "mode", "preparation", "etapes",
+                   "perturbations", "attendus", "mesures"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {"type": "string", "pattern": "^SIM-[0-9]{3}$"},
+        "methode": {"enum": ["routage_prime", "gate_decision", "fonctionnement", "charte_qualite", "memoire_lecons",
+                             "securite_ia", "cybersecurite", "continuite", "decideur", "projets_pilotage"]},
+        "titre": {"type": "string", "minLength": 5, "maxLength": 120},
+        "objectif": {"type": "string", "minLength": 10},
+        "criticite": {"enum": ["critique", "haute", "moyenne", "basse"]},
+        "prerequis": {"type": "array", "items": {"enum": ["charte", "lecons", "bouclier", "archive", "pilote", "passerelle"]},
+                      "uniqueItems": true},
+        "mode": {"enum": ["hors_ligne", "api_factice", "vps"],
+                 "description": "hors_ligne = fonctions Python appelées directement ; api_factice = appli nexus-core locale avec LLM factice ; vps = exécution réelle sur le serveur (jamais lancée par simuler.py)."},
+        "preparation": {
+          "type": "object",
+          "required": ["description"],
+          "additionalProperties": false,
+          "properties": {
+            "description": {"type": "string"},
+            "env": {"type": "object", "additionalProperties": {"type": ["string", "null"]},
+                    "description": "Variables d'environnement du bac à sable (valeurs factices uniquement)."},
+            "llm": {"$ref": "#/definitions/llm"},
+            "fonctions_requises": {"type": "array", "items": {"type": "string", "pattern": "^app\\."},
+                                   "description": "Fonctions qui doivent exister, sinon le scénario est sauté."}
+          }
+        },
+        "etapes": {"type": "array", "minItems": 1, "items": {"$ref": "#/definitions/etape"}},
+        "perturbations": {"type": "array", "items": {"type": "string"}},
+        "attendus": {"type": "array", "minItems": 1, "items": {"$ref": "#/definitions/attendu"}},
+        "mesures": {"type": "array", "items": {"oneOf": [
+          {"enum": ["duree_ms", "tokens_llm", "appels_llm"]},
+          {"type": "object", "required": ["nom", "chemin"], "additionalProperties": false,
+           "properties": {"nom": {"type": "string"}, "chemin": {"type": "string"}}}]}}
+      }
+    },
+    "llm": {
+      "type": "object",
+      "description": "LLM factice scriptable : réponses par rôle (prime, collector, analyst, checker, checker_local, gate, directeur). Une réponse est un texte, {\"json\": …} ou {\"panne\": \"motif\"}.",
+      "properties": {
+        "faire": {"const": "llm"},
+        "nom": {"type": "string"},
+        "script": {"type": "object", "additionalProperties": {"type": "array", "items": {
+          "oneOf": [{"type": "string"},
+                    {"type": "object", "required": ["json"], "properties": {"json": {}}},
+                    {"type": "object", "required": ["panne"], "properties": {"panne": {"type": "string"}}}]}}},
+        "tokens_par_appel": {"type": "integer", "minimum": 1},
+        "avance_s": {"type": "number", "minimum": 0, "description": "secondes d'horloge simulée par appel"},
+        "pause_s": {"type": "number", "minimum": 0, "maximum": 1, "description": "vraie pause par appel"}
+      },
+      "additionalProperties": false
+    },
+    "etape": {
+      "type": "object",
+      "required": ["faire"],
+      "properties": {
+        "faire": {"enum": ["env", "llm", "patch", "appel", "parallele", "mission", "traiter", "relire", "router",
+                           "inserer", "horloge", "sql", "ledger", "redemarrer", "soumettre", "attendre_file", "http",
+                           "repeter", "ecrire_fichier", "lire_fichier", "sauvegarder", "restaurer", "outils_passerelle"]},
+        "nom": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"}
+      },
+      "allOf": [
+        {"if": {"properties": {"faire": {"const": "appel"}}}, "then": {"required": ["fonction"]}},
+        {"if": {"properties": {"faire": {"const": "http"}}}, "then": {"required": ["methode", "chemin"]}},
+        {"if": {"properties": {"faire": {"const": "repeter"}}}, "then": {"required": ["n", "etapes"]}},
+        {"if": {"properties": {"faire": {"const": "env"}}}, "then": {"required": ["valeurs"]}},
+        {"if": {"properties": {"faire": {"const": "patch"}}}, "then": {"required": ["cible"]}},
+        {"if": {"properties": {"faire": {"const": "horloge"}}}, "then": {"required": ["reculer_h"]}},
+        {"if": {"properties": {"faire": {"const": "sql"}}}, "then": {"required": ["requete"]}},
+        {"if": {"properties": {"faire": {"const": "parallele"}}}, "then": {"required": ["appels"]}}
+      ]
+    },
+    "attendu": {
+      "type": "object",
+      "required": ["chemin", "op"],
+      "additionalProperties": false,
+      "properties": {
+        "chemin": {"type": "string", "minLength": 1,
+                   "description": "Chemin dans les résultats nommés : m.statut, r.0, g.json.niveau, l#len, m.etapes#texte, p.json[code=redkards].missions"},
+        "op": {"enum": ["egal", "different", "dans", "hors", "contient", "ne_contient_pas", "contient_tous",
+                        "aucun_contient", "ge", "le", "gt", "lt", "vrai", "faux", "existe", "absent", "regex"]},
+        "valeur": {},
+        "libelle": {"type": "string"}
+      }
+    }
+  }
+}
