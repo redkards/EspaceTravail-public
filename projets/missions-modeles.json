@@ -1,0 +1,270 @@
+{
+  "version": "1.0",
+  "date": "2026-11-03",
+  "description": "Modèles de missions NEXUS pour les 3 projets poker (REDKARDS, Poker Feeling, Poker Winners). 6 modèles par projet. Les {{placeholders}} sont remplis par lancer-mission.sh (cle=valeur). Le niveau attendu correspond aux règles déterministes du GATE (nexus-core/app/gate.py).",
+  "projets": {
+    "redkards": "BD / webtoon REDKARDS (Red Card)",
+    "poker-feeling": "Livre Poker Feeling",
+    "poker-winners": "Site Poker Winners (alias Poker Vitrine, dépôt redkards/poker-vitrine)"
+  },
+  "modeles": [
+    {
+      "id": "RK-1",
+      "projet": "redkards",
+      "numero": 1,
+      "titre": "REDKARDS — synopsis S{{saison}}E{{episode}} « {{titre_episode}} »",
+      "consigne": "Écris le synopsis (250 à 350 mots, en français) de l'épisode {{episode}} « {{titre_episode}} » de la saison {{saison}} de la BD REDKARDS.\nSituation de départ : {{situation}}.\nRepères : Red Cards (28 ans, impulsif, se touche le cou sous stress) ; voix intérieures Rouge (émotion) et Bleu (calcul), aucune n'est le méchant ; carnet où il sépare hypothèse, émotion et résultat.\nRègles de l'univers : compétitions fictives, pas de gains faciles, aucune certitude avant l'abattage, calculs crédibles.\nStructure : situation, décision, conséquence, leçon notée au carnet (1 phrase).",
+      "service": "CONTENT-ARENA/redaction",
+      "niveau_attendu": "N2",
+      "criteres_reussite": [
+        "Entre 250 et 350 mots",
+        "Structure situation / décision / conséquence / leçon respectée",
+        "Rouge et Bleu présents sans caricature",
+        "Aucun tournoi, marque ou joueur réel cité"
+      ]
+    },
+    {
+      "id": "RK-2",
+      "projet": "redkards",
+      "numero": 2,
+      "titre": "REDKARDS — cohérence avec la bible narrative ({{element}})",
+      "consigne": "Évalue la cohérence du texte ci-dessous avec la bible narrative REDKARDS ({{element}}).\nPoints à contrôler : âge, apparence et tics des personnages ; rôle de Rouge et Bleu ; Maya Thorne et Elias Vance ont leurs propres objectifs ; le secret du Zéro n'est pas une stratégie magique ; les 5 règles de l'univers (compétence et hasard, pas de gains faciles, calculs crédibles, compétitions fictives, chaque victoire coûte).\nTexte :\n{{texte}}\nLivre : tableau incohérence / passage / correction proposée, puis un verdict global.",
+      "service": "AGENT-FACTORY/evaluation",
+      "niveau_attendu": "N1",
+      "criteres_reussite": [
+        "Chaque incohérence cite le passage concerné",
+        "Une correction est proposée pour chaque point",
+        "Aucun fait inventé sur la bible ; les manques sont marqués À COMPLÉTER"
+      ]
+    },
+    {
+      "id": "RK-3",
+      "projet": "redkards",
+      "numero": 3,
+      "titre": "REDKARDS — post de promotion de l'épisode {{episode}} ({{reseau}})",
+      "consigne": "Rédige un post {{reseau}} pour faire découvrir l'épisode {{episode}} « {{titre_episode}} » de la BD REDKARDS.\nAngle : {{angle}}.\nContraintes : 500 caractères maximum hors hashtags, 3 à 5 hashtags, ton cinématographique, aucune incitation au jeu d'argent, aucune promesse de gain, aucune marque ou compétition réelle. Ajoute en fin de post : « Réservé aux majeurs. Joueurs Info Service : 09 74 75 13 13 (appel non surtaxé). »\nLivre : le texte du post, puis 2 variantes d'accroche.",
+      "service": "CONTENT-ARENA/redaction",
+      "action": "publier",
+      "niveau_attendu": "N3",
+      "criteres_reussite": [
+        "500 caractères maximum hors hashtags ; 3 à 5 hashtags",
+        "Mention majeurs + 09 74 75 13 13 présente",
+        "Aucune promesse de gain",
+        "La mission attend la décision N3 dans le cockpit"
+      ]
+    },
+    {
+      "id": "RK-4",
+      "projet": "redkards",
+      "numero": 4,
+      "titre": "REDKARDS — plan de production des épisodes {{episodes}}",
+      "consigne": "Établis un plan de production pour la mise en dessin des épisodes {{episodes}} de la saison 1 de REDKARDS.\nCapacité disponible : {{capacite}} ; échéance visée : {{echeance}}.\nÉtapes par épisode : storyboard validé, crayonné, encrage, couleur, lettrage, relecture qualité.\nLivre : un tableau épisode / étape / semaine prévue, les dépendances, les risques et une checklist de relecture qualité par épisode.",
+      "service": "OPS-CORE/projets",
+      "niveau_attendu": "N1",
+      "criteres_reussite": [
+        "Chaque épisode demandé figure dans le tableau",
+        "Le plan tient dans l'échéance ou signale l'écart",
+        "Risques et checklist qualité présents"
+      ]
+    },
+    {
+      "id": "RK-5",
+      "projet": "redkards",
+      "numero": 5,
+      "titre": "REDKARDS — crédibilité poker d'une main (épisode {{episode}})",
+      "consigne": "Vérifie la crédibilité poker de la main jouée dans l'épisode {{episode}} de REDKARDS, à partir de la description fournie.\nMain : {{main}}.\nContrôle : cotes du pot, équité approximative contre une range plausible, cohérence des tailles de mise, absence de certitude avant l'abattage. Signale toute erreur de calcul et propose une version crédible qui garde l'enjeu dramatique.\nAucune source externe : appuie-toi uniquement sur la description et les règles du Texas Hold'em.",
+      "service": "R&D-PARADOX/veille",
+      "niveau_attendu": "N1",
+      "criteres_reussite": [
+        "Les calculs sont détaillés et vérifiables",
+        "Les erreurs éventuelles sont corrigées sans casser la tension",
+        "Aucune certitude affichée avant l'abattage"
+      ]
+    },
+    {
+      "id": "RK-6",
+      "projet": "redkards",
+      "numero": 6,
+      "titre": "REDKARDS — contrôle de conformité d'un épisode ({{episode}})",
+      "consigne": "Contrôle la conformité du texte de l'épisode {{episode}} de REDKARDS pour un public d'adolescents âgés et d'adultes.\nPoints : aucune marque, compétition, joueur ou casino réel ; aucune glorification de la ruine ni du jeu d'argent ; bankroll distincte du budget de vie ; pas de représentation incitative envers les mineurs ; droit des marques et droit à l'image.\nTexte :\n{{texte}}\nLivre : liste des points à corriger (gravité faible / moyenne / élevée) et formulation de remplacement.",
+      "service": "LEX-GUARD/conformite",
+      "niveau_attendu": "N1",
+      "criteres_reussite": [
+        "Chaque point cite le passage et sa gravité",
+        "Une formulation de remplacement est proposée",
+        "Aucun avis juridique présenté comme définitif"
+      ]
+    },
+    {
+      "id": "PF-1",
+      "projet": "poker-feeling",
+      "numero": 1,
+      "titre": "Poker Feeling — chapitre {{numero_chapitre}} « {{titre_chapitre}} »",
+      "consigne": "Rédige une première version du chapitre {{numero_chapitre}} « {{titre_chapitre}} » du livre Poker Feeling (bloc {{bloc}}), environ {{nb_mots}} mots.\nPoints à couvrir : {{points}}.\nTon : vouvoiement, pédagogique, aucun jargon non expliqué ; le personnage Red Cards peut servir d'exemple. Aucune promesse de gain ou de résultat.\nTermine par trois encadrés : « L'essentiel », « Ce que vous saurez faire » et 3 questions d'auto-évaluation.",
+      "service": "CONTENT-ARENA/redaction",
+      "niveau_attendu": "N2",
+      "criteres_reussite": [
+        "Longueur proche de la cible demandée",
+        "Les trois encadrés de fin sont présents",
+        "Vouvoiement constant, termes techniques expliqués",
+        "Aucune promesse de gain"
+      ]
+    },
+    {
+      "id": "PF-2",
+      "projet": "poker-feeling",
+      "numero": 2,
+      "titre": "Poker Feeling — quatrième de couverture ({{format}})",
+      "consigne": "Rédige la quatrième de couverture du livre Poker Feeling pour l'édition {{format}}, 150 à 200 mots.\nPromesse : passer de « je joue au feeling » à « je sais pourquoi je perds ». Public : joueurs de Texas Hold'em débutants à intermédiaires. Fil rouge : le personnage Red Cards. Le livre s'arrête volontairement avant les solvers.\nInterdits : promesse de gain, chiffres de résultat, prix, date. Obligatoire : « Réservé aux majeurs. Joueurs Info Service : 09 74 75 13 13 (appel non surtaxé). »\nLivre : le texte, puis 3 accroches courtes alternatives.",
+      "service": "CONTENT-ARENA/redaction",
+      "niveau_attendu": "N2",
+      "criteres_reussite": [
+        "150 à 200 mots",
+        "Mention majeurs + 09 74 75 13 13 présente",
+        "Ni prix, ni date, ni promesse de gain"
+      ]
+    },
+    {
+      "id": "PF-3",
+      "projet": "poker-feeling",
+      "numero": 3,
+      "titre": "Poker Feeling — plan de lancement sur {{nb_semaines}} semaines",
+      "consigne": "Établis un plan de lancement du livre Poker Feeling sur {{nb_semaines}} semaines, canaux envisagés : {{canaux}}.\nInclure : jalons (relecture finale, maquette, liste d'attente, page du livre sur le site Poker Winners, lien avec la BD REDKARDS), tâches par semaine, responsables (propriétaire ou agent NEXUS), points de validation du propriétaire.\nRègles : aucun prix ni date de sortie inventés (écrire À COMPLÉTER), aucune diffusion sans validation, mention majeurs + Joueurs Info Service sur chaque support.",
+      "service": "OPS-CORE/projets",
+      "niveau_attendu": "N1",
+      "criteres_reussite": [
+        "Tableau semaine par semaine",
+        "Points de validation du propriétaire explicites",
+        "Prix et date laissés À COMPLÉTER"
+      ]
+    },
+    {
+      "id": "PF-4",
+      "projet": "poker-feeling",
+      "numero": 4,
+      "titre": "Poker Feeling — conformité ANJ d'un message ({{support}})",
+      "consigne": "Contrôle la conformité du message ci-dessous (support : {{support}}) au regard des règles françaises d'encadrement des communications liées au poker et aux jeux d'argent (ANJ) et des règles éditoriales du livre.\nPoints : aucune promesse de gain ou de résultat, aucune incitation excessive, pas de cible mineure, mention « Réservé aux majeurs » + Joueurs Info Service 09 74 75 13 13, pas de lien vers un opérateur.\nMessage :\n{{texte}}\nLivre : verdict conforme / à corriger, liste des écarts et version corrigée.",
+      "service": "LEX-GUARD/conformite",
+      "niveau_attendu": "N1",
+      "criteres_reussite": [
+        "Verdict clair conforme / à corriger",
+        "Chaque écart est justifié",
+        "Version corrigée fournie, mention obligatoire incluse"
+      ]
+    },
+    {
+      "id": "PF-5",
+      "projet": "poker-feeling",
+      "numero": 5,
+      "titre": "Poker Feeling — proposition à {{partenaire}}",
+      "consigne": "Rédige un brouillon de proposition de collaboration entre l'auteur du livre Poker Feeling et {{partenaire}} ({{type_partenaire}}).\nOffre envisagée : {{offre}}.\nStructure : objet, contexte du livre, contenu de l'offre, calendrier indicatif, conditions (À COMPLÉTER si non fournies), prochaine étape. Ton professionnel, vouvoiement, 1 page maximum.\nInterdits : promesse de gain pour les lecteurs, mention d'un opérateur de jeux, prix inventé.",
+      "service": "REVENUE-CORE/propositions",
+      "action": "envoyer_client",
+      "niveau_attendu": "N3",
+      "criteres_reussite": [
+        "Structure complète en 1 page",
+        "Aucun montant inventé",
+        "La mission attend la décision N3 (rien n'est transmis)"
+      ]
+    },
+    {
+      "id": "PF-6",
+      "projet": "poker-feeling",
+      "numero": 6,
+      "titre": "Poker Feeling — évaluation qualité du chapitre {{numero_chapitre}}",
+      "consigne": "Évalue le chapitre {{numero_chapitre}} du livre Poker Feeling selon la grille suivante, note de 1 à 5 par critère : clarté pour un débutant, vouvoiement constant, termes techniques expliqués, exactitude des calculs (outs, cotes, espérance), présence des encadrés de fin, absence de promesse de gain.\nTexte :\n{{texte}}\nLivre : tableau critère / note / justification, puis les 3 corrections prioritaires.",
+      "service": "AGENT-FACTORY/evaluation",
+      "niveau_attendu": "N1",
+      "criteres_reussite": [
+        "Les 6 critères sont notés et justifiés",
+        "3 corrections prioritaires concrètes",
+        "Erreurs de calcul signalées si présentes"
+      ]
+    },
+    {
+      "id": "PW-1",
+      "projet": "poker-winners",
+      "numero": 1,
+      "titre": "Poker Winners — revue de code {{fichier}}",
+      "consigne": "Fais la revue de code du fichier {{fichier}} du site Poker Winners (back Symfony 7.4 / PHP 8.2 ou front Angular 22).\nObjectif de la modification : {{objectif}}.\nPoints : sécurité (injections, contrôle d'accès, JWT, CSP), validation des entrées, performances (requêtes Doctrine), lisibilité, tests manquants.\nCode :\n{{code}}\nLivre : liste des problèmes classés bloquant / important / mineur, avec correctif proposé. Aucune mise en production.",
+      "service": "CODE-CORE/revue",
+      "niveau_attendu": "N2",
+      "criteres_reussite": [
+        "Problèmes classés par gravité",
+        "Correctif concret pour chaque point bloquant",
+        "Aucun secret recopié dans le livrable"
+      ]
+    },
+    {
+      "id": "PW-2",
+      "projet": "poker-winners",
+      "numero": 2,
+      "titre": "Poker Winners — conformité RGPD et ANJ de la page {{page}}",
+      "consigne": "Contrôle la page {{page}} du site Poker Winners (site éducatif, aucun jeu d'argent réel, aucun lien vers un opérateur).\nRGPD : base légale, information des membres, consentements, durée de conservation, droits d'accès, d'export et d'effacement.\nJeu responsable : mention « interdit aux moins de 18 ans » + Joueurs Info Service 09 74 75 13 13, aucune promesse de gain, pas d'incitation.\nTexte de la page :\n{{texte}}\nLivre : liste des écarts (gravité), texte de remplacement proposé, points À COMPLÉTER par le propriétaire.",
+      "service": "LEX-GUARD/conformite",
+      "niveau_attendu": "N1",
+      "criteres_reussite": [
+        "Écarts classés par gravité",
+        "Texte de remplacement proposé",
+        "Aucun avis présenté comme définitif ; points À COMPLÉTER listés"
+      ]
+    },
+    {
+      "id": "PW-3",
+      "projet": "poker-winners",
+      "numero": 3,
+      "titre": "Poker Winners — checklist de bêta {{version}} ({{parcours}})",
+      "consigne": "Établis une checklist de test pour la version {{version}} du site Poker Winners, parcours : {{parcours}}.\nPour chaque étape : action, résultat attendu, case OK / KO, gravité si KO, capture à joindre.\nInclure : affichage mobile Android, messages d'erreur en français, pages légales accessibles, mention jeu responsable en pied de page, suppression de compte RGPD.\nLivre : la checklist et une grille de tri des anomalies (bloquant / majeur / mineur).",
+      "service": "OPS-CORE/projets",
+      "niveau_attendu": "N1",
+      "criteres_reussite": [
+        "Chaque étape a un résultat attendu vérifiable",
+        "Le parcours mobile est couvert",
+        "Grille de tri des anomalies fournie"
+      ]
+    },
+    {
+      "id": "PW-4",
+      "projet": "poker-winners",
+      "numero": 4,
+      "titre": "Poker Winners — leçon « {{titre_lecon}} » (niveau {{niveau}})",
+      "consigne": "Rédige le contenu de la leçon « {{titre_lecon}} » pour la rubrique Leçons du site Poker Winners, niveau {{niveau}} (1 = débutant, 3 = avancé), 400 à 600 mots.\nPoints à couvrir : {{points}}.\nAjoute un quiz de 5 questions à choix multiple avec la bonne réponse et une explication d'une phrase. Propose aussi un titre SEO (60 caractères max) et une description (155 caractères max).\nRègles : vouvoiement, pédagogique, aucune promesse de gain, aucun opérateur cité.",
+      "service": "CONTENT-ARENA/redaction",
+      "niveau_attendu": "N2",
+      "criteres_reussite": [
+        "400 à 600 mots",
+        "Quiz de 5 questions avec réponses expliquées",
+        "Titre et description SEO dans les limites"
+      ]
+    },
+    {
+      "id": "PW-5",
+      "projet": "poker-winners",
+      "numero": 5,
+      "titre": "Poker Winners — proposition de partenariat avec {{partenaire}}",
+      "consigne": "Rédige un brouillon de proposition de partenariat entre Poker Winners (site éducatif francophone : leçons, vidéos, forum, calendrier des tournois ; aucun jeu d'argent réel) et {{partenaire}} ({{type_partenaire}}).\nOffre envisagée : {{offre}} ; montant indicatif : {{montant}}.\nStructure : objet, contexte, contenu de l'offre, calendrier indicatif, conditions, prochaine étape. Ton professionnel, vouvoiement, 1 page maximum.\nInterdits : mention d'un opérateur de jeux, promesse de gains pour les joueurs.",
+      "service": "REVENUE-CORE/propositions",
+      "action": "envoyer_client",
+      "niveau_attendu": "N3",
+      "criteres_reussite": [
+        "Structure complète en 1 page",
+        "Montant repris tel que fourni (sinon À COMPLÉTER)",
+        "La mission attend la décision N3 (rien n'est transmis)"
+      ]
+    },
+    {
+      "id": "PW-6",
+      "projet": "poker-winners",
+      "numero": 6,
+      "titre": "Poker Winners — note de veille {{sujet}}",
+      "consigne": "Prépare une note de veille sur le sujet « {{sujet}} » pour le site Poker Winners, uniquement à partir des textes fournis ci-dessous (pas d'accès web).\nTextes :\n{{textes}}\nLivre : 5 points clés, impacts possibles pour le site (contenus, juridique, technique), actions recommandées et questions ouvertes. Indique la source de chaque point ; n'invente aucune référence.",
+      "service": "R&D-PARADOX/veille",
+      "niveau_attendu": "N1",
+      "criteres_reussite": [
+        "Chaque point cite le texte source",
+        "Impacts classés contenus / juridique / technique",
+        "Aucune référence inventée"
+      ]
+    }
+  ]
+}
