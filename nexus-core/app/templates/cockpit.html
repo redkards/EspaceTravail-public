@@ -53,6 +53,11 @@
   .vide { color: var(--doux); font-style: italic; }
   #toast { position: fixed; left: 16px; right: 16px; bottom: 16px; padding: 10px 14px; border-radius: 8px;
            background: var(--texte); color: var(--fond); display: none; z-index: 9; }
+  .filtre { display: flex; align-items: center; gap: 8px; padding: 0 16px 8px; max-width: 980px; margin: 0 auto; }
+  .filtre label { margin: 0; white-space: nowrap; }
+  .filtre select { flex: 1; min-width: 0; }
+  .compteurs { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+  .projet { cursor: pointer; }
   .mono { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; word-break: break-all; }
 </style>
 </head>
@@ -72,18 +77,26 @@
 <nav id="onglets">
   <button data-o="decisions" class="sel" type="button">Décisions N3 <span id="nbDec"></span></button>
   <button data-o="missions" type="button">Missions</button>
+  <button data-o="projets" type="button">Projets</button>
   <button data-o="nouvelle" type="button">Nouvelle mission</button>
   <button data-o="agents" type="button">Agents</button>
   <button data-o="journal" type="button">Journal</button>
 </nav>
+<div class="filtre">
+  <label for="filtreProjet">Projet</label>
+  <select id="filtreProjet"><option value="">Tous les projets</option></select>
+</div>
 <main>
   <section id="decisions" class="active"><h2>Décisions en attente</h2><div id="listeDec"></div></section>
   <section id="missions"><h2>Missions</h2><div id="listeMis"></div></section>
+  <section id="projets"><h2>Projets</h2><div id="listeProj" class="grille"></div></section>
   <section id="nouvelle">
     <h2>Nouvelle mission</h2>
     <form class="carte" id="formMission">
       <label for="titre">Titre</label><input id="titre" required maxlength="200">
       <label for="consigne">Consigne</label><textarea id="consigne" required></textarea>
+      <label for="projet">Projet</label>
+      <select id="projet"><option value="divers">Divers</option></select>
       <label for="service">Service (facultatif)</label>
       <select id="service"><option value="">Choix automatique</option></select>
       <label for="montant">Montant engagé en € (facultatif)</label><input id="montant" type="number" min="0" step="0.01">
@@ -132,11 +145,12 @@ document.querySelectorAll("#onglets button").forEach((b) => b.addEventListener("
 }));
 
 async function chargerDecisions() {
-  const l = await api("/decisions?statut=en_attente");
+  const l = await api("/decisions?statut=en_attente" + filtre("&"));
   $("#nbDec").textContent = l.length ? "(" + l.length + ")" : "";
   $("#listeDec").innerHTML = l.length ? l.map((d) => `
     <div class="carte">
       <div class="ligne"><strong>#${d.id} · ${esc(d.mission_titre)}</strong>
+        <span class="puce">${esc(nomProjet(d.projet))}</span>
         <span class="puce ${d.risque}">risque ${lib(d.risque)}</span>
         <span class="puce">${Number(d.cout_estime_eur).toFixed(2)} €</span></div>
       <pre>${esc(d.resume)}</pre>
@@ -168,13 +182,13 @@ async function voirMission(id, cible) {
 }
 
 async function chargerMissions() {
-  const l = await api("/missions?limit=50");
+  const l = await api("/missions?limit=50" + filtre("&"));
   $("#listeMis").innerHTML = l.length ? l.map((m) => `
     <div class="carte">
       <div class="ligne"><strong>#${m.id} · ${esc(m.titre)}</strong>
         <span class="puce ${m.statut}">${lib(m.statut)}</span>
         ${m.niveau ? `<span class="puce ${m.niveau}">${m.niveau}</span>` : ""}</div>
-      <div class="meta">${esc(m.service || "service à déterminer")} · ${date(m.cree_le)} · ${m.tokens} tokens</div>
+      <div class="meta">${esc(nomProjet(m.projet))} · ${esc(m.service || "service à déterminer")} · ${date(m.cree_le)} · ${m.tokens} tokens</div>
       ${m.message ? `<div class="meta">${esc(m.message)}</div>` : ""}
       <div class="ligne" style="margin-top:6px"><button data-m="${m.id}" type="button">Détail</button></div>
       <div id="mis${m.id}"></div>
@@ -214,9 +228,10 @@ $("#btnVerif").addEventListener("click", async () => {
 $("#formMission").addEventListener("submit", async (e) => {
   e.preventDefault();
   const corps = { titre: $("#titre").value, consigne: $("#consigne").value, service: $("#service").value || null,
+    projet: $("#projet").value || null,
     montant_eur: $("#montant").value ? Number($("#montant").value) : null, action: $("#action").value || null };
   try { const r = await api("/missions", { method: "POST", body: JSON.stringify(corps) });
-    toast("Mission #" + r.id + " lancée."); e.target.reset(); document.querySelector('[data-o="missions"]').click();
+    toast("Mission #" + r.id + " lancée (" + nomProjet(r.projet) + ")."); e.target.reset(); $("#projet").value = projetCourant() || "divers"; document.querySelector('[data-o="missions"]').click();
   } catch (err) { toast(err.message); }
 });
 
@@ -241,10 +256,49 @@ async function chargerEtat() {
   $("#etat").textContent = (arretActif ? "ARRÊT D'URGENCE ACTIF · " : "") + `${s.agents} agents · ${b.fournisseur} · ${b.modele} · ${b.tokens} tokens ce mois`;
 }
 
+// --- Projets : registre, sélecteur global et cartes avec compteurs ---
+let PROJETS = [];
+const projetCourant = () => $("#filtreProjet").value;
+const filtre = (sep) => projetCourant() ? sep + "projet=" + encodeURIComponent(projetCourant()) : "";
+const nomProjet = (code) => (PROJETS.find((p) => p.code === code) || {}).nom || code || "Divers";
+
+async function chargerProjets() {
+  PROJETS = await api("/projets");
+  const f = $("#filtreProjet"), courant = f.value, form = $("#projet"), choixForm = form.value;
+  f.innerHTML = '<option value="">Tous les projets</option>' +
+    PROJETS.map((p) => `<option value="${esc(p.code)}">${esc(p.nom)}${p.decisions_en_attente ? " (" + p.decisions_en_attente + ")" : ""}</option>`).join("");
+  form.innerHTML = PROJETS.map((p) => `<option value="${esc(p.code)}">${esc(p.nom)}</option>`).join("");
+  f.value = PROJETS.some((p) => p.code === courant) ? courant : "";
+  form.value = PROJETS.some((p) => p.code === choixForm) ? choixForm : (projetCourant() || "divers");
+  $("#listeProj").innerHTML = PROJETS.map((p) => `
+    <div class="carte projet" data-p="${esc(p.code)}" role="button" tabindex="0">
+      <strong>${esc(p.nom)}</strong> <span class="meta mono">${esc(p.code)}</span>
+      <div class="meta">${esc(p.description)}</div>
+      <div class="compteurs">
+        <span class="puce">${p.missions} mission(s)</span>
+        <span class="puce en_cours">${p.missions_en_cours} en cours</span>
+        <span class="puce ${p.decisions_en_attente ? "en_attente" : ""}">${p.decisions_en_attente} décision(s) N3</span>
+      </div>
+      ${p.services.length ? `<div class="meta" style="margin-top:6px">Services : ${p.services.map(esc).join(", ")}</div>` : ""}
+    </div>`).join("");
+}
+
+// Clic sur une carte projet : filtre sur ce projet et ouvre les missions.
+$("#listeProj").addEventListener("click", (e) => {
+  const c = e.target.closest("[data-p]"); if (!c) return;
+  $("#filtreProjet").value = c.dataset.p; memoriserFiltre();
+  document.querySelector('[data-o="missions"]').click();
+});
+function memoriserFiltre() { try { localStorage.setItem("projet", projetCourant()); } catch (e) {} }
+$("#filtreProjet").addEventListener("change", () => {
+  memoriserFiltre(); $("#projet").value = projetCourant() || "divers"; rafraichir();
+});
+
 async function rafraichir() {
   const o = document.querySelector("#onglets .sel").dataset.o;
   try {
     await chargerEtat();
+    await chargerProjets();
     if (o === "decisions") await chargerDecisions(); else chargerDecisions().catch(() => {});
     if (o === "missions") await chargerMissions();
     if (o === "agents" || $("#service").options.length === 1) await chargerAgents();
@@ -252,6 +306,8 @@ async function rafraichir() {
   } catch (err) { $("#etat").textContent = "Connexion impossible : " + err.message; }
 }
 
+try { const p = localStorage.getItem("projet");
+  if (p) { $("#filtreProjet").add(new Option(p, p)); $("#filtreProjet").value = p; } } catch (e) {}
 try { const o = localStorage.getItem("onglet"); const b = o && document.querySelector(`[data-o="${o}"]`); if (b) b.click(); else rafraichir(); }
 catch (e) { rafraichir(); }
 setInterval(rafraichir, 15000);

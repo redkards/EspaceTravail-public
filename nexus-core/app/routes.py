@@ -3,10 +3,11 @@ from typing import Literal
 
 from fastapi import APIRouter, BackgroundTasks, HTTPException, Query
 from pydantic import BaseModel, Field
-from sqlalchemy import select
+from sqlalchemy import func, select
 
 from . import agents as reg
 from . import budget, ledger, pipeline, sentinel
+from . import projets as registre
 from .db import session_scope
 from .models import Decision, Etape, Mission
 
@@ -17,6 +18,7 @@ class NouvelleMission(BaseModel):
     service: str | None = None
     montant_eur: float | None = Field(default=None, ge=0)
     action: str | None = Field(default=None, max_length=40, pattern=r"^[a-z_]+$")
+    projet: str | None = Field(default=None, max_length=60)
 
 
 class Commentaire(BaseModel):
@@ -30,7 +32,7 @@ class KillSwitch(BaseModel):
 
 
 def _mission(m: Mission, etapes: list[Etape] | None = None) -> dict:
-    d = {"id": m.id, "titre": m.titre, "consigne": m.consigne, "service": m.service,
+    d = {"id": m.id, "projet": m.projet, "titre": m.titre, "consigne": m.consigne, "service": m.service,
          "directeur": m.directeur, "statut": m.statut, "niveau": m.niveau,
          "montant_eur": m.montant_eur, "action": m.action, "message": m.message,
          "cree_le": m.cree_le.isoformat(), "maj_le": m.maj_le.isoformat(),
@@ -42,13 +44,24 @@ def _mission(m: Mission, etapes: list[Etape] | None = None) -> dict:
     return d
 
 
-def _decision(d: Decision, titre: str | None = None) -> dict:
-    return {"id": d.id, "mission_id": d.mission_id, "mission_titre": titre, "niveau": d.niveau,
+def _decision(d: Decision, titre: str | None = None, projet: str | None = None) -> dict:
+    return {"id": d.id, "mission_id": d.mission_id, "mission_titre": titre, "projet": projet,
+            "niveau": d.niveau,
             "resume": d.resume, "recommandation": d.recommandation,
             "cout_estime_eur": d.cout_estime_eur, "risque": d.risque, "sources": d.sources,
             "avis_checker": d.avis_checker, "statut": d.statut, "cree_le": d.cree_le.isoformat(),
             "decide_le": d.decide_le.isoformat() if d.decide_le else None,
             "commentaire": d.commentaire}
+
+
+def _filtre_projet(projet: str | None) -> str | None:
+    """Filtre ?projet= : vide → aucun filtre ; inconnu → 422."""
+    if not projet:
+        return None
+    try:
+        return registre.resoudre(projet)
+    except ValueError as e:
+        raise HTTPException(422, str(e))
 
 
 def creer_routeur() -> APIRouter:
@@ -67,22 +80,32 @@ def creer_routeur() -> APIRouter:
     def creer_mission(corps: NouvelleMission, taches: BackgroundTasks):
         if corps.service and corps.service not in reg.services():
             raise HTTPException(422, f"Service inconnu : {corps.service}")
+        try:
+            projet = registre.resoudre(corps.projet)
+        except ValueError as e:
+            raise HTTPException(422, str(e))
         with session_scope() as s:
             m = Mission(titre=corps.titre.strip(), consigne=corps.consigne.strip(), service=corps.service,
-                        montant_eur=corps.montant_eur or 0.0, action=corps.action, statut="recue")
+                        montant_eur=corps.montant_eur or 0.0, action=corps.action, statut="recue",
+                        projet=projet)
             s.add(m)
             s.flush()
             mid = m.id
-        ledger.journaliser("API", "mission_recue", mid, titre=corps.titre, service=corps.service)
+        ledger.journaliser("API", "mission_recue", mid, titre=corps.titre, service=corps.service,
+                           projet=projet)
         taches.add_task(pipeline.traiter, mid)
-        return {"id": mid, "statut": "recue"}
+        return {"id": mid, "statut": "recue", "projet": projet}
 
     @r.get("/missions")
-    def lister_missions(statut: str | None = None, limit: int = Query(50, ge=1, le=500)):
+    def lister_missions(statut: str | None = None, projet: str | None = None,
+                        limit: int = Query(50, ge=1, le=500)):
+        code = _filtre_projet(projet)
         with session_scope() as s:
             q = select(Mission).order_by(Mission.id.desc()).limit(limit)
             if statut:
                 q = q.where(Mission.statut == statut)
+            if code:
+                q = q.where(Mission.projet == code)
             return [_mission(m) for m in s.execute(q).scalars()]
 
     @r.get("/missions/{mid}")
@@ -95,13 +118,40 @@ def creer_routeur() -> APIRouter:
             return _mission(m, list(etapes))
 
     @r.get("/decisions")
-    def lister_decisions(statut: str | None = None, limit: int = Query(100, ge=1, le=500)):
+    def lister_decisions(statut: str | None = None, projet: str | None = None,
+                         limit: int = Query(100, ge=1, le=500)):
+        code = _filtre_projet(projet)
         with session_scope() as s:
-            q = (select(Decision, Mission.titre).join(Mission, Mission.id == Decision.mission_id)
+            q = (select(Decision, Mission.titre, Mission.projet)
+                 .join(Mission, Mission.id == Decision.mission_id)
                  .order_by(Decision.id.desc()).limit(limit))
             if statut:
                 q = q.where(Decision.statut == statut)
-            return [_decision(d, t) for d, t in s.execute(q).all()]
+            if code:
+                q = q.where(Mission.projet == code)
+            return [_decision(d, t, p) for d, t, p in s.execute(q).all()]
+
+    @r.get("/projets")
+    def lister_projets(recharger: bool = False):
+        """Registre des projets avec compteurs ; ?recharger=1 relit projets.yaml."""
+        try:
+            reg_projets = registre.charger(recharger=recharger)
+        except Exception as e:
+            raise HTTPException(500, f"projets.yaml invalide, ancien registre conservé : {e}")
+        if recharger:
+            ledger.journaliser("DECIDEUR", "projets_recharges", None, nombre=len(reg_projets))
+        with session_scope() as s:
+            missions = dict(s.execute(select(Mission.projet, func.count(Mission.id))
+                                      .group_by(Mission.projet)).all())
+            en_cours = dict(s.execute(select(Mission.projet, func.count(Mission.id))
+                                      .where(Mission.statut.in_(("recue", "en_cours")))
+                                      .group_by(Mission.projet)).all())
+            attente = dict(s.execute(select(Mission.projet, func.count(Decision.id))
+                                     .join(Mission, Mission.id == Decision.mission_id)
+                                     .where(Decision.statut == "en_attente")
+                                     .group_by(Mission.projet)).all())
+        return [{**p, "missions": missions.get(c, 0), "missions_en_cours": en_cours.get(c, 0),
+                 "decisions_en_attente": attente.get(c, 0)} for c, p in reg_projets.items()]
 
     def _decider(did: int, choix: str, corps: Commentaire | None):
         try:

@@ -33,6 +33,8 @@ class Mission(Base):
     action: Mapped[str | None] = mapped_column(String(40), nullable=True)
     directeur: Mapped[str | None] = mapped_column(String(40), nullable=True)
     message: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # Code du projet (registre projets.yaml) ; « divers » par défaut.
+    projet: Mapped[str] = mapped_column(String(40), default="divers", server_default="divers", index=True)
 
 
 class Etape(Base):

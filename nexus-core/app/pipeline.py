@@ -339,10 +339,11 @@ def executer_livrable(mid: int, executor_id: str, statut_final: str = "terminee"
     """Enregistre le livrable final et prépare l'action ; n'exécute rien à l'extérieur."""
     with session_scope() as s:
         m = s.get(Mission, mid)
-        contenu = (f"# {m.titre}\n\n- Mission : #{m.id}\n- Service : {m.service}\n"
+        projet = m.projet
+        contenu = (f"# {m.titre}\n\n- Mission : #{m.id}\n- Projet : {m.projet}\n- Service : {m.service}\n"
                    f"- Niveau : {m.niveau}\n- Action préparée : {m.action or 'aucune'} "
                    f"(à réaliser par un humain ou un workflow n8n)\n\n---\n\n{m.livrable_texte or ''}\n")
-    chemin = cfg().data_dir / "livrables" / f"{mid}.md"
+    chemin = cfg().data_dir / "livrables" / (projet or "divers") / f"{mid}.md"
     fichier = None
     try:
         chemin.parent.mkdir(parents=True, exist_ok=True)

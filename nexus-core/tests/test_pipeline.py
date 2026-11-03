@@ -22,7 +22,7 @@ def test_checker_refus_puis_acceptation(tmp_path):
     assert m.statut == "terminee"
     assert FournisseurFactice.appels.count("analyst") == 2  # 1 brouillon + 1 correction
     assert FournisseurFactice.appels.count("checker") == 2
-    assert (tmp_path / "data" / "livrables" / f"{mid}.md").exists()
+    assert (tmp_path / "data" / "livrables" / "divers" / f"{mid}.md").exists()
 
 
 def test_trois_refus_echouee():

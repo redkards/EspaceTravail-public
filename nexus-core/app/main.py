@@ -14,6 +14,7 @@ from fastapi.responses import RedirectResponse
 
 from . import agents as reg
 from . import ledger, pipeline
+from . import projets as registre
 from .cockpit import router as cockpit_router
 from .config import cfg
 from .db import init_db
@@ -52,6 +53,7 @@ async def cycle_de_vie(app: FastAPI):
         log.warning("Impossible de créer %s (%s) : vérifier les droits du montage (UID 10001).", dossier, e)
     init_db()
     reg.charger()
+    registre.charger()  # échec explicite au démarrage si projets.yaml est invalide
     ledger.journaliser("NEXUS-PRIME", "demarrage", None, agents=len(reg.charger()))
     # Garde-fou « tout gratuit » : refus d'Anthropic sans budget, message clair au démarrage.
     from .llm import info, refus_anthropic

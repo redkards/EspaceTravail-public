@@ -4,7 +4,7 @@ import time
 from pathlib import Path
 from contextlib import contextmanager
 
-from sqlalchemy import create_engine, event, text
+from sqlalchemy import create_engine, event, inspect, text
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, sessionmaker
 
@@ -66,6 +66,28 @@ def session_scope():
         s.close()
 
 
+# Colonnes ajoutées après la première version : (table, colonne, définition SQL portable).
+COLONNES_AJOUTEES = [
+    ("missions", "projet", "VARCHAR(40) NOT NULL DEFAULT 'divers'"),
+]
+
+
+def migrer(eng: Engine) -> list[str]:
+    """Migration douce : ajoute les colonnes manquantes (SQLite et PostgreSQL)."""
+    ajoutees = []
+    existantes = {t: {c["name"] for c in inspect(eng).get_columns(t)}
+                  for t in {t for t, _, _ in COLONNES_AJOUTEES}}
+    for table, colonne, definition in COLONNES_AJOUTEES:
+        if colonne not in existantes[table]:
+            with eng.begin() as c:
+                c.execute(text(f"ALTER TABLE {table} ADD COLUMN {colonne} {definition}"))
+                if colonne == "projet":
+                    c.execute(text("CREATE INDEX IF NOT EXISTS ix_missions_projet ON missions (projet)"))
+            log.info("Migration : colonne %s.%s ajoutée.", table, colonne)
+            ajoutees.append(f"{table}.{colonne}")
+    return ajoutees
+
+
 def init_db(tentatives: int = 30, pause_s: float = 2.0) -> None:
     """Crée l'extension vector (si PostgreSQL) puis les tables.
 
@@ -81,6 +103,7 @@ def init_db(tentatives: int = 30, pause_s: float = 2.0) -> None:
                 except Exception as e:  # extension absente : on continue sans elle
                     log.warning("Extension vector indisponible : %s", e)
             Base.metadata.create_all(eng)
+            migrer(eng)
             return
         except Exception as e:
             if i == tentatives - 1:
