@@ -15,9 +15,19 @@ _verrou = threading.Lock()
 _registre: dict[str, dict] | None = None
 
 
+# Copie montée par docker compose (./nexus-core/projets.yaml:/config/projets.yaml:ro) :
+# modifiable sur l'hôte sans reconstruire l'image, puis GET /api/projets?recharger=1.
+CONFIG_MONTEE = Path("/config/projets.yaml")
+EMBARQUE = Path(__file__).resolve().parent.parent / "projets.yaml"  # /app/projets.yaml dans l'image
+
+
 def chemin() -> Path:
-    return Path(os.environ.get("NEXUS_PROJETS_FILE",
-                               Path(__file__).resolve().parent.parent / "projets.yaml"))
+    """NEXUS_PROJETS_FILE si défini, sinon /config/projets.yaml s'il existe, sinon le fichier de l'image."""
+    if os.environ.get("NEXUS_PROJETS_FILE", "").strip():
+        return Path(os.environ["NEXUS_PROJETS_FILE"].strip())
+    if CONFIG_MONTEE.is_file():
+        return CONFIG_MONTEE
+    return EMBARQUE
 
 
 def _lire() -> dict[str, dict]:

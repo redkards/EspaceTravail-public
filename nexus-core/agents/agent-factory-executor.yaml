@@ -2,6 +2,7 @@
 id: AGENT-FACTORY-EXECUTOR
 nom: AGENT-FACTORY Exécutant
 role: executor
+type: deterministe
 direction: AGENTOPS
 departement: Qualité agents
 service: AGENT-FACTORY/evaluation

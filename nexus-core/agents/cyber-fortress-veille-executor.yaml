@@ -2,6 +2,7 @@
 id: CYBER-FORTRESS-VEILLE-EXECUTOR
 nom: CYBER-FORTRESS-VEILLE Exécutant
 role: executor
+type: deterministe
 direction: TECH
 departement: Cybersécurité
 service: CYBER-FORTRESS/veille

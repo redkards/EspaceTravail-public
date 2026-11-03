@@ -2,6 +2,7 @@
 id: NEXUS-BUDGET
 nom: Budget
 role: budget
+type: deterministe
 direction: NOYAU
 departement: Noyau
 service: ''

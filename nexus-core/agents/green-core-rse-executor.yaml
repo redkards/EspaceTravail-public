@@ -2,6 +2,7 @@
 id: GREEN-CORE-RSE-EXECUTOR
 nom: GREEN-CORE-RSE Exécutant
 role: executor
+type: deterministe
 direction: IMPACT
 departement: Environnement
 service: GREEN-CORE/rse

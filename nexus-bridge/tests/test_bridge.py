@@ -221,6 +221,35 @@ def test_limite_de_debit(session, monkeypatch, client):
     assert session("gemini").rpc("ping").status_code == 200
 
 
+def _lot(n, depart=1):
+    return [{"jsonrpc": "2.0", "id": depart + i, "method": "ping"} for i in range(n)]
+
+
+def test_lot_compte_chaque_element(session, monkeypatch):
+    monkeypatch.setenv("BRIDGE_LIMITE_PAR_MINUTE", "5")
+    s = session("chatgpt")
+    r = s.post(_lot(4))
+    assert r.status_code == 200 and len(r.json()) == 4
+    r = s.post(_lot(2, 10))  # 4 + 2 > 5 : lot entier refusé (tout ou rien)
+    assert r.status_code == 429
+    assert s.rpc("ping").status_code == 200  # il restait 1 place
+    assert s.rpc("ping").status_code == 429
+
+
+def test_lot_trop_grand_refuse(session, monkeypatch):
+    monkeypatch.setenv("BRIDGE_LIMITE_PAR_MINUTE", "100")
+    s = session("claude")
+    r = s.post(_lot(11))
+    assert r.status_code == 400 and "10 éléments" in r.json()["error"]["message"]
+    assert s.post(_lot(10)).status_code == 200
+
+
+def test_lot_plus_grand_que_la_limite(session, monkeypatch):
+    monkeypatch.setenv("BRIDGE_LIMITE_PAR_MINUTE", "3")
+    r = session("gemini").post(_lot(5))
+    assert r.status_code == 429 and int(r.headers["Retry-After"]) >= 1
+
+
 # --- Tâches ----------------------------------------------------------------------------------
 def test_verrou_de_tache(session):
     c, g = session("claude"), session("gemini")

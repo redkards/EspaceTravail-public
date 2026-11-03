@@ -1,4 +1,10 @@
-"""Chargement des 40 fiches d'agents (YAML) de la Mini Mothership."""
+"""Chargement des fiches d'agents (YAML) de la Mini Mothership.
+
+93 rôles : noyau (5 : PRIME, GATE, SENTINEL, LEDGER, BUDGET), 8 directeurs et 20 services
+× quadrant COLLECTOR / ANALYST / CHECKER / EXECUTOR (80 agents).
+Champ facultatif `type` : « llm » (défaut) ou « deterministe » — l'agent n'appelle jamais de
+modèle (EXECUTOR, SENTINEL, LEDGER, BUDGET : logique codée dans pipeline.py et voisins).
+"""
 from functools import lru_cache
 
 import yaml
@@ -9,6 +15,7 @@ CHAMPS = ["id", "nom", "role", "direction", "departement", "service", "mission",
           "outils_autorises"]
 ROLES = {"prime", "gate", "sentinel", "ledger", "budget", "directeur", "collector", "analyst",
          "checker", "executor"}
+TYPES = {"llm", "deterministe"}
 
 
 @lru_cache(maxsize=1)
@@ -21,10 +28,17 @@ def charger() -> dict[str, dict]:
             raise ValueError(f"{f.name} : champs manquants {manquants}")
         if a["role"] not in ROLES:
             raise ValueError(f"{f.name} : rôle inconnu {a['role']}")
+        a.setdefault("type", "llm")
+        if a["type"] not in TYPES:
+            raise ValueError(f"{f.name} : type inconnu {a['type']} (llm ou deterministe)")
         if a["id"] in agents:
             raise ValueError(f"{f.name} : identifiant en double {a['id']}")
         agents[a["id"]] = a
     return agents
+
+
+def appelle_llm(a: dict) -> bool:
+    return a.get("type", "llm") != "deterministe"
 
 
 def agent(agent_id: str) -> dict:

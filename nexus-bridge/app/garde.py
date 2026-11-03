@@ -83,16 +83,24 @@ class LimiteDebit:
         self._appels: dict[str, deque] = defaultdict(deque)
         self._verrou = threading.Lock()
 
-    def autoriser(self, cle: str, limite: int, fenetre: float = 60.0) -> tuple[bool, int]:
-        """(autorisé, secondes à attendre). Ne compte que les appels acceptés."""
+    def autoriser(self, cle: str, limite: int, fenetre: float = 60.0, cout: int = 1) -> tuple[bool, int]:
+        """(autorisé, secondes à attendre). `cout` = nombre d'appels (éléments d'un lot JSON-RPC).
+
+        Tout ou rien : un lot qui dépasserait la limite est refusé en entier. Seuls les appels
+        acceptés sont comptés.
+        """
+        cout = max(1, int(cout))
         t = time.monotonic()
         with self._verrou:
             q = self._appels[cle]
             while q and t - q[0] >= fenetre:
                 q.popleft()
-            if len(q) >= limite:
-                return False, max(1, int(fenetre - (t - q[0])) + 1)
-            q.append(t)
+            if len(q) + cout > limite:
+                if not q:  # lot plus grand que la limite elle-même
+                    return False, int(fenetre)
+                index = min(len(q) - 1, len(q) + cout - limite - 1)
+                return False, max(1, int(fenetre - (t - q[index])) + 1)
+            q.extend([t] * cout)
             return True, 0
 
     def reinitialiser(self) -> None:

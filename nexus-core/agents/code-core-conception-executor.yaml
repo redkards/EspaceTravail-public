@@ -2,6 +2,7 @@
 id: CODE-CORE-CONCEPTION-EXECUTOR
 nom: CODE-CORE-CONCEPTION Exécutant
 role: executor
+type: deterministe
 direction: TECH
 departement: Ingénierie
 service: CODE-CORE/conception

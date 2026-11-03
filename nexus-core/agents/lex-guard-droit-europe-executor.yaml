@@ -2,6 +2,7 @@
 id: LEX-GUARD-DROIT-EUROPE-EXECUTOR
 nom: LEX-GUARD-DROIT-EUROPE Exécutant
 role: executor
+type: deterministe
 direction: STRATEGIE
 departement: Droit
 service: LEX-GUARD/droit-europe

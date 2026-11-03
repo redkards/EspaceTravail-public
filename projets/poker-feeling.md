@@ -1,6 +1,6 @@
 # Livre « Poker Feeling » — plan d'emploi des agents NEXUS
 
-Code projet : `poker-feeling` · cockpit : https://srv2113898.hstgr.cloud/cockpit · modèles : `PF-1` à `PF-6` dans `missions-modeles.json`.
+Code projet : `poker-feeling` · cockpit : https://srvXXXX.hstgr.cloud/cockpit · modèles : `PF-1` à `PF-6` dans `missions-modeles.json`.
 Contexte de référence : `../tests-poker/contexte/poker-feeling.md`.
 
 ## Principe

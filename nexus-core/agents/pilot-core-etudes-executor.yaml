@@ -2,6 +2,7 @@
 id: PILOT-CORE-ETUDES-EXECUTOR
 nom: PILOT-CORE-ETUDES Exécutant
 role: executor
+type: deterministe
 direction: OPERATIONS
 departement: Pilotage
 service: PILOT-CORE/etudes

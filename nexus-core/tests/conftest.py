@@ -24,7 +24,8 @@ def environnement(tmp_path, monkeypatch):
     monkeypatch.setenv("NEXUS_HOST", "nexus.exemple.fr")
     monkeypatch.setenv("BUDGET_TASK_TOKENS", "20000")
     for v in ("NTFY_URL", "NTFY_TOPIC", "ANTHROPIC_API_KEY", "NEXUS_FONCTIONNEMENT_DEFAUT", "EUR_PAR_USD",
-              "NEXUS_FONCTIONNEMENT_FILE", "BUDGET_MONTHLY_EUR"):
+              "NEXUS_FONCTIONNEMENT_FILE", "BUDGET_MONTHLY_EUR", "LEDGER_HMAC_KEY", "NEXUS_MAX_MISSIONS",
+              "NEXUS_PROJETS_FILE"):
         monkeypatch.delenv(v, raising=False)
     from app import fonctionnement
     fonctionnement.charger(recharger=True)

@@ -2,6 +2,7 @@
 id: CONTENT-ARENA-EXECUTOR
 nom: CONTENT-ARENA Exécutant
 role: executor
+type: deterministe
 direction: CREATION
 departement: Contenus
 service: CONTENT-ARENA/redaction

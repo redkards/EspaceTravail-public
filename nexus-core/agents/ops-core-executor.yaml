@@ -2,6 +2,7 @@
 id: OPS-CORE-EXECUTOR
 nom: OPS-CORE Exécutant
 role: executor
+type: deterministe
 direction: OPERATIONS
 departement: Projets
 service: OPS-CORE/projets

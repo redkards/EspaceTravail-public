@@ -15,7 +15,8 @@
 #    ./run_tests.sh PK-01 PK-09               # seulement certaines missions
 #
 #  Variables facultatives :
-#    NEXUS_URL        (défaut : https://srv2113898.hstgr.cloud)
+#    NEXUS_URL        (défaut : https://$NEXUS_HOST, sinon https://srvXXXX.hstgr.cloud)
+#    NEXUS_RESOLVE    (facultatif) ex. srvXXXX.hstgr.cloud:443:IP_PUBLIQUE (sur le VPS lui-même)
 #    INTERVALLE_S     (défaut : 15)   délai entre deux interrogations
 #    DELAI_MAX_S      (défaut : 900)  délai maximal par mission (15 min)
 #    MISSIONS_JSON    (défaut : missions.json à côté du script)
@@ -30,7 +31,7 @@
 set -euo pipefail
 
 DOSSIER="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-NEXUS_URL="${NEXUS_URL:-https://srv2113898.hstgr.cloud}"
+NEXUS_URL="${NEXUS_URL:-https://${NEXUS_HOST:-srvXXXX.hstgr.cloud}}"
 NEXUS_URL="${NEXUS_URL%/}"
 INTERVALLE_S="${INTERVALLE_S:-15}"
 DELAI_MAX_S="${DELAI_MAX_S:-900}"
@@ -44,7 +45,8 @@ HORODATAGE="$(date +%Y-%m-%d_%H%M%S)"
 RAPPORT="${DOSSIER}/resultats-${HORODATAGE}.md"
 
 # Statuts considérés comme finaux pour un test (la mission n'évoluera plus seule).
-STATUTS_FINAUX=" en_attente_n3 validee refusee revision terminee echouee suspendue plafond_atteint "
+# « en_attente_place » (file d'attente) n'est PAS final ; « a_reformuler » l'est (anomalie).
+STATUTS_FINAUX=" en_attente_n3 validee refusee revision terminee echouee suspendue plafond_atteint a_reformuler "
 
 erreur() { printf 'ERREUR : %s\n' "$*" >&2; exit 1; }
 info()   { printf '%s\n' "$*" >&2; }
@@ -61,7 +63,12 @@ jq -e '.missions | type == "array" and length > 0' "$MISSIONS_JSON" >/dev/null \
 
 # Fichier temporaire pour les réponses HTTP, supprimé à la sortie.
 TMP_REPONSE="$(mktemp)"
-trap 'rm -f "$TMP_REPONSE"' EXIT
+# La clé passe par un fichier temporaire (droits 600) lu par « curl -H @fichier » :
+# elle n'apparaît jamais dans la liste des processus (ps).
+TMP_ENTETE="$(mktemp)"
+trap 'rm -f "$TMP_REPONSE" "$TMP_ENTETE"' EXIT
+chmod 600 "$TMP_ENTETE"
+printf 'X-Nexus-Key: %s\n' "$NEXUS_API_KEY" > "$TMP_ENTETE"
 
 # Appel HTTP : api <méthode> <chemin> [corps_json]
 # Écrit le corps de la réponse dans $TMP_REPONSE et renvoie le code HTTP sur stdout
@@ -69,9 +76,9 @@ trap 'rm -f "$TMP_REPONSE"' EXIT
 api() {
   local methode="$1" chemin="$2" corps="${3:-}"
   local args=(-sS -o "$TMP_REPONSE" -w '%{http_code}' --max-time 30
-              -X "$methode" -H "X-Nexus-Key: ${NEXUS_API_KEY}" -H 'Accept: application/json')
+              -X "$methode" -H "@${TMP_ENTETE}" -H 'Accept: application/json')
   # Sur le VPS lui-même, le nom d'hôte pointe vers 127.0.1.1 : NEXUS_RESOLVE="hote:443:IP"
-  # force l'adresse publique (ex. srv2113898.hstgr.cloud:443:2.24.51.112).
+  # force l'adresse publique (ex. srvXXXX.hstgr.cloud:443:IP_PUBLIQUE).
   if [[ -n "${NEXUS_RESOLVE:-}" ]]; then
     args+=(--resolve "$NEXUS_RESOLVE")
   fi
@@ -187,7 +194,7 @@ for ID in "${IDS[@]}"; do
   refus="$(jq '[.etapes[]? | select(.role == "checker" and .verdict == "refus")] | length' <<<"$detail")"
   cmp="$(comparer_niveaux "$niveau" "$attendu")"
 
-  if [[ "$cmp" == "-" || "$statut" =~ ^(echouee|suspendue|delai_depasse|plafond_atteint)$ ]]; then
+  if [[ "$cmp" == "-" || "$statut" =~ ^(echouee|suspendue|delai_depasse|plafond_atteint|a_reformuler)$ ]]; then
     NB_ANOMALIES=$((NB_ANOMALIES + 1))
   else
     NB_OK=$((NB_OK + 1))
@@ -243,7 +250,7 @@ done
   done
   printf '\nMissions conformes : %d · anomalies : %d\n\n' "$NB_OK" "$NB_ANOMALIES"
   printf 'Les missions en `en_attente_n3` attendent une décision dans le cockpit (`/cockpit`) : '
-  printf "c'est le comportement attendu pour PK-01 et PK-03.\n"
+  printf "c'est le comportement attendu pour PK-01, PK-03 et PK-04.\n"
   printf '%s\n' "$DETAILS"
 } >> "$RAPPORT"
 

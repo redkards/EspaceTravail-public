@@ -1,6 +1,6 @@
 # Tous les projets — accès au Mini NEXUS MOTHERSHIP
 
-Chaque mission porte un champ `projet` (code ci-dessous), choisi dans le sélecteur de projet du cockpit (https://srv2113898.hstgr.cloud/cockpit) ou passé en 1er argument de `lancer-mission.sh`.
+Chaque mission porte un champ `projet` (code ci-dessous), choisi dans le sélecteur de projet du cockpit (https://srvXXXX.hstgr.cloud/cockpit) ou passé en 1er argument de `lancer-mission.sh`.
 Les 3 projets poker ont des modèles prêts (`missions-modeles.json`) ; les autres utilisent le mode `libre` :
 `./lancer-mission.sh <code> libre titre="..." consigne="..." service=<SERVICE>`.
 

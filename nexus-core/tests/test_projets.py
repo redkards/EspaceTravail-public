@@ -103,3 +103,23 @@ def test_migration_colonne_projet(tmp_path, monkeypatch):
     with db.session_scope() as s:
         assert s.get(Mission, 1).projet == "divers"
     assert db.migrer(db.engine()) == []  # idempotent
+
+
+def test_projets_surcharge_par_config_montee(tmp_path, monkeypatch, client, entetes):
+    assert projets.chemin() == projets.EMBARQUE  # aucun montage
+    monte = tmp_path / "config" / "projets.yaml"
+    monte.parent.mkdir()
+    monte.write_text("projets:\n  - {code: divers, nom: Divers}\n  - {code: monte, nom: Projet monté}\n",
+                     encoding="utf-8")
+    monkeypatch.setattr(projets, "CONFIG_MONTEE", monte)
+    assert projets.chemin() == monte
+    codes = {p["code"] for p in client.get("/api/projets?recharger=1", headers=entetes).json()}
+    assert codes == {"divers", "monte"}
+    # NEXUS_PROJETS_FILE reste prioritaire.
+    autre = tmp_path / "autre.yaml"
+    autre.write_text("projets:\n  - {code: divers, nom: Divers}\n", encoding="utf-8")
+    monkeypatch.setenv("NEXUS_PROJETS_FILE", str(autre))
+    assert projets.chemin() == autre
+    monkeypatch.delenv("NEXUS_PROJETS_FILE")
+    monkeypatch.setattr(projets, "CONFIG_MONTEE", tmp_path / "absent.yaml")
+    projets.charger(recharger=True)

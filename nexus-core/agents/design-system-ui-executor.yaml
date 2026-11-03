@@ -2,6 +2,7 @@
 id: DESIGN-SYSTEM-UI-EXECUTOR
 nom: DESIGN-SYSTEM-UI Exécutant
 role: executor
+type: deterministe
 direction: CREATION
 departement: Design
 service: DESIGN-SYSTEM/ui

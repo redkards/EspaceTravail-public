@@ -22,7 +22,7 @@
 | PK-01 | CONTENT-ARENA/redaction | Post de lancement de Poker Feeling | **N3** | `action: publier` |
 | PK-02 | CONTENT-ARENA/redaction | Synopsis REDKARDS S1E09 « Le Bruit » | N2 | service de publication |
 | PK-03 | REVENUE-CORE/propositions | Partenariat payant avec un club (450 €) | **N3** | montant > 0 + `envoyer_client` |
-| PK-04 | LEX-GUARD/conformite | Conformité du site (RGPD, LCEN, ANJ, jeu responsable) | N1 | livrable interne |
+| PK-04 | LEX-GUARD/conformite | Conformité du site (RGPD, LCEN, ANJ, jeu responsable) | N3 | mot-clé « suppression » (compte RGPD) : déclencheur N3 assumé |
 | PK-05 | CODE-CORE/revue | Revue de `SearchController.php` (extrait réel) | N2 | production / revue de code |
 | PK-06 | OPS-CORE/projets | Checklist de bêta-test du site | N1 | livrable interne |
 | PK-07 | R&D-PARADOX/veille | Note de veille sur un texte fourni (fictif) | N1 | livrable interne |
@@ -48,7 +48,7 @@ Variables facultatives :
 
 | Variable | Défaut | Effet |
 |---|---|---|
-| `NEXUS_URL` | `https://srv2113898.hstgr.cloud` | Adresse de l'API (ex. `http://127.0.0.1:8000` si le port est publié en local) |
+| `NEXUS_URL` | `https://srvXXXX.hstgr.cloud` | Adresse de l'API (ex. `http://127.0.0.1:8000` si le port est publié en local) |
 | `INTERVALLE_S` | `15` | Délai entre deux interrogations de `GET /api/missions/{id}` |
 | `DELAI_MAX_S` | `900` | Délai maximal par mission (15 min) |
 | `MISSIONS_JSON` | `./missions.json` | Autre fichier de missions |
@@ -56,7 +56,7 @@ Variables facultatives :
 Durée à prévoir avec `qwen2.5:3b` sur 2 vCPU : plusieurs minutes par mission (5 à 7 appels LLM chacune).
 Les missions sont traitées l'une après l'autre ; comptez jusqu'à ~1 h 30 dans le pire cas.
 
-Le script ne déclenche **aucune action externe** : PK-01 et PK-03 s'arrêtent en `en_attente_n3`
+Le script ne déclenche **aucune action externe** : PK-01, PK-03 et PK-04 s'arrêtent en `en_attente_n3`
 et apparaissent dans le cockpit (`/cockpit`) avec une fiche de décision. Refusez-les ou laissez-les expirer
 après le test. Chaque passage ajoute 2 décisions N3 au compteur du jour (`N3_DAILY_CAP`).
 

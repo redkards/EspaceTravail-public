@@ -85,6 +85,8 @@ def creer_routeur() -> APIRouter:
         from .llm import info
         return {"statut": "ok", "service": "nexus-core", "llm": info(), "agents": len(reg.charger()),
                 "fonctionnement_defaut": fct.defaut(),
+                "ledger_hmac": ledger.avertissement() is None,
+                "avertissements": [a for a in (ledger.avertissement(),) if a],
                 "arret_urgence": bool(sentinel.actifs().get("kill:grille"))}
 
     @r.post("/missions", status_code=202)
@@ -242,7 +244,8 @@ def creer_routeur() -> APIRouter:
                             or k.get(f"kill:dir:{sentinel.normaliser_direction(a['direction'])}"))
             res.append({"id": a["id"], "nom": a["nom"], "role": a["role"], "direction": a["direction"],
                         "departement": a["departement"], "service": a["service"], "mission": a["mission"],
-                        "outils_autorises": a["outils_autorises"],
+                        "outils_autorises": a["outils_autorises"], "type": a.get("type", "llm"),
+                        "appelle_llm": reg.appelle_llm(a),
                         "statut": "suspendu" if suspendu else "actif"})
         return res
 

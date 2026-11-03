@@ -263,6 +263,8 @@ class Contexte:
               tolerer_erreur: bool = False) -> str | None:
         """Appelle le LLM au nom d'un agent, avec SENTINEL, plafonds du niveau et BUDGET."""
         a = reg.agent(agent_id)
+        if not reg.appelle_llm(a):
+            raise ValueError(f"{agent_id} est un agent déterministe : il n'appelle jamais de modèle.")
         cle = sentinel.bloque(self.directeur, agent_id)
         if cle:
             raise MissionArretee("suspendue", f"Arrêt d'urgence actif ({cle}).")
@@ -890,7 +892,8 @@ def decider(did: int, choix: str, commentaire: str | None) -> dict:
 # --- EXECUTOR (aucune action externe) -------------------------------------------
 
 def executer_livrable(mid: int, executor_id: str, statut_final: str = "terminee") -> None:
-    """Enregistre le livrable final et prépare l'action ; n'exécute rien à l'extérieur."""
+    """EXECUTOR (agent déterministe, sans LLM) : enregistre le livrable final et prépare l'action ;
+    n'exécute rien à l'extérieur."""
     with session_scope() as s:
         m = s.get(Mission, mid)
         projet = m.projet

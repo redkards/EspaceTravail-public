@@ -2,6 +2,7 @@
 id: R&D-PARADOX-EXECUTOR
 nom: R&D-PARADOX Exécutant
 role: executor
+type: deterministe
 direction: SAVOIR
 departement: Recherche
 service: R&D-PARADOX/veille

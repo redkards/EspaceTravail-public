@@ -2,6 +2,7 @@
 id: NEXUS-LEDGER
 nom: Ledger
 role: ledger
+type: deterministe
 direction: NOYAU
 departement: Noyau
 service: ''

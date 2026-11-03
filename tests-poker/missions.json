@@ -53,7 +53,7 @@
       "titre": "Contrôle de conformité du site Poker Winners",
       "consigne": "Réalise un contrôle de conformité du site Poker Winners (site éducatif de poker, bêta privée) et rends un tableau : exigence, état constaté, écart, correction proposée, priorité (haute/moyenne/basse).\nFaits fournis : pages Mentions légales, Confidentialité et CGU présentes en bas de page ; éditeur particulier non professionnel (adresse non diffusée, coordonnées laissées à l'hébergeur) ; hébergeur indiqué. RGPD : consentement à l'inscription, export des informations du compte, suppression confirmée par e-mail puis anonymisation. Pied de page : « Le jeu comporte des risques : endettement, dépendance… Appelez le 09 74 75 13 13 (appel non surtaxé). Interdit aux moins de 18 ans. » Aucun lien vers un opérateur de jeux. Offre Premium affichée, mais prix, renouvellement, résiliation et rétractation sont encore « à compléter ».\nAxes à couvrir : RGPD, mentions légales (LCEN), règles françaises sur la communication autour des jeux d'argent (ANJ, loi du 12 mai 2010), messages de mise en garde jeu responsable, protection des mineurs. Signale ce qui doit être vérifié par un juriste.",
       "service": "LEX-GUARD/conformite",
-      "niveau_attendu": "N1",
+      "niveau_attendu": "N3",
       "criteres_reussite": [
         "Le tableau couvre les 5 axes demandés (RGPD, LCEN, ANJ, jeu responsable, mineurs)",
         "Les champs Premium « à compléter » sont signalés comme écart prioritaire avant tout paiement",

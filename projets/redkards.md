@@ -1,6 +1,6 @@
 # REDKARDS (BD / webtoon) — plan d'emploi des agents NEXUS
 
-Code projet : `redkards` · cockpit : https://srv2113898.hstgr.cloud/cockpit · modèles : `RK-1` à `RK-6` dans `missions-modeles.json`.
+Code projet : `redkards` · cockpit : https://srvXXXX.hstgr.cloud/cockpit · modèles : `RK-1` à `RK-6` dans `missions-modeles.json`.
 Contexte de référence : `../tests-poker/contexte/redkards.md`.
 
 ## Principe

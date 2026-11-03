@@ -2,6 +2,7 @@
 id: CYBER-FORTRESS-CONFORMITE-EXECUTOR
 nom: CYBER-FORTRESS-CONFORMITE Exécutant
 role: executor
+type: deterministe
 direction: TECH
 departement: Cybersécurité
 service: CYBER-FORTRESS/conformite

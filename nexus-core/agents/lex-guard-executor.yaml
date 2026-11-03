@@ -2,6 +2,7 @@
 id: LEX-GUARD-EXECUTOR
 nom: LEX-GUARD Exécutant
 role: executor
+type: deterministe
 direction: STRATEGIE
 departement: Conformité
 service: LEX-GUARD/conformite

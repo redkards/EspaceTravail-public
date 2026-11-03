@@ -94,7 +94,10 @@ app = FastAPI(title="NEXUS Mothership — nexus-core", version="1.0.0", lifespan
 def sante_publique():
     from .fonctionnement import defaut
     from .llm import info
-    return {"statut": "ok", "service": "nexus-core", "llm": info(), "fonctionnement_defaut": defaut()}
+    from .ledger import avertissement
+    avert = [a for a in (avertissement(),) if a]
+    return {"statut": "ok", "service": "nexus-core", "llm": info(), "fonctionnement_defaut": defaut(),
+            "ledger_hmac": not avert, "avertissements": avert}
 
 
 app.include_router(creer_routeur(), prefix="/api", dependencies=[Depends(verifier_cle)])

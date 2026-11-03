@@ -2,6 +2,7 @@
 id: REVENUE-CORE-EXECUTOR
 nom: REVENUE-CORE Exécutant
 role: executor
+type: deterministe
 direction: CROISSANCE
 departement: Ventes
 service: REVENUE-CORE/propositions

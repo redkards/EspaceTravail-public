@@ -95,6 +95,8 @@ class Ledger(Base):
     details_json: Mapped[str] = mapped_column(Text, default="{}")
     hash_prec: Mapped[str] = mapped_column(String(64))
     hash: Mapped[str] = mapped_column(String(64))
+    # « hmac » : HMAC-SHA256 avec LEDGER_HMAC_KEY ; « sha256 » : chaînage sans clé (ancien mode).
+    algo: Mapped[str] = mapped_column(String(10), default="sha256", server_default="sha256")
 
 
 class Etat(Base):

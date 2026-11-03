@@ -34,7 +34,7 @@ lire_env() {
 }
 
 HOTE="$(lire_env NEXUS_HOST)"
-HOTE="${HOTE:-srv2113898.hstgr.cloud}"
+HOTE="${HOTE:-srvXXXX.hstgr.cloud}"
 
 url_de() {
   local ia="$1" jeton

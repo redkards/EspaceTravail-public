@@ -216,7 +216,7 @@
       "titre": "Poker Winners — checklist de bêta {{version}} ({{parcours}})",
       "consigne": "Établis une checklist de test pour la version {{version}} du site Poker Winners, parcours : {{parcours}}.\nPour chaque étape : action, résultat attendu, case OK / KO, gravité si KO, capture à joindre.\nInclure : affichage mobile Android, messages d'erreur en français, pages légales accessibles, mention jeu responsable en pied de page, suppression de compte RGPD.\nLivre : la checklist et une grille de tri des anomalies (bloquant / majeur / mineur).",
       "service": "OPS-CORE/projets",
-      "niveau_attendu": "N1",
+      "niveau_attendu": "N3",
       "criteres_reussite": [
         "Chaque étape a un résultat attendu vérifiable",
         "Le parcours mobile est couvert",

@@ -2,6 +2,7 @@
 id: LEX-GUARD-DROIT-INTERNATIONAL-EXECUTOR
 nom: LEX-GUARD-DROIT-INTERNATIONAL Exécutant
 role: executor
+type: deterministe
 direction: STRATEGIE
 departement: Droit
 service: LEX-GUARD/droit-international

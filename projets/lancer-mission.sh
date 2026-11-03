@@ -19,8 +19,8 @@
 #
 #  Variables :
 #    NEXUS_API_KEY   (obligatoire) clé API du kit (voir .env)
-#    NEXUS_URL       (défaut : https://srv2113898.hstgr.cloud)
-#    NEXUS_RESOLVE   (facultatif) ex. srv2113898.hstgr.cloud:443:<IP publique>
+#    NEXUS_URL       (défaut : https://$NEXUS_HOST, sinon https://srvXXXX.hstgr.cloud)
+#    NEXUS_RESOLVE   (facultatif) ex. srvXXXX.hstgr.cloud:443:IP_PUBLIQUE
 #                    utile quand le script tourne sur le VPS lui-même
 #    MODELES_JSON    (défaut : missions-modeles.json à côté du script)
 #    SIMULATION=1    affiche le JSON sans l'envoyer
@@ -36,7 +36,7 @@
 set -euo pipefail
 
 DOSSIER="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-NEXUS_URL="${NEXUS_URL:-https://srv2113898.hstgr.cloud}"
+NEXUS_URL="${NEXUS_URL:-https://${NEXUS_HOST:-srvXXXX.hstgr.cloud}}"
 NEXUS_URL="${NEXUS_URL%/}"
 MODELES_JSON="${MODELES_JSON:-${DOSSIER}/missions-modeles.json}"
 PROJETS_VALIDES=" paradoxx nexus poker-winners poker-feeling redkards top-solver youtube-poker-winner freelance-ia esct-boxe turf divers "
@@ -128,10 +128,15 @@ command -v curl >/dev/null 2>&1 || erreur "curl est introuvable (apt-get install
 [[ -n "${NEXUS_API_KEY:-}" ]] || erreur "NEXUS_API_KEY n'est pas définie. Exemple : export NEXUS_API_KEY=\$(grep '^NEXUS_API_KEY=' /srv/p1/nexus-mothership/.env | cut -d= -f2-)"
 
 TMP_REPONSE="$(mktemp)"
-trap 'rm -f "$TMP_REPONSE"' EXIT
+# La clé passe par un fichier temporaire (droits 600) lu par « curl -H @fichier » :
+# elle n'apparaît jamais dans la liste des processus (ps).
+TMP_ENTETE="$(mktemp)"
+trap 'rm -f "$TMP_REPONSE" "$TMP_ENTETE"' EXIT
+chmod 600 "$TMP_ENTETE"
+printf 'X-Nexus-Key: %s\n' "$NEXUS_API_KEY" > "$TMP_ENTETE"
 
 ARGS=(-sS -o "$TMP_REPONSE" -w '%{http_code}' --max-time 30 -X POST
-      -H "X-Nexus-Key: ${NEXUS_API_KEY}" -H 'Accept: application/json'
+      -H "@${TMP_ENTETE}" -H 'Accept: application/json'
       -H 'Content-Type: application/json' --data-binary "$CORPS")
 if [[ -n "${NEXUS_RESOLVE:-}" ]]; then
   ARGS+=(--resolve "$NEXUS_RESOLVE")
@@ -149,7 +154,7 @@ case "$code" in
     [[ -z "$msg" ]] || info "Note : ${msg}"
     info "Suivi : ${NEXUS_URL}/cockpit  ·  API : GET ${NEXUS_URL}/api/missions/${mid}"
     ;;
-  000) erreur "serveur injoignable (${NEXUS_URL}). Sur le VPS, essayez NEXUS_RESOLVE=hote:443:<IP publique>." ;;
+  000) erreur "serveur injoignable (${NEXUS_URL}). Sur le VPS, essayez NEXUS_RESOLVE=srvXXXX.hstgr.cloud:443:IP_PUBLIQUE." ;;
   401|403) erreur "clé API refusée (HTTP ${code}) : vérifiez NEXUS_API_KEY." ;;
   *)
     msg="$(jq -r '.detail // .message // empty' "$TMP_REPONSE" 2>/dev/null | head -c 300 || true)"

@@ -25,6 +25,8 @@ from fastapi.responses import HTMLResponse, JSONResponse, Response
 from . import db
 from .config import IDENTITES, cfg
 from .garde import limiteur
+
+LOT_MAX = 10  # éléments maximum dans un lot JSON-RPC
 from .outils import OutilErreur, outils, resultat_texte, trouver
 from .page import page_bridge
 from .schema import ErreurArguments, valider
@@ -179,18 +181,25 @@ async def _mcp(request: Request, jeton_chemin: str | None = None) -> Response:
                                                            f"Versions acceptées : {', '.join(VERSIONS_PROTOCOLE)}."),
                             status_code=400)
 
-    autorise, attente = limiteur.autoriser(identite, cfg().limite_par_minute)
-    if not autorise:
-        return JSONResponse(_erreur(None, RATE_LIMITED, f"Trop d'appels : limite de {cfg().limite_par_minute} par minute "
-                                                         f"atteinte. Réessayez dans {attente} s."),
-                            status_code=429, headers={"Retry-After": str(attente)})
-
     corps = await request.body()
     if len(corps) > cfg().corps_max_octets:
         return JSONResponse(_erreur(None, INVALID_REQUEST, "Requête trop volumineuse (64 Ko maximum)."), status_code=413)
     try:
         message = json.loads(corps)
     except (ValueError, UnicodeDecodeError):
+        message = None
+    if isinstance(message, list) and len(message) > LOT_MAX:
+        return JSONResponse(_erreur(None, INVALID_REQUEST, f"Lot JSON-RPC trop grand : {LOT_MAX} éléments maximum."),
+                            status_code=400)
+
+    # Limite de débit : chaque élément d'un lot compte comme un appel (un lot ne contourne pas la limite).
+    cout = len(message) if isinstance(message, list) and message else 1
+    autorise, attente = limiteur.autoriser(identite, cfg().limite_par_minute, cout=cout)
+    if not autorise:
+        return JSONResponse(_erreur(None, RATE_LIMITED, f"Trop d'appels : limite de {cfg().limite_par_minute} par minute "
+                                                         f"atteinte. Réessayez dans {attente} s."),
+                            status_code=429, headers={"Retry-After": str(attente)})
+    if message is None and corps.strip() != b"null":
         return JSONResponse(_erreur(None, PARSE_ERROR, "JSON invalide."), status_code=400)
 
     if isinstance(message, list):  # lots JSON-RPC (protocole 2025-03-26) : pris en charge par compatibilité

@@ -2,6 +2,7 @@
 id: NEXUS-SENTINEL
 nom: Sentinel
 role: sentinel
+type: deterministe
 direction: NOYAU
 departement: Noyau
 service: ''

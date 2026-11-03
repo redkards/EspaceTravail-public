@@ -2,6 +2,7 @@
 id: CODE-CORE-EXECUTOR
 nom: CODE-CORE Exécutant
 role: executor
+type: deterministe
 direction: TECH
 departement: Ingénierie
 service: CODE-CORE/revue

@@ -187,7 +187,7 @@ cd /srv/p1/nexus-mothership
 ```bash
 bash install.sh --email votre@email.fr
 ```
-C'est le **MVP** (cockpit + agents). Ajoutez `--complet` pour avoir aussi n8n, Uptime Kuma et ntfy. Le nom d'hôte est détecté automatiquement. Si `hostname -f` ne renvoie pas un nom complet, le script utilise `srv2113898.hstgr.cloud`. Vous pouvez aussi le forcer avec `--host`.
+C'est le **MVP** (cockpit + agents). Ajoutez `--complet` pour avoir aussi n8n, Uptime Kuma et ntfy. Le nom d'hôte est détecté automatiquement. Si `hostname -f` ne renvoie pas un nom complet, le script utilise `srvXXXX.hstgr.cloud`. Vous pouvez aussi le forcer avec `--host`.
 
 Options utiles :
 | Option | Effet |
@@ -226,14 +226,14 @@ Dans **hPanel > VPS > Sécurité > Pare-feu**, autorisez en entrée (TCP) :
 
 ## 5. Première utilisation
 
-Remplacez `srv2113898.hstgr.cloud` par votre nom d'hôte s'il est différent.
+Remplacez `srvXXXX.hstgr.cloud` par votre nom d'hôte s'il est différent.
 
-- **Cockpit** : `https://srv2113898.hstgr.cloud/cockpit`
+- **Cockpit** : `https://srvXXXX.hstgr.cloud/cockpit`
   Identifiant `decideur` et le mot de passe affiché. C'est ici que vous **validez, refusez ou faites réviser** les décisions N3. Vous y créez aussi des missions et y trouvez le bouton d'**arrêt d'urgence**.
 Version complète uniquement :
-- **n8n** : `https://srv2113898.hstgr.cloud:8443`
+- **n8n** : `https://srvXXXX.hstgr.cloud:8443`
   Une première fenêtre demande l'identifiant `admin` et son mot de passe (barrière Caddy). Ensuite, n8n vous fait créer votre compte propriétaire.
-- **Uptime Kuma** : `https://srv2113898.hstgr.cloud:8444`. Mêmes identifiants que le cockpit, puis création du compte admin Kuma. Ajoutez par exemple une sonde HTTP sur `http://nexus-core:8000/api/sante`.
+- **Uptime Kuma** : `https://srvXXXX.hstgr.cloud:8444`. Mêmes identifiants que le cockpit, puis création du compte admin Kuma. Ajoutez par exemple une sonde HTTP sur `http://nexus-core:8000/api/sante`.
 
 Sur Android, ajoutez le cockpit à l'écran d'accueil : menu Chrome **⋮ > Ajouter à l'écran d'accueil**.
 
@@ -246,7 +246,7 @@ Sur Android, ajoutez le cockpit à l'écran d'accueil : menu Chrome **⋮ > Ajou
 *(version complète uniquement : `bash install.sh --complet`)*
 
 1. Installez l'application **ntfy** (Play Store ou F-Droid).
-2. Touchez **+**, cochez **Utiliser un autre serveur**, puis saisissez `https://srv2113898.hstgr.cloud:8445`.
+2. Touchez **+**, cochez **Utiliser un autre serveur**, puis saisissez `https://srvXXXX.hstgr.cloud:8445`.
 3. Comme nom de topic, saisissez la valeur `NTFY_TOPIC` affichée à la fin de l'installation (`nexus-xxxxxxxxxxxx`).
 
 Vous serez prévenu à chaque décision N3 en attente et chaque soir à 19 h (si le rapport du soir est activé).
@@ -268,7 +268,7 @@ Trois workflows sont importés automatiquement. Ils sont **désactivés** par d�
 
 Exemple d'appel du webhook (une fois le workflow activé). Le mot de passe Caddy de n8n est obligatoire :
 ```bash
-curl -u admin:MOT_DE_PASSE_N8N -X POST https://srv2113898.hstgr.cloud:8443/webhook/nexus-mission \
+curl -u admin:MOT_DE_PASSE_N8N -X POST https://srvXXXX.hstgr.cloud:8443/webhook/nexus-mission \
   -H 'Content-Type: application/json' \
   -d '{"titre":"Plan de lancement","consigne":"Rédige un plan de projet en 5 étapes","service":"OPS-CORE/projets"}'
 ```
@@ -355,7 +355,7 @@ C'est gratuit et open source (service `nexus-bridge`, installé avec le MVP). Ch
 cd /srv/p1/nexus-mothership
 bash bridge-connecteurs.sh
 ```
-Le script affiche une adresse par IA, du type `https://srv2113898.hstgr.cloud/mcp/<jeton>`, et les étapes à suivre. **Cette adresse est un mot de passe** : ne la collez que dans l'IA concernée. Astuce téléphone : appui long sur l'adresse dans le terminal > Copier, puis collez-la dans l'autre application.
+Le script affiche une adresse par IA, du type `https://srvXXXX.hstgr.cloud/mcp/<jeton>`, et les étapes à suivre. **Cette adresse est un mot de passe** : ne la collez que dans l'IA concernée. Astuce téléphone : appui long sur l'adresse dans le terminal > Copier, puis collez-la dans l'autre application.
 
 ### Étape 2 — Brancher chaque IA
 
@@ -371,7 +371,7 @@ Le script affiche une adresse par IA, du type `https://srv2113898.hstgr.cloud/mc
 ### Étape 3 — Premier essai
 
 Dans chaque IA : *« Utilise la passerelle NEXUS : lis tes messages, puis écris en mémoire que la passerelle fonctionne pour toi. »*
-Puis ouvrez **https://srv2113898.hstgr.cloud/bridge** (identifiants du cockpit) : page en lecture seule, lisible sur téléphone, avec les dernières mémoires, tâches, messages, passations et le journal.
+Puis ouvrez **https://srvXXXX.hstgr.cloud/bridge** (identifiants du cockpit) : page en lecture seule, lisible sur téléphone, avec les dernières mémoires, tâches, messages, passations et le journal.
 
 ### Bonnes habitudes à donner aux IA
 - **Début de session** : « lis tes messages, la dernière passation du projet `poker-winners` et les tâches ouvertes ».

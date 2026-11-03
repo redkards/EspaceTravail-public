@@ -118,10 +118,10 @@ n8n : N8N_ENCRYPTION_KEY, DB_TYPE=postgresdb, GENERIC_TIMEZONE=Europe/Paris, N8N
 
 ## install.sh (agent INFRA)
 Idempotent, en français, `set -euo pipefail`. Étapes : vérifie root + Ubuntu ; affiche RAM/disque ; installe Docker + plugin compose s'ils manquent (dépôt officiel) ; détecte `NEXUS_HOST` (hostname -f, confirmation possible via argument `--host`) ; demande ACME_EMAIL (argument `--email` ou invite) ; génère .env avec secrets aléatoires (openssl rand) et le hash bcrypt via `docker run --rm caddy:2.8 caddy hash-password` ; vérifie ufw sans le modifier (voir ci-dessous) ; `docker compose up -d --build` ; `docker compose exec ollama ollama pull $NEXUS_MODEL` ; importe les workflows n8n ; mission de test « Rédige une checklist de démarrage du Mothership » (service OPS-CORE/projets) ; affiche les URL, identifiants et la commande pour revoir les identifiants (`cat /srv/p1/nexus-mothership/.env`). Répertoire d'installation : /srv/p1/nexus-mothership. Journal d'installation : /srv/p1/nexus-mothership/install.log.
-**Pare-feu : install.sh ne modifie JAMAIS ufw ni le pare-feu Hostinger** ; il détecte l'état d'ufw, affiche les commandes `ufw allow` manquantes et rappelle d'ouvrir 80, 443, 8443, 8444, 8445 dans hPanel > Sécurité > Pare-feu. `--host` par défaut : `hostname -f`, ou `srv2113898.hstgr.cloud` si ce n'est pas un FQDN. install.sh vérifie que /srv/p1 est un point de montage (sinon propose partitions.sh).
+**Pare-feu : install.sh ne modifie JAMAIS ufw ni le pare-feu Hostinger** ; il détecte l'état d'ufw, affiche les commandes `ufw allow` manquantes et rappelle d'ouvrir 80, 443, 8443, 8444, 8445 dans hPanel > Sécurité > Pare-feu. `--host` par défaut : `hostname -f`, ou `srvXXXX.hstgr.cloud` si ce n'est pas un FQDN. install.sh vérifie que /srv/p1 est un point de montage (sinon propose partitions.sh).
 
 ## Partitions (agent INFRA)
-VPS réel : Ubuntu 24.04, `srv2113898.hstgr.cloud`, 2 vCPU / 8 Go / 100 Go (~95 Go libres).
+VPS réel : Ubuntu 24.04, `srvXXXX.hstgr.cloud`, 2 vCPU / 8 Go / 100 Go (~95 Go libres).
 `partitions.sh` (root, idempotent, `--size 20G`, `--dry-run`) : 4 fichiers image ext4 `/srv/images/p1.img … p4.img` (fallocate, `mkfs.ext4 -F -L nexus-pN`), montés en loop sur `/srv/p1 … /srv/p4`, ajoutés à /etc/fstab avec `loop,nofail,defaults` (sauvegarde `/etc/fstab.bak-<date>`, pas de doublon). Refus si espace libre sur / < (4 × taille) + 10 Go (90 Go pour 20G). Le disque système n'est pas modifié.
 
 | Partition | Usage | RAM | vCPU | Disque |

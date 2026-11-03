@@ -2,6 +2,7 @@
 id: PILOT-CORE-PILOTAGE-EXECUTOR
 nom: PILOT-CORE-PILOTAGE Exécutant
 role: executor
+type: deterministe
 direction: OPERATIONS
 departement: Pilotage
 service: PILOT-CORE/pilotage
