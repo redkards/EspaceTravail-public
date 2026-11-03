@@ -1,0 +1,81 @@
+# Niveaux de FONCTIONNEMENT des agents (F1..F4) — source unique, lue au démarrage.
+# À ne pas confondre avec les niveaux de DÉCISION N0..N3 (GATE).
+#
+# Champs d'un niveau :
+#   nom, effort (texte affiché), fournisseur (ollama_local | courant | anthropic),
+#   modeles (facultatif : modèle par rôle, clé « defaut » pour les autres rôles),
+#   budget_tokens (plafond de la mission), revisions_max (boucles de correction ANALYST
+#   après un refus du CHECKER), double_controle (2e CHECKER avec le modèle local ;
+#   les deux doivent valider), llm_max_chars (taille max d'un message), num_ctx
+#   (contexte Ollama), delai_max_s (chrono global de la mission), cout_max_eur.
+#
+# Compatibilité : pour F2, les variables BUDGET_TASK_TOKENS, LLM_MAX_CHARS et
+# OLLAMA_NUM_CTX, si elles sont définies, remplacent les valeurs ci-dessous.
+
+defaut: F2
+
+niveaux:
+  F1:
+    nom: Éclair
+    effort: Réponse rapide, modèle local, aucune correction.
+    fournisseur: ollama_local
+    budget_tokens: 6000
+    revisions_max: 0
+    double_controle: false
+    llm_max_chars: 4000
+    num_ctx: 4096
+    delai_max_s: 180
+    cout_max_eur: 0
+
+  F2:
+    nom: Standard
+    effort: Fournisseur courant (Ollama Cloud si configuré, repli local), 1 correction.
+    fournisseur: courant
+    budget_tokens: 20000
+    revisions_max: 1
+    double_controle: false
+    llm_max_chars: 12000
+    num_ctx: 8192
+    delai_max_s: 600
+    cout_max_eur: 0
+
+  F3:
+    nom: Renforcé
+    effort: Fournisseur courant, 2 corrections et double contrôle par le modèle local.
+    fournisseur: courant
+    budget_tokens: 40000
+    revisions_max: 2
+    double_controle: true
+    llm_max_chars: 16000
+    num_ctx: 8192
+    delai_max_s: 1200
+    cout_max_eur: 0
+
+  F4:
+    nom: Expert
+    effort: Modèles Anthropic par rôle, 3 corrections, double contrôle ; lancement soumis à validation.
+    fournisseur: anthropic
+    modeles:
+      analyst: claude-sonnet-5-5
+      checker: claude-sonnet-5-5
+      collector: claude-haiku-5-5
+      executor: claude-haiku-5-5
+      defaut: claude-haiku-5-5
+    budget_tokens: 80000
+    revisions_max: 3
+    double_controle: true
+    llm_max_chars: 24000
+    num_ctx: 8192
+    delai_max_s: 1800
+    cout_max_eur: 0.50
+
+# Tarifs en dollars US par million de tokens (entrée / sortie).
+tarifs_usd_par_mtok:
+  claude-haiku-5-5: {entree: 0.10, sortie: 0.50}
+  claude-sonnet-5-5: {entree: 2.0, sortie: 10.0}
+
+# Taux de conversion (remplacé par la variable EUR_PAR_USD si elle est définie).
+eur_par_usd: 0.92
+
+# Estimation avant lancement F4 : part des tokens en entrée (le reste en sortie).
+part_entree_estimation: 0.75

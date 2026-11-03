@@ -7,9 +7,10 @@ from sqlalchemy import func, select
 
 from . import agents as reg
 from . import budget, ledger, pipeline, sentinel
+from . import fonctionnement as fct
 from . import projets as registre
 from .db import session_scope
-from .models import Decision, Etape, Mission
+from .models import Decision, Etape, Mission, maintenant
 
 
 class NouvelleMission(BaseModel):
@@ -19,6 +20,10 @@ class NouvelleMission(BaseModel):
     montant_eur: float | None = Field(default=None, ge=0)
     action: str | None = Field(default=None, max_length=40, pattern=r"^[a-z_]+$")
     projet: str | None = Field(default=None, max_length=60)
+    # Niveau de fonctionnement F1..F4 (défaut : NEXUS_FONCTIONNEMENT_DEFAUT).
+    fonctionnement: Literal["F1", "F2", "F3", "F4"] | None = None
+    # F4 indisponible (budget, clé) : lancer en F3 plutôt que refuser.
+    repli_f3: bool = True
 
 
 class Commentaire(BaseModel):
@@ -36,7 +41,11 @@ def _mission(m: Mission, etapes: list[Etape] | None = None) -> dict:
          "directeur": m.directeur, "statut": m.statut, "niveau": m.niveau,
          "montant_eur": m.montant_eur, "action": m.action, "message": m.message,
          "cree_le": m.cree_le.isoformat(), "maj_le": m.maj_le.isoformat(),
-         "livrable_texte": m.livrable_texte, "tokens": m.tokens, "cout_eur": m.cout_eur}
+         "livrable_texte": m.livrable_texte, "tokens": m.tokens, "cout_eur": m.cout_eur,
+         "fonctionnement_demande": m.fonctionnement_demande, "fonctionnement": m.fonctionnement,
+         "fonctionnement_raison": m.fonctionnement_raison, "repli_f3": m.repli_f3,
+         "tokens_entree": m.tokens_entree, "tokens_sortie": m.tokens_sortie,
+         "duree_s": m.duree_s, "revisions": m.revisions, "attente": m.attente}
     if etapes is not None:
         d["etapes"] = [{"id": e.id, "agent_id": e.agent_id, "role": e.role, "entree": e.entree,
                         "sortie": e.sortie, "verdict": e.verdict, "tokens": e.tokens,
@@ -46,7 +55,7 @@ def _mission(m: Mission, etapes: list[Etape] | None = None) -> dict:
 
 def _decision(d: Decision, titre: str | None = None, projet: str | None = None) -> dict:
     return {"id": d.id, "mission_id": d.mission_id, "mission_titre": titre, "projet": projet,
-            "niveau": d.niveau,
+            "niveau": d.niveau, "objet": d.objet,
             "resume": d.resume, "recommandation": d.recommandation,
             "cout_estime_eur": d.cout_estime_eur, "risque": d.risque, "sources": d.sources,
             "avis_checker": d.avis_checker, "statut": d.statut, "cree_le": d.cree_le.isoformat(),
@@ -74,6 +83,7 @@ def creer_routeur() -> APIRouter:
             s.execute(select(1))
         from .llm import info
         return {"statut": "ok", "service": "nexus-core", "llm": info(), "agents": len(reg.charger()),
+                "fonctionnement_defaut": fct.defaut(),
                 "arret_urgence": bool(sentinel.actifs().get("kill:grille"))}
 
     @r.post("/missions", status_code=202)
@@ -84,17 +94,42 @@ def creer_routeur() -> APIRouter:
             projet = registre.resoudre(corps.projet)
         except ValueError as e:
             raise HTTPException(422, str(e))
+        demande = corps.fonctionnement or fct.defaut()
+        applique, raison, attente_f4 = demande, None, False
+        if demande == "F4":
+            indispo = fct.disponibilite_f4()
+            if indispo and not corps.repli_f3:
+                ledger.journaliser("NEXUS-BUDGET", "f4_refuse", None, titre=corps.titre, raison=indispo)
+                raise HTTPException(422, f"F4 indisponible : {indispo}. Mission non créée "
+                                         "(cochez « repli_f3 » pour la lancer en F3).")
+            if indispo:
+                applique, raison = "F3", f"F4 indisponible : {indispo} — mission lancée en F3"
+            else:
+                attente_f4 = True
         with session_scope() as s:
             m = Mission(titre=corps.titre.strip(), consigne=corps.consigne.strip(), service=corps.service,
-                        montant_eur=corps.montant_eur or 0.0, action=corps.action, statut="recue",
-                        projet=projet)
+                        montant_eur=corps.montant_eur or 0.0, action=corps.action,
+                        statut="en_attente_n3" if attente_f4 else "recue", projet=projet,
+                        fonctionnement_demande=demande, fonctionnement=applique,
+                        fonctionnement_raison=raison, repli_f3=corps.repli_f3,
+                        attente="lancement_f4" if attente_f4 else None, message=raison)
             s.add(m)
             s.flush()
             mid = m.id
         ledger.journaliser("API", "mission_recue", mid, titre=corps.titre, service=corps.service,
-                           projet=projet)
+                           projet=projet, fonctionnement_demande=demande, fonctionnement=applique,
+                           raison=raison)
+        rep = {"id": mid, "statut": "recue", "projet": projet, "fonctionnement_demande": demande,
+               "fonctionnement": applique, "message": raison}
+        if attente_f4:
+            # Aucune exécution avant l'accord du propriétaire (décision N3 « Lancer en F4 »).
+            did = pipeline.creer_decision_lancement_f4(mid)
+            est = fct.estimer_cout_eur("F4")
+            rep.update(statut="en_attente_n3", decision_id=did, cout_estime_eur=est["cout_estime_eur"],
+                       message=f"Lancement F4 soumis à validation — coût estimé {est['cout_estime_eur']:.2f} €.")
+            return rep
         taches.add_task(pipeline.traiter, mid)
-        return {"id": mid, "statut": "recue", "projet": projet}
+        return rep
 
     @r.get("/missions")
     def lister_missions(statut: str | None = None, projet: str | None = None,
@@ -159,6 +194,8 @@ def creer_routeur() -> APIRouter:
             res = pipeline.decider(did, choix, commentaire)
             if res.get("relance") and taches is not None:
                 taches.add_task(pipeline.relancer_revision, res["mission_id"], commentaire)
+            if res.get("lancer") and taches is not None:
+                taches.add_task(pipeline.traiter, res["mission_id"])  # lancement F4 approuvé
             return res
         except LookupError as e:
             raise HTTPException(404, str(e))
@@ -166,8 +203,8 @@ def creer_routeur() -> APIRouter:
             raise HTTPException(409, str(e))
 
     @r.post("/decisions/{did}/valider")
-    def valider(did: int, corps: Commentaire | None = None):
-        return _decider(did, "valider", corps)
+    def valider(did: int, taches: BackgroundTasks, corps: Commentaire | None = None):
+        return _decider(did, "valider", corps, taches)
 
     @r.post("/decisions/{did}/refuser")
     def refuser(did: int, corps: Commentaire | None = None):
@@ -207,6 +244,27 @@ def creer_routeur() -> APIRouter:
                         "outils_autorises": a["outils_autorises"],
                         "statut": "suspendu" if suspendu else "actif"})
         return res
+
+    @r.get("/fonctionnement")
+    def lire_fonctionnement():
+        """Grille F1..F4 et consommation du mois par niveau appliqué."""
+        debut = maintenant().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        with session_scope() as s:
+            rows = s.execute(
+                select(Mission.fonctionnement, func.count(Mission.id), func.coalesce(func.sum(Mission.tokens), 0),
+                       func.coalesce(func.sum(Mission.tokens_entree), 0),
+                       func.coalesce(func.sum(Mission.tokens_sortie), 0),
+                       func.coalesce(func.sum(Mission.cout_eur), 0.0), func.avg(Mission.duree_s))
+                .where(Mission.cree_le >= debut).group_by(Mission.fonctionnement)).all()
+        conso = {r[0]: r for r in rows}
+        mois = []
+        for code in fct.CODES:
+            r = conso.get(code)
+            mois.append({"code": code, "missions": r[1] if r else 0, "tokens": int(r[2]) if r else 0,
+                         "tokens_entree": int(r[3]) if r else 0, "tokens_sortie": int(r[4]) if r else 0,
+                         "cout_eur": round(float(r[5]), 4) if r else 0.0,
+                         "duree_moyenne_s": round(float(r[6]), 1) if r and r[6] is not None else None})
+        return {**fct.grille_publique(), "mois": debut.strftime("%Y-%m"), "consommation": mois}
 
     @r.get("/budget")
     def lire_budget():

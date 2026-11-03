@@ -306,6 +306,27 @@ def test_mothership_mission(session, faux_core):
     assert "checklist" not in json.dumps(j).lower()
 
 
+def test_mothership_mission_fonctionnement(session, faux_core):
+    # Sans paramètre : rien n'est ajouté (défaut du serveur).
+    session().outil("mothership_mission", titre="t", consigne="c")
+    assert "fonctionnement" not in json.loads(faux_core.requetes[-1].content)
+    # F1..F3 transmis tels quels.
+    _, d = session("chatgpt").outil("mothership_mission", titre="t", consigne="c", fonctionnement="F3")
+    assert json.loads(faux_core.requetes[-1].content)["fonctionnement"] == "F3" and d["fonctionnement"] == "F3"
+    # F4 : transmis, la passerelle annonce l'attente de l'accord humain et ne peut rien approuver.
+    res, d = session("gemini").outil("mothership_mission", titre="t", consigne="c", fonctionnement="F4")
+    assert not res["isError"] and json.loads(faux_core.requetes[-1].content)["fonctionnement"] == "F4"
+    assert d["statut"] == "en_attente_n3" and "validation du propriétaire" in d["message"]
+    assert "coût estimé" in d["note_mothership"]
+    assert all(r.method != "POST" or not r.url.path.startswith("/api/decisions") for r in faux_core.requetes)
+    # Valeur hors énumération refusée avant tout appel à nexus-core.
+    n = len(faux_core.requetes)
+    res, _ = session().outil("mothership_mission", titre="t", consigne="c", fonctionnement="F9")
+    assert res["isError"] and len(faux_core.requetes) == n
+    schema = next(o for o in session().rpc("tools/list").json()["result"]["tools"] if o["name"] == "mothership_mission")
+    assert schema["inputSchema"]["properties"]["fonctionnement"]["enum"] == ["F1", "F2", "F3", "F4"]
+
+
 def test_mothership_injoignable_ou_cle_refusee(session, monkeypatch):
     monkeypatch.setenv("NEXUS_API_KEY", "mauvaise-cle-" + "1" * 30)
     res, _ = session().outil("mothership_mission", titre="t", consigne="c")

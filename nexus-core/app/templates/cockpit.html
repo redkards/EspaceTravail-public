@@ -58,6 +58,18 @@
   .filtre select { flex: 1; min-width: 0; }
   .compteurs { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
   .projet { cursor: pointer; }
+  .niveaux { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px; }
+  .niveaux label { margin: 0; display: block; border: 1px solid var(--bord); border-radius: 8px; padding: 8px;
+                   cursor: pointer; color: var(--texte); background: var(--fond); }
+  .niveaux input { width: auto; margin-right: 6px; }
+  .niveaux label.sel { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+  .case { display: flex; gap: 8px; align-items: center; margin-top: 8px; }
+  .case input { width: auto; }
+  .tableau { width: 100%; overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--bord); white-space: nowrap; }
+  th { color: var(--doux); font-weight: 600; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
   .mono { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; word-break: break-all; }
 </style>
 </head>
@@ -80,6 +92,7 @@
   <button data-o="projets" type="button">Projets</button>
   <button data-o="nouvelle" type="button">Nouvelle mission</button>
   <button data-o="agents" type="button">Agents</button>
+  <button data-o="conso" type="button">Fonctionnement</button>
   <button data-o="journal" type="button">Journal</button>
 </nav>
 <div class="filtre">
@@ -104,10 +117,23 @@
       <select id="action"><option value="">Aucune</option><option>envoyer_client</option><option>publier</option>
         <option>signer</option><option>mise_en_production</option><option>depense</option><option>supprimer</option>
         <option>donnees_sensibles</option></select>
+      <label>Niveau de fonctionnement (effort, tokens, coût, délai)</label>
+      <div class="niveaux" id="niveaux"><span class="meta">Chargement…</span></div>
+      <div class="case" id="caseRepli" hidden>
+        <input type="checkbox" id="repliF3" checked>
+        <label for="repliF3" style="margin:0">Si F4 est indisponible (budget, clé), lancer en F3 (gratuit)</label>
+      </div>
+      <div class="meta" id="infoF4"></div>
       <div class="ligne" style="margin-top:12px"><button class="prim" type="submit">Lancer la mission</button></div>
     </form>
   </section>
   <section id="agents"><h2>Organigramme</h2><div id="listeAg"></div></section>
+  <section id="conso">
+    <h2>Niveaux de fonctionnement</h2>
+    <div class="carte tableau"><table id="tabGrille"></table></div>
+    <h2>Consommation du mois <span class="meta" id="moisConso"></span></h2>
+    <div class="carte tableau"><table id="tabConso"></table></div>
+  </section>
   <section id="journal">
     <h2>Journal LEDGER</h2>
     <div class="ligne"><button id="btnVerif" type="button">Vérifier la chaîne</button><span id="verif" class="meta"></span></div>
@@ -122,7 +148,7 @@ const $ = (s) => document.querySelector(s);
 const esc = (t) => String(t ?? "").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const LIB = { recue:"reçue", en_cours:"en cours", en_attente_n3:"en attente N3", validee:"validée", refusee:"refusée",
   revision:"révision", terminee:"terminée", echouee:"échouée", suspendue:"suspendue", en_attente:"en attente",
-  expiree:"expirée", faible:"faible", moyen:"moyen", eleve:"élevé", actif:"actif", suspendu:"suspendu" };
+  expiree:"expirée", plafond_atteint:"plafond atteint", faible:"faible", moyen:"moyen", eleve:"élevé", actif:"actif", suspendu:"suspendu" };
 const lib = (s) => LIB[s] || s || "—";
 const date = (d) => d ? new Date(d + (d.endsWith("Z") ? "" : "Z")).toLocaleString("fr-FR") : "";
 
@@ -151,6 +177,7 @@ async function chargerDecisions() {
     <div class="carte">
       <div class="ligne"><strong>#${d.id} · ${esc(d.mission_titre)}</strong>
         <span class="puce">${esc(nomProjet(d.projet))}</span>
+        ${d.objet === "lancement_f4" ? '<span class="puce en_attente">lancement F4</span>' : ""}
         <span class="puce ${d.risque}">risque ${lib(d.risque)}</span>
         <span class="puce">${Number(d.cout_estime_eur).toFixed(2)} €</span></div>
       <pre>${esc(d.resume)}</pre>
@@ -187,8 +214,12 @@ async function chargerMissions() {
     <div class="carte">
       <div class="ligne"><strong>#${m.id} · ${esc(m.titre)}</strong>
         <span class="puce ${m.statut}">${lib(m.statut)}</span>
-        ${m.niveau ? `<span class="puce ${m.niveau}">${m.niveau}</span>` : ""}</div>
-      <div class="meta">${esc(nomProjet(m.projet))} · ${esc(m.service || "service à déterminer")} · ${date(m.cree_le)} · ${m.tokens} tokens</div>
+        ${m.niveau ? `<span class="puce ${m.niveau}">${m.niveau}</span>` : ""}
+        <span class="puce" title="Niveau de fonctionnement">${esc(m.fonctionnement)}${m.fonctionnement !== m.fonctionnement_demande ? " (demandé " + esc(m.fonctionnement_demande) + ")" : ""}</span></div>
+      <div class="meta">${esc(nomProjet(m.projet))} · ${esc(m.service || "service à déterminer")} · ${date(m.cree_le)}
+        · ${m.tokens} tokens (${m.tokens_entree} entrée / ${m.tokens_sortie} sortie) · ${Number(m.cout_eur).toFixed(3)} €
+        · ${Number(m.duree_s).toFixed(0)} s · ${m.revisions} correction(s)</div>
+      ${m.fonctionnement_raison ? `<div class="meta">Niveau : ${esc(m.fonctionnement_raison)}</div>` : ""}
       ${m.message ? `<div class="meta">${esc(m.message)}</div>` : ""}
       <div class="ligne" style="margin-top:6px"><button data-m="${m.id}" type="button">Détail</button></div>
       <div id="mis${m.id}"></div>
@@ -228,10 +259,10 @@ $("#btnVerif").addEventListener("click", async () => {
 $("#formMission").addEventListener("submit", async (e) => {
   e.preventDefault();
   const corps = { titre: $("#titre").value, consigne: $("#consigne").value, service: $("#service").value || null,
-    projet: $("#projet").value || null,
+    projet: $("#projet").value || null, fonctionnement: niveauChoisi(), repli_f3: $("#repliF3").checked,
     montant_eur: $("#montant").value ? Number($("#montant").value) : null, action: $("#action").value || null };
   try { const r = await api("/missions", { method: "POST", body: JSON.stringify(corps) });
-    toast("Mission #" + r.id + " lancée (" + nomProjet(r.projet) + ")."); e.target.reset(); $("#projet").value = projetCourant() || "divers"; document.querySelector('[data-o="missions"]').click();
+    toast("Mission #" + r.id + " — " + (r.message || "lancée") + " (" + nomProjet(r.projet) + ", " + r.fonctionnement + ")."); e.target.reset(); dessinerNiveaux(); $("#projet").value = projetCourant() || "divers"; document.querySelector('[data-o="missions"]').click();
   } catch (err) { toast(err.message); }
 });
 
@@ -294,11 +325,59 @@ $("#filtreProjet").addEventListener("change", () => {
   memoriserFiltre(); $("#projet").value = projetCourant() || "divers"; rafraichir();
 });
 
+// --- Niveaux de fonctionnement F1..F4 ---
+let GRILLE = null;
+const euros = (v) => Number(v || 0).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + " €";
+const duree = (s) => s >= 60 ? Math.round(s / 60) + " min" : Math.round(s) + " s";
+const niveauChoisi = () => (document.querySelector('input[name="fonct"]:checked') || {}).value || null;
+
+function dessinerNiveaux() {
+  if (!GRILLE) return;
+  const choix = niveauChoisi() || GRILLE.defaut;
+  $("#niveaux").innerHTML = GRILLE.niveaux.map((n) => `
+    <label class="${n.code === choix ? "sel" : ""}"><input type="radio" name="fonct" value="${n.code}" ${n.code === choix ? "checked" : ""}>
+      <b>${n.code} · ${esc(n.nom)}</b>${n.code === GRILLE.defaut ? ' <span class="meta">(défaut)</span>' : ""}
+      <div class="meta">${esc(n.effort)}</div>
+      <div class="meta">${n.budget_tokens.toLocaleString("fr-FR")} tokens · ${n.revisions_max} corr. · ${duree(n.delai_max_s)}
+        · ${n.cout_max_eur > 0 ? "≤ " + euros(n.cout_max_eur) : "0 €"}</div></label>`).join("");
+  majInfoF4();
+}
+function majInfoF4() {
+  const f4 = niveauChoisi() === "F4";
+  $("#caseRepli").hidden = !f4;
+  $("#infoF4").textContent = !f4 ? "" : GRILLE.f4_indisponible
+    ? "F4 indisponible : " + GRILLE.f4_indisponible + ($("#repliF3").checked ? " — la mission sera lancée en F3." : " — la mission sera refusée.")
+    : "Coût estimé " + euros(GRILLE.estimation_f4.cout_estime_eur) + " : une décision N3 vous sera demandée avant le lancement.";
+  document.querySelectorAll("#niveaux label").forEach((l) => l.classList.toggle("sel", l.querySelector("input").checked));
+}
+$("#niveaux").addEventListener("change", majInfoF4);
+$("#repliF3").addEventListener("change", majInfoF4);
+
+async function chargerFonctionnement() {
+  const premier = !GRILLE;
+  GRILLE = await api("/fonctionnement");
+  if (premier || !niveauChoisi()) dessinerNiveaux(); else majInfoF4();
+  $("#tabGrille").innerHTML = `<tr><th>Niveau</th><th>Fournisseur</th><th class="num">Tokens</th><th class="num">Corrections</th>
+    <th>Double contrôle</th><th class="num">Délai</th><th class="num">Coût max</th></tr>` +
+    GRILLE.niveaux.map((n) => `<tr><td><b>${n.code}</b> ${esc(n.nom)}</td><td>${esc(n.fournisseur)}</td>
+      <td class="num">${n.budget_tokens.toLocaleString("fr-FR")}</td><td class="num">${n.revisions_max}</td>
+      <td>${n.double_controle ? "oui" : "non"}</td><td class="num">${duree(n.delai_max_s)}</td>
+      <td class="num">${euros(n.cout_max_eur)}</td></tr>`).join("");
+  $("#moisConso").textContent = GRILLE.mois;
+  $("#tabConso").innerHTML = `<tr><th>Niveau</th><th class="num">Missions</th><th class="num">Tokens</th>
+    <th class="num">Entrée / sortie</th><th class="num">Coût</th><th class="num">Durée moy.</th></tr>` +
+    GRILLE.consommation.map((c) => `<tr><td><b>${c.code}</b></td><td class="num">${c.missions}</td>
+      <td class="num">${c.tokens.toLocaleString("fr-FR")}</td>
+      <td class="num">${c.tokens_entree.toLocaleString("fr-FR")} / ${c.tokens_sortie.toLocaleString("fr-FR")}</td>
+      <td class="num">${euros(c.cout_eur)}</td><td class="num">${c.duree_moyenne_s == null ? "—" : duree(c.duree_moyenne_s)}</td></tr>`).join("");
+}
+
 async function rafraichir() {
   const o = document.querySelector("#onglets .sel").dataset.o;
   try {
     await chargerEtat();
     await chargerProjets();
+    if (o === "nouvelle" || o === "conso" || !GRILLE) await chargerFonctionnement();
     if (o === "decisions") await chargerDecisions(); else chargerDecisions().catch(() => {});
     if (o === "missions") await chargerMissions();
     if (o === "agents" || $("#service").options.length === 1) await chargerAgents();

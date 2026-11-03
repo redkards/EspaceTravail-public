@@ -67,9 +67,9 @@ Python 3.12, FastAPI, SQLAlchemy 2, psycopg 3, httpx, PyYAML, uvicorn. Dockerfil
 - Format YAML d'un agent : `id, nom, role (prime|gate|sentinel|ledger|budget|directeur|collector|analyst|checker|executor), direction, departement, service, mission, consignes (prompt système FR), outils_autorises (liste), modele (optionnel)`.
 
 ### Modèle de données (tables)
-missions(id, titre, consigne, service, statut[recue|en_cours|en_attente_n3|validee|refusee|revision|terminee|echouee|suspendue], niveau[N0..N3], cree_le, maj_le, livrable_texte, tokens, cout_eur)
+missions(id, titre, consigne, service, statut[recue|en_cours|en_attente_n3|validee|refusee|revision|terminee|echouee|suspendue|plafond_atteint], niveau[N0..N3], cree_le, maj_le, livrable_texte, tokens, cout_eur, projet, fonctionnement_demande, fonctionnement, fonctionnement_raison, repli_f3, tokens_entree, tokens_sortie, duree_s, revisions, attente)
 etapes(id, mission_id, agent_id, role, entree, sortie, verdict, tokens, cree_le)
-decisions(id, mission_id, niveau, resume, recommandation, cout_estime_eur, risque[faible|moyen|eleve], sources, avis_checker, statut[en_attente|validee|refusee|revision|expiree], cree_le, decide_le, commentaire)
+decisions(id, mission_id, niveau, objet[livrable|lancement_f4], resume, recommandation, cout_estime_eur, risque[faible|moyen|eleve], sources, avis_checker, statut[en_attente|validee|refusee|revision|expiree], cree_le, decide_le, commentaire)
 ledger(id, horodatage, acteur, action, mission_id, details_json, hash_prec, hash) — chaîne de hachage SHA-256, append-only (aucune route de suppression/modification).
 etat(cle, valeur) — kill switch (`kill:grille`, `kill:dir:<x>`, `kill:agent:<id>`), compteurs budget.
 
@@ -85,8 +85,17 @@ etat(cle, valeur) — kill switch (`kill:grille`, `kill:dir:<x>`, `kill:agent:<i
 9. LEDGER journalise chaque étape (acteur, action, coût). BUDGET compte les tokens ; dépassement BUDGET_TASK_TOKENS → arrêt de la mission ; si LLM_PROVIDER payant et dépense du mois ≥ BUDGET_MONTHLY_EUR → refus.
 10. Tâche de fond toutes les 10 min : décisions en attente depuis > N3_TIMEOUT_HOURS → `expiree` = refus par défaut + journal.
 
+### Niveaux de fonctionnement F1..F4 (`nexus-core/fonctionnement.yaml`, source unique)
+Distincts des niveaux de décision N0–N3. Chaque niveau fixe : fournisseur, budget_tokens, revisions_max (boucles de correction ANALYST après refus CHECKER), double_controle (2ᵉ CHECKER avec le modèle local, les deux doivent valider), llm_max_chars, num_ctx, delai_max_s, cout_max_eur.
+F1 Éclair (ollama local, 6 000, 0, non, 4 000, 4096, 180 s, 0 €) · F2 Standard (LLM_PROVIDER courant, 20 000, 1, non, 12 000, 8192, 600 s, 0 € ; BUDGET_TASK_TOKENS / LLM_MAX_CHARS / OLLAMA_NUM_CTX restent la base de F2) · F3 Renforcé (courant, 40 000, 2, oui, 16 000, 8192, 1 200 s, 0 €) · F4 Expert (anthropic, ANALYST/CHECKER claude-sonnet-5-5, COLLECTOR/EXECUTOR/autres claude-haiku-5-5, 80 000, 3, oui, 24 000, 1 800 s, ≤ 0,50 € ; tarifs $/MTok en config, EUR_PAR_USD défaut 0.92).
+- Choix : champ `fonctionnement` (F1..F4) de POST /api/missions, défaut NEXUS_FONCTIONNEMENT_DEFAUT (F2) ; champ `repli_f3` (bool, défaut true).
+- Planchers (ne fait que monter, raison tracée dans `fonctionnement_raison` et LEDGER) : GATE N2+ (pré-classement par règles, puis GATE final) → F1 relevé en F2 ; IA locale injoignable → F1 relevé en F2 ; LEX-GUARD/droit-* et PILOT-CORE/* → F3 minimum.
+- F4 : indisponible si BUDGET_MONTHLY_EUR=0, ANTHROPIC_API_KEY absente ou budget mensuel restant < estimation → repli F3 (« F4 indisponible : budget IA à 0 € — mission lancée en F3 ») si `repli_f3`, sinon 422. Disponible → décision N3 `objet=lancement_f4` « Lancer en F4 — coût estimé X € » ; aucune exécution avant validation (révision impossible ; refus → `refusee`). Disponibilité revérifiée au démarrage.
+- Exécution : plafonds tokens / délai (chrono global) / coût (contrôlé avant et après chaque appel) → statut `plafond_atteint`, livrable partiel conservé, proposition de relance au niveau supérieur. Jamais de dépassement silencieux.
+- Mesures par mission : fonctionnement_demande / fonctionnement, fonctionnement_raison, tokens_entree, tokens_sortie, cout_eur, duree_s, revisions ; LEDGER : fonctionnement_applique, fonctionnement_releve, plafond_atteint, mission_bilan.
+
 ### API (préfixe /api, clé X-Nexus-Key)
-GET /api/sante · POST /api/missions · GET /api/missions · GET /api/missions/{id} (avec étapes) · GET /api/decisions?statut=en_attente · POST /api/decisions/{id}/valider|refuser|reviser {commentaire} · POST /api/killswitch {portee: grille|direction|agent, cible?, actif: bool} · GET /api/ledger?limit= · GET /api/ledger/verifier (vérifie la chaîne) · GET /api/agents · GET /api/budget.
+GET /api/sante (+ fonctionnement_defaut) · GET /api/fonctionnement (grille + consommation du mois par niveau : missions, tokens, €, durée moyenne) · POST /api/missions · GET /api/missions · GET /api/missions/{id} (avec étapes) · GET /api/decisions?statut=en_attente · POST /api/decisions/{id}/valider|refuser|reviser {commentaire} · POST /api/killswitch {portee: grille|direction|agent, cible?, actif: bool} · GET /api/ledger?limit= · GET /api/ledger/verifier (vérifie la chaîne) · GET /api/agents · GET /api/budget.
 Traitement des missions : en tâche de fond (BackgroundTasks ou file Redis simple) pour ne pas bloquer l'appel ; la réponse renvoie l'id et le statut.
 
 ### Cockpit (/cockpit, HTML servi par nexus-core, sans dépendance externe)

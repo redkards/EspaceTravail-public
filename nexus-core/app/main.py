@@ -54,6 +54,9 @@ async def cycle_de_vie(app: FastAPI):
     init_db()
     reg.charger()
     registre.charger()  # échec explicite au démarrage si projets.yaml est invalide
+    from . import fonctionnement
+    fonctionnement.charger()  # idem pour fonctionnement.yaml
+    log.info("Fonctionnement par défaut : %s", fonctionnement.defaut())
     ledger.journaliser("NEXUS-PRIME", "demarrage", None, agents=len(reg.charger()))
     # Garde-fou « tout gratuit » : refus d'Anthropic sans budget, message clair au démarrage.
     from .llm import info, refus_anthropic
@@ -84,8 +87,9 @@ app = FastAPI(title="NEXUS Mothership — nexus-core", version="1.0.0", lifespan
 # /api/sante reste accessible sans clé pour les sondes (Docker, Uptime Kuma).
 @app.get("/api/sante", include_in_schema=False)
 def sante_publique():
+    from .fonctionnement import defaut
     from .llm import info
-    return {"statut": "ok", "service": "nexus-core", "llm": info()}
+    return {"statut": "ok", "service": "nexus-core", "llm": info(), "fonctionnement_defaut": defaut()}
 
 
 app.include_router(creer_routeur(), prefix="/api", dependencies=[Depends(verifier_cle)])

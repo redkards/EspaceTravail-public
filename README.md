@@ -31,7 +31,7 @@ L'IA utilise **Ollama Cloud** (offre gratuite), avec l'IA locale du VPS en secou
 ---
 
 ## Sommaire
-0. [Ollama Cloud](#ollama-cloud)
+0. [Ollama Cloud](#ollama-cloud) · [Niveaux de fonctionnement](#niveaux-de-fonctionnement)
 1. [Ce qui sera installé](#1-ce-qui-sera-installé)
 2. [Partitions](#2-partitions)
 3. [Installation pas à pas](#3-installation-pas-à-pas)
@@ -70,6 +70,25 @@ Ollama Cloud fait tourner de gros modèles (par défaut `gemma4:31b`) sur les se
 | `--sans-repli` | Ollama Cloud **sans** IA locale : le MVP n'utilise plus qu'environ 0,5 Go de RAM |
 | `--local` | IA locale seule, sans Ollama Cloud |
 | `--model NOM` | choisit le modèle (doit figurer dans la liste affichée) |
+
+---
+
+## Niveaux de fonctionnement
+
+Chaque mission tourne à un **niveau de fonctionnement** qui règle l'effort, les tokens, le coût et le délai. Ne pas confondre avec les niveaux de **décision** N0–N3 (qui disent si votre accord est nécessaire).
+
+| Niveau | IA utilisée | Tokens max | Corrections | Double contrôle | Délai max | Coût |
+|---|---|---|---|---|---|---|
+| **F1 Éclair** | IA locale (`qwen2.5:3b`) | 6 000 | 0 | non | 3 min | 0 € |
+| **F2 Standard** *(défaut)* | Ollama Cloud si configuré, sinon locale | 20 000 | 1 | non | 10 min | 0 € |
+| **F3 Renforcé** | comme F2 + 2ᵉ contrôle par l'IA locale | 40 000 | 2 | oui | 20 min | 0 € |
+| **F4 Expert** | Claude (Anthropic), modèle par rôle | 80 000 | 3 | oui | 30 min | ≤ 0,50 € |
+
+- **Choisir** : menu « Niveau de fonctionnement » du formulaire *Nouvelle mission* (cockpit), variable `FONCTIONNEMENT=F3` de `projets/lancer-mission.sh` et `tests-poker/run_tests.sh`, ou paramètre `fonctionnement` de l'outil `mothership_mission` des IA. Défaut : `NEXUS_FONCTIONNEMENT_DEFAUT=F2` dans `.env`.
+- **Relèvements automatiques** (jamais de baisse ; la raison est affichée sur la mission) : F1 → F2 si le GATE classe la mission N2 ou N3, ou si l'IA locale est absente ; missions juridiques (`LEX-GUARD/droit-*`) et de pilotage (`PILOT-CORE/*`) → F3 minimum.
+- **F4 est payant et toujours soumis à votre accord** : le coût est estimé, une décision « Lancer en F4 — coût estimé X € » apparaît dans le cockpit et rien ne démarre avant votre validation (les IA connectées par la passerelle ne peuvent pas valider). Avec `BUDGET_MONTHLY_EUR=0` (installation gratuite), F4 est indisponible : la mission part en **F3** (case « repli F3 », cochée par défaut) ou est refusée.
+- **Plafonds** : si le délai, les tokens ou le coût max sont atteints, la mission s'arrête proprement (statut « plafond atteint »), le livrable partiel est gardé et le cockpit propose de relancer au niveau supérieur.
+- **Suivi** : onglet *Fonctionnement* du cockpit (grille et consommation du mois par niveau) ou `GET /api/fonctionnement`. Réglages : `nexus-core/fonctionnement.yaml`.
 
 ---
 

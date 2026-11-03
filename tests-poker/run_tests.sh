@@ -19,6 +19,10 @@
 #    INTERVALLE_S     (défaut : 15)   délai entre deux interrogations
 #    DELAI_MAX_S      (défaut : 900)  délai maximal par mission (15 min)
 #    MISSIONS_JSON    (défaut : missions.json à côté du script)
+#    FONCTIONNEMENT   (facultatif) F1 | F2 | F3 | F4 : niveau imposé à toutes les
+#                     missions (sinon champ « fonctionnement » de la mission dans
+#                     missions.json, sinon défaut du serveur). F4 crée une décision
+#                     N3 de lancement : la mission reste « en_attente_n3 ».
 #
 #  Aucune action externe n'est déclenchée : les missions N3 restent
 #  « en_attente_n3 » jusqu'à une décision humaine dans le cockpit.
@@ -31,11 +35,16 @@ NEXUS_URL="${NEXUS_URL%/}"
 INTERVALLE_S="${INTERVALLE_S:-15}"
 DELAI_MAX_S="${DELAI_MAX_S:-900}"
 MISSIONS_JSON="${MISSIONS_JSON:-${DOSSIER}/missions.json}"
+FONCTIONNEMENT="${FONCTIONNEMENT:-}"
+FONCTIONNEMENT="${FONCTIONNEMENT^^}"
+if [[ -n "$FONCTIONNEMENT" && ! "$FONCTIONNEMENT" =~ ^F[1-4]$ ]]; then
+  printf 'ERREUR : FONCTIONNEMENT invalide « %s » (F1, F2, F3 ou F4).\n' "$FONCTIONNEMENT" >&2; exit 1
+fi
 HORODATAGE="$(date +%Y-%m-%d_%H%M%S)"
 RAPPORT="${DOSSIER}/resultats-${HORODATAGE}.md"
 
 # Statuts considérés comme finaux pour un test (la mission n'évoluera plus seule).
-STATUTS_FINAUX=" en_attente_n3 validee refusee revision terminee echouee suspendue "
+STATUTS_FINAUX=" en_attente_n3 validee refusee revision terminee echouee suspendue plafond_atteint "
 
 erreur() { printf 'ERREUR : %s\n' "$*" >&2; exit 1; }
 info()   { printf '%s\n' "$*" >&2; }
@@ -112,7 +121,8 @@ mapfile -t IDS < <(jq -r --argjson f "$FILTRE" \
   printf '# Résultats des tests NEXUS — %s\n\n' "$HORODATAGE"
   printf -- '- API : `%s`\n- Fichier de missions : `%s`\n- Missions lancées : %d\n' \
     "$NEXUS_URL" "$(basename "$MISSIONS_JSON")" "${#IDS[@]}"
-  printf -- '- Interrogation toutes les %d s, délai max %d s par mission\n\n' "$INTERVALLE_S" "$DELAI_MAX_S"
+  printf -- '- Interrogation toutes les %d s, délai max %d s par mission\n' "$INTERVALLE_S" "$DELAI_MAX_S"
+  printf -- '- Fonctionnement imposé : %s\n\n' "${FONCTIONNEMENT:-aucun (missions.json ou défaut du serveur)}"
   printf 'Légende niveau : `=` conforme · `+` plus élevé que prévu (prudence, acceptable) · `-` plus bas que prévu (**anomalie GATE**).\n\n'
 } > "$RAPPORT"
 
@@ -128,7 +138,11 @@ for ID in "${IDS[@]}"; do
   corps="$(jq -c '{titre, consigne}
                   + (if .service then {service} else {} end)
                   + (if .montant_eur then {montant_eur} else {} end)
-                  + (if .action then {action} else {} end)' <<<"$mission")"
+                  + (if .action then {action} else {} end)
+                  + (if .fonctionnement then {fonctionnement} else {} end)' <<<"$mission")"
+  if [[ -n "$FONCTIONNEMENT" ]]; then
+    corps="$(jq -c --arg f "$FONCTIONNEMENT" '. + {fonctionnement: $f}' <<<"$corps")"
+  fi
 
   info ""
   info "[$ID] ${titre}"
@@ -173,7 +187,7 @@ for ID in "${IDS[@]}"; do
   refus="$(jq '[.etapes[]? | select(.role == "checker" and .verdict == "refus")] | length' <<<"$detail")"
   cmp="$(comparer_niveaux "$niveau" "$attendu")"
 
-  if [[ "$cmp" == "-" || "$statut" =~ ^(echouee|suspendue|delai_depasse)$ ]]; then
+  if [[ "$cmp" == "-" || "$statut" =~ ^(echouee|suspendue|delai_depasse|plafond_atteint)$ ]]; then
     NB_ANOMALIES=$((NB_ANOMALIES + 1))
   else
     NB_OK=$((NB_OK + 1))
@@ -186,6 +200,9 @@ for ID in "${IDS[@]}"; do
   DETAILS+="- Mission API n°${mid} · service : \`${service}\` · statut : **${statut}**"$'\n'
   DETAILS+="- Niveau obtenu : **${niveau}** · attendu : ${attendu} · écart : \`${cmp}\`"$'\n'
   DETAILS+="- Durée : $(duree_lisible "$duree") · verdicts CHECKER : ${boucles} (dont ${refus} refus) · tokens : $(jq -r '.tokens // 0' <<<"$detail")"$'\n'
+  DETAILS+="- Fonctionnement : demandé $(jq -r '.fonctionnement_demande // "-"' <<<"$detail") · appliqué **$(jq -r '.fonctionnement // "-"' <<<"$detail")** · tokens entrée/sortie : $(jq -r '"\(.tokens_entree // 0) / \(.tokens_sortie // 0)"' <<<"$detail") · coût : $(jq -r '.cout_eur // 0' <<<"$detail") € · corrections : $(jq -r '.revisions // 0' <<<"$detail")"$'\n'
+  raison="$(jq -r '.fonctionnement_raison // empty' <<<"$detail")"
+  [[ -n "$raison" ]] && DETAILS+="- Relèvement du niveau : ${raison}"$'\n'
   msg="$(jq -r '.message // empty' <<<"$detail")"
   [[ -n "$msg" ]] && DETAILS+="- Message : ${msg}"$'\n'
   DETAILS+=$'\n'"### Critères de réussite (à cocher à la relecture)"$'\n\n'

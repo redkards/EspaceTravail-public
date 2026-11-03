@@ -169,6 +169,9 @@ services:
       BUDGET_TASK_TOKENS: ${BUDGET_TASK_TOKENS:-20000}
       LLM_MAX_CHARS: ${LLM_MAX_CHARS:-12000}
       OLLAMA_NUM_CTX: ${OLLAMA_NUM_CTX:-8192}
+      # Niveau de fonctionnement par défaut (F1 Éclair · F2 Standard · F3 Renforcé · F4 Expert payant)
+      NEXUS_FONCTIONNEMENT_DEFAUT: ${NEXUS_FONCTIONNEMENT_DEFAUT:-F2}
+      EUR_PAR_USD: ${EUR_PAR_USD:-0.92}
       N3_TIMEOUT_HOURS: ${N3_TIMEOUT_HOURS:-24}
       N3_DAILY_CAP: ${N3_DAILY_CAP:-15}
       # Vides en MVP : nexus-core n'envoie alors aucune notification

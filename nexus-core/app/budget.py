@@ -49,10 +49,13 @@ def verifier_mois(fournisseur: str) -> None:
         )
 
 
-def enregistrer(tokens: int, fournisseur: str) -> float:
-    """Ajoute la consommation aux compteurs du mois ; renvoie le coût en euros."""
+def enregistrer(tokens: int, fournisseur: str, cout: float | None = None) -> float:
+    """Ajoute la consommation aux compteurs du mois ; renvoie le coût en euros.
+
+    `cout` : coût déjà calculé (tarifs par modèle du niveau F4) ; sinon estimation générique.
+    """
     m = mois_courant()
-    cout = cout_eur(tokens, fournisseur)
+    cout = cout_eur(tokens, fournisseur) if cout is None else cout
     sentinel.incrementer(f"budget:{m}:tokens", tokens)
     if cout:
         sentinel.incrementer(f"budget:{m}:eur", cout)

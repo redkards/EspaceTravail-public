@@ -537,13 +537,19 @@ def projets_lister(auteur: str, a: dict) -> dict:
     "mothership_mission", "Confier une mission au Mothership",
     "Envoie une mission aux agents du Mini NEXUS MOTHERSHIP (nexus-core) et renvoie son id. "
     "Le Mothership classe la mission (N0 à N3) ; tout ce qui engage (argent, publication, envoi, "
-    "contrat…) attend la validation humaine dans le cockpit. Suivez-la avec mothership_statut.",
+    "contrat…) attend la validation humaine dans le cockpit. Suivez-la avec mothership_statut. "
+    "Niveau de fonctionnement facultatif : F1 Éclair (local, rapide), F2 Standard, F3 Renforcé "
+    "(double contrôle), F4 Expert (payant : crée une demande de lancement que SEUL le propriétaire "
+    "peut valider dans le cockpit ; la passerelle ne peut jamais l'approuver).",
     _objet({
         "titre": _texte("Titre de la mission.", 200),
         "consigne": _texte("Consigne complète pour les agents (contexte, livrable attendu)."),
         "service": {"type": "string", "maxLength": 80,
                     "description": "Optionnel : service cible (ex. « CONTENT-ARENA/redaction », « OPS-CORE/projets »)."},
         "projet": _projet("Optionnel : projet concerné."),
+        "fonctionnement": {"type": "string", "enum": ["F1", "F2", "F3", "F4"],
+                           "description": "Optionnel : niveau de fonctionnement (effort, tokens, coût, délai). "
+                                          "Défaut : celui du serveur (F2)."},
     }, ["titre", "consigne"]),
     ecriture=True,
 )
@@ -554,14 +560,22 @@ def mothership_mission(auteur: str, a: dict) -> dict:
         corps["service"] = a["service"]
     if a.get("projet"):
         corps["projet"] = a["projet"]
+    if a.get("fonctionnement"):
+        corps["fonctionnement"] = a["fonctionnement"]  # transmis tel quel ; F4 attend l'accord humain
     rep = _appel_core("POST", "/api/missions", json=corps)
     if rep.status_code not in (200, 201, 202):
         db.journaliser_seul(auteur, "mothership_mission", "mission:refusee", f"http {rep.status_code}")
         raise OutilErreur(f"nexus-core a refusé la mission (HTTP {rep.status_code}) : {_detail(rep)}")
     d = rep.json()
     db.journaliser_seul(auteur, "mothership_mission", f"mission:{d.get('id')}")
-    return {"id": d.get("id"), "statut": d.get("statut"), "projet": a.get("projet"),
-            "message": "Mission transmise au Mothership. " + _rappel()}
+    res = {"id": d.get("id"), "statut": d.get("statut"), "projet": a.get("projet"),
+           "fonctionnement": d.get("fonctionnement"), "message": "Mission transmise au Mothership. " + _rappel()}
+    if d.get("message"):
+        res["note_mothership"] = d["message"]
+    if d.get("fonctionnement_demande") == "F4" and d.get("statut") == "en_attente_n3":
+        res["message"] = ("Lancement F4 demandé : la mission ne démarrera qu'après validation du propriétaire "
+                          "dans le cockpit (coût estimé indiqué dans la décision). " + _rappel())
+    return res
 
 
 @outil(
@@ -576,7 +590,8 @@ def mothership_statut(auteur: str, a: dict) -> dict:
     if rep.status_code != 200:
         raise OutilErreur(f"nexus-core a répondu HTTP {rep.status_code} : {_detail(rep)}")
     m = rep.json()
-    res = {k: m.get(k) for k in ("id", "titre", "service", "directeur", "statut", "niveau", "message", "cree_le", "maj_le", "projet")}
+    res = {k: m.get(k) for k in ("id", "titre", "service", "directeur", "statut", "niveau", "message", "cree_le", "maj_le", "projet",
+                                 "fonctionnement_demande", "fonctionnement", "fonctionnement_raison", "tokens", "cout_eur", "duree_s")}
     livrable = m.get("livrable_texte")
     res["livrable"] = (livrable[:6000] + " […]") if livrable and len(livrable) > 6000 else livrable
     res["etapes"] = [{"agent": e.get("agent_id"), "role": e.get("role"), "verdict": e.get("verdict")} for e in m.get("etapes") or []]

@@ -24,6 +24,11 @@
 #                    utile quand le script tourne sur le VPS lui-même
 #    MODELES_JSON    (défaut : missions-modeles.json à côté du script)
 #    SIMULATION=1    affiche le JSON sans l'envoyer
+#    FONCTIONNEMENT  (facultatif) F1 Éclair | F2 Standard | F3 Renforcé | F4 Expert
+#                    (défaut : celui du serveur, NEXUS_FONCTIONNEMENT_DEFAUT).
+#                    F4 est payant : une décision N3 avec le coût estimé est créée,
+#                    la mission ne démarre qu'après validation dans le cockpit.
+#    REPLI_F3        (défaut 1) si F4 est indisponible, lancer en F3 ; 0 = refuser
 #
 #  Aucune action externe : une mission N3 reste « en_attente_n3 » jusqu'à
 #  la décision du propriétaire dans le cockpit (/cockpit).
@@ -37,6 +42,11 @@ MODELES_JSON="${MODELES_JSON:-${DOSSIER}/missions-modeles.json}"
 PROJETS_VALIDES=" paradoxx nexus poker-winners poker-feeling redkards top-solver youtube-poker-winner freelance-ia esct-boxe turf divers "
 
 erreur() { printf 'ERREUR : %s\n' "$*" >&2; exit 1; }
+FONCTIONNEMENT="${FONCTIONNEMENT:-}"
+FONCTIONNEMENT="${FONCTIONNEMENT^^}"
+[[ -z "$FONCTIONNEMENT" || "$FONCTIONNEMENT" =~ ^F[1-4]$ ]] \
+  || { printf 'ERREUR : FONCTIONNEMENT invalide « %s » (F1, F2, F3 ou F4).\n' "$FONCTIONNEMENT" >&2; exit 1; }
+REPLI_F3="${REPLI_F3:-1}"
 info()   { printf '%s\n' "$*" >&2; }
 
 usage() {
@@ -97,9 +107,16 @@ else
   ATTENDU="$(jq -r '.niveau_attendu' <<<"$MODELE")"
 fi
 
+# Niveau de fonctionnement (facultatif) et repli F3 pour F4.
+if [[ -n "$FONCTIONNEMENT" ]]; then
+  CORPS="$(jq -c --arg f "$FONCTIONNEMENT" --argjson r "$([[ "$REPLI_F3" == "0" ]] && echo false || echo true)" \
+            '. + {fonctionnement: $f, repli_f3: $r}' <<<"$CORPS")"
+fi
+
 info "== NEXUS — mission projet « ${PROJET} » =="
 info "Titre : $(jq -r '.titre' <<<"$CORPS")"
 info "Service : $(jq -r '.service // "(choisi par PRIME)"' <<<"$CORPS") · niveau attendu : ${ATTENDU}"
+info "Fonctionnement : ${FONCTIONNEMENT:-défaut du serveur}"
 
 if [[ "${SIMULATION:-0}" == "1" ]]; then
   info "SIMULATION : rien n'est envoyé. Corps JSON :"
@@ -127,7 +144,9 @@ case "$code" in
   200|202)
     mid="$(jq -r '.id // "?"' "$TMP_REPONSE")"
     statut="$(jq -r '.statut // "recue"' "$TMP_REPONSE")"
-    info "Mission n°${mid} envoyée (statut : ${statut})."
+    info "Mission n°${mid} envoyée (statut : ${statut}, fonctionnement : $(jq -r '.fonctionnement // "?"' "$TMP_REPONSE"))."
+    msg="$(jq -r '.message // empty' "$TMP_REPONSE")"
+    [[ -z "$msg" ]] || info "Note : ${msg}"
     info "Suivi : ${NEXUS_URL}/cockpit  ·  API : GET ${NEXUS_URL}/api/missions/${mid}"
     ;;
   000) erreur "serveur injoignable (${NEXUS_URL}). Sur le VPS, essayez NEXUS_RESOLVE=hote:443:<IP publique>." ;;

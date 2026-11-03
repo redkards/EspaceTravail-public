@@ -26,7 +26,14 @@ class FauxCore:
         if req.headers.get("x-nexus-key") != CLE_CORE:
             return httpx.Response(401, json={"detail": "Clé API absente ou invalide"})
         if req.method == "POST" and req.url.path == "/api/missions":
-            return httpx.Response(202, json={"id": 42, "statut": "recue"})
+            corps = json.loads(req.content or b"{}")
+            f = corps.get("fonctionnement") or "F2"
+            if f == "F4":  # comme nexus-core : décision N3 de lancement, aucune exécution
+                return httpx.Response(202, json={"id": 43, "statut": "en_attente_n3", "fonctionnement_demande": "F4",
+                                                 "fonctionnement": "F4", "decision_id": 8, "cout_estime_eur": 0.29,
+                                                 "message": "Lancement F4 soumis à validation — coût estimé 0,29 €."})
+            return httpx.Response(202, json={"id": 42, "statut": "recue", "fonctionnement_demande": f,
+                                             "fonctionnement": f})
         if req.method == "GET" and req.url.path == "/api/missions/42":
             return httpx.Response(200, json={"id": 42, "titre": "Test", "statut": "en_attente_n3", "niveau": "N3",
                                              "livrable_texte": "Brouillon", "etapes": [{"agent_id": "a", "role": "analyst"}]})

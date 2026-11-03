@@ -61,7 +61,9 @@ def test_deux_refus_tiennent_dans_budget_par_defaut(monkeypatch):
     monkeypatch.delenv("BUDGET_TASK_TOKENS", raising=False)
     FournisseurFactice.tokens_par_appel = 2000  # appels réalistes pour un petit modèle
     FournisseurFactice.script["checker"].extend([REFUS, REFUS, ACCEPTE])
-    mid = creer_mission(titre="Checklist", consigne="Liste les étapes", service="OPS-CORE/projets")
+    # 2 refus suivis d'une correction acceptée exigent F3 (2 corrections permises).
+    mid = creer_mission(titre="Checklist", consigne="Liste les étapes", service="OPS-CORE/projets",
+                        fonctionnement="F3")
     pipeline.traiter(mid)
     m = lire_mission(mid)
     assert m.statut == "terminee", m.message

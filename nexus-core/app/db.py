@@ -69,6 +69,16 @@ def session_scope():
 # Colonnes ajoutées après la première version : (table, colonne, définition SQL portable).
 COLONNES_AJOUTEES = [
     ("missions", "projet", "VARCHAR(40) NOT NULL DEFAULT 'divers'"),
+    ("missions", "fonctionnement_demande", "VARCHAR(2) NOT NULL DEFAULT 'F2'"),
+    ("missions", "fonctionnement", "VARCHAR(2) NOT NULL DEFAULT 'F2'"),
+    ("missions", "fonctionnement_raison", "TEXT"),
+    ("missions", "repli_f3", "BOOLEAN NOT NULL DEFAULT {VRAI}"),
+    ("missions", "tokens_entree", "INTEGER NOT NULL DEFAULT 0"),
+    ("missions", "tokens_sortie", "INTEGER NOT NULL DEFAULT 0"),
+    ("missions", "duree_s", "FLOAT NOT NULL DEFAULT 0"),
+    ("missions", "revisions", "INTEGER NOT NULL DEFAULT 0"),
+    ("missions", "attente", "VARCHAR(30)"),
+    ("decisions", "objet", "VARCHAR(20) NOT NULL DEFAULT 'livrable'"),
 ]
 
 
@@ -77,8 +87,10 @@ def migrer(eng: Engine) -> list[str]:
     ajoutees = []
     existantes = {t: {c["name"] for c in inspect(eng).get_columns(t)}
                   for t in {t for t, _, _ in COLONNES_AJOUTEES}}
+    vrai = "TRUE" if eng.dialect.name == "postgresql" else "1"
     for table, colonne, definition in COLONNES_AJOUTEES:
         if colonne not in existantes[table]:
+            definition = definition.replace("{VRAI}", vrai)
             with eng.begin() as c:
                 c.execute(text(f"ALTER TABLE {table} ADD COLUMN {colonne} {definition}"))
                 if colonne == "projet":

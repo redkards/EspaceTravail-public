@@ -1,7 +1,7 @@
 """Modèle de données (SQLAlchemy 2)."""
 from datetime import datetime, timezone
 
-from sqlalchemy import DateTime, Float, ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -35,6 +35,18 @@ class Mission(Base):
     message: Mapped[str | None] = mapped_column(Text, nullable=True)
     # Code du projet (registre projets.yaml) ; « divers » par défaut.
     projet: Mapped[str] = mapped_column(String(40), default="divers", server_default="divers", index=True)
+    # Niveau de fonctionnement (F1..F4) : demandé, appliqué (ne peut que monter) et raison.
+    fonctionnement_demande: Mapped[str] = mapped_column(String(2), default="F2", server_default="F2")
+    fonctionnement: Mapped[str] = mapped_column(String(2), default="F2", server_default="F2", index=True)
+    fonctionnement_raison: Mapped[str | None] = mapped_column(Text, nullable=True)
+    repli_f3: Mapped[bool] = mapped_column(Boolean, default=True, server_default="1")
+    # Mesures : tokens entrée/sortie, durée cumulée (s), boucles de correction effectuées.
+    tokens_entree: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
+    tokens_sortie: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
+    duree_s: Mapped[float] = mapped_column(Float, default=0.0, server_default="0")
+    revisions: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
+    # Attente particulière (ex. « lancement_f4 » : la mission attend l'accord avant de démarrer).
+    attente: Mapped[str | None] = mapped_column(String(30), nullable=True)
 
 
 class Etape(Base):
@@ -55,6 +67,8 @@ class Decision(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     mission_id: Mapped[int] = mapped_column(ForeignKey("missions.id"), index=True)
     niveau: Mapped[str] = mapped_column(String(2))
+    # « livrable » (fiche N3 classique) ou « lancement_f4 » (accord avant un lancement payant).
+    objet: Mapped[str] = mapped_column(String(20), default="livrable", server_default="livrable")
     resume: Mapped[str] = mapped_column(Text)
     recommandation: Mapped[str] = mapped_column(Text)
     cout_estime_eur: Mapped[float] = mapped_column(Float, default=0.0)

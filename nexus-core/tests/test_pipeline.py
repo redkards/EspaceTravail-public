@@ -27,7 +27,9 @@ def test_checker_refus_puis_acceptation(tmp_path):
 
 def test_trois_refus_echouee():
     FournisseurFactice.script["checker"].extend([REFUS, REFUS, REFUS])
-    mid = creer_mission(titre="Checklist", consigne="Liste les étapes", service="OPS-CORE/projets")
+    # F3 : 2 boucles de correction permises → 3 refus avant l'escalade.
+    mid = creer_mission(titre="Checklist", consigne="Liste les étapes", service="OPS-CORE/projets",
+                        fonctionnement="F3")
     pipeline.traiter(mid)
     m = lire_mission(mid)
     assert m.statut == "echouee"
@@ -57,7 +59,7 @@ def test_budget_tokens_depasse_arret(monkeypatch):
     mid = creer_mission(titre="Checklist", consigne="Liste les étapes", service="OPS-CORE/projets")
     pipeline.traiter(mid)
     m = lire_mission(mid)
-    assert m.statut == "echouee"
+    assert m.statut == "plafond_atteint"  # arrêt propre (niveaux de fonctionnement)
     assert "Budget" in m.message
     assert len(FournisseurFactice.appels) == 2  # arrêt juste après le dépassement
 

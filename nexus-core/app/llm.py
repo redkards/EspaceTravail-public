@@ -23,6 +23,14 @@ class Reponse:
     fournisseur: str
     modele: str = ""
     bascule: str | None = None  # motif si le cloud a échoué et que le local a répondu
+    tokens_entree: int = 0
+    tokens_sortie: int = 0
+
+    def __post_init__(self):
+        # Répartition par défaut quand le fournisseur ne détaille pas entrée/sortie.
+        if not self.tokens_entree and not self.tokens_sortie and self.tokens:
+            self.tokens_sortie = self.tokens // 4
+            self.tokens_entree = self.tokens - self.tokens_sortie
 
 
 def estimer_tokens(texte: str) -> int:
@@ -51,7 +59,8 @@ def _masquer(texte: str) -> str:
 
 
 def _ollama_chat(base_url: str, modele: str, systeme: str, utilisateur: str, role: str,
-                 temperature: float, en_tetes: dict | None = None, local: bool = True) -> dict:
+                 temperature: float, en_tetes: dict | None = None, local: bool = True,
+                 num_ctx: int | None = None, timeout: float | None = None) -> dict:
     corps = {
         "model": modele,
         "messages": [{"role": "system", "content": systeme},
@@ -61,32 +70,38 @@ def _ollama_chat(base_url: str, modele: str, systeme: str, utilisateur: str, rol
     }
     if local:
         # Contexte assez grand pour LLM_MAX_CHARS (≈ 12 000 caractères ≈ 4 000 tokens) + réponse.
-        corps["options"]["num_ctx"] = cfg().ollama_num_ctx
+        corps["options"]["num_ctx"] = num_ctx or cfg().ollama_num_ctx
     if role == "checker":
         corps["format"] = "json"  # sortie contrainte en JSON
-    r = httpx.post(f"{base_url}/api/chat", json=corps, headers=en_tetes or {}, timeout=cfg().llm_timeout_s)
+    r = httpx.post(f"{base_url}/api/chat", json=corps, headers=en_tetes or {},
+                   timeout=timeout or cfg().llm_timeout_s)
     r.raise_for_status()
     return r.json()
 
 
 def _reponse(d: dict, systeme: str, utilisateur: str, nom: str, modele: str) -> Reponse:
     texte = (d.get("message") or {}).get("content", "")
-    tokens = int(d.get("prompt_eval_count") or 0) + int(d.get("eval_count") or 0)
-    return Reponse(texte, tokens or estimer_tokens(systeme + utilisateur + texte), nom, modele)
+    entree, sortie = int(d.get("prompt_eval_count") or 0), int(d.get("eval_count") or 0)
+    if entree + sortie:
+        return Reponse(texte, entree + sortie, nom, modele, tokens_entree=entree, tokens_sortie=sortie)
+    e, so = estimer_tokens(systeme + utilisateur), estimer_tokens(texte)
+    return Reponse(texte, e + so, nom, modele, tokens_entree=e, tokens_sortie=so)
 
 
 class FournisseurOllama:
     nom = "ollama"
 
-    def __init__(self, modele_force: str | None = None):
+    def __init__(self, modele_force: str | None = None, num_ctx: int | None = None):
         # modele_force : modèle local utilisé quand on remplace un fournisseur cloud.
         self.modele_force = modele_force
+        self.num_ctx = num_ctx
 
     def appeler(self, systeme: str, utilisateur: str, role: str = "", temperature: float = 0.3,
-                modele: str | None = None) -> Reponse:
+                modele: str | None = None, timeout: float | None = None) -> Reponse:
         m = self.modele_force or modele_pour(role, modele)
         try:
-            d = _ollama_chat(cfg().ollama_url, m, systeme, utilisateur, role, temperature)
+            d = _ollama_chat(cfg().ollama_url, m, systeme, utilisateur, role, temperature,
+                             num_ctx=self.num_ctx, timeout=timeout)
         except Exception as e:
             raise ErreurLLM(f"Ollama local injoignable ou en erreur : {e}") from e
         return _reponse(d, systeme, utilisateur, self.nom, m)
@@ -117,12 +132,13 @@ class FournisseurOllamaCloud:
     ESSAIS = 2  # appel initial + 1 nouvel essai
     MODELE_DEFAUT = "gemma4:31b"
 
-    def __init__(self, modele_force: str | None = None):
+    def __init__(self, modele_force: str | None = None, num_ctx: int | None = None):
         # modele_force : modèle cloud imposé (cas de la bascule depuis Anthropic).
         self.modele_force = modele_force
+        self.num_ctx = num_ctx  # utilisé seulement par le repli local
 
     def appeler(self, systeme: str, utilisateur: str, role: str = "", temperature: float = 0.3,
-                modele: str | None = None) -> Reponse:
+                modele: str | None = None, timeout: float | None = None) -> Reponse:
         c = cfg()
         m = self.modele_force or modele_pour(role, modele)
         en_tetes = {"Authorization": f"Bearer {c.ollama_api_key}"}
@@ -130,13 +146,14 @@ class FournisseurOllamaCloud:
         for _ in range(self.ESSAIS):
             try:
                 d = _ollama_chat(c.ollama_cloud_url, m, systeme, utilisateur, role, temperature,
-                                 en_tetes, local=False)
+                                 en_tetes, local=False, timeout=timeout)
                 return _reponse(d, systeme, utilisateur, self.nom, m)
             except Exception as e:
                 motif = _motif(e)
                 log.warning("Ollama Cloud en erreur (%s) sur le modèle %s", motif, m)
         if c.llm_fallback == "ollama" and ollama_local_joignable():
-            r = FournisseurOllama(c.modele_local).appeler(systeme, utilisateur, role, temperature)
+            r = FournisseurOllama(c.modele_local, self.num_ctx).appeler(systeme, utilisateur, role, temperature,
+                                                                        timeout=timeout)
             r.bascule = f"Ollama Cloud en échec ({motif}) : repli sur Ollama local ({c.modele_local})"
             return r
         raise ErreurLLM(_masquer(f"Ollama Cloud en échec ({motif}) et aucun repli disponible."))
@@ -147,17 +164,20 @@ class FournisseurOllamaCloud:
 class FournisseurAnthropic:
     nom = "anthropic"
 
+    MAX_TOKENS_SORTIE = 1500
+
     def appeler(self, systeme: str, utilisateur: str, role: str = "", temperature: float = 0.3,
-                modele: str | None = None) -> Reponse:
+                modele: str | None = None, timeout: float | None = None) -> Reponse:
         c = cfg()
+        m = modele or c.anthropic_model
         try:
             r = httpx.post(
                 "https://api.anthropic.com/v1/messages",
                 headers={"x-api-key": c.anthropic_api_key, "anthropic-version": "2023-06-01",
                          "content-type": "application/json"},
-                json={"model": c.anthropic_model, "max_tokens": 1500, "temperature": temperature,
+                json={"model": m, "max_tokens": self.MAX_TOKENS_SORTIE, "temperature": temperature,
                       "system": systeme, "messages": [{"role": "user", "content": utilisateur}]},
-                timeout=c.llm_timeout_s,
+                timeout=timeout or c.llm_timeout_s,
             )
             r.raise_for_status()
             d = r.json()
@@ -165,8 +185,10 @@ class FournisseurAnthropic:
             raise ErreurLLM(f"Anthropic en erreur : {e}") from e
         texte = "".join(b.get("text", "") for b in d.get("content", []) if b.get("type") == "text")
         u = d.get("usage") or {}
-        tokens = int(u.get("input_tokens") or 0) + int(u.get("output_tokens") or 0)
-        return Reponse(texte, tokens or estimer_tokens(systeme + utilisateur + texte), self.nom)
+        entree, sortie = int(u.get("input_tokens") or 0), int(u.get("output_tokens") or 0)
+        if not entree + sortie:
+            entree, sortie = estimer_tokens(systeme + utilisateur), estimer_tokens(texte)
+        return Reponse(texte, entree + sortie, self.nom, m, tokens_entree=entree, tokens_sortie=sortie)
 
 
 # --- Factice (tests, démonstration hors ligne) ---------------------------------
@@ -190,16 +212,21 @@ class FournisseurFactice:
         cls.appels = []
         cls.entrees = []
 
+    def __init__(self, *_, **__):
+        pass  # accepte les mêmes paramètres que les autres fournisseurs
+
     def appeler(self, systeme: str, utilisateur: str, role: str = "", temperature: float = 0.3,
-                modele: str | None = None) -> Reponse:
+                modele: str | None = None, timeout: float | None = None) -> Reponse:
         FournisseurFactice.appels.append(role)
         FournisseurFactice.entrees.append((role, utilisateur))
         if FournisseurFactice.script[role]:
             texte = FournisseurFactice.script[role].popleft()
         else:
             texte = self._defaut(role, utilisateur)
-        tokens = FournisseurFactice.tokens_par_appel or estimer_tokens(systeme + utilisateur + texte)
-        return Reponse(texte, tokens, self.nom)
+        if FournisseurFactice.tokens_par_appel:
+            return Reponse(texte, FournisseurFactice.tokens_par_appel, self.nom, modele or "")
+        e, so = estimer_tokens(systeme + utilisateur), estimer_tokens(texte)
+        return Reponse(texte, e + so, self.nom, modele or "", tokens_entree=e, tokens_sortie=so)
 
     @staticmethod
     def _defaut(role: str, utilisateur: str) -> str:
@@ -266,6 +293,32 @@ def fournisseur():
         _avertir_une_fois(motif)
         return _repli_gratuit()
     return FournisseurOllama()
+
+
+def fournisseur_niveau(code_fournisseur: str, num_ctx: int | None = None):
+    """Fournisseur d'un niveau de fonctionnement (ollama_local | courant | anthropic).
+
+    En mode test (LLM_PROVIDER=fake), le fournisseur factice est toujours utilisé.
+    La disponibilité d'Anthropic (budget, clé) est vérifiée avant, par fonctionnement.py.
+    """
+    c = cfg()
+    if c.llm_provider == "fake":
+        return FournisseurFactice()
+    if code_fournisseur == "ollama_local":
+        return FournisseurOllama(c.modele_local, num_ctx)
+    if code_fournisseur == "anthropic":
+        return FournisseurAnthropic()
+    f = fournisseur()
+    if hasattr(f, "num_ctx") and num_ctx:
+        f.num_ctx = num_ctx
+    return f
+
+
+def fournisseur_controle_local(num_ctx: int | None = None):
+    """Fournisseur du double contrôle : toujours le modèle local (factice en test)."""
+    if cfg().llm_provider == "fake":
+        return FournisseurFactice()
+    return FournisseurOllama(cfg().modele_local, num_ctx)
 
 
 def info() -> dict:
