@@ -9,7 +9,8 @@ Contraintes : gratuit / open source uniquement ; aucune clé API payante requise
 partitions.sh           # crée les 4 partitions P1..P4 (agent INFRA)
 install.sh              # installation en une commande (agent INFRA)
 uninstall.sh            # arrêt + suppression des conteneurs (garde les volumes sauf --purge)
-backup.sh               # dump PostgreSQL + export n8n vers ./backups/
+backup.sh               # copies SQLite cohérentes, dumps PostgreSQL, export n8n, .env chiffré -> ./backups/ (7 gardées, --hors-serveur rclone)
+restore.sh              # restauration d'une sauvegarde datée (vérif, arrêt, UID 10001, redémarrage, /api/sante)
 docker-compose.yml      # agent INFRA (MVP par défaut ; profils local / complet)
 docker-compose.complet.yml # agent INFRA (surcouche du mode complet)
 Caddyfile.mvp           # agent INFRA (cockpit seul, 80/443)
@@ -24,29 +25,34 @@ README.md               # agent INFRA (guide FR)
 
 | Service | Image | Exposé |
 |---|---|---|
-| caddy | caddy:2.8 | 80, 443 (cockpit), 8443 (n8n), 8444 (Uptime Kuma), 8445 (ntfy) — HTTPS Let's Encrypt sur `${NEXUS_HOST}` (nom d'hôte du VPS, ex. srvXXXX.hstgr.cloud) |
-| postgres | pgvector/pgvector:pg16 | interne |
-| redis | redis:7-alpine | interne |
-| n8n | n8nio/n8n:1.64.3 | interne (via caddy :8443) ; base PostgreSQL (schéma `n8n`) |
-| ollama | ollama/ollama:0.3.14 | interne ; modèle par défaut `qwen2.5:3b` (variable `NEXUS_MODEL`) |
-| nexus-core | build ./nexus-core | interne :8000 (via caddy :443) |
+| caddy | caddy:2.8 | 80, 443 (cockpit), 8443 (n8n), 8444 (Uptime Kuma), 8445 (ntfy) liés à `${NEXUS_BIND_IP}` — HTTPS Let's Encrypt sur `${NEXUS_HOST}` (ex. srvXXXX.hstgr.cloud) |
+| postgres | pgvector/pgvector:pg16 | interne (complet) ; **réservé** : pgvector non utilisé par le MVP |
+| redis | redis:7-alpine | interne (complet) ; **réservé, non utilisé par le MVP** |
+| n8n | n8nio/n8n:2.45.6 | interne (via caddy :8443) ; base PostgreSQL ; `N8N_BLOCK_ENV_ACCESS_IN_NODE=true` |
+| ollama | ollama/ollama:0.40.12 | interne ; modèle local `qwen2.5:3b` (`NEXUS_MODEL_LOCAL`) |
+| nexus-core | build ./nexus-core | interne :8000 (via caddy :443) ; `cap_drop: ALL`, `read_only` + tmpfs /tmp ; `./nexus-core/projets.yaml` monté en `/config/projets.yaml:ro` |
+| nexus-bridge | build ./nexus-bridge | interne :8000 (via caddy :443, `/mcp*` et `/bridge*`) — fait partie du MVP ; `cap_drop: ALL`, `read_only` |
 | uptime-kuma | louislam/uptime-kuma:1 | interne (via caddy :8444) |
-| ntfy | binwiederhier/ntfy:v2.11.0 | interne (via caddy :8445) ; topic `${NTFY_TOPIC}` |
+| ntfy | binwiederhier/ntfy:v2.11.0 | interne (via caddy :8445) ; `NTFY_AUTH_DEFAULT_ACCESS=deny-all`, sujet `${NTFY_TOPIC}` : écriture anonyme, lecture pour `NTFY_USER` |
+
+Tous les services : `security_opt: no-new-privileges:true`. Caddy : en-têtes CSP `frame-ancestors 'none'`, X-Frame-Options DENY, nosniff, Referrer-Policy no-referrer, HSTS 1 an ; journaux d'accès et d'erreurs filtrés (URI `/mcp*` → `/mcp/***`, en-têtes X-Nexus-Key / X-Cockpit-Auth / Authorization / Cookie supprimés).
 
 Limites (mem_limit / cpus, partition P1 ≤ 5 Go et ≤ 1,5 vCPU) : ollama 2944m/0.8, postgres 640m/0.2, n8n 640m/0.15, nexus-core 384m/0.1, nexus-bridge 128m/0.1, redis 128m/0.05, uptime-kuma 128m/0.03, caddy 64m/0.05, ntfy 48m/0.02 (total 5104 Mo, 1,5 vCPU). Projet compose `p1-nexus`, réseau `p1-nexus-net`. Données persistantes en bind mounts `./data/<service>` (aucun volume nommé).
-Cockpit (:443) protégé par basic auth Caddy (`COCKPIT_USER` / hash de `COCKPIT_PASSWORD`). nexus-core exige aussi l'en-tête `X-Nexus-Key: ${NEXUS_API_KEY}` pour l'API (le cockpit servi par nexus-core l'injecte côté serveur : les routes `/cockpit/*` sont protégées par Caddy, l'API `/api/*` par la clé).
+Cockpit (:443) protégé par basic auth Caddy (`COCKPIT_USER` / hash de `COCKPIT_PASSWORD`) ; Caddy supprime tout `X-Cockpit-Auth` venant du client puis, sur `/cockpit*` et après le basic auth, ajoute `X-Cockpit-Auth: ${COCKPIT_INTERNAL}`, exigé par nexus-core. nexus-core exige aussi l'en-tête `X-Nexus-Key: ${NEXUS_API_KEY}` pour l'API (le cockpit servi par nexus-core l'injecte côté serveur : les routes `/cockpit/*` sont protégées par Caddy, l'API `/api/*` par la clé).
 
 ## Variables d'environnement (.env)
 
 NEXUS_HOST, ACME_EMAIL, POSTGRES_USER=nexus, POSTGRES_PASSWORD, POSTGRES_DB=nexus, REDIS_URL=redis://redis:6379/0,
 NEXUS_API_KEY, COCKPIT_USER=decideur, COCKPIT_PASSWORD, COCKPIT_PASSWORD_HASH (bcrypt pour Caddy),
+COCKPIT_INTERNAL (64 hex, caddy + nexus-core), LEDGER_HMAC_KEY (64 hex, nexus-core), NEXUS_MAX_MISSIONS (vide = auto),
 N8N_ENCRYPTION_KEY, N8N_BASIC_USER, N8N_BASIC_PASSWORD,
 NEXUS_MODEL=qwen2.5:3b, OLLAMA_URL=http://ollama:11434,
-LLM_PROVIDER=ollama (valeurs possibles : ollama | anthropic — anthropic désactivé tant que ANTHROPIC_API_KEY vide),
+LLM_PROVIDER=ollama et LLM_FALLBACK=ollama par défaut (ollama | ollama_cloud | anthropic — anthropic désactivé tant que ANTHROPIC_API_KEY vide),
 ANTHROPIC_API_KEY=, ANTHROPIC_MODEL=,
-BUDGET_MONTHLY_EUR=0, BUDGET_TASK_TOKENS=6000,
+BUDGET_MONTHLY_EUR=0, BUDGET_TASK_TOKENS=20000, NEXUS_FONCTIONNEMENT_DEFAUT=F2, EUR_PAR_USD=0.92,
 N3_TIMEOUT_HOURS=24, N3_DAILY_CAP=15,
-NTFY_URL=http://ntfy, NTFY_TOPIC=nexus-<aléatoire>,
+NTFY_URL=https://ntfy.sh (MVP ; http://ntfy forcé en complet), NTFY_TOPIC=nexus-<16 hex>, NTFY_USER, NTFY_PASSWORD,
+BACKUP_PASSPHRASE (gpg), BACKUP_AGE_RECIPIENT (facultatif), NEXUS_RCLONE_REMOTE=gdrive,
 DATABASE_URL=postgresql+psycopg://nexus:${POSTGRES_PASSWORD}@postgres:5432/nexus
 
 ## nexus-core (agent CORE)
@@ -54,7 +60,7 @@ DATABASE_URL=postgresql+psycopg://nexus:${POSTGRES_PASSWORD}@postgres:5432/nexus
 Python 3.12, FastAPI, SQLAlchemy 2, psycopg 3, httpx, PyYAML, uvicorn. Dockerfile slim, utilisateur non root. Tests pytest avec SQLite et LLM factice (aucun réseau).
 
 ### Agents (fichiers YAML dans nexus-core/agents/) — Mini Mothership = 93 rôles
-93 = noyau (5) + 8 directeurs + 20 services × quadrant COLLECTOR / ANALYST / CHECKER / EXECUTOR (80 agents).
+93 = noyau (5) + 8 directeurs (9 directions en comptant le noyau) + 20 services × quadrant COLLECTOR / ANALYST / CHECKER / EXECUTOR (80 agents). COLLECTOR, ANALYST et CHECKER appellent l'IA ; EXECUTOR, SENTINEL, LEDGER et BUDGET sont déterministes.
 - Noyau (5) : NEXUS-PRIME, NEXUS-GATE, NEXUS-SENTINEL, NEXUS-LEDGER, NEXUS-BUDGET.
 - 8 directeurs : DIR-STRATEGIE, DIR-CROISSANCE, DIR-CREATION, DIR-TECH, DIR-OPERATIONS, DIR-SAVOIR, DIR-AGENTOPS, DIR-IMPACT.
 - 7 services pilotes d'origine (1 par direction) :
@@ -75,11 +81,13 @@ Python 3.12, FastAPI, SQLAlchemy 2, psycopg 3, httpx, PyYAML, uvicorn. Dockerfil
 - Format YAML d'un agent : `id, nom, role (prime|gate|sentinel|ledger|budget|directeur|collector|analyst|checker|executor), direction, departement, service, mission, consignes (prompt système FR), outils_autorises (liste), modele (optionnel)`.
 
 ### Modèle de données (tables)
-missions(id, titre, consigne, service, statut[recue|en_cours|en_attente_n3|validee|refusee|revision|terminee|echouee|suspendue|plafond_atteint], niveau[N0..N3], cree_le, maj_le, livrable_texte, tokens, cout_eur, projet, fonctionnement_demande, fonctionnement, fonctionnement_raison, repli_f3, tokens_entree, tokens_sortie, duree_s, revisions, attente)
+missions(id, titre, consigne, service, statut[recue|en_attente_place|en_cours|en_attente_n3|validee|refusee|revision|terminee|echouee|suspendue|plafond_atteint|a_reformuler], niveau[N0..N3], cree_le, maj_le, livrable_texte, tokens, cout_eur, projet, fonctionnement_demande, fonctionnement, fonctionnement_raison, repli_f3, tokens_entree, tokens_sortie, duree_s, revisions, attente)
 etapes(id, mission_id, agent_id, role, entree, sortie, verdict, tokens, cree_le)
 decisions(id, mission_id, niveau, objet[livrable|lancement_f4], resume, recommandation, cout_estime_eur, risque[faible|moyen|eleve], sources, avis_checker, statut[en_attente|validee|refusee|revision|expiree], cree_le, decide_le, commentaire)
 ledger(id, horodatage, acteur, action, mission_id, details_json, hash_prec, hash) — chaîne de hachage SHA-256, append-only (aucune route de suppression/modification).
 etat(cle, valeur) — kill switch (`kill:grille`, `kill:dir:<x>`, `kill:agent:<id>`), compteurs budget.
+
+Statuts ajoutés : `en_attente_place` (file, NEXUS_MAX_MISSIONS ; non final), `a_reformuler` (consigne à reformuler ; final), `plafond_atteint` (final, livrable partiel), `echouee` avec motif « interrompue par un redémarrage » pour une mission coupée.
 
 ### Pipeline d'une mission (POST /api/missions {titre, consigne, service?, montant_eur?, action?})
 1. SENTINEL vérifie le kill switch → si actif, statut `suspendue`, journal.
@@ -103,7 +111,7 @@ F1 Éclair (ollama local, 6 000, 0, non, 4 000, 4096, 180 s, 0 €) · F2 Standa
 - Mesures par mission : fonctionnement_demande / fonctionnement, fonctionnement_raison, tokens_entree, tokens_sortie, cout_eur, duree_s, revisions ; LEDGER : fonctionnement_applique, fonctionnement_releve, plafond_atteint, mission_bilan.
 
 ### API (préfixe /api, clé X-Nexus-Key)
-GET /api/sante (+ fonctionnement_defaut) · GET /api/fonctionnement (grille + consommation du mois par niveau : missions, tokens, €, durée moyenne) · POST /api/missions · GET /api/missions · GET /api/missions/{id} (avec étapes) · GET /api/decisions?statut=en_attente · POST /api/decisions/{id}/valider|refuser|reviser {commentaire} · POST /api/killswitch {portee: grille|direction|agent, cible?, actif: bool} · GET /api/ledger?limit= · GET /api/ledger/verifier (vérifie la chaîne) · GET /api/agents · GET /api/budget.
+GET /api/sante (+ fonctionnement_defaut) · GET /api/fonctionnement (grille + consommation du mois par niveau : missions, tokens, €, durée moyenne) · POST /api/missions · GET /api/missions · GET /api/missions/{id} (avec étapes) · GET /api/decisions?statut=en_attente · POST /api/decisions/{id}/valider|refuser|reviser {commentaire} · POST /api/killswitch {portee: grille|direction|agent, cible?, actif: bool} · GET /api/ledger?limit= · GET /api/ledger/verifier (vérifie la chaîne HMAC ; `/api/sante` expose `ledger_hmac` et `avertissements`) · GET /api/agents · GET /api/budget.
 Traitement des missions : en tâche de fond (BackgroundTasks ou file Redis simple) pour ne pas bloquer l'appel ; la réponse renvoie l'id et le statut.
 
 ### Cockpit (/cockpit, HTML servi par nexus-core, sans dépendance externe)
@@ -114,25 +122,27 @@ Workflows importés automatiquement par install.sh (`n8n import:workflow --separ
 1. « NEXUS — Mission par webhook » : Webhook POST → HTTP Request vers http://nexus-core:8000/api/missions (en-tête X-Nexus-Key depuis variable d'env `$env.NEXUS_API_KEY`) → réponse.
 2. « NEXUS — Veille quotidienne » : Cron 08:00 Europe/Paris → mission R&D-PARADOX/veille (désactivé par défaut).
 3. « NEXUS — Rapport du soir » : Cron 19:00 → GET /api/decisions?statut=en_attente + /api/missions → message ntfy récapitulatif.
-n8n : N8N_ENCRYPTION_KEY, DB_TYPE=postgresdb, GENERIC_TIMEZONE=Europe/Paris, N8N_HOST=${NEXUS_HOST}, N8N_PORT=5678, N8N_PROTOCOL=https, WEBHOOK_URL=https://${NEXUS_HOST}:8443/, N8N_BLOCK_ENV_ACCESS_IN_NODE=false, NEXUS_API_KEY transmis.
+n8n : N8N_ENCRYPTION_KEY, DB_TYPE=postgresdb, GENERIC_TIMEZONE=Europe/Paris, N8N_HOST=${NEXUS_HOST}, N8N_PORT=5678, N8N_PROTOCOL=https, WEBHOOK_URL=https://${NEXUS_HOST}:8443/, N8N_BLOCK_ENV_ACCESS_IN_NODE=true (les workflows doivent utiliser un identifiant n8n « Header Auth » au lieu de `$env.NEXUS_API_KEY` ; NEXUS_API_KEY n'est plus transmis à n8n).
 
 ## install.sh (agent INFRA)
-Idempotent, en français, `set -euo pipefail`. Étapes : vérifie root + Ubuntu ; affiche RAM/disque ; installe Docker + plugin compose s'ils manquent (dépôt officiel) ; détecte `NEXUS_HOST` (hostname -f, confirmation possible via argument `--host`) ; demande ACME_EMAIL (argument `--email` ou invite) ; génère .env avec secrets aléatoires (openssl rand) et le hash bcrypt via `docker run --rm caddy:2.8 caddy hash-password` ; vérifie ufw sans le modifier (voir ci-dessous) ; `docker compose up -d --build` ; `docker compose exec ollama ollama pull $NEXUS_MODEL` ; importe les workflows n8n ; mission de test « Rédige une checklist de démarrage du Mothership » (service OPS-CORE/projets) ; affiche les URL, identifiants et la commande pour revoir les identifiants (`cat /srv/p1/nexus-mothership/.env`). Répertoire d'installation : /srv/p1/nexus-mothership. Journal d'installation : /srv/p1/nexus-mothership/install.log.
-**Pare-feu : install.sh ne modifie JAMAIS ufw ni le pare-feu Hostinger** ; il détecte l'état d'ufw, affiche les commandes `ufw allow` manquantes et rappelle d'ouvrir 80, 443, 8443, 8444, 8445 dans hPanel > Sécurité > Pare-feu. `--host` par défaut : `hostname -f`, ou `srvXXXX.hstgr.cloud` si ce n'est pas un FQDN. install.sh vérifie que /srv/p1 est un point de montage (sinon propose partitions.sh).
+Idempotent, en français, `set -euo pipefail`. Étapes : vérifie root + Ubuntu ; affiche RAM/disque ; installe Docker + plugin compose s'ils manquent (dépôt officiel) ; détecte `NEXUS_HOST` (hostname -f, confirmation possible via argument `--host`) ; demande ACME_EMAIL (argument `--email` ou invite) ; génère .env avec secrets aléatoires (openssl rand) et le hash bcrypt via `docker run --rm caddy:2.8 caddy hash-password` ; vérifie ufw sans le modifier (voir ci-dessous) ; `docker compose up -d --build` ; `docker compose exec ollama ollama pull $NEXUS_MODEL` ; importe les workflows n8n ; mission de test « Rédige une checklist de démarrage du Mothership » (service OPS-CORE/projets) ; affiche les URL et, pour chaque secret, la commande `grep … .env` (aucun secret à l'écran ni dans install.log ; un ancien install.log contenant des secrets est réécrit après accord) ; génère COCKPIT_INTERNAL, LEDGER_HMAC_KEY, NTFY_TOPIC, BACKUP_PASSPHRASE ; crée `backups/` ; propose (o/N, N si non interactif) la sauvegarde quotidienne `/etc/cron.d/nexus-mothership-sauvegarde` ; en complet, crée le compte ntfy et les droits du sujet. Répertoire d'installation : /srv/p1/nexus-mothership. Journal d'installation : /srv/p1/nexus-mothership/install.log.
+**Pare-feu : install.sh ne modifie JAMAIS ufw ni le pare-feu Hostinger** ; il détecte l'état d'ufw, affiche les commandes `ufw allow` manquantes et rappelle d'ouvrir 80, 443, 8443, 8444, 8445 dans hPanel > Sécurité > Pare-feu. `--host` par défaut : `hostname -f`, sinon question (erreur si non interactif). install.sh vérifie que /srv/p1 est un point de montage (sinon propose partitions.sh).
 
 ## Partitions (agent INFRA)
-VPS réel : Ubuntu 24.04, `srvXXXX.hstgr.cloud`, 2 vCPU / 8 Go / 100 Go (~95 Go libres).
-`partitions.sh` (root, idempotent, `--size 20G`, `--dry-run`) : 4 fichiers image ext4 `/srv/images/p1.img … p4.img` (fallocate, `mkfs.ext4 -F -L nexus-pN`), montés en loop sur `/srv/p1 … /srv/p4`, ajoutés à /etc/fstab avec `loop,nofail,defaults` (sauvegarde `/etc/fstab.bak-<date>`, pas de doublon). Refus si espace libre sur / < (4 × taille) + 10 Go (90 Go pour 20G). Le disque système n'est pas modifié.
+VPS cible : Ubuntu 24.04, `srvXXXX.hstgr.cloud`, 2 vCPU / 8 Go / 100 Go (~95 Go libres).
+`partitions.sh` (root, idempotent, `--size 20G`, `--dry-run`) : 4 fichiers image ext4 `/srv/images/p1.img … p4.img` (fallocate, `mkfs.ext4 -F -L nexus-pN`), montés en loop sur `/srv/p1 … /srv/p4`, ajoutés à /etc/fstab avec `loop,nofail,x-systemd.before=docker.service` (anciennes lignes mises à jour) + drop-in `/etc/systemd/system/docker.service.d/nexus-partitions.conf` (`RequiresMountsFor=/srv/p1 … /srv/p4`) (sauvegarde `/etc/fstab.bak-<date>`, pas de doublon). Refus si espace libre sur / < (4 × taille) + 10 Go (90 Go pour 20G). Le disque système n'est pas modifié.
 
 | Partition | Usage | RAM | vCPU | Disque |
 |---|---|---|---|---|
 | P1 | Mini Mothership (/srv/p1/nexus-mothership) | 5 Go | 1,5 | 20 Go |
-| P2, P3, P4 | libres, réservées à de futurs projets (compose `pN-xxx`, réseau `pN-xxx-net`, bind mounts sous /srv/pN) | 1 Go chacune | ~0,15 chacune | 20 Go chacune |
+| P2, P3, P4 | libres, réservées à de futurs projets (compose `pN-xxx`, réseau `pN-xxx-net`, bind mounts sous /srv/pN) | 0,75 Go chacune | ~0,15 chacune | 20 Go chacune |
+
+Reste ≈ 0,75 Go et 0,05 vCPU pour Ubuntu et Docker.
 
 nexus-core : les livrables sont écrits dans /data/livrables (bind mount ./data/nexus-core). Le conteneur tourne en non-root : install.sh donne le dossier à l'uid/gid de l'image.
 
 ## Modes MVP / complet et IA gratuite (agent INFRA)
-- **MVP (défaut)** : caddy + nexus-core (SQLite `sqlite:////data/nexus.db`), ports 80/443, Caddyfile.mvp. Profil `local` = ollama (repli). Limites : ollama 3584m/1.1, nexus-core 384m/0.2, nexus-bridge 128m/0.1, caddy 64m/0.1 (4160 Mo, 1,5 vCPU ; 576 Mo sans repli).
+- **MVP (défaut)** : caddy + nexus-core (SQLite `sqlite:////data/nexus.db`) + nexus-bridge, alertes N3 via ntfy.sh (sujet secret, texte générique), ports 80/443, Caddyfile.mvp. Profil `local` = ollama (repli). Limites : ollama 3584m/1.1, nexus-core 384m/0.2, nexus-bridge 128m/0.1, caddy 64m/0.1 (4160 Mo, 1,5 vCPU ; 576 Mo sans repli).
 - **Complet** (`install.sh --complet`) : `COMPOSE_PROFILES=complet[,local]` + `COMPOSE_FILE=docker-compose.yml:docker-compose.complet.yml` (PostgreSQL, Redis, n8n, Uptime Kuma, ntfy, Caddyfile.complet, ports 8443–8445 ; 5104 Mo / 1,5 vCPU).
 - **IA, tout gratuit** : par défaut Ollama Cloud (`LLM_PROVIDER=ollama_cloud`, `NEXUS_MODEL=gemma4:31b`, `OLLAMA_CLOUD_URL=https://ollama.com`, clé `OLLAMA_API_KEY` saisie par `read -rs`, testée sur /api/tags) + repli local `LLM_FALLBACK=ollama`, `NEXUS_MODEL_LOCAL=qwen2.5:3b` (profil `local`). `--sans-repli` → `LLM_FALLBACK=aucun`, pas d'ollama. Sans clé ou clé refusée → `LLM_PROVIDER=ollama`, `NEXUS_MODEL=qwen2.5:3b`. `--local` force le local. `BUDGET_MONTHLY_EUR=0`, `LLM_EUR_PAR_1K_TOKENS=0`. Anthropic : payant, jamais proposé (variables vides).
 - `--sans-partition` : installation de test dans /opt/nexus-mothership. Réseau `p1-nexus-net` non interne (sortie HTTPS vers ollama.com). `/api/sante` public (healthcheck sans clé). Données nexus-core : chown 10001:10001.

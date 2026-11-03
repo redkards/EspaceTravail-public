@@ -12,18 +12,18 @@ bash partitions.sh && cd /srv/p1/nexus-mothership && bash install.sh
 
 - `partitions.sh` crée les 4 partitions de 20 Go et replace automatiquement le kit cloné **dans** la partition P1 (d'où le second `cd`).
 - `install.sh` vous demande votre e-mail, puis votre **clé Ollama Cloud** (gratuite, saisie masquée). Sans clé, il continue avec l'IA locale.
-- À la fin, un encadré affiche l'adresse du cockpit et son mot de passe.
+- À la fin, un encadré affiche l'adresse du cockpit et **la commande pour voir le mot de passe** (`grep COCKPIT_PASSWORD .env`) : aucun secret n'est affiché ni écrit dans `install.log`.
 
 > Pour un **test rapide sans partition** : clonez dans `/opt/nexus-mothership`, puis lancez `bash install.sh --sans-partition`.
 
-Le **MVP** démarre seulement le cockpit (`caddy`), les agents (`nexus-core`, base SQLite) et l'IA locale de secours (`ollama`). Seuls les ports 80 et 443 sont utilisés.
+Le **MVP** démarre le cockpit (`caddy`), les agents (`nexus-core`, base SQLite), la passerelle des IA (`nexus-bridge`) et l'IA locale de secours (`ollama`). Seuls les ports 80 et 443 sont utilisés. Les alertes N3 arrivent sur le téléphone dès le MVP (appli gratuite ntfy, [section 6](#6-recevoir-les-alertes-n3-sur-le-téléphone)).
 La **version complète** (n8n, surveillance, notifications Android) s'ajoute plus tard avec `bash install.sh --complet`.
 
 **Tout est gratuit** : Ollama Cloud en offre gratuite, l'IA locale, et des logiciels open source. Aucune option payante n'est proposée, et le budget de dépense est fixé à 0 €.
 
 ---
 
-Ce kit installe votre « Mini Mothership » : 93 agents IA organisés en directions (dont un département de cybersécurité défensive, CYBER-FORTRESS), avec un **cockpit** pour valider les décisions importantes depuis votre téléphone. En version complète, il ajoute **n8n** pour les automatisations, des **notifications** sur Android et une **surveillance** des services.
+Ce kit installe votre « Mini Mothership » : **93 rôles d'agents** — 5 du noyau (PRIME, GATE, SENTINEL, LEDGER, BUDGET), 8 directeurs (9 directions en comptant le noyau) et 20 services × 4 agents (COLLECTOR, ANALYST, CHECKER, EXECUTOR), dont le département de cybersécurité défensive **CYBER-FORTRESS** (4 services). COLLECTOR, ANALYST et CHECKER appellent l'IA ; EXECUTOR, SENTINEL, LEDGER et BUDGET sont **déterministes** (aucune IA). Le tout avec un **cockpit** pour valider les décisions importantes depuis votre téléphone. En version complète, il ajoute **n8n** pour les automatisations, des **notifications** sur Android et une **surveillance** des services.
 L'IA utilise **Ollama Cloud** (offre gratuite), avec l'IA locale du VPS en secours. Aucune action externe (envoi, publication, paiement) n'est faite sans votre validation.
 
 > Vous avez seulement besoin du **terminal web de hPanel** (déjà connecté en root) et de votre **téléphone Android**.
@@ -37,13 +37,14 @@ L'IA utilise **Ollama Cloud** (offre gratuite), avec l'IA locale du VPS en secou
 3. [Installation pas à pas](#3-installation-pas-à-pas)
 4. [Ouvrir les ports dans le pare-feu Hostinger](#4-ouvrir-les-ports-dans-le-pare-feu-hostinger)
 5. [Première utilisation](#5-première-utilisation)
-6. [Recevoir les notifications sur Android](#6-recevoir-les-notifications-sur-android)
+6. [Recevoir les alertes N3 sur le téléphone](#6-recevoir-les-alertes-n3-sur-le-téléphone)
 7. [Les workflows n8n](#7-les-workflows-n8n)
 8. [Sauvegardes](#8-sauvegardes)
 9. [Commandes utiles](#9-commandes-utiles)
 10. [Problèmes fréquents](#10-problèmes-fréquents)
 11. [Désinstaller](#11-désinstaller)
 12. [Passerelle Claude · ChatGPT · Gemini](#12-passerelle-claude--chatgpt--gemini)
+13. [Entretien au téléphone](#13-entretien-au-téléphone) : mettre à jour, restaurer, changer un mot de passe ou une clé, vérifier que tout va bien
 
 ---
 
@@ -96,8 +97,10 @@ Chaque mission tourne à un **niveau de fonctionnement** qui règle l'effort, le
 
 ```
 Internet ──► Caddy (HTTPS automatique, ports 80/443)
-               └─ :443   Cockpit + API ─► nexus-core (SQLite) ─► Ollama Cloud (https://ollama.com)
-                                                              └─► Ollama local (secours)
+               ├─ :443   Cockpit + API ─► nexus-core (SQLite) ─► Ollama Cloud (https://ollama.com)
+               │                                    │          └─► Ollama local (secours)
+               │                                    └─► ntfy.sh (alerte « Décision N3 en attente #id »)
+               └─ :443   /mcp et /bridge ─► nexus-bridge (passerelle des IA, SQLite)
    Version complète (--complet) en plus :
                ├─ :8443  n8n (automatisations)      ─► PostgreSQL, Redis
                ├─ :8444  Uptime Kuma (surveillance)
@@ -129,6 +132,8 @@ Internet ──► Caddy (HTTPS automatique, ports 80/443)
 | ntfy | notifications | 48 Mo | 0,02 |
 | **Total** | | **≈ 5 Go** | **1,5 vCPU** |
 
+PostgreSQL (extension pgvector) et Redis sont **réservés, non utilisés par le MVP** : nexus-core y bascule seulement en version complète ; pgvector n'est pas encore exploité.
+
 Seul Caddy est accessible depuis Internet. Les autres services n'exposent aucun port (réseau Docker `p1-nexus-net`). nexus-core peut sortir vers Internet pour joindre ollama.com.
 
 ---
@@ -140,18 +145,19 @@ Le VPS (2 vCPU, 8 Go RAM, 100 Go disque) est découpé en **4 partitions isolée
 | Partition | Usage | RAM réservée | vCPU | Disque |
 |---|---|---|---|---|
 | **P1** `/srv/p1` | **Mini Mothership** (ce kit) | 5 Go | 1,5 | 20 Go |
-| P2 `/srv/p2` | libre (futur projet) | 1 Go | ~0,15 | 20 Go |
-| P3 `/srv/p3` | libre (futur projet) | 1 Go | ~0,15 | 20 Go |
-| P4 `/srv/p4` | libre (futur projet) | 1 Go | ~0,15 | 20 Go |
+| P2 `/srv/p2` | libre (futur projet) | 0,75 Go | ~0,15 | 20 Go |
+| P3 `/srv/p3` | libre (futur projet) | 0,75 Go | ~0,15 | 20 Go |
+| P4 `/srv/p4` | libre (futur projet) | 0,75 Go | ~0,15 | 20 Go |
 
-Il reste environ 0 à 1 Go de RAM et ~0,05 vCPU pour Ubuntu, Docker et le terminal. En MVP avec Ollama Cloud sans repli (`--sans-repli`), P1 n'utilise qu'environ 0,5 Go.
+Il reste environ 0,75 Go de RAM et ~0,05 vCPU pour Ubuntu, Docker et le terminal.
+Au redémarrage, Docker attend que les partitions soient montées (option fstab `x-systemd.before=docker.service` et règle systemd `RequiresMountsFor`) : si une partition manque, Docker reste arrêté au lieu de démarrer sur un dossier vide. En MVP avec Ollama Cloud sans repli (`--sans-repli`), P1 n'utilise qu'environ 0,5 Go.
 `partitions.sh` refuse de continuer si l'espace libre sur `/` est inférieur à (4 × taille) + 10 Go, soit **90 Go** pour 4 × 20 Go.
 
 ### Installer un futur projet dans P2, P3 ou P4
 1. Placez le projet dans sa partition : `mkdir -p /srv/p2/mon-projet && cd /srv/p2/mon-projet`
 2. Donnez-lui un nom de projet Docker Compose qui commence par le numéro de partition, par exemple dans son `.env` : `COMPOSE_PROJECT_NAME=p2-monprojet`
 3. Mettez **toutes** ses données dans des dossiers de la partition (bind mounts `./data/...`), pas dans des volumes Docker nommés.
-4. Respectez les limites de la partition dans son `docker-compose.yml`, avec `mem_limit` et `cpus` sur chaque service. **Total : 1 Go et 0,15 vCPU maximum.** Exemple :
+4. Respectez les limites de la partition dans son `docker-compose.yml`, avec `mem_limit` et `cpus` sur chaque service. **Total : 0,75 Go et 0,15 vCPU maximum.** Exemple :
    ```yaml
    services:
      app:
@@ -187,7 +193,7 @@ cd /srv/p1/nexus-mothership
 ```bash
 bash install.sh --email votre@email.fr
 ```
-C'est le **MVP** (cockpit + agents). Ajoutez `--complet` pour avoir aussi n8n, Uptime Kuma et ntfy. Le nom d'hôte est détecté automatiquement. Si `hostname -f` ne renvoie pas un nom complet, le script utilise `srvXXXX.hstgr.cloud`. Vous pouvez aussi le forcer avec `--host`.
+C'est le **MVP** (cockpit + agents). Ajoutez `--complet` pour avoir aussi n8n, Uptime Kuma et ntfy. Le nom d'hôte est détecté automatiquement (`hostname -f`). Sinon, le script vous le demande (hPanel > VPS > Vue d'ensemble, du type `srvXXXX.hstgr.cloud`) ; vous pouvez aussi le donner avec `--host`.
 
 Options utiles :
 | Option | Effet |
@@ -200,8 +206,8 @@ Options utiles :
 | `--sans-partition` | test rapide dans `/opt/nexus-mothership`, sans partition P1 |
 | `--yes` | ne pose aucune question (pas de saisie de clé : IA locale seule, sauf si la clé est déjà dans `.env`) |
 
-Le script affiche des étapes numérotées (1/12 … 12/12 ; 13 en mode complet). À la fin, un **encadré** donne vos adresses et mots de passe. **Prenez-le en photo ou copiez-le.**
-Pour revoir les identifiants plus tard : `cat /srv/p1/nexus-mothership/.env`
+Le script affiche des étapes numérotées (1/13 … 13/13 ; 14 en mode complet). Il propose aussi (réponse **o**) une **sauvegarde automatique chaque nuit**. À la fin, un **encadré** donne vos adresses et, pour chaque secret, la commande qui l'affiche, par exemple `grep COCKPIT_PASSWORD .env`. Aucun secret n'est écrit dans `install.log` (un ancien journal qui en contenait est nettoyé, après accord).
+Notez hors du VPS (gestionnaire de mots de passe) le mot de passe du cockpit et `BACKUP_PASSPHRASE` : `grep -E 'COCKPIT_PASSWORD=|BACKUP_PASSPHRASE' .env`.
 
 Le script peut être **relancé sans risque** : il ne régénère pas les mots de passe si `.env` existe déjà.
 Il **ne touche jamais au pare-feu**. Si `ufw` est actif et que des ports manquent, il affiche les commandes `ufw allow …` à lancer vous-même.
@@ -241,16 +247,19 @@ Sur Android, ajoutez le cockpit à l'écran d'accueil : menu Chrome **⋮ > Ajou
 
 ---
 
-## 6. Recevoir les notifications sur Android
+## 6. Recevoir les alertes N3 sur le téléphone
 
-*(version complète uniquement : `bash install.sh --complet`)*
+Gratuit, dès le MVP. `install.sh` crée un **sujet secret** aléatoire (`nexus-` + 16 caractères).
 
 1. Installez l'application **ntfy** (Play Store ou F-Droid).
-2. Touchez **+**, cochez **Utiliser un autre serveur**, puis saisissez `https://srvXXXX.hstgr.cloud:8445`.
-3. Comme nom de topic, saisissez la valeur `NTFY_TOPIC` affichée à la fin de l'installation (`nexus-xxxxxxxxxxxx`).
+2. Dans le terminal hPanel : `cd /srv/p1/nexus-mothership && grep NTFY_TOPIC .env`
+3. Dans ntfy : **+** > nom du sujet = la valeur affichée.
+   - **MVP** : laissez le serveur par défaut `ntfy.sh`.
+   - **Version complète** : cochez **Utiliser un autre serveur** > `https://srvXXXX.hstgr.cloud:8445`, puis, dans les paramètres de l'appli, ajoutez l'utilisateur `NTFY_USER` / `NTFY_PASSWORD` (`grep NTFY_ .env`). Ce serveur refuse tout par défaut : seul votre compte peut lire le sujet.
 
-Vous serez prévenu à chaque décision N3 en attente et chaque soir à 19 h (si le rapport du soir est activé).
-Le nom du topic est **secret** : ne le partagez pas.
+> **À savoir** : en MVP, **ntfy.sh est un service tiers** (gratuit, public). Quiconque connaît le sujet peut lire les alertes : il est secret, ne le partagez pas. C'est pourquoi le texte reste **générique** (« Décision N3 en attente #id ») : aucun contenu de mission n'est envoyé. Les détails se lisent dans le cockpit. Pour ne plus rien envoyer à ntfy.sh : mettez `NTFY_TOPIC=` vide dans `.env` puis `docker compose up -d`.
+
+Le rapport du soir (19 h) existe seulement en version complète, si vous l'activez dans n8n.
 
 ---
 
@@ -259,6 +268,8 @@ Le nom du topic est **secret** : ne le partagez pas.
 *(version complète uniquement)*
 
 Trois workflows sont importés automatiquement. Ils sont **désactivés** par défaut : activez-les dans n8n avec l'interrupteur *Active*.
+
+> **Sécurité** : n8n est épinglé sur une version corrigée (2.45.6) avec `N8N_BLOCK_ENV_ACCESS_IN_NODE=true` : les workflows **ne peuvent plus lire `$env`** (clés, mots de passe). Avant d'activer un workflow, créez dans n8n un identifiant *Header Auth* (nom `X-Nexus-Key`, valeur : `grep NEXUS_API_KEY .env`) et choisissez-le dans ses nœuds *HTTP Request* à la place de `{{ $env.NEXUS_API_KEY }}` ; remplacez de même `$env.NTFY_TOPIC` et `$env.NEXUS_HOST` par leur valeur. Faites `bash backup.sh` avant de passer d'une ancienne version (1.64) à celle-ci.
 
 | Workflow | Fonction |
 |---|---|
@@ -281,12 +292,13 @@ curl -u admin:MOT_DE_PASSE_N8N -X POST https://srvXXXX.hstgr.cloud:8443/webhook/
 cd /srv/p1/nexus-mothership
 bash backup.sh
 ```
-Cela crée `backups/<date>/` avec la base SQLite et les livrables (MVP), plus les bases PostgreSQL et les workflows n8n (version complète), ainsi qu'une copie du `.env`. Les 14 dernières sauvegardes sont conservées.
-Pour une sauvegarde automatique chaque nuit à 3 h 30, tapez `crontab -e` et ajoutez :
-```
-30 3 * * * /srv/p1/nexus-mothership/backup.sh >> /srv/p1/nexus-mothership/backups/backup.log 2>&1
-```
-Pensez aussi à télécharger régulièrement une sauvegarde hors du VPS, par exemple sur votre PC.
+Cela crée `backups/<date>/` : copie **cohérente** des bases SQLite (`nexus.db`, `bridge.db`, sans fichiers `-wal`/`-shm`) et des livrables, plus les bases PostgreSQL et les workflows n8n (version complète), et le `.env` **chiffré** avec gpg (`env.sauvegarde.gpg`, phrase = `BACKUP_PASSPHRASE`). Les **7** dernières sont gardées. La sauvegarde de chaque nuit à 3 h 30 est proposée par `install.sh` (fichier `/etc/cron.d/nexus-mothership-sauvegarde`).
+
+**Copie hors du VPS (gratuit, Google Drive)** — une seule fois, depuis le terminal :
+1. `apt-get install -y rclone` puis `rclone config` : `n` (nouveau), nom `gdrive`, type `drive`, laissez client_id/secret vides, accès `1` (complet), puis à « Use web browser » répondez **n** et suivez l'indication (une commande `rclone authorize` à lancer sur un ordinateur, ou ouvrez le lien sur votre téléphone si proposé).
+2. Ensuite : `bash backup.sh --hors-serveur` (copie dans le dossier Drive `nexus-sauvegardes`, 7 gardées). Pour le faire chaque nuit, éditez `/etc/cron.d/nexus-mothership-sauvegarde` et ajoutez `--hors-serveur` après `backup.sh`.
+
+> Sur Drive, seul le `.env` est chiffré ; les bases (missions, mémoire des IA) sont en clair dans votre Drive. Restauration : [section 13](#restaurer-une-sauvegarde).
 
 ---
 
@@ -304,7 +316,7 @@ Toujours depuis `/srv/p1/nexus-mothership` :
 | arrêter / relancer | `docker compose down` puis `docker compose up -d` |
 | changer de modèle | `bash install.sh --model NOM` (cloud) ; en local : `docker compose exec ollama ollama pull NOM`, puis `NEXUS_MODEL_LOCAL=NOM` dans `.env` et `docker compose up -d` |
 | passer en version complète | `bash install.sh --complet` |
-| revoir les identifiants | `cat .env` |
+| revoir un secret | `grep COCKPIT_PASSWORD .env` (ou `NEXUS_API_KEY`, `NTFY_`, `BACKUP_PASSPHRASE`…) |
 | URL des connecteurs IA (passerelle) | `bash bridge-connecteurs.sh` |
 | voir les jetons de la passerelle | `grep BRIDGE_TOKEN /srv/p1/nexus-mothership/.env` |
 | espace des partitions | `df -h /srv/p*` |
@@ -323,7 +335,9 @@ Toujours depuis `/srv/p1/nexus-mothership` :
 | `Clé Ollama Cloud refusée` | vérifiez la clé sur ollama.com/settings/keys, supprimez la ligne `OLLAMA_API_KEY` de `.env`, puis relancez `install.sh` |
 | un service « unhealthy » | `docker compose logs NOM_DU_SERVICE`, puis `docker compose up -d` |
 | une IA ne voit pas la passerelle | `docker compose logs nexus-bridge` ; vérifiez l'adresse avec `bash bridge-connecteurs.sh` (section 12) |
-| après un redémarrage du VPS | les partitions se remontent seules (fstab) et les services redémarrent seuls |
+| après un redémarrage du VPS | les partitions se remontent seules (fstab), puis Docker et les services redémarrent |
+| Docker ne démarre plus après un redémarrage | une partition n'est pas montée : `df -h /srv/p*`, puis `mount -a && systemctl start docker` |
+| `COCKPIT_INTERNAL manquant` (ou `LEDGER_HMAC_KEY`) | relancez `bash install.sh` : il ajoute les nouveaux secrets sans toucher aux anciens |
 
 ---
 
@@ -332,7 +346,8 @@ Toujours depuis `/srv/p1/nexus-mothership` :
 ```bash
 cd /srv/p1/nexus-mothership
 bash uninstall.sh            # supprime les conteneurs, GARDE les données (./data) et le .env
-bash uninstall.sh --purge    # supprime AUSSI toutes les données (demande de taper SUPPRIMER)
+bash uninstall.sh --purge    # supprime AUSSI données, .env et install.log (taper SUPPRIMER),
+                             # puis les sauvegardes si vous tapez SUPPRIMER-SAUVEGARDES
 ```
 Les partitions `/srv/p1` à `/srv/p4` ne sont jamais supprimées par ce script.
 
@@ -387,5 +402,59 @@ Puis ouvrez **https://srvXXXX.hstgr.cloud/bridge** (identifiants du cockpit) : p
 - Rien n'est jamais effacé : une correction crée une nouvelle version ; « oublier » archive (seuls l'IA autrice ou vous, avec votre jeton propriétaire, peuvent le faire).
 - Les jetons ne sont jamais écrits dans les journaux. **Voir les jetons :** `grep BRIDGE_TOKEN /srv/p1/nexus-mothership/.env`.
 - **Changer un jeton** (adresse divulguée) : supprimez sa ligne `BRIDGE_TOKEN_...` dans `.env`, relancez `bash install.sh`, puis recollez la nouvelle adresse dans l'IA.
-- Les données sont dans `./data/nexus-bridge/bridge.db` (sauvegarde : copiez ce dossier, ou `docker compose exec nexus-bridge python -c "import sqlite3; s=sqlite3.connect('/data/bridge.db'); d=sqlite3.connect('/data/bridge-sauvegarde.db'); s.backup(d)"`).
+- Les données sont dans `./data/nexus-bridge/bridge.db`, incluses dans `bash backup.sh`.
+- Caddy n'écrit jamais l'adresse `/mcp/<jeton>` dans ses journaux (remplacée par `/mcp/***`).
 
+---
+
+## 13. Entretien au téléphone
+
+Tout se fait dans **hPanel > VPS > Terminal** (console web, déjà root), en commençant par `cd /srv/p1/nexus-mothership`.
+
+### Mettre à jour
+```bash
+bash backup.sh
+git pull
+docker compose up -d --build
+```
+Si un message indique `... manquant dans .env`, lancez `bash install.sh` (il ajoute les nouveaux réglages sans changer vos mots de passe).
+
+### Restaurer une sauvegarde
+```bash
+bash restore.sh                      # liste les sauvegardes
+bash restore.sh 2026-11-03_033000    # restaure celle-ci : tapez RESTAURER
+```
+Le script vérifie la sauvegarde **avant** de couper quoi que ce soit, arrête nexus-core et nexus-bridge, met les données actuelles de côté (`data/.avant-restauration-<date>/`), restaure, remet les droits, redémarre et contrôle `/api/sante`. Ajoutez `--avec-env` pour remplacer aussi `.env` (sur un VPS neuf, la phrase `BACKUP_PASSPHRASE` notée vous sera demandée).
+
+### Changer le mot de passe du cockpit
+```bash
+sed -i '/^COCKPIT_PASSWORD/d' .env     # supprime COCKPIT_PASSWORD et COCKPIT_PASSWORD_HASH
+bash install.sh
+grep COCKPIT_PASSWORD= .env            # nouveau mot de passe
+```
+
+### Changer une clé / un jeton de passerelle
+- Jeton d'une IA (adresse divulguée) : `sed -i '/^BRIDGE_TOKEN_CHATGPT=/d' .env` (ou `_CLAUDE`, `_GEMINI`, `_PROPRIETAIRE`), `bash install.sh`, puis `bash bridge-connecteurs.sh chatgpt` et recollez l'adresse dans l'IA.
+- Clé API (`NEXUS_API_KEY`), secret interne (`COCKPIT_INTERNAL`) ou sujet ntfy (`NTFY_TOPIC`, à ressaisir dans l'appli) : même méthode, supprimez la ligne puis `bash install.sh`.
+- Clé Ollama Cloud : supprimez la ligne `OLLAMA_API_KEY=` puis `bash install.sh` (saisie masquée).
+- Ne supprimez **pas** `LEDGER_HMAC_KEY` : le journal existant ne serait plus vérifiable.
+
+### Recevoir les alertes N3 sur le téléphone
+`grep NTFY_TOPIC .env`, puis abonnez-vous à ce sujet dans l'appli **ntfy** ([section 6](#6-recevoir-les-alertes-n3-sur-le-téléphone)).
+
+### Vérifier que tout va bien
+- `docker compose ps` : tous les services « running » / « healthy ».
+- `https://srvXXXX.hstgr.cloud/api/sante` : `ledger_hmac` doit valoir `true` ; la liste `avertissements` doit être vide (sinon, elle dit quoi corriger).
+- Intégrité du journal LEDGER : `grep '^NEXUS_API_KEY=' .env | sed 's/^NEXUS_API_KEY=/X-Nexus-Key: /' | curl -s -H @- https://srvXXXX.hstgr.cloud/api/ledger/verifier` (la clé passe par l'entrée standard, jamais dans la ligne de commande).
+- `ls backups/` : une sauvegarde de moins de 24 h.
+
+### Statuts d'une mission
+| Statut | Sens |
+|---|---|
+| `en_attente_place` | file d'attente : trop de missions en cours (`NEXUS_MAX_MISSIONS`), elle partira seule |
+| `en_cours` | traitement par les agents |
+| `en_attente_n3` | votre décision est attendue dans le cockpit (alerte ntfy) |
+| `a_reformuler` | consigne refusée ou trop floue : reformulez-la et relancez |
+| `plafond_atteint` | délai, tokens ou coût max atteint : livrable partiel gardé, relance possible au niveau supérieur |
+| `echouee` | échec (le motif est affiché, par ex. « interrompue par un redémarrage ») |
+| `terminee` / `validee` / `refusee` / `revision` / `suspendue` | fin normale, décision prise, ou arrêt d'urgence actif |
