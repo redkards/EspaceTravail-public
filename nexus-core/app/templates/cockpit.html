@@ -103,7 +103,22 @@
 <main>
   <section id="decisions" class="active"><h2>Décisions en attente</h2><div id="listeDec"></div></section>
   <section id="missions"><h2>Missions</h2><div id="listeMis"></div></section>
-  <section id="projets"><h2>Projets</h2><div id="listeProj" class="grille"></div></section>
+  <section id="projets"><h2>Projets</h2><div id="listeProj" class="grille"></div>
+    <h2>Mémoire du projet <span class="meta" id="memProjet"></span></h2>
+    <div class="carte">
+      <p class="meta" id="memAide">Choisissez un projet dans le sélecteur « Projet » ci-dessus.</p>
+      <form id="formRechMem" class="ligne"><input id="memQ" placeholder="Rechercher (mots-clés)" style="flex:1">
+        <button type="submit">Rechercher</button></form>
+      <div id="memListe" style="margin-top:8px"></div>
+      <details style="margin-top:8px"><summary>Ajouter une connaissance</summary>
+        <form id="formAjoutMem">
+          <label for="memTitre">Titre</label><input id="memTitre" maxlength="200" required>
+          <label for="memContenu">Contenu (aucun mot de passe, clé ou jeton)</label><textarea id="memContenu" required></textarea>
+          <label for="memSource">Source (facultatif)</label><input id="memSource" maxlength="300">
+          <div class="ligne" style="margin-top:8px"><button class="prim" type="submit">Ajouter</button></div>
+        </form></details>
+    </div>
+  </section>
   <section id="nouvelle">
     <h2>Nouvelle mission</h2>
     <form class="carte" id="formMission">
@@ -380,12 +395,35 @@ async function chargerFonctionnement() {
       <td class="num">${euros(c.cout_eur)}</td><td class="num">${c.duree_moyenne_s == null ? "—" : duree(c.duree_moyenne_s)}</td></tr>`).join("");
 }
 
+// --- Mémoire du projet (connaissances) ---
+async function chargerMemoire(q) {
+  const p = projetCourant();
+  $("#memProjet").textContent = p ? "· " + nomProjet(p) : "";
+  $("#memAide").hidden = !!p;
+  if (!p) { $("#memListe").innerHTML = ""; return; }
+  const l = await api(`/projets/${encodeURIComponent(p)}/connaissances?limite=20${q ? "&q=" + encodeURIComponent(q) : ""}`);
+  $("#memListe").innerHTML = l.length ? l.map((k) => `<div class="carte"><strong>${esc(k.titre)}</strong>
+      <div class="meta">${esc(k.source)} · ${esc(k.auteur)} · v${k.version} · ${esc(k.origine)}</div>
+      <pre>${esc(k.contenu.length > 600 ? k.contenu.slice(0, 600) + "…" : k.contenu)}</pre></div>`).join("")
+    : '<p class="vide">Aucune connaissance trouvée.</p>';
+}
+$("#formRechMem").addEventListener("submit", (e) => { e.preventDefault(); chargerMemoire($("#memQ").value).catch((err) => toast(err.message)); });
+$("#formAjoutMem").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const p = projetCourant(); if (!p) return toast("Choisissez d'abord un projet.");
+  try { await api(`/projets/${encodeURIComponent(p)}/connaissances`, { method: "POST", body: JSON.stringify({
+      titre: $("#memTitre").value, contenu: $("#memContenu").value, source: $("#memSource").value || null }) });
+    toast("Connaissance ajoutée."); e.target.reset(); chargerMemoire();
+  } catch (err) { toast(err.message); }
+});
+
 async function rafraichir() {
   const o = document.querySelector("#onglets .sel").dataset.o;
   try {
     await chargerEtat();
     await chargerProjets();
     if (o === "nouvelle" || o === "conso" || !GRILLE) await chargerFonctionnement();
+    if (o === "projets") await chargerMemoire($("#memQ").value);
     if (o === "decisions") await chargerDecisions(); else chargerDecisions().catch(() => {});
     if (o === "missions") await chargerMissions();
     if (o === "agents" || $("#service").options.length === 1) await chargerAgents();

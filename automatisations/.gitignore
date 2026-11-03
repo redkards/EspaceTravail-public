@@ -1,0 +1,4 @@
+# Fichiers produits à l'exécution (journal sans secret, état, verrou)
+veille-cyber.log
+.veille-cyber.etat
+.veille-cyber.verrou

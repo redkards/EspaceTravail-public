@@ -9,7 +9,7 @@ OUTILS_ATTENDUS = {
     "tache_creer", "tache_lister", "tache_prendre", "tache_mettre_a_jour",
     "message_envoyer", "messages_lire", "passation_ecrire", "passation_derniere",
     "projets_lister", "mothership_mission", "mothership_statut", "mothership_decisions_en_attente",
-    "journal_lister",
+    "journal_lister", "projet_connaissances",
 }
 
 
@@ -354,6 +354,23 @@ def test_mothership_mission_fonctionnement(session, faux_core):
     assert res["isError"] and len(faux_core.requetes) == n
     schema = next(o for o in session().rpc("tools/list").json()["result"]["tools"] if o["name"] == "mothership_mission")
     assert schema["inputSchema"]["properties"]["fonctionnement"]["enum"] == ["F1", "F2", "F3", "F4"]
+
+
+def test_projet_connaissances(session, faux_core):
+    res, d = session("chatgpt").outil("projet_connaissances", projet="redkards", q="pitch", limite=3)
+    assert not res["isError"] and d["nombre"] == 1 and d["connaissances"][0]["source"] == "contexte/redkards.md#2"
+    req = faux_core.requetes[-1]
+    assert req.method == "GET" and req.url.path == "/api/projets/redkards/connaissances"
+    assert req.url.params["q"] == "pitch" and req.url.params["limite"] == "3"
+    assert req.headers["x-nexus-key"] == CLE_CORE
+    assert len(d["connaissances"][0]["contenu"]) <= 1500 + 10  # tronqué
+    # Projet hors énumération refusé avant tout appel ; aucune écriture possible via la passerelle.
+    n = len(faux_core.requetes)
+    res, _ = session().outil("projet_connaissances", projet="pas-un-projet")
+    assert res["isError"] and len(faux_core.requetes) == n
+    assert all(r.method == "GET" for r in faux_core.requetes if "/connaissances" in r.url.path)
+    noms = {o["name"] for o in session().rpc("tools/list").json()["result"]["tools"]}
+    assert not any("connaissance" in n and n != "projet_connaissances" for n in noms)
 
 
 def test_mothership_injoignable_ou_cle_refusee(session, monkeypatch):

@@ -33,7 +33,8 @@ STATUTS_EXECUTES = {"terminee", "validee"}
 
 
 def normaliser(texte):
-    t = unicodedata.normalize("NFKD", texte or "").encode("ascii", "ignore").decode()
+    t = (texte or "").replace("€", " euros ")  # « € » disparaîtrait en ASCII
+    t = unicodedata.normalize("NFKD", t).encode("ascii", "ignore").decode()
     return re.sub(r"\s+", " ", t.lower())
 
 
@@ -78,9 +79,9 @@ _OFFENSIF = [r"/dev/tcp/", r"\bnc\s+-[a-z]*e\b", r"\bncat\s+-[a-z]*e\b", r"\bbas
 _REF_JURIDIQUE = re.compile(
     r"(?<![a-z0-9])(?:articles?|art\.)\s*(?:[lrd]\.?\s*)?\d+(?:[-.]\d+)*"
     r"|(?<![a-z0-9])(?:loi|decret|ordonnance|directive|reglement)\s+(?:n\s*[o°]?\s*)?\d{2,4}[-/]\d+")
-_MENTION_VERIF = re.compile(r"references?\s+a\s+verifier|a\s+verifier")
+_MENTION_VERIF = re.compile(r"references?\s+a\s+verifier")
 
-_CHIFFRE = re.compile(r"\d+(?:[.,]\d+)?\s*(?:%|€|k€|euros?|eur\b|abonnes|vues|ventes|clients|\$)")
+_CHIFFRE = re.compile(r"\d+(?:[.,]\d+)?\s*(?:%|k?\s*euros?|eur\b|abonnes|vues|ventes|clients|\$)")
 _HYPOTHESE = re.compile(r"hypothes|estimation|fourchette|scenario")
 
 _PROMESSE_GAIN = [r"gains? (?:assures?|garantis?|faciles?|certains?)", r"gagner (?:a coup sur|facilement|gros)",

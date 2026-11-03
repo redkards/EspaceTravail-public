@@ -236,7 +236,10 @@ def importer(dossier: str | Path | None = None) -> dict:
         stats["fichiers"] += 1
         rel = f.relative_to(racine).as_posix()
         sources = set()
-        for i, (titre, contenu) in enumerate(decouper(texte), 1):
+        # La ligne « projet: code » est une métadonnée : elle n'est pas importée comme contenu.
+        corps = re.sub(r"\A((?:.*\n){0,30}?)\s*(?:[-*]\s*)?projet\s*:\s*`?[A-Za-z0-9-]+`?\s*\n", r"\1",
+                       texte + "\n", count=1, flags=re.I)
+        for i, (titre, contenu) in enumerate(decouper(corps), 1):
             source = f"{rel}#{i}"
             sources.add(source)
             r = ajouter(projet, f"{f.stem} — {titre}" if titre else f.stem, contenu, source, "import",

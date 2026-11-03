@@ -534,6 +534,37 @@ def projets_lister(auteur: str, a: dict) -> dict:
 
 
 @outil(
+    "projet_connaissances", "Mémoire d'un projet (lecture)",
+    "Recherche dans la mémoire du projet tenue par le Mothership (fiches de contexte, connaissances ajoutées "
+    "par le propriétaire, résumés des livrables validés). Lecture seule : l'écriture est réservée à "
+    "nexus-core et au propriétaire (cockpit).",
+    _objet({
+        "projet": _projet("Code du projet dont on lit la mémoire."),
+        "q": {"type": "string", "maxLength": 300, "description": "Optionnel : mots-clés de recherche (plein texte)."},
+        "limite": {"type": "integer", "minimum": 1, "maximum": 10, "default": 5,
+                   "description": "Nombre maximal de résultats."},
+    }, ["projet"]),
+)
+def projet_connaissances(auteur: str, a: dict) -> dict:
+    params = {"limite": a.get("limite") or 5}
+    if (a.get("q") or "").strip():
+        params["q"] = a["q"].strip()
+    rep = _appel_core("GET", f"/api/projets/{a['projet']}/connaissances", params=params)
+    if rep.status_code == 404:
+        raise OutilErreur(f"Projet inconnu du Mothership : {a['projet']}.")
+    if rep.status_code != 200:
+        raise OutilErreur(f"nexus-core a répondu HTTP {rep.status_code} : {_detail(rep)}")
+    resultats = []
+    for k in rep.json():
+        contenu = k.get("contenu") or ""
+        resultats.append({"titre": k.get("titre"), "source": k.get("source"), "date": k.get("date"),
+                          "auteur": k.get("auteur"), "version": k.get("version"),
+                          "contenu": contenu if len(contenu) <= 1500 else contenu[:1500] + " […]"})
+    return {"projet": a["projet"], "nombre": len(resultats), "connaissances": resultats,
+            "note": "Lecture seule : pour ajouter une connaissance, passez par le cockpit du propriétaire."}
+
+
+@outil(
     "mothership_mission", "Confier une mission au Mothership",
     "Envoie une mission aux agents du Mini NEXUS MOTHERSHIP (nexus-core) et renvoie son id. "
     "Le Mothership classe la mission (N0 à N3) ; tout ce qui engage (argent, publication, envoi, "

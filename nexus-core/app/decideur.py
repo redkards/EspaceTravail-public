@@ -19,7 +19,8 @@ import secrets
 import threading
 import time
 from datetime import datetime, timedelta, timezone
-from zoneinfo import ZoneInfo
+import logging
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from sqlalchemy import func, select
 
@@ -28,7 +29,11 @@ from .config import cfg
 from .db import session_scope
 from .models import Decision, Mission, maintenant
 
-PARIS = ZoneInfo("Europe/Paris")
+try:
+    PARIS = ZoneInfo("Europe/Paris")  # base de fuseaux du système ou paquet Python « tzdata »
+except ZoneInfoNotFoundError:  # pragma: no cover — image sans base de fuseaux
+    PARIS = timezone(timedelta(hours=1), "Europe/Paris (UTC+1, approximatif)")
+    logging.getLogger("nexus.decideur").warning("Fuseau Europe/Paris introuvable : UTC+1 utilisé (installer tzdata).")
 URGENCE_H = 4          # expiration dans moins de 4 h à la création → notification immédiate
 RAPPEL_H = 2           # rappel 2 h avant le refus automatique
 FENETRE_SESSION_MIN = 60

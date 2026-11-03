@@ -1,0 +1,429 @@
+{
+  "version": "1.0",
+  "date": "2026-11-03",
+  "description": "Audit du projet SYFER (NEXUS MOTHERSHIP + Mini Mothership + agents NEXUS + passerelle nexus-bridge) mené par le Mothership lui-même : 10 missions en F3, projet « nexus », service imposé (champ « service » de l'API). Chaque consigne contient un dossier factuel compact tiré du dépôt, sans secret, sans nom d'hôte ni IP. Niveaux attendus : règles déterministes de gate.py appliquées à la consigne et au service ; « niveaux_acceptes » quand le livrable peut légitimement relever le niveau.",
+  "fonctionnement_defaut": "F3",
+  "selection_rapide": [
+    "SY-01",
+    "SY-04",
+    "SY-06",
+    "SY-08"
+  ],
+  "missions": [
+    {
+      "id": "SY-01",
+      "titre": "SYFER — audit de configuration et de durcissement",
+      "consigne": "Audit du projet SYFER (NEXUS MOTHERSHIP + Mini Mothership + agents NEXUS + passerelle nexus-bridge). Dossier factuel :\n- VPS Ubuntu 22.04/24.04, 2 vCPU, 8 Go RAM, Docker Compose. Seul Caddy 2.8 écoute sur Internet (80/443) ; les autres services n'exposent aucun port (réseau Docker interne).\n- Conteneurs nexus-core et nexus-bridge : utilisateur non root (UID 10001), cap_drop ALL, read_only, no-new-privileges, limites mémoire/CPU (384 Mo/0,2 et 128 Mo/0,1).\n- API protégée par l'en-tête X-Nexus-Key (comparaison à temps constant) ; cockpit protégé par basic auth Caddy (hash bcrypt) + en-tête interne injecté par Caddy + contrôles anti-CSRF (en-tête X-Cockpit, Origin, corps JSON).\n- Caddy retire les en-têtes d'authentification avant transmission aux services et masque l'adresse /mcp/<jeton> dans ses journaux ; HSTS actif.\n- Secrets générés aléatoirement dans .env par install.sh, jamais affichés ; .env chiffré (gpg) dans les sauvegardes.\n- Journal LEDGER chaîné, HMAC-SHA256 si LEDGER_HMAC_KEY est définie (sinon SHA-256 sans clé, avertissement affiché).\n- Constats d'audit déjà corrigés : secrets retirés d'install.log, garde anti-CSRF du cockpit, masquage des secrets dans les livrables cyber.\n- Le pare-feu (ufw) est vérifié par install.sh mais pas modifié.\nLivrable attendu, avec ces intertitres : Constats (pour chaque constat : gravité faible/moyenne/élevée, preuve tirée du dossier, correction proposée), Note /10 (justifiée), 3 améliorations prioritaires. Ne suppose rien qui n'est pas dans le dossier : signale ce qui manque comme « à vérifier ».",
+      "projet": "nexus",
+      "service": "CYBER-FORTRESS/audit",
+      "service_attendu": "CYBER-FORTRESS/audit",
+      "niveau_decision_attendu": "N3",
+      "obligatoires": [
+        "gravit*",
+        "preuve*",
+        "correction*",
+        [
+          "/10",
+          "sur 10"
+        ],
+        "Caddy",
+        [
+          "non root",
+          "UID"
+        ]
+      ],
+      "interdits": [
+        "regle:secret",
+        "regle:offensif"
+      ],
+      "longueur": {
+        "min_mots": 200,
+        "max_mots": 1200
+      },
+      "sections": [
+        "Constats",
+        "Note",
+        "Améliorations"
+      ]
+    },
+    {
+      "id": "SY-02",
+      "titre": "SYFER — conformité RGPD art. 32, sauvegardes 3-2-1 et PRA",
+      "consigne": "Audit du projet SYFER (NEXUS MOTHERSHIP + Mini Mothership + agents NEXUS + passerelle nexus-bridge). Dossier factuel :\n- Données traitées : missions, livrables et décisions (nexus.db, SQLite), mémoire partagée des IA (bridge.db, SQLite WAL + FTS5). Usage interne, un seul propriétaire.\n- La passerelle refuse d'enregistrer un texte qui ressemble à une clé API, un mot de passe ou un numéro de carte ; rien n'est effacé (versions, archivage).\n- backup.sh : copie cohérente des bases SQLite et des livrables, .env chiffré par gpg, 7 sauvegardes gardées, proposition d'une tâche planifiée chaque nuit à 3 h 30.\n- Option --hors-serveur : copie vers un dossier Google Drive via rclone ; sur Drive seul le .env est chiffré, les bases y sont en clair.\n- restore.sh : restauration d'une sauvegarde datée avec vérification, arrêt, remise des droits UID 10001, redémarrage et contrôle de /api/sante.\n- Aucun test de restauration planifié n'est documenté ; pas de PRA écrit ; pas de chiffrement au repos des bases sur le VPS.\nToute référence de texte porte la mention « référence à vérifier ».\nLivrable attendu, avec ces intertitres : Constats (pour chaque constat : gravité faible/moyenne/élevée, preuve tirée du dossier, correction proposée), Note /10 (justifiée), 3 améliorations prioritaires. Ne suppose rien qui n'est pas dans le dossier : signale ce qui manque comme « à vérifier ».",
+      "projet": "nexus",
+      "service": "CYBER-FORTRESS/conformite",
+      "service_attendu": "CYBER-FORTRESS/conformite",
+      "niveau_decision_attendu": "N3",
+      "obligatoires": [
+        "gravit*",
+        "preuve*",
+        "correction*",
+        [
+          "/10",
+          "sur 10"
+        ],
+        "3-2-1",
+        [
+          "article 32",
+          "art. 32"
+        ],
+        [
+          "PRA",
+          "plan de reprise"
+        ],
+        "hors site",
+        "ne remplace pas l'avis d'un avocat"
+      ],
+      "interdits": [
+        "regle:secret",
+        "regle:offensif",
+        "regle:reference_juridique_non_verifiee"
+      ],
+      "longueur": {
+        "min_mots": 200,
+        "max_mots": 1200
+      },
+      "sections": [
+        "Constats",
+        "Note",
+        "Améliorations"
+      ]
+    },
+    {
+      "id": "SY-03",
+      "titre": "SYFER — veille vulnérabilités de la pile",
+      "consigne": "Audit du projet SYFER (NEXUS MOTHERSHIP + Mini Mothership + agents NEXUS + passerelle nexus-bridge). Dossier factuel :\nPile logicielle (versions épinglées dans docker-compose et requirements) :\n- Système : Ubuntu 22.04 ou 24.04 ; Docker Engine + plugin compose (dépôt officiel).\n- Caddy 2.8 (frontal HTTPS Let's Encrypt).\n- Ollama 0.40.12 (IA locale qwen2.5:3b), et Ollama Cloud en option.\n- n8n 2.45.6 (version complète seulement), PostgreSQL 16 (pgvector), Redis 7-alpine, Uptime Kuma 1, ntfy 2.11.0.\n- nexus-core et nexus-bridge : Python 3.12-slim, FastAPI 0.162.0, Starlette 1.7.0, Uvicorn 0.54.0, SQLAlchemy 2.0.56, httpx 0.28.1, PyYAML 6.0.3, Pydantic 2.13.5.\n- Bases : SQLite (MVP), PostgreSQL (version complète).\nDemande : pour chaque composant, risques connus par famille (exposition réseau, désérialisation, élévation de droits…), comment suivre ses avis de sécurité, fréquence de mise à jour conseillée. N'invente aucun identifiant de CVE : écris « à vérifier sur la source officielle » si tu n'es pas certain.\nLivrable attendu, avec ces intertitres : Constats (pour chaque constat : gravité faible/moyenne/élevée, preuve tirée du dossier, correction proposée), Note /10 (justifiée), 3 améliorations prioritaires. Ne suppose rien qui n'est pas dans le dossier : signale ce qui manque comme « à vérifier ».",
+      "projet": "nexus",
+      "service": "CYBER-FORTRESS/veille",
+      "service_attendu": "CYBER-FORTRESS/veille",
+      "niveau_decision_attendu": "N2",
+      "obligatoires": [
+        "gravit*",
+        "preuve*",
+        "correction*",
+        [
+          "/10",
+          "sur 10"
+        ],
+        [
+          "à vérifier",
+          "source officielle"
+        ],
+        "Caddy",
+        "n8n",
+        "FastAPI",
+        "Ollama"
+      ],
+      "interdits": [
+        "regle:secret",
+        "regle:offensif"
+      ],
+      "longueur": {
+        "min_mots": 200,
+        "max_mots": 1200
+      },
+      "sections": [
+        "Constats",
+        "Note",
+        "Améliorations"
+      ],
+      "niveaux_acceptes": [
+        "N3"
+      ]
+    },
+    {
+      "id": "SY-04",
+      "titre": "SYFER — architecture et séparation en 4 dépôts",
+      "consigne": "Audit du projet SYFER (NEXUS MOTHERSHIP + Mini Mothership + agents NEXUS + passerelle nexus-bridge). Dossier factuel :\n- Aujourd'hui : un seul dépôt (kit) contenant nexus-core (FastAPI, 93 agents en fiches YAML : noyau de 5, 8 directeurs, 20 services × COLLECTOR/ANALYST/CHECKER/EXECUTOR), nexus-bridge (serveur MCP Streamable HTTP, JSON-RPC écrit à la main, 17 outils : mémoire, tâches, messages, passations, missions), scripts d'installation, Caddyfile, docker-compose, workflows n8n.\n- Pipeline d'une mission : SENTINEL → PRIME (routage par mots-clés puis LLM) → COLLECTOR → ANALYST ⇄ CHECKER → GATE (N0–N3, règles déterministes) → décision humaine N3 ou EXECUTOR (aucune action externe).\n- Niveaux de fonctionnement F1–F4 (local, courant, renforcé, Anthropic payant soumis à validation).\n- Cible demandée : 4 dépôts — nexus-bridge, nexus-agents (fiches YAML et règles), mini-mothership (kit VPS), nexus-mothership (version complète) — reliés par un « protocole NEXUS v1 » à définir (format des missions, des décisions, des journaux, versionnage).\nDemande : découpage proposé, dépendances entre dépôts, contenu minimal du protocole NEXUS v1 (messages, champs, versions, compatibilité), ordre de migration et risques.\nLivrable attendu, avec ces intertitres : Constats (pour chaque constat : gravité faible/moyenne/élevée, preuve tirée du dossier, correction proposée), Note /10 (justifiée), 3 améliorations prioritaires. Ne suppose rien qui n'est pas dans le dossier : signale ce qui manque comme « à vérifier ».",
+      "projet": "nexus",
+      "service": "CODE-CORE/conception",
+      "service_attendu": "CODE-CORE/conception",
+      "niveau_decision_attendu": "N1",
+      "obligatoires": [
+        "gravit*",
+        "preuve*",
+        "correction*",
+        [
+          "/10",
+          "sur 10"
+        ],
+        "nexus-bridge",
+        "nexus-agents",
+        "mini-mothership",
+        [
+          "protocole NEXUS v1",
+          "NEXUS v1"
+        ],
+        "version*"
+      ],
+      "interdits": [
+        "regle:secret",
+        "regle:offensif"
+      ],
+      "longueur": {
+        "min_mots": 200,
+        "max_mots": 1200
+      },
+      "sections": [
+        "Constats",
+        "Note",
+        "Améliorations",
+        "Protocole"
+      ]
+    },
+    {
+      "id": "SY-05",
+      "titre": "SYFER — qualité et dette technique",
+      "consigne": "Audit du projet SYFER (NEXUS MOTHERSHIP + Mini Mothership + agents NEXUS + passerelle nexus-bridge). Dossier factuel :\n- Environ 5 500 lignes Python (nexus-core + nexus-bridge) ; le plus gros fichier, pipeline.py, fait environ 960 lignes et regroupe routage, boucle qualité, escalade, décisions et exécution.\n- 212 tests pytest (SQLite temporaire, LLM factice, aucun réseau), dépendances épinglées.\n- Routage PRIME par listes de mots-clés codées en dur ; règles GATE par expressions régulières (négations simples gérées, faux positifs neutralisés).\n- File d'exécution en mémoire (threads), reprise des missions au démarrage ; transitions de statut atomiques en base.\n- SQLite en MVP, PostgreSQL prévu en version complète mais pgvector et Redis non utilisés.\n- Scripts bash d'installation longs (install.sh ≈ 39 Ko).\nDemande : revue de la qualité du code et de la dette technique (lisibilité, couplage, testabilité, performances, robustesse), avec pour chaque point une correction concrète.\nLivrable attendu, avec ces intertitres : Constats (pour chaque constat : gravité faible/moyenne/élevée, preuve tirée du dossier, correction proposée), Note /10 (justifiée), 3 améliorations prioritaires. Ne suppose rien qui n'est pas dans le dossier : signale ce qui manque comme « à vérifier ».",
+      "projet": "nexus",
+      "service": "CODE-CORE/revue",
+      "service_attendu": "CODE-CORE/revue",
+      "niveau_decision_attendu": "N2",
+      "obligatoires": [
+        "gravit*",
+        "preuve*",
+        "correction*",
+        [
+          "/10",
+          "sur 10"
+        ],
+        [
+          "pipeline.py",
+          "pipeline"
+        ],
+        [
+          "dette",
+          "dette technique"
+        ],
+        "test*"
+      ],
+      "interdits": [
+        "regle:secret",
+        "regle:offensif"
+      ],
+      "longueur": {
+        "min_mots": 200,
+        "max_mots": 1200
+      },
+      "sections": [
+        "Constats",
+        "Note",
+        "Améliorations"
+      ]
+    },
+    {
+      "id": "SY-06",
+      "titre": "SYFER — commercialisation : droit français",
+      "consigne": "Audit du projet SYFER (NEXUS MOTHERSHIP + Mini Mothership + agents NEXUS + passerelle nexus-bridge). Dossier factuel :\n- Projet : vendre ou louer à des tiers un logiciel d'organisation d'agents IA (kit d'installation sur VPS + passerelle pour Claude, ChatGPT, Gemini), aujourd'hui utilisé en interne par une seule personne.\n- Statut envisagé du vendeur : micro-entreprise puis SASU.\n- Licence actuelle envisagée : « tous droits réservés » ; le kit embarque des logiciels open source (Caddy, n8n, Ollama, FastAPI…) sous leurs propres licences.\n- Nom commercial « SYFER » et noms « NEXUS » : disponibilité de marque non vérifiée (INPI à vérifier).\n- Le logiciel peut traiter des données saisies par les utilisateurs (missions, mémoire des IA).\nDemande : obligations françaises pour cette commercialisation (contrat de licence, CGV, information du consommateur ou du professionnel, responsabilité, marque à vérifier à l'INPI, compatibilité des licences open source). Toute référence de texte porte la mention « référence à vérifier ».\nLivrable attendu, avec ces intertitres : Constats (pour chaque constat : gravité faible/moyenne/élevée, preuve tirée du dossier, correction proposée), Note /10 (justifiée), 3 améliorations prioritaires. Ne suppose rien qui n'est pas dans le dossier : signale ce qui manque comme « à vérifier ».",
+      "projet": "nexus",
+      "service": "LEX-GUARD/droit-france",
+      "service_attendu": "LEX-GUARD/droit-france",
+      "niveau_decision_attendu": "N3",
+      "obligatoires": [
+        "gravit*",
+        "preuve*",
+        "correction*",
+        [
+          "/10",
+          "sur 10"
+        ],
+        "INPI",
+        [
+          "licence",
+          "licences"
+        ],
+        [
+          "tous droits réservés",
+          "propriété intellectuelle"
+        ],
+        "ne remplace pas l'avis d'un avocat"
+      ],
+      "interdits": [
+        "regle:secret",
+        "regle:offensif",
+        "regle:reference_juridique_non_verifiee",
+        "regle:promesse_gain"
+      ],
+      "longueur": {
+        "min_mots": 200,
+        "max_mots": 1300
+      },
+      "sections": [
+        "Constats",
+        "Note",
+        "Améliorations"
+      ]
+    },
+    {
+      "id": "SY-07",
+      "titre": "SYFER — commercialisation : droit européen (AI Act, RGPD)",
+      "consigne": "Audit du projet SYFER (NEXUS MOTHERSHIP + Mini Mothership + agents NEXUS + passerelle nexus-bridge). Dossier factuel :\n- Même projet de commercialisation dans l'Union européenne d'un logiciel d'organisation d'agents IA (93 agents, un seul humain valide les décisions engageantes N3, aucune action externe automatique).\n- Les modèles utilisés sont tiers (Ollama local, Ollama Cloud, Anthropic en option) : le projet n'entraîne aucun modèle.\n- Données : missions, livrables et mémoire partagée des IA stockées chez l'utilisateur (VPS) ; sauvegardes possibles sur Google Drive.\n- Marque « SYFER » / « NEXUS » non vérifiée au niveau européen (EUIPO à vérifier).\nDemande : qualification au regard du règlement européen sur l'IA (AI Act : rôle de fournisseur ou de déployeur, niveau de risque, obligations de transparence et de supervision humaine), du RGPD (responsable de traitement ou sous-traitant, transferts hors UE) et de la marque de l'Union européenne. Toute référence de texte porte la mention « référence à vérifier ».\nLivrable attendu, avec ces intertitres : Constats (pour chaque constat : gravité faible/moyenne/élevée, preuve tirée du dossier, correction proposée), Note /10 (justifiée), 3 améliorations prioritaires. Ne suppose rien qui n'est pas dans le dossier : signale ce qui manque comme « à vérifier ».",
+      "projet": "nexus",
+      "service": "LEX-GUARD/droit-europe",
+      "service_attendu": "LEX-GUARD/droit-europe",
+      "niveau_decision_attendu": "N3",
+      "obligatoires": [
+        "gravit*",
+        "preuve*",
+        "correction*",
+        [
+          "/10",
+          "sur 10"
+        ],
+        "AI Act",
+        "RGPD",
+        "EUIPO",
+        [
+          "supervision humaine",
+          "contrôle humain"
+        ],
+        "ne remplace pas l'avis d'un avocat"
+      ],
+      "interdits": [
+        "regle:secret",
+        "regle:offensif",
+        "regle:reference_juridique_non_verifiee"
+      ],
+      "longueur": {
+        "min_mots": 200,
+        "max_mots": 1300
+      },
+      "sections": [
+        "Constats",
+        "Note",
+        "Améliorations"
+      ]
+    },
+    {
+      "id": "SY-08",
+      "titre": "SYFER — modèle économique et coûts",
+      "consigne": "Audit du projet SYFER (NEXUS MOTHERSHIP + Mini Mothership + agents NEXUS + passerelle nexus-bridge). Dossier factuel :\n- Coûts d'exploitation constatés pour un utilisateur : VPS Hostinger KVM 2 environ 17 à 25 $ par mois selon la durée d'engagement ; IA de 0 $ (modèle local ou Ollama Cloud gratuit) à environ 55 $ par mois (Anthropic en F4, plafonné à 0,50 € par mission et par un budget mensuel).\n- Coût de la mission F4 estimé avant lancement et soumis à validation ; F1–F3 gratuits.\n- Cible pressentie : indépendants et petites structures francophones voulant piloter plusieurs projets avec des agents IA.\n- Aucune donnée de marché ni tarif de vente n'est encore établi.\nDemande : modèle économique comparé (licence unique, abonnement, installation + maintenance), structure de coûts, seuil de rentabilité, trois scénarios. Chaque chiffre repose sur une hypothèse explicite.\nLivrable attendu, avec ces intertitres : Constats (pour chaque constat : gravité faible/moyenne/élevée, preuve tirée du dossier, correction proposée), Note /10 (justifiée), 3 améliorations prioritaires. Ne suppose rien qui n'est pas dans le dossier : signale ce qui manque comme « à vérifier ».",
+      "projet": "nexus",
+      "service": "PILOT-CORE/etudes",
+      "service_attendu": "PILOT-CORE/etudes",
+      "niveau_decision_attendu": "N3",
+      "obligatoires": [
+        "gravit*",
+        "preuve*",
+        "correction*",
+        [
+          "/10",
+          "sur 10"
+        ],
+        "hypothèse*",
+        [
+          "seuil de rentabilité",
+          "rentabilité"
+        ],
+        "scénario*",
+        [
+          "VPS",
+          "hébergement"
+        ]
+      ],
+      "interdits": [
+        "regle:secret",
+        "regle:offensif",
+        "regle:promesse_chiffree_sans_hypothese",
+        "regle:promesse_gain"
+      ],
+      "longueur": {
+        "min_mots": 200,
+        "max_mots": 1200
+      },
+      "sections": [
+        "Constats",
+        "Note",
+        "Améliorations",
+        "Hypothèses"
+      ]
+    },
+    {
+      "id": "SY-09",
+      "titre": "SYFER — indicateurs et plan à 90 jours",
+      "consigne": "Audit du projet SYFER (NEXUS MOTHERSHIP + Mini Mothership + agents NEXUS + passerelle nexus-bridge). Dossier factuel :\n- État : kit installable en 3 étapes, 93 agents, cockpit web, alertes N3 sur téléphone, passerelle pour 3 IA, banc d'essai qualité (note /100 par mission, coût, durée par niveau F1–F4) en cours de mise en place.\n- Mesures disponibles par mission : statut, service routé, niveau de décision, niveau de fonctionnement appliqué, tokens entrée/sortie, coût €, durée, révisions.\n- Objectif du propriétaire : présentation finale du projet, puis éventuelle commercialisation.\nDemande : tableau d'indicateurs (définition, source, seuil d'alerte) et plan à 90 jours en 3 phases de 30 jours avec livrables et critères de passage.\nLivrable attendu, avec ces intertitres : Constats (pour chaque constat : gravité faible/moyenne/élevée, preuve tirée du dossier, correction proposée), Note /10 (justifiée), 3 améliorations prioritaires. Ne suppose rien qui n'est pas dans le dossier : signale ce qui manque comme « à vérifier ».",
+      "projet": "nexus",
+      "service": "PILOT-CORE/pilotage",
+      "service_attendu": "PILOT-CORE/pilotage",
+      "niveau_decision_attendu": "N1",
+      "obligatoires": [
+        "gravit*",
+        "preuve*",
+        "correction*",
+        [
+          "/10",
+          "sur 10"
+        ],
+        "indicateur*",
+        [
+          "90 jours",
+          "J+90"
+        ],
+        "seuil*",
+        [
+          "phase 1",
+          "30 jours"
+        ]
+      ],
+      "interdits": [
+        "regle:secret",
+        "regle:offensif",
+        "regle:promesse_chiffree_sans_hypothese"
+      ],
+      "longueur": {
+        "min_mots": 200,
+        "max_mots": 1200
+      },
+      "sections": [
+        "Constats",
+        "Note",
+        "Améliorations",
+        "Indicateurs",
+        "Plan"
+      ]
+    },
+    {
+      "id": "SY-10",
+      "titre": "SYFER — sobriété numérique du VPS et des modèles",
+      "consigne": "Audit du projet SYFER (NEXUS MOTHERSHIP + Mini Mothership + agents NEXUS + passerelle nexus-bridge). Dossier factuel :\n- VPS 2 vCPU, 8 Go RAM, ~100 Go disque, allumé en permanence.\n- Limites des conteneurs (MVP) : Ollama 3,5 Go / 1,1 vCPU, nexus-core 384 Mo / 0,2, nexus-bridge 128 Mo / 0,1, Caddy 64 Mo / 0,1 ; total ≈ 4,1 Go et 1,5 vCPU (0,6 Go sans IA locale).\n- Modèle local qwen2.5:3b (CPU uniquement) ; option Ollama Cloud (gemma4:31b) et Anthropic en F4.\n- F3 ajoute deux corrections et un double contrôle par le modèle local (plus d'appels) ; tâche de fond toutes les 10 minutes ; sauvegarde nocturne, 7 conservées.\nDemande : estimation qualitative puis en fourchette de l'impact (énergie, matériel, appels aux modèles) et mesures de sobriété (choix du niveau F, taille des modèles, mise en veille, rétention). Chaque chiffre repose sur une hypothèse explicite.\nLivrable attendu, avec ces intertitres : Constats (pour chaque constat : gravité faible/moyenne/élevée, preuve tirée du dossier, correction proposée), Note /10 (justifiée), 3 améliorations prioritaires. Ne suppose rien qui n'est pas dans le dossier : signale ce qui manque comme « à vérifier ».",
+      "projet": "nexus",
+      "service": "GREEN-CORE/environnement",
+      "service_attendu": "GREEN-CORE/environnement",
+      "niveau_decision_attendu": "N1",
+      "obligatoires": [
+        "gravit*",
+        "preuve*",
+        "correction*",
+        [
+          "/10",
+          "sur 10"
+        ],
+        "hypothèse*",
+        "fourchette",
+        [
+          "qwen2.5:3b",
+          "modèle local"
+        ],
+        [
+          "F3",
+          "niveau de fonctionnement"
+        ]
+      ],
+      "interdits": [
+        "regle:secret",
+        "regle:offensif",
+        "regle:promesse_chiffree_sans_hypothese",
+        "neutre en carbone"
+      ],
+      "longueur": {
+        "min_mots": 200,
+        "max_mots": 1200
+      },
+      "sections": [
+        "Constats",
+        "Note",
+        "Améliorations"
+      ]
+    }
+  ]
+}

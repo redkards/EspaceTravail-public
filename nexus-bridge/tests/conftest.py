@@ -42,6 +42,14 @@ class FauxCore:
         if req.method == "GET" and req.url.path == "/api/decisions":
             return httpx.Response(200, json=[{"id": 7, "mission_id": 42, "niveau": "N3", "resume": "Devis",
                                               "recommandation": "valider", "cout_estime_eur": 0, "risque": "moyen"}])
+        if req.method == "GET" and req.url.path.startswith("/api/projets/") and req.url.path.endswith("/connaissances"):
+            code = req.url.path.split("/")[3]
+            if code == "inconnu":
+                return httpx.Response(404, json={"detail": "Projet inconnu"})
+            q = req.url.params.get("q", "")
+            return httpx.Response(200, json=[{"titre": "Pitch", "source": "contexte/redkards.md#2", "auteur": "import",
+                                              "version": 1, "date": "2026-11-03T20:00:00",
+                                              "contenu": f"Résultat pour « {q} » " + "x" * 2000}])
         if req.method == "GET" and req.url.path == "/api/projets":
             if not self.projets_disponible:
                 return httpx.Response(404, json={"detail": "Not Found"})

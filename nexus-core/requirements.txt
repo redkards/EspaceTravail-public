@@ -7,5 +7,7 @@ psycopg[binary]==3.3.7
 httpx==0.28.1
 pyyaml==6.0.3
 pydantic==2.13.5
+# Base des fuseaux horaires (Europe/Paris des sessions N3) absente de l'image python:3.12-slim
+tzdata==2025.2
 # Tests uniquement
 pytest==9.1.1
