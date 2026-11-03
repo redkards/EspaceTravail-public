@@ -1,0 +1,8 @@
+.env
+data/
+backups/
+install.log
+__pycache__/
+*.db
+*.db-wal
+*.db-shm
