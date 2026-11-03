@@ -1,0 +1,65 @@
+# Registre des projets servis par le Mini NEXUS MOTHERSHIP.
+# Rechargeable sans redémarrage : GET /api/projets?recharger=1 (avec la clé X-Nexus-Key).
+# Champs : code (minuscules, chiffres, tirets), nom, description, services (services conseillés),
+#          alias (facultatif, autres noms acceptés à la création d'une mission).
+# Le projet « divers » est obligatoire : c'est le projet par défaut.
+
+projets:
+  - code: paradoxx
+    nom: PARADOXX SYSTÈME
+    description: Structure de pilotage multi-projets et VPS Hostinger dédié.
+    services: [OPS-CORE/projets, CODE-CORE/revue, LEX-GUARD/conformite]
+
+  - code: nexus
+    nom: NEXUS MOTHERSHIP
+    description: Organisation d'agents IA en départements, un seul humain valide.
+    services: [AGENT-FACTORY/evaluation, CODE-CORE/revue, OPS-CORE/projets]
+
+  - code: poker-winners
+    nom: Poker Winners
+    alias: [poker-vitrine, poker vitrine]
+    description: Site vitrine poker et bêta privée.
+    services: [CONTENT-ARENA/redaction, CODE-CORE/revue, REVENUE-CORE/propositions]
+
+  - code: poker-feeling
+    nom: Poker Feeling
+    description: Livre de poker « Poker Feeling ».
+    services: [CONTENT-ARENA/redaction, R&D-PARADOX/veille]
+
+  - code: redkards
+    nom: REDKARDS / Red Card
+    alias: [red-card, redcard]
+    description: Bande dessinée REDKARDS.
+    services: [CONTENT-ARENA/redaction, OPS-CORE/projets]
+
+  - code: top-solver
+    nom: Top Solver
+    alias: [solver, pw-solver]
+    description: Solver GTO de poker en français, outil d'analyse de main.
+    services: [CODE-CORE/revue, R&D-PARADOX/veille]
+
+  - code: youtube-poker-winner
+    nom: Chaîne YouTube Poker Winner
+    description: Chaîne YouTube de poker éducatif.
+    services: [CONTENT-ARENA/redaction, R&D-PARADOX/veille]
+
+  - code: freelance-ia
+    nom: Freelance IA
+    description: Activité freelance de développeur d'applications et d'automatisation IA.
+    services: [REVENUE-CORE/propositions, LEX-GUARD/conformite, OPS-CORE/projets]
+
+  - code: esct-boxe
+    nom: Site ESCT Boxe
+    alias: [siteesctboxe]
+    description: Site web du club ESCT Boxe.
+    services: [CODE-CORE/revue, CONTENT-ARENA/redaction]
+
+  - code: turf
+    nom: TURF
+    description: Projet TURF.
+    services: [R&D-PARADOX/veille, OPS-CORE/projets]
+
+  - code: divers
+    nom: Divers
+    description: Projet par défaut pour les missions non rattachées.
+    services: [OPS-CORE/projets]
