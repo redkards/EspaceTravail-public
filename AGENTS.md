@@ -1,3 +1,16 @@
+# MÉTHODE PRIORITAIRE COMMUNE — ÉCONOMIE D'ABORD (v1, 04/11/2026)
+
+**À appliquer avant toute autre règle, par toutes les IA.** Objectif : le système le moins cher en argent et en jetons.
+
+1. **Faut-il le faire ?** Réutiliser l'existant (digest, script, page) avant de créer.
+2. **Machine avant IA** : ce qui se répète tourne en script gratuit sur le VPS ou le PC (systemd, n8n). Coût en jetons : 0. L'IA ne traite que les exceptions.
+3. **Lecture minimale** : index MNEMOS par ID → un seul digest. Jamais de recherche large ni de journal complet. Sorties filtrées.
+4. **Le plus petit modèle qui suffit** : routines et veilles = modèle léger ; modèle fort réservé aux décisions complexes. Fréquence minimale des tâches planifiées.
+5. **Virtuel avant réel** : maquette et simulation avant de lancer ou de dépenser.
+6. **Gratuit d'abord** : open source et offres gratuites ; toute dépense ou crédit = devis + « OUI » de Jérémy.
+7. **Regrouper** : une seule passe, une seule carte « OUI / NON » ; pas de sous-agent pour une simple question.
+8. **Mesurer** : audit de consommation à chaque fin de version ; on supprime ce qui coûte sans servir.
+
 # Protocole NEXUS commun — toutes les IA de Jérémy (v1, 04/11/2026)
 
 S'applique à : Claude (cloud, PC, VPS), Claude Code, ChatGPT, Gemini, agents du Mothership, et toute future IA.
