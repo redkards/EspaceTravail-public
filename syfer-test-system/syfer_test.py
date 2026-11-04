@@ -53,7 +53,7 @@ def dossiers_presents() -> dict:
     return pres
 
 
-def passages(sauf: Path | None = None, avec=("tout", "rapide", "suite")) -> list[dict]:
+def passages(sauf: Path | None = None, avec=("tout", "rapide")) -> list[dict]:
     """Passages précédents (plus ancien → plus récent)."""
     out = []
     if not C.RESULTATS.exists():
@@ -147,6 +147,9 @@ def passage(noms: list[str], mode: str, code: str, graine: int, pdf: bool = True
                          "axes": {k: v.get("score") for k, v in ((p.get("score") or {}).get("axes") or {}).items()}}
                         for p in prec[-10:]]}
     C.ecrire_json(sortie / "syfer_test.json", doc)
+    if mode == "suite":
+        print(f"Résultat : {sortie / 'syfer_test.json'} (porte : passage complet requis, « tout » ou « rapide »)")
+        return 0 if all(r["statut"] in ("reussi", "saute") for r in res.values()) else 1
     print(f"\nScore global : {fiche['global']} / 100 (couverture {int(100 * fiche['couverture_globale'])} %)")
     for k, a in fiche["axes"].items():
         print(f"  {a['libelle']:16} {a['score'] if a['score'] is not None else '—':>6}")
@@ -155,6 +158,8 @@ def passage(noms: list[str], mode: str, code: str, graine: int, pdf: bool = True
         print(f"  - {r}")
     if pdf:
         faire_rapport(sortie)
+    if porte["verdict"] != P.VERT:
+        return 1
     return 0 if all(r["statut"] in ("reussi", "saute") for r in res.values()) else 1
 
 
@@ -194,7 +199,7 @@ def dernier(modes) -> dict | None:
 
 def faire_rapport(dossier: Path | None = None) -> Path | None:
     from sts import rapport_pdf
-    base = C.lire_json(dossier / "syfer_test.json") if dossier else dernier(("tout", "rapide", "suite"))
+    base = C.lire_json(dossier / "syfer_test.json") if dossier else dernier(("tout", "rapide"))
     if base and dossier:
         base["_dossier"] = str(dossier)
     vers = dernier(("version",))
@@ -244,7 +249,7 @@ def main(argv=None) -> int:
         if a.commande == "porte":
             if a.relancer:
                 passage(ORDRE_TOUT, "tout", "A", a.graine, pdf)
-            d = dernier(("tout", "rapide", "suite"))
+            d = dernier(("tout", "rapide"))
             if not d:
                 print("Aucun passage : lancez « syfer_test.py tout ».", file=sys.stderr)
                 return 3

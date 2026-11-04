@@ -82,6 +82,27 @@ def robustesse(hyp, scenarios, tirages, jours, base, pool, resultats):
         r["score_robuste"] = (1 - POIDS_PANNE) * r["score"]["moy"] + POIDS_PANNE * panne
 
 
+def choisir_selon_regle(scores: dict, couts: dict) -> str:
+    """Règle de recommandation : meilleur score ; à 1 point près, le moins cher."""
+    meilleur = max(scores.values())
+    proches = [sid for sid, v in scores.items() if v >= meilleur - 1.0]
+    return min(proches, key=lambda sid: (couts[sid], -scores[sid]))
+
+
+def verdicts_sensibilite(sens: dict, couts: dict) -> dict:
+    """Gagnant au min et au max de chaque hypothèse, avec la même règle que la recommandation."""
+    cands = sens["candidats"]
+    tete = choisir_selon_regle(sens["base"], couts)
+    for l in sens["parametres"]:
+        for b in ("min", "max"):
+            l["gagnant_" + b] = choisir_selon_regle({sid: l["scores"][sid][b] for sid in cands}, couts)
+        l["change_conclusion"] = l["gagnant_min"] != tete or l["gagnant_max"] != tete
+        l["delta_score_recommande"] = abs(l["scores"][tete]["max"] - l["scores"][tete]["min"])
+    sens["gagnant_base"] = tete
+    sens["parametres"].sort(key=lambda l: (l["change_conclusion"], l["delta_score_recommande"]), reverse=True)
+    return sens
+
+
 def recommander(resultats):
     """Meilleur score robuste parmi les scénarios de conception, sous contraintes ; à 1 point près, le moins cher."""
     eligibles = []
@@ -219,12 +240,15 @@ def graphiques(resultats, ordre, jours, cap=None):
             ax.scatter([p50 / 60], [yi], s=36, color=C1, zorder=2, label="p50" if yi == y[0] else None)
             ax.scatter([p90 / 60], [yi], s=36, color=C2, zorder=2, label="p90" if yi == y[0] else None)
         ax.set_xscale("log")
+        from matplotlib.ticker import FixedLocator, FuncFormatter
+        ax.xaxis.set_major_locator(FixedLocator([0.5, 1, 2, 5, 10, 20, 60]))
+        ax.xaxis.set_major_formatter(FuncFormatter(lambda v, _: f"{v:g}"))
         ax.axvline(J.charger_hypotheses()["fixes"]["fonctionnement"][f]["delai_max_s"] / 60, color=ENCRE2, lw=0.8,
                    ls="--")
         ax.set_title(f"{f} — délai arrivée → livrable (min)", loc="left", fontsize=10)
         ax.grid(axis="x", color=GRILLE, lw=0.6)
     axes[0].set_yticks(y, noms, fontsize=8)
-    axes[0].legend(frameon=False, loc="lower right")
+    fig.legend(*axes[0].get_legend_handles_labels(), frameon=False, loc="upper right", ncol=2)
     fig.suptitle("Délais de bout en bout des missions de jour (tiret = chrono max du niveau)", x=0.01, ha="left")
     finir(fig, "delais.png")
 
@@ -426,7 +450,11 @@ def main(argv=None):
     ap.add_argument("--candidats", type=int, default=5, help="nombre de scénarios comparés dans la tornade")
     ap.add_argument("--rapide", action="store_true", help="20 tirages, tornade 6 tirages (essai)")
     ap.add_argument("--processus", type=int, default=os.cpu_count() or 1)
+    ap.add_argument("--rapport-seul", action="store_true",
+                    help="relit resultats/resultats.json et régénère rapport et graphiques sans simuler")
     args = ap.parse_args(argv)
+    if args.rapport_seul:
+        return regenerer(args)
     if args.rapide:
         args.tirages, args.sensibilite = 20, 6
     os.makedirs(RES, exist_ok=True)
@@ -449,6 +477,7 @@ def main(argv=None):
             candidats = [choix] + [s for s in classement if s != choix][:args.candidats - 1]
             print(f"Sensibilité : {len(candidats)} candidats × {len(hyp['parametres'])} hypothèses × 2 bornes")
             sens = sensibilite(hyp, scenarios, candidats, args.sensibilite, args.jours, args.graine, pool)
+            sens = verdicts_sensibilite(sens, {s: resultats[s]["resume"]["cout_total_eur"]["moy"] for s in candidats})
     finally:
         if pool:
             pool.close()
@@ -462,6 +491,29 @@ def main(argv=None):
     rapport(hyp, resultats, ordre, choix, classement, sens, calage, args, fichiers, cap)
     print(f"Recommandation : {choix} ({resultats[choix]['scenario']['nom']}) — {time.time() - t0:.0f} s")
     print("Sensibilités principales : " + ", ".join(l["parametre"] for l in sens["parametres"][:3]))
+    return sortie
+
+
+def regenerer(args):
+    hyp = J.charger_hypotheses()
+    with open(os.path.join(RES, "resultats.json"), encoding="utf-8") as f:
+        sortie = json.load(f)
+    for k in ("tirages", "jours", "graine"):
+        setattr(args, k, sortie["parametres_execution"][k])
+    resultats = sortie["scenarios"]
+    ordre = list(resultats)
+    sens = sortie["sensibilite"]
+    if sens.get("candidats"):
+        sens = verdicts_sensibilite(sens, {s: resultats[s]["resume"]["cout_total_eur"]["moy"]
+                                           for s in sens["candidats"]})
+        sortie["sensibilite"] = sens
+    fichiers = graphiques(resultats, ordre, args.jours, sortie.get("capacite"))
+    rapport(hyp, resultats, ordre, sortie["recommandation"], sortie["classement"], sens, sortie["calage"], args,
+            fichiers, sortie.get("capacite"))
+    with open(os.path.join(RES, "resultats.json"), "w", encoding="utf-8") as f:
+        json.dump(sortie, f, ensure_ascii=False, indent=1)
+    print("Rapport régénéré. Sensibilités principales : "
+          + ", ".join(l["parametre"] for l in sens["parametres"][:3]))
     return sortie
 
 

@@ -50,7 +50,7 @@ def _calcul(horodatage, acteur, action, mission_id, details_json, hash_prec, alg
 # Texte libre (contenu des missions, commentaires, extraits de livrable) : jamais en clair dans le LEDGER,
 # qui est immuable (un effacement RGPD ne peut pas le réécrire). Seule une empreinte courte est gardée.
 TEXTE_LIBRE = {"titre", "consigne", "commentaire", "texte", "livrable", "resume", "recommandation", "indication",
-               "suggestion", "problemes", "avertissements", "motifs", "contenu", "extrait", "question", "motif"}
+               "suggestion", "problemes", "avertissements", "motifs", "contenu", "extrait", "question", "motif_demande"}
 
 
 def empreinte_texte(valeur) -> dict:

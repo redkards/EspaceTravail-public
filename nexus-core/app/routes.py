@@ -3,7 +3,10 @@ import json
 import os
 from typing import Literal
 
-from fastapi import APIRouter, BackgroundTasks, HTTPException, Query
+import threading
+from datetime import timedelta
+
+from fastapi import APIRouter, BackgroundTasks, Header, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy import func, select
 
@@ -15,6 +18,10 @@ from .file_missions import FILE
 from . import projets as registre
 from .db import session_scope
 from .models import Decision, Etape, Mission, maintenant
+
+
+_VERROU_CREATION = threading.Lock()
+DOUBLON_S = 30  # même titre + consigne + projet en moins de 30 s : doublon (double clic)
 
 
 class NouvelleMission(BaseModel):
@@ -109,13 +116,48 @@ def creer_routeur(cockpit: bool = False) -> APIRouter:
                 "arret_urgence": bool(sentinel.actifs().get("kill:grille"))}
 
     @r.post("/missions", status_code=202)
-    def creer_mission(corps: NouvelleMission, taches: BackgroundTasks):
+    def creer_mission(corps: NouvelleMission, taches: BackgroundTasks,
+                      cle_idempotence: str | None = Header(None, alias="Idempotency-Key")):
+        with _VERROU_CREATION:  # contrôle de doublon + insertion atomiques (double clic, double envoi)
+            return _creer_mission(corps, taches, cle_idempotence)
+
+    def _doublon(cle: str | None, titre: str, consigne: str, projet: str, corps: NouvelleMission) -> int | None:
+        """Même demande (titre, consigne, projet, service, niveau, montant, action) en moins de DOUBLON_S s,
+        hors missions refusées ou échouées (une nouvelle demande identique est alors légitime)."""
+        if cle:
+            mid = sentinel.lire(f"idem:{cle[:120]}")
+            if mid:
+                return int(mid)
+        depuis = maintenant() - timedelta(seconds=DOUBLON_S)
+        with session_scope() as s:
+            return s.execute(select(Mission.id).where(
+                Mission.titre == titre, Mission.consigne == consigne, Mission.projet == projet,
+                Mission.service.is_(corps.service) if corps.service is None else Mission.service == corps.service,
+                Mission.fonctionnement_demande == (corps.fonctionnement or fct.defaut()),
+                Mission.montant_eur == (corps.montant_eur or 0.0),
+                Mission.action.is_(None) if corps.action is None else Mission.action == corps.action,
+                Mission.statut.notin_(("refusee", "echouee", "a_reformuler", "plafond_atteint", "annulee")),
+                Mission.fantome.is_(False), Mission.cree_le >= depuis).order_by(Mission.id.desc())).scalars().first()
+
+    def _creer_mission(corps: NouvelleMission, taches: BackgroundTasks, cle: str | None):
         if corps.service and corps.service not in reg.services():
             raise HTTPException(422, f"Service inconnu : {corps.service}")
         try:
             projet = registre.resoudre(corps.projet)
         except ValueError as e:
             raise HTTPException(422, str(e))
+        # Secret ou canari collé dans la consigne ou le titre : masqué avant TOUT stockage.
+        titre, consigne = pipeline._assainir(corps.titre.strip()), pipeline._assainir(corps.consigne.strip())
+        if titre != corps.titre.strip() or consigne != corps.consigne.strip():
+            ledger.journaliser("NEXUS-SENTINEL", "secret_masque_a_la_creation", None)
+        existant = _doublon(cle, titre, consigne, projet, corps)
+        if existant is not None:
+            ledger.journaliser("API", "mission_doublon_ignoree", existant, cle_idempotence=bool(cle))
+            with session_scope() as s:
+                m = s.get(Mission, existant)
+                return {"id": existant, "statut": m.statut, "projet": m.projet, "doublon": True,
+                        "fonctionnement_demande": m.fonctionnement_demande, "fonctionnement": m.fonctionnement,
+                        "message": "Mission identique déjà créée il y a moins de 30 s : aucune nouvelle mission."}
         demande = corps.fonctionnement or fct.defaut()
         applique, raison, attente_f4 = demande, None, False
         if demande == "F4":
@@ -129,7 +171,7 @@ def creer_routeur(cockpit: bool = False) -> APIRouter:
             else:
                 attente_f4 = True
         with session_scope() as s:
-            m = Mission(titre=corps.titre.strip(), consigne=corps.consigne.strip(), service=corps.service,
+            m = Mission(titre=titre, consigne=consigne, service=corps.service,
                         montant_eur=corps.montant_eur or 0.0, action=corps.action,
                         statut="en_attente_n3" if attente_f4 else "recue", projet=projet,
                         fonctionnement_demande=demande, fonctionnement=applique,
@@ -138,7 +180,9 @@ def creer_routeur(cockpit: bool = False) -> APIRouter:
             s.add(m)
             s.flush()
             mid = m.id
-        ledger.journaliser("API", "mission_recue", mid, titre=corps.titre, service=corps.service,
+        if cle:
+            sentinel.ecrire(f"idem:{cle[:120]}", str(mid))
+        ledger.journaliser("API", "mission_recue", mid, titre=titre, service=corps.service,
                            projet=projet, fonctionnement_demande=demande, fonctionnement=applique,
                            raison=raison)
         rep = {"id": mid, "statut": "recue", "projet": projet, "fonctionnement_demande": demande,

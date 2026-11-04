@@ -207,7 +207,7 @@ def effacer(mid: int, demandeur: str, motif: str = "droit à l'effacement") -> i
                 x.texte, x.efface = "", True
     cascade = _effacer_cascade(mid, demandeur)
     if n or any(cascade.values()):
-        ledger.journaliser("NEXUS-LEDGER", "archive_effacement", mid, lignes=n, demandeur=demandeur, motif=motif,
+        ledger.journaliser("NEXUS-LEDGER", "archive_effacement", mid, lignes=n, demandeur=demandeur, motif_demande=motif,
                            **cascade)
     return n
 

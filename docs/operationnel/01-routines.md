@@ -104,7 +104,7 @@ tail -n 20 /var/log/nexus-securite-ia.log           # journal de l'attaque simul
 |---|---|---|
 | **Rotation des clés et jetons** | Procédure 6 de [02-procedures.md](02-procedures.md) : mot de passe du cockpit, code Décideur, jetons de passerelle, clé API. **Jamais** `LEDGER_HMAC_KEY`. | Un secret qui a fuité sans que vous le sachiez cesse de servir. |
 | Mise à jour du **gestionnaire de mots de passe** (Bitwarden, prévu) | Recopier chaque nouveau secret (lu par `grep NOM .env`). | Sans cela, une restauration sur un VPS neuf est impossible. |
-| Revue des **sources de veille** | `python3 collecteur.py stats` (voir procédure 13) | Retirer les sources mortes, ajouter les utiles. |
+| Revue des **sources de veille** | `python3 collecteur.py stats` (voir procédure 12) | Retirer les sources mortes, ajouter les utiles. |
 | Revue des **projets actifs** | `nexus-core/projets.yaml`, champ `actif` | Le pilote du lundi ne travaille que sur les projets actifs. |
 
 > **Avis d'expert** (certitude élevée) — La rotation trimestrielle est une **bonne pratique**, pas une

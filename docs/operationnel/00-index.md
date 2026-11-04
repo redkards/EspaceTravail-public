@@ -29,7 +29,7 @@
 | Fichier | Contenu | Quand l'ouvrir |
 |---|---|---|
 | [01-routines.md](01-routines.md) | Routines quotidienne (5 min), hebdomadaire, mensuelle, trimestrielle | Tous les jours |
-| [02-procedures.md](02-procedures.md) | 13 procédures pas à pas : commandes exactes, résultat attendu, retour arrière | Avant toute intervention |
+| [02-procedures.md](02-procedures.md) | 12 procédures pas à pas : commandes exactes, résultat attendu, retour arrière | Avant toute intervention |
 | [03-incidents.md](03-incidents.md) | Arbre de décision et 9 fiches réflexes | Quand quelque chose ne va pas |
 | [04-supervision.md](04-supervision.md) | Indicateurs, seuils, alertes, liste complète des tâches planifiées, porte de qualité | Chaque semaine |
 | [05-calendrier-et-checklists.md](05-calendrier-et-checklists.md) | Calendrier et checklists imprimables | Mise en production, fin de mois, achat, vente |
@@ -76,5 +76,5 @@ flowchart LR
 |---|---|---|
 | Vérifications par `--resolve` | Le dossier ATLAS du 04/11 utilise l'adresse locale `127.0.0.1`, mais Caddy écoute sur `NEXUS_BIND_IP` (adresse publique). Ce manuel lit donc `NEXUS_BIND_IP` dans `.env`. | 02-procedures, §1 |
 | Migration avec `restore.sh --avec-env` | Le `.env` restauré contient l'ancien `NEXUS_HOST` et l'ancien `NEXUS_BIND_IP`. Il faut les corriger (procédure 3). À répéter sur un serveur de test avant le jour J. | 02-procedures, §3 |
-| Chemin de la veille | `veille/README.md` cite `/opt/syfer/...` ; `install.sh` utilise `/srv/p1/nexus-mothership/veille`. Ce manuel suit `install.sh`. | 02-procedures, §13 |
+| Chemin de la veille | `veille/README.md` cite `/opt/syfer/...` ; `install.sh` utilise `/srv/p1/nexus-mothership/veille`. Ce manuel suit `install.sh`. | 02-procedures, §12 |
 | Tailscale | Aucune procédure dans le dépôt. Les commandes données suivent la documentation publique de Tailscale. | 02-procedures, §7 |
