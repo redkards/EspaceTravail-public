@@ -237,6 +237,7 @@ class Contexte:
         self.motifs_sortie: list[str] = []  # bouclier : signes d'injection réussie dans les livrables
         self.veille = ""  # fiches de la veille SYFER (encapsulées), pour le COLLECTOR
         self.veille_d: list[str] = []  # sources de confiance D citées : jamais présentées comme des faits
+        self.veille_fiches_d: list[dict] = []  # mots distinctifs des fiches D (reformulations détectées)
         self.fantome = bool(mission.fantome)  # rejeu du test fantôme : aucun effet de bord
         self.pilote = mission.pilote_semaine  # mission de pilotage hebdomadaire (plan consolidé ensuite)
         self.f = fct.niveau(mission.fonctionnement or fct.defaut())
@@ -570,7 +571,7 @@ def _charger_connaissances(ctx: Contexte) -> None:
     # Veille SYFER (recherche locale, sans LLM) : fiches filtrées par le bouclier, citées avec confiance A–D.
     v = veille.pour_mission(ctx.mid, f"{ctx.titre} {ctx.consigne}", ctx.service, ctx.projet)
     _alerter(ctx, v["alertes"])
-    ctx.veille, ctx.veille_d = v["texte"], v["sources_d"]
+    ctx.veille, ctx.veille_d, ctx.veille_fiches_d = v["texte"], v["sources_d"], v["fiches_d"]
     if trouves:
         ledger.journaliser("NEXUS-PRIME", "connaissances_fournies", ctx.mid, projet=ctx.projet,
                            sources=[e["source"] for e in trouves], caracteres=len(ctx.connaissances))
@@ -647,7 +648,7 @@ def _controler(ctx: Contexte, srv: dict, livrable: str, masque: str | None = Non
                            projet=controle["projet"])
         return refus
     # Veille : une fiche de confiance D citée sans prudence → refus déterministe (retour à l'ANALYST).
-    faits_d = veille.affirmations_d(livrable, ctx.veille_d)
+    faits_d = veille.affirmations_d(livrable, ctx.veille_d, ctx.veille_fiches_d, f"{ctx.titre} {ctx.consigne}")
     if faits_d:
         refus = {"ok": False, "problemes": faits_d}
         _etape(mid, srv["checker"], "checker", "veille (confiance D)", json.dumps(refus, ensure_ascii=False), "refus", 0)
@@ -733,9 +734,12 @@ def _boucle_qualite(ctx: Contexte, srv: dict, livrable: str, elements: str) -> N
         ("Consigne", ctx.consigne, 2, "debut"),
         ("Livrable final", livrable, 3, "tete_queue")], ctx.max_chars), temperature=0.0)
     # Suspect : source suspecte, ou signe d'injection vu dans une sortie brute (avant masquage), ou sortie finale.
-    suspect = bool(ctx.alertes_bouclier or ctx.motifs_sortie) or _verifier_sortie(ctx, livrable)["suspect"]
+    fortes = [a for a in ctx.alertes_bouclier if not a.startswith(bouclier.FAIBLE)]
+    suspect = bool(fortes or ctx.motifs_sortie) or _verifier_sortie(ctx, livrable)["suspect"]
     niveau, motif = gate.classer(ctx.titre, ctx.consigne, ctx.service, ctx.montant, ctx.action,
                                  parser_niveau(avis), livrable=livrable, suspect=suspect)
+    if niveau == "N0" and len(fortes) < len(ctx.alertes_bouclier):  # signal faible du bouclier : jamais N0
+        niveau, motif = "N1", motif + " ; plancher N1 : signal faible du bouclier"
     _maj_mission(mid, niveau=niveau)
     ledger.journaliser(gate_id, "classement", mid, niveau=niveau, motif=motif)
 
@@ -904,6 +908,8 @@ def creer_decision_si_possible(mid: int, verdict: dict | None = None, motif: str
                                      + sortie["motifs"]))
         if alertes:
             avis += "\nAlertes du bouclier anti-injection (à examiner) :\n" + bouclier.texte_alertes(alertes)
+        alertes = [a for a in alertes if not a.startswith(bouclier.FAIBLE)]
+        if alertes:
             raisons = [r for r in raisons if r != "aucun critère de risque détecté"] + \
                 ["suspicion d'injection de consignes (bouclier) : relire le livrable avant toute action"]
             risque = "moyen" if risque == "faible" else risque

@@ -201,6 +201,8 @@ def filtrer_extraits(trouves: list[dict], mission_id: int | None = None) -> tupl
         alertes.extend(v.alertes_transmises)
         if e.get("suspect") and v.decision == "accepte":
             alertes.append(f"{source} : connaissance stockée comme suspecte")
+        elif v.decision == "accepte" and v.score >= bouclier.SEUIL_BAS:
+            alertes.append(f"{bouclier.FAIBLE} {source} : score {v.score}/100")
         if v.decision == "rejete":
             continue
         propre = bouclier.nettoyer_contenu(e["extrait"], source).texte

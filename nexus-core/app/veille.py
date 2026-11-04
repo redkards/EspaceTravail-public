@@ -79,7 +79,7 @@ def _ligne(f: dict) -> str:
 
 def pour_mission(ctx_mid: int, consigne: str, service: str | None, projet: str | None) -> dict:
     """{"texte": bloc encapsulé ou "", "alertes": [...], "sources_d": [...], "sources": [...]}"""
-    res = {"texte": "", "alertes": [], "sources_d": [], "sources": []}
+    res = {"texte": "", "alertes": [], "sources_d": [], "sources": [], "fiches_d": []}
     trouvees = fiches(consigne, service, projet)
     retenues = []
     for f in trouvees:
@@ -87,6 +87,8 @@ def pour_mission(ctx_mid: int, consigne: str, service: str | None, projet: str |
         v = bouclier.filtrer_contenu(f"{f['titre']} : {f['resume']}", source, journal=ledger.journaliser,
                                      mission_id=ctx_mid)
         res["alertes"].extend(v.alertes_transmises)
+        if v.decision == "accepte" and v.score >= bouclier.SEUIL_BAS:
+            res["alertes"].append(f"{bouclier.FAIBLE} {source} : score {v.score}/100")
         if v.decision == "rejete":
             continue
         propre = {**f, "titre": bouclier.nettoyer_contenu(f["titre"], source).texte,
@@ -96,6 +98,8 @@ def pour_mission(ctx_mid: int, consigne: str, service: str | None, projet: str |
         return res
     res["sources"] = [f["source_id"] for f in retenues]
     res["sources_d"] = sorted({f["source_id"] for f in retenues if f.get("confiance") == "D"})
+    res["fiches_d"] = [{"source_id": f["source_id"], "mots": sorted(mots_distinctifs(f"{f['titre']} {f['resume']}"))}
+                       for f in retenues if f.get("confiance") == "D"]
     texte = ("Veille SYFER (fiches courtes à recouper ; confiance A = officielle … D = réseau social, "
              "JAMAIS un fait) :\n" + "\n".join(_ligne(f) for f in retenues))
     res["texte"] = bouclier.encapsuler(texte, "veille SYFER")
@@ -108,14 +112,43 @@ CONSIGNE_D = ("Une fiche de confiance D (réseau social) n'est JAMAIS un fait : 
               "de prudence explicite (« selon <source>, non vérifié »), ou pas du tout.")
 
 
-def affirmations_d(livrable: str, sources_d: list[str]) -> list[str]:
-    """Lignes du livrable citant une fiche D sans formule de prudence (contrôle déterministe)."""
-    if not sources_d:
+_VIDES = set("""avec dans pour par sur sous une des les aux du de la le un et ou est sont serait seraient
+etait sera cette ces son sa ses leur leurs plus moins tres tout tous toute toutes comme mais pas que qui quoi
+dont rumeur selon fait faits vers chez entre depuis apres avant source sources veille confiance""".split())
+SEUIL_RECOUVREMENT = 3  # mots distinctifs communs avec une fiche D pour la reconnaître reformulée
+
+
+def _norm(t: str) -> str:
+    import unicodedata
+    return unicodedata.normalize("NFKD", t or "").encode("ascii", "ignore").decode().lower()
+
+
+def mots_distinctifs(texte: str) -> set[str]:
+    return {m for m in re.findall(r"[a-z0-9]{4,}", _norm(texte)) if m not in _VIDES}
+
+
+def affirmations_d(livrable: str, sources_d: list[str], fiches_d: list[dict] | None = None,
+                   sujet: str = "") -> list[str]:
+    """Lignes du livrable reprenant une fiche D sans formule de prudence (contrôle déterministe) :
+    citation « veille:<source> », simple mention de la source, ou contenu reformulé (au moins
+    SEUIL_RECOUVREMENT mots distinctifs de la fiche, ou la moitié d'entre eux, hors mots du sujet de
+    la mission : `sujet` = titre + consigne, dont les mots ne prouvent rien)."""
+    du_sujet = mots_distinctifs(sujet)
+    if not sources_d and not fiches_d:
         return []
+    fiches = fiches_d or [{"source_id": s, "mots": []} for s in sources_d]
     problemes = []
     for ligne in (livrable or "").splitlines():
-        for s in sources_d:
-            if f"veille:{s}" in ligne and not PRUDENCE.search(ligne):
+        if not ligne.strip() or PRUDENCE.search(ligne):
+            continue
+        mots = mots_distinctifs(ligne)
+        for f in fiches:
+            s, distinctifs = f["source_id"], set(f.get("mots") or []) - du_sujet
+            communs = mots & distinctifs
+            cite = f"veille:{s}" in ligne or re.search(rf"(?<![\w-]){re.escape(s)}(?![\w-])", ligne)
+            reformule = len(distinctifs) >= 2 and \
+                len(communs) >= min(SEUIL_RECOUVREMENT, max(2, (len(distinctifs) + 1) // 2))
+            if cite or reformule:
                 problemes.append(f"[veille] fiche de confiance D ({s}) présentée comme un fait : "
                                  f"« {ligne.strip()[:120]} » — ajoutez « selon …, non vérifié » ou retirez-la")
                 break

@@ -274,8 +274,8 @@ def test_f1_aucune_correction():
 # --- Mesures et API -------------------------------------------------------------------
 
 def test_mesures_et_route_fonctionnement(client, entetes, cockpit):
-    for f in ("F1", "F2", "F2"):
-        client.post("/api/missions", headers=entetes, json={"titre": "Checklist", "consigne": "Liste les étapes",
+    for i, f in enumerate(("F1", "F2", "F2")):  # titres distincts : deux demandes identiques en 30 s = doublon
+        client.post("/api/missions", headers=entetes, json={"titre": f"Checklist {i}", "consigne": "Liste les étapes",
                                                              "service": "OPS-CORE/projets", "fonctionnement": f})
     m = client.get("/api/missions", headers=entetes).json()[0]
     assert m["tokens_entree"] > 0 and m["tokens_sortie"] > 0

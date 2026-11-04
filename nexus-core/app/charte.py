@@ -122,6 +122,10 @@ def verifier(projet: str | None, service: str | None, livrable: str, action: str
     inach = c["inacheve"]
     trouves = [m for m in inach.get("marqueurs") or []
                if re.search(rf"(?<![a-z0-9]){re.escape(gate.normaliser(m))}(?![a-z0-9])", t)]
+    for motif in inach.get("motifs") or []:
+        r = re.search(motif, t)
+        if r:
+            trouves.append(r.group(0).strip()[:20])
     if trouves:
         gravite = inach.get("gravite_publication" if typ in ("publication", "commercial") else "gravite_autres",
                             "avertissement")

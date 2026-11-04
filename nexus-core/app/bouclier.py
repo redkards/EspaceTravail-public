@@ -82,6 +82,8 @@ log = logging.getLogger("nexus.bouclier")
 
 SEUIL_HAUT = 60
 SEUIL_MOYEN = 30
+SEUIL_BAS = 10            # signal faible : contenu transmis, mais niveau GATE au moins N1
+FAIBLE = "[signal faible]"
 MAX_CARACTERES = 20000
 NIVEAU_MINIMUM_SUSPECT = "N2"
 FACTEUR_MENTION = 0.25      # poids d'un motif cité (guillemets, contexte méta) au lieu d'ordonné
@@ -342,6 +344,14 @@ MOTIFS: list[tuple[str, int, re.Pattern]] = [(f, p, re.compile(m, re.M)) for f, 
      r"|\b(?:considere[rsz]?|traite[rsz]?|treat|consider) (?:tout|toutes? les? \w+|everything|all \w+) (?:comme |as )(?:valide|validee?s?|approuvee?s?|approved|accepted)"
      r"|\b(?:la )?validation humaine (?:est |a ete )?(?:desactivee|suspendue|inutile|supprimee)|\bhuman (?:approval|review|validation) (?:is )?(?:disabled|off|not (?:required|needed))"
      r"|\bgreen-?light (?:the |this |all )?(?:pending )?\w+"),
+    # Contournement « doux » du contrôle humain (aucun ordre explicite, mais incite à sauter la relecture).
+    ("contournement_controle", 35,
+     r"\b(?:la |une )?(?:relecture|validation|verification|controle|revue)(?: humaine| manuelle| du proprietaire)?"
+     r" (?:n'est |ne serait |n'etant |ne sera )?(?:pas|plus|guere) (?:utile|necessaire|requise?|obligatoire|indispensable)\b"
+     r"|\bpas (?:besoin|la peine) de (?:relire|valider|verifier|faire valider|relecture|validation)"
+     r"|\binutile de (?:relire|valider|verifier|faire valider|demander)|\bsans (?:relecture|validation|verification) humaine"
+     r"|\bl'(?:assistant|ia|agent|modele) (?:peut|doit|devra) considerer que\b"
+     r"|\b(?:skip|bypass) (?:the )?(?:human )?(?:review|approval|validation)"),
     ("secret", 45, rf"\b{_VERBES_SECRET}\b(?:[^.!?\n]|\.(?!\s)){{0,60}}?(?<![a-z0-9]){_OBJETS_SECRET}"),
     ("outil", 35,
      rf"\b(?:appelle[rsz]?|declenche[rsz]?|call|invoke|trigger)\s+(?:l'|le |la |the )?(?:outil|tool|fonction|function|webhook|executor|workflow)\b"
