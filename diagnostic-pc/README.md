@@ -6,6 +6,12 @@
 irm https://raw.githubusercontent.com/redkards/espacetravail-public/nexus-mothership-kit/diagnostic-pc/test-connexion.ps1 | iex
 ```
 
+**Variante Python 3.14 :**
+
+```powershell
+py -c "import urllib.request as u;exec(u.urlopen('https://raw.githubusercontent.com/redkards/espacetravail-public/nexus-mothership-kit/diagnostic-pc/test_connexion.py').read())"
+```
+
 Si GitHub ne répond pas (DNS cassé), lancer d'abord :
 `ipconfig /flushdns; tailscale set --exit-node=` puis relancer la commande.
 
