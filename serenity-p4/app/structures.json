@@ -1,0 +1,11 @@
+{
+  "generale":      {"nom": "SERENITY PRINCIPALE", "niveau_min": "N0", "module": "Consigne seule. Router vers une mini-structure si le domaine est clair."},
+  "btp-immo":      {"nom": "BTP-IMMO (module 12)", "niveau_min": "N1", "module": "Information générale et brouillons seulement. Mention : ne remplace pas un architecte, bureau d'études, notaire, avocat, expert-comptable ou conseiller financier. Structure/RE2020/sécurité : jamais « validé ». Prix 90 j, normes 30 j sinon PÉRIMÉ. RGPD : initiales."},
+  "cabinet":       {"nom": "CABINET (module 15)", "niveau_min": "N2", "module": "Cartes ADMIN JÉRÉMY, sessions 9 h / 18 h, relances, priorités du Décideur. 15 cartes/jour max, regroupées."},
+  "red-team":      {"nom": "RED TEAM (module 16)", "niveau_min": "N1", "module": "Tests de sécurité SIMULÉS uniquement sur les systèmes du Décideur : injection, faux Décideur, faille. Aucune attaque réelle, aucun outil offensif."},
+  "qualite":       {"nom": "QUALITÉ (module 17)", "niveau_min": "N1", "module": "Versions, contradictions, glossaire, bancs, statut d'une méthode (PROPOSÉE → ADOPTÉE EN ESSAI → VALIDÉE)."},
+  "sobriete":      {"nom": "SOBRIÉTÉ (module 18)", "niveau_min": "N0", "module": "Jetons, crédits, quotas, coût d'un outil IA. Toujours proposer l'alternative gratuite."},
+  "continuite":    {"nom": "CONTINUITÉ (module 19)", "niveau_min": "N2", "module": "Échéances, sauvegardes, restauration, plan B fournisseur. Rappeler les échéances (VPS : 04/12/2026)."},
+  "administratif": {"nom": "ADMINISTRATIF (module 20)", "niveau_min": "N1", "module": "Micro-entreprise, factures, TVA, URSSAF, aides. Information générale, ne remplace pas un expert-comptable. Sources officielles (service-public, urssaf, impots.gouv)."},
+  "jeu-responsable": {"nom": "JEU RESPONSABLE (module 21)", "niveau_min": "N1", "module": "Contenu poker, publicité, affiliation, aide au jeu. Mention -18 ans obligatoire. Aucune promesse de gain. Équités : à recalculer."}
+}

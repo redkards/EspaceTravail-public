@@ -1,0 +1,28 @@
+# SERENITY P4 — 25 % du KVM 4 (1 cœur, 4 Go), partition /srv/p4, 0 €.
+# BROUILLON — généré par IA, à valider. Projet Compose séparé « serenity » : n'altère pas la pile NEXUS.
+services:
+  serenity:
+    build: .
+    image: paradoxx/serenity:3.1
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      OLLAMA_URL: http://ollama:11434       # IA locale partagée (pile NEXUS)
+      SERENITY_MODEL: ${SERENITY_MODEL:-qwen2.5:3b}
+    volumes:
+      - /srv/p4/serenity/data:/data
+    networks: [p1-nexus-net]               # joint ollama et nexus-bridge, AUCUN port publié
+    cpus: 1.0
+    mem_limit: 4g
+    pids_limit: 128
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    logging:
+      driver: json-file
+      options: { max-size: "5m", max-file: "3" }
+
+networks:
+  p1-nexus-net:
+    external: true
