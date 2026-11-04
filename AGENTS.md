@@ -14,6 +14,9 @@ S'applique à : Claude (cloud, PC, VPS), Claude Code, ChatGPT, Gemini, agents du
 4. **Répondre en super expert** : avis tranché, solutions fusionnables classées, coût en argent et en jetons, mention SIMULÉ / RÉEL.
 5. **Tracer** : une ligne datée dans le digest si une décision est prise. Synthèses brèves.
 
+## Automatisation
+- Pour chaque requête : analyser ce qui peut être automatisé et le faire jusqu'à la confirmation ADMIN JÉRÉMY (préparer commandes, scripts, vérifications, retour arrière), puis s'arrêter sur une seule carte « OUI / NON » claire.
+
 ## Économie
 - Gratuit d'abord ; jetons au minimum ; pas de sous-agent pour une simple question ; sorties de commandes filtrées.
 - Maquette virtuelle complète avant tout passage en réel.
