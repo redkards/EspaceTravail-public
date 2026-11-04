@@ -15,6 +15,7 @@
 11. **Toujours en mode virtuel dès que possible** : raisonner, tester, comparer en simulation ; le réel sert seulement à mesurer ou à livrer.
 12. **10 % réel / 90 % virtuel gratuit** : ~10 % de recherche et mesures réelles (officiel → forums → réseaux → YouTube → bases ouvertes), ~90 % de scénarios virtuels gratuits, différents (nominal, panne, pire cas, alternative) et spécialisés (un agent NEXUS expert par scénario), puis fusion en une recommandation.
 13. **Veille technique permanente** : surveiller les modèles et outils les plus performants, audit complet (qualité, coût, licence, ressources, sécurité), puis reproduction virtuelle gratuite (même résultat avec briques open source / locales) ; revue mensuelle dans MNEMOS.
+14. **Tout projet démarre par le pack SERENITY, dernière version (V3.1)** : `serenity-p4/app/consigne_v3_1.txt` sur la branche `serenity-p4` (2,5 Ko ; VPS : `/srv/p4`). Ordre : pack SERENITY → index MNEMOS → digest du projet.
 
 # Protocole NEXUS commun — toutes les IA de Jérémy (v1, 04/11/2026)
 
