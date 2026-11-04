@@ -7,9 +7,11 @@ b=/root/sauvegarde-correctifs-$(date +%Y%m%d-%H%M%S); mkdir -p "$b"
 cp -a /etc/ssh/sshd_config.d "$b/"; [[ -f /etc/fail2ban/jail.local ]] && cp -a /etc/fail2ban/jail.local "$b/"
 echo "Sauvegarde : $b"
 
-# S10 - mot de passe SSH interdit, y compris dans le fichier cloud-init lu en premier
-f=/etc/ssh/sshd_config.d/50-cloud-init.conf
-[[ -f $f ]] && sed -i 's/^\s*PasswordAuthentication\s\+yes/PasswordAuthentication no/I' "$f"
+# S10 - mot de passe SSH interdit. sshd garde la PREMIÈRE valeur lue : 50-cloud-init.conf passait
+# avant 99-paradoxx.conf. On renomme notre fichier en 00- pour qu'il soit lu en premier, et on neutralise cloud-init.
+d=/etc/ssh/sshd_config.d
+[[ -f $d/99-paradoxx.conf ]] && mv "$d/99-paradoxx.conf" "$d/00-paradoxx.conf"
+[[ -f $d/50-cloud-init.conf ]] && sed -i 's/^\s*PasswordAuthentication\s\+yes/PasswordAuthentication no/I' "$d/50-cloud-init.conf"
 if sshd -t; then systemctl reload ssh; echo "[OK] sshd rechargé"
 else cp -a "$b/sshd_config.d/." /etc/ssh/sshd_config.d/; echo "[ECHEC] config sshd invalide : restaurée"; exit 1; fi
 sshd -T | grep -iE '^(passwordauthentication|permitrootlogin) '

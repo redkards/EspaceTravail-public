@@ -35,3 +35,5 @@ Aucun mot de passe demandé, aucun secret écrit.
 - `SCENARIOS.md` : 15 situations de panne, chemins de secours, simulation NEXUS.
 - `vps-sante.sh` : bilan de santé VPS en **lecture seule** (à lancer par Claude PC sur le VPS).
 - `correctifs-admin.sh` : correctifs S10 + S11, **à lancer par Jérémy** avec sudo (sauvegarde + retour arrière).
+- `test-multiscenarios.ps1` : test de stabilité PC → VPS (S1, S2, S4, S5, S7, S9, exposition publique), lecture seule.
+- `SCHEMA-CONFIG.md` + `schema-config.png` : configuration cible (Tailscale, ufw, sshd, fail2ban, pare-feu Hostinger).
