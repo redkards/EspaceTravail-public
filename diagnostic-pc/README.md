@@ -1,0 +1,25 @@
+# Diagnostic connexion PC → VPS (mission Claude Code)
+
+**Lancement en 1 commande (PowerShell, PC Windows) :**
+
+```powershell
+irm https://raw.githubusercontent.com/redkards/espacetravail-public/nexus-mothership-kit/diagnostic-pc/test-connexion.ps1 | iex
+```
+
+Si GitHub ne répond pas (DNS cassé), lancer d'abord :
+`ipconfig /flushdns; tailscale set --exit-node=` puis relancer la commande.
+
+## Ce que fait le test (automatique)
+
+1. Réseau local : passerelle, Internet par IP, serveurs DNS.
+2. DNS : claude.ai, api.anthropic.com, github.com, google.com + test direct via 1.1.1.1.
+3. Tailscale : état, exit node, DNS Tailscale.
+4. Réparations sûres et réversibles **seulement si le DNS est cassé** : vidage DNS → désactivation exit node → `accept-dns=false`.
+5. VPS : `tailscale ping`, port 22, SSH par clé (`ssh paradoxx`), services, tmux, Claude, Docker.
+6. Rapport : `Bureau\diagnostic-paradoxx.txt` + presse-papiers.
+
+Aucun mot de passe demandé, aucun secret écrit.
+
+## Consigne pour Claude Code (PC)
+
+> Lance `diagnostic-pc/test-connexion.ps1`, lis le rapport, corrige ce qui est en [ECHEC] dans la limite des règles du canal Notion « Canal Claude Cloud ↔ Claude PC » (actions ADMIN JÉRÉMY : montrer la commande et attendre « OUI »), puis écris le compte rendu dans ce canal (Pour = Claude Cloud, Réponse à = l'ordre correspondant).
