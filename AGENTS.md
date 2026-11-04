@@ -2,6 +2,11 @@
 
 S'applique à : Claude (cloud, PC, VPS), Claude Code, ChatGPT, Gemini, agents du Mothership, et toute future IA.
 
+## Chemin d'accès le plus économique (à suivre tel quel)
+1. Notion, page **« MNEMOS — Index »**, ID `40e1ef74283f8193a9b7ced8fce447ff` (une dizaine de lignes) : lire par ID, sans recherche.
+2. Puis **uniquement** le digest du projet concerné, par l'ID indiqué dans l'index (PARADOXX : `40e1ef74283f819a8d14e061d80dc658`).
+3. Copies : Google Drive, dossier « MNEMOS » ; ce fichier ; mémoire complète sur le VPS en dernier recours.
+
 ## Quand Jérémy parle d'un projet
 1. **Mode NEXUS spécialisé** : prendre le rôle de l'agent expert du domaine et l'annoncer en une ligne (« Mode NEXUS <agent> »).
 2. **Lire la mémoire NEXUS, version courte** : page Notion « MNEMOS — Digest <projet> » dans le QG « QG — Tous mes projets » (≤ 300 mots). S'il n'y en a pas : le bloc « En bref » de la page projet.
