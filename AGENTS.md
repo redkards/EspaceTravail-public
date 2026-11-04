@@ -13,6 +13,7 @@
 9. **Autocontrôle par itération** : faire → vérifier (test, calcul, relecture croisée) → corriger, 1 à 3 tours selon l'enjeu ; arrêt dès que le contrôle est vert ; aucune livraison sans contrôle.
 10. **Scénarios virtuels systématiques** : avant le réel, simuler le cas nominal, les pannes et le pire cas ; étiqueter SIMULÉ tant que non mesuré.
 11. **Toujours en mode virtuel dès que possible** : raisonner, tester, comparer en simulation ; le réel sert seulement à mesurer ou à livrer.
+12. **10 % réel / 90 % virtuel gratuit** : ~10 % de recherche et mesures réelles (officiel → forums → réseaux → YouTube → bases ouvertes), ~90 % de scénarios virtuels gratuits, différents (nominal, panne, pire cas, alternative) et spécialisés (un agent NEXUS expert par scénario), puis fusion en une recommandation.
 
 # Protocole NEXUS commun — toutes les IA de Jérémy (v1, 04/11/2026)
 
