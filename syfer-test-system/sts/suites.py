@@ -410,12 +410,12 @@ def suite_iterations(ctx: Contexte) -> dict:
         if g == "critique" and ouvert:
             crit_ouverts += 1
         if ouvert:
-            titre = d.get("titre") or (f"{d.get('id')} — {d.get('oracle_titre')} ({d.get('description', '')})"
+            t_def = d.get("titre") or (f"{d.get('id')} — {d.get('oracle_titre')} ({d.get('description', '')})"
                                        if d.get("oracle_titre") else d.get("description") or d.get("id") or "défaut")
             preuve = d.get("preuve") or (f"{d.get('occurrences', '?')} occurrence(s) · observé : {str(d.get('observe', ''))[:160]}"
                                          f" · attendu : {str(d.get('attendu', ''))[:120]} · {d.get('fichier_ligne_probable', '')}"
                                          if "observe" in d else d.get("reproduction") or d.get("graine") or d.get("_fichier", ""))
-            defauts.append(defaut("iterations", g, titre, preuve,
+            defauts.append(defaut("iterations", g, t_def, preuve,
                                   (d.get("correction") or d.get("correction_suggeree") or "Corriger puis rejouer la graine.")
                                   + (f" Rejouer : {d['rejouer']}" if isinstance(d.get("rejouer"), str) else ""),
                                   d.get("responsable") or RESPONSABLES["iterations-100"],
@@ -743,8 +743,8 @@ def suite_compaction(ctx: Contexte) -> dict:
     o = C.choisir_option(aide, ["--rapide", "--court"])
     if o:
         args.append(o)
-    # Mode court : corpus réduit (tout : 2 000 missions ; rapide : 500).
-    for opt, (n_tout, n_rap) in (("--missions", (2000, 500)), ("--fiches", (1000, 250)), ("--connaissances", (400, 100))):
+    # Mode court : corpus réduit à 2 000 missions (en dessous de 1 000, mesure.py divise par zéro).
+    for opt, (n_tout, n_rap) in (("--missions", (2000, 2000)), ("--fiches", (1000, 500)), ("--connaissances", (400, 200))):
         if C.choisir_option(aide, [opt]):
             args += [opt, str(n_rap if ctx.rapide else n_tout)]
     o = C.choisir_option(aide, ["--graine", "--seed"])

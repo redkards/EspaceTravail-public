@@ -7,10 +7,10 @@
 # que d'inventer une information.
 inacheve:
   marqueurs: ["a completer", "todo", "tbd", "tbc", "xxx", "[a remplir]", "[a completer]", "lorem ipsum", "fixme",
-              "a definir", "a preciser", "a confirmer", "a determiner", "a renseigner", "a fixer", "a venir",
-              "a valider", "to be defined", "to be confirmed", "[nom]", "[date]", "[prix]", "[x]"]
+              "a definir", "a preciser", "a confirmer", "a determiner", "a renseigner", "a fixer",
+              "to be defined", "to be confirmed", "[nom]", "[date]", "[prix]", "[x]"]
   # Motifs (expressions régulières sur le texte normalisé) : « [...] », « [ ] », « XX € », « ??? », « <prix> ».
-  motifs: ['\[\s*(?:\.{2,}|…)?\s*\]', '(?<![a-z0-9])x{2,}\s*(?:€|eur|euros?|%)', '\?{3,}', '<\s*(?:a completer|nom|date|prix|montant)[^>]*>']
+  motifs: ['\[\s*(?:\.{2,}|…)?\s*\]', '(?<![a-z0-9])x{2,}(?![a-z0-9])', '\?{3,}', '<\s*(?:a completer|nom|date|prix|montant)[^>]*>']
   gravite_publication: bloquant
   gravite_autres: avertissement
 

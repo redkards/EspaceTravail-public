@@ -50,14 +50,16 @@ ST = {
     "pp": ParagraphStyle("pp", fontName=N, fontSize=7.6, leading=9.6, textColor=colors.HexColor(ENCRE)),
     "ppb": ParagraphStyle("ppb", fontName=B, fontSize=7.6, leading=9.6, textColor=colors.HexColor(ENCRE)),
     "th": ParagraphStyle("th", fontName=B, fontSize=7.8, leading=9.6, textColor=colors.white),
+    "thp": ParagraphStyle("thp", fontName=B, fontSize=7, leading=8.6, textColor=colors.white),
     "gros": ParagraphStyle("gros", fontName=B, fontSize=26, leading=30, alignment=TA_CENTER),
     "centre": ParagraphStyle("centre", fontName=N, fontSize=8.5, leading=11, alignment=TA_CENTER,
                              textColor=colors.HexColor(ENCRE2)),
 }
 
 
-def P(t, s="p"):
-    return Paragraph(t if isinstance(t, str) and t.startswith("<") else escape(str(t if t is not None else "—")), ST[s])
+def P(t, s="p", brut=False):
+    """Paragraphe ; le texte est échappé sauf brut=True (balisage reportlab déjà construit)."""
+    return Paragraph(t if brut else escape(str(t if t is not None else "—")), ST[s])
 
 
 def Pc(t, couleur, s="ppb"):
@@ -273,23 +275,23 @@ def produire(base: dict | None, vers: dict | None, precedents: list[dict], cible
                                   ("BOX", (1, 0), (1, -1), 0.6, colors.HexColor(GRILLE)),
                                   ("TOPPADDING", (0, 0), (-1, 0), 8), ("BOTTOMPADDING", (0, -1), (-1, -1), 8)]))
         E += [bloc, Spacer(1, 8)]
-        lignes = [[P("Axe", "th")] + [P(a["libelle"], "th") for a in fiche["axes"].values()]]
+        lignes = [[P("Axe", "thp")] + [P(a["libelle"], "thp") for a in fiche["axes"].values()]]
         lignes.append([P("Score /100", "ppb")] + [Pc(_f(a["score"]), _couleur_score(a["score"])) for a in fiche["axes"].values()])
-        E += [tableau(lignes, [LARGEUR * 0.16] + [LARGEUR * 0.12] * len(fiche["axes"])), Spacer(1, 8)]
+        E += [tableau(lignes, [LARGEUR * 0.12] + [LARGEUR * 0.88 / len(fiche["axes"])] * len(fiche["axes"])), Spacer(1, 8)]
         if porte["raisons"]:
             E.append(P("Raisons du verdict", "h2"))
-            E += [P("• " + escape(r)) for r in porte["raisons"]]
+            E += [P("• " + escape(r), brut=True) for r in porte["raisons"]]
         E.append(P("3 points forts", "h2"))
-        E += [P("• " + x) for x in points_forts(fiche, suites)]
+        E += [P("• " + x, brut=True) for x in points_forts(fiche, suites)]
         E.append(P("3 défauts majeurs", "h2"))
         top = base["defauts"][:3]
         E += [P(f"• <b>[{d['gravite']}]</b> {escape(d['titre'])} — <i>{escape(d['correction'])}</i> "
-                f"({escape(d['responsable'])})") for d in top] or [P("Aucun défaut.")]
+                f"({escape(d['responsable'])})", brut=True) for d in top] or [P("Aucun défaut.")]
         sautes = [f"{s['nom']} : {s['motif']}" for s in suites.values() if s["statut"] == "saute"]
         sautes += [f"tests/{x}" for x in suites.get("tests", {}).get("mesures", {}).get("dossiers_sautes", [])]
         if sautes:
             E.append(P("Épreuves sautées (intégrées automatiquement dès que leur dossier apparaît)", "h2"))
-            E += [P("• " + escape(s), "pp") for s in sautes]
+            E += [P("• " + escape(s), "pp", brut=True) for s in sautes]
         E.append(PageBreak())
 
         # ---- tableau par suite
@@ -394,7 +396,7 @@ def produire(base: dict | None, vers: dict | None, precedents: list[dict], cible
         lignes = [[P(x, "th") for x in ("Gravité", "Épreuve", "Défaut et preuve", "Correction suggérée", "Responsable")]]
         for d in defs[:80]:
             lignes.append([Pc(d["gravite"], GRAV.get(d["gravite"], ENCRE2)), P(d["suite"], "pp"),
-                           P(f"<b>{escape(d['titre'])}</b><br/>{escape(d['preuve'] or '')}", "pp"),
+                           P(f"<b>{escape(d['titre'])}</b><br/>{escape(d['preuve'] or '')}", "pp", brut=True),
                            P(d["correction"], "pp"), P(d["responsable"], "pp")])
         E.append(tableau(lignes, [LARGEUR * 0.09, LARGEUR * 0.1, LARGEUR * 0.42, LARGEUR * 0.24, LARGEUR * 0.15]))
 
@@ -430,6 +432,6 @@ def produire(base: dict | None, vers: dict | None, precedents: list[dict], cible
         "résultats) sont classées « factices » via config/secrets_autorises.json.",
         "Tout s'exécute dans une copie jetable du dépôt : aucun fichier du dépôt n'est modifié.",
     ]
-    E += [P("• " + escape(x), "pp") for x in lim]
+    E += [P("• " + escape(x), "pp", brut=True) for x in lim]
     doc.build(E, onFirstPage=_entete_page, onLaterPages=_entete_page)
     return cible
