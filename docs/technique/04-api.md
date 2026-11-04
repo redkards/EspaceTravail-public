@@ -13,9 +13,9 @@ flowchart LR
         I["IA (Claude, ChatGPT, Gemini)"]
     end
     S -- "GET /api/sante (public)" --> CORE["nexus-core"]
-    N -- "X-Nexus-Key: <NEXUS_API_KEY>" --> CORE
+    N -- "X-Nexus-Key = NEXUS_API_KEY" --> CORE
     B -- "basic auth Caddy → X-Cockpit-Auth injecté<br/>+ X-Cockpit: 1, JSON, Origin" --> CORE
-    I -- "Bearer <BRIDGE_TOKEN_x> ou /mcp/<jeton>" --> BR["nexus-bridge"]
+    I -- "Bearer BRIDGE_TOKEN_x ou /mcp/{jeton}" --> BR["nexus-bridge"]
     BR -- "X-Nexus-Key" --> CORE
 ```
 
@@ -41,7 +41,7 @@ Définies dans `nexus-core/app/routes.py` (`creer_routeur`). Les colonnes « API
 | Méthode | Chemin | API | Cockpit | Entrée | Sortie | Erreurs |
 |---|---|---|---|---|---|---|
 | GET | `/sante` | public (version courte, route déclarée avant le routeur protégé) | oui | — | `/api/sante` : `{statut, service, llm, fonctionnement_defaut, ledger_hmac, avertissements}` ; `/cockpit/api/sante` : `+ agents, arret_urgence` (vérifie aussi l'accès à la base) | — |
-| POST | `/missions` | oui | oui | `{titre (1–200), consigne (1–20 000), service?, montant_eur? ≥ 0, action? ^[a-z_]+$ ≤ 40, projet? ≤ 60, fonctionnement? F1–F4, repli_f3=true}` | **202** `{id, statut (recue|en_attente_n3), projet, fonctionnement_demande, fonctionnement, message, decision_id?, cout_estime_eur?}` | 422 service inconnu, projet inconnu, F4 indisponible sans repli |
+| POST | `/missions` | oui | oui | `{titre (1–200), consigne (1–20 000), service?, montant_eur? ≥ 0, action? ^[a-z_]+$ ≤ 40, projet? ≤ 60, fonctionnement? F1–F4, repli_f3=true}` | **202** `{id, statut (recue\|en_attente_n3), projet, fonctionnement_demande, fonctionnement, message, decision_id?, cout_estime_eur?}` | 422 service inconnu, projet inconnu, F4 indisponible sans repli |
 | GET | `/missions` | oui | oui | `?statut=&projet=&limit=50 (1–500)` ; `statut=fantome` pour voir les rejeux | liste de missions (`protocole/schemas/mission.schema.json`) | 422 projet inconnu |
 | GET | `/missions/{mid}` | oui | oui | — | mission + `etapes[]` | 404 |
 | POST | `/missions/{mid}/note` | oui | oui | `{note: 1–5}` | `{mission_id, note, exemple}` | 404 |
@@ -50,10 +50,10 @@ Définies dans `nexus-core/app/routes.py` (`creer_routeur`). Les colonnes « API
 | POST | `/decisions/{did}/valider` | **403** | oui | `{commentaire? ≤ 4 000, code? ≤ 12}` (code exigé si risque élevé) | `{decision_id, mission_id, statut, relance, lancer, missions_creees?}` | 403/423 code ; 404 ; 409 déjà traitée ou mission modifiée |
 | POST | `/decisions/{did}/refuser` | **403** | oui | `{commentaire?}` | idem | 404, 409 |
 | POST | `/decisions/{did}/reviser` | **403** | oui | `{commentaire?}` | idem, `relance=true` | 404 ; 409 lancement F4, plan de la semaine, limite de 2 révisions |
-| POST | `/killswitch` | oui | oui | `{portee: grille|direction|agent, cible?, actif}` | `{cle, actif, interrupteurs}` | 422 cible manquante, agent inconnu |
+| POST | `/killswitch` | oui | oui | `{portee: grille\|direction\|agent, cible?, actif}` | `{cle, actif, interrupteurs}` | 422 cible manquante, agent inconnu |
 | GET | `/ledger` | oui | oui | `?limit=50 (1–500)` | entrées (`evenement-ledger.schema.json`) | — |
 | GET | `/ledger/verifier` | oui | oui | — | `{valide, entrees, premiere_erreur, motif, hmac_actif, entrees_signees, entrees_non_signees}` | — |
-| GET | `/agents` | oui | oui | — | 93 agents `{id, nom, role, direction, departement, service, mission, outils_autorises, type, appelle_llm, statut actif|suspendu}` | — |
+| GET | `/agents` | oui | oui | — | 93 agents `{id, nom, role, direction, departement, service, mission, outils_autorises, type, appelle_llm, statut actif\|suspendu}` | — |
 | GET | `/projets` | oui | oui | `?recharger=1` relit `projets.yaml` | projets + compteurs (`missions`, `missions_en_cours`, `decisions_en_attente`) | 500 fichier invalide (ancien registre conservé) |
 | GET | `/projets/{code}/connaissances` | oui | oui | `?q (≤ 300)&limite=10 (1–50)` | connaissances (`connaissance.schema.json`) | 404 projet |
 | POST | `/projets/{code}/connaissances` | oui (auteur `api`) | oui (auteur `proprietaire`) | `{titre 1–200, contenu 1–20 000, source? ≤ 300}` | **201** connaissance | 404 ; 422 secret détecté ou injection (score ≥ 60) |
@@ -78,7 +78,7 @@ Remarque : les routes d'écriture non décisionnelles (`/killswitch`, `/missions
 | GET | `/archive/verifier` | oui | oui | — | vérification de la chaîne de l'archive | — |
 | POST | `/cockpit/api/memoire/lecons/{lid}/accepter` | — | **seul** | `{texte? ≤ 300, terme_charte? ≤ 80, confirmation_fantome=false}` | leçon | 404 ; 409 statut ; 422 texte suspect ou test fantôme défavorable non confirmé |
 | POST | `/cockpit/api/memoire/lecons/{lid}/rejeter` | — | **seul** | `{motif? ≤ 300}` | leçon | 404, 409 |
-| POST | `/cockpit/api/memoire/fantome` | — | **seul** | `{type: charte|modeles, valeur 1–500, service?, projet?}` | tâche planifiée | 422 |
+| POST | `/cockpit/api/memoire/fantome` | — | **seul** | `{type: charte\|modeles, valeur 1–500, service?, projet?}` | tâche planifiée | 422 |
 | POST | `/cockpit/api/memoire/archive/effacer/{mid}` | — | **seul** | `{motif? ≤ 300}` | `{mission_id, lignes_effacees}` | 404 aucune archive |
 
 ## 4. Décideur mobile
@@ -88,8 +88,8 @@ Remarque : les routes d'écriture non décisionnelles (`/killswitch`, `/missions
 | Méthode | Chemin | Entrée | Sortie | Erreurs |
 |---|---|---|---|---|
 | GET | `/etat` | — | cartes des décisions en attente (résumé 3 lignes, risque et raisons, expiration, propositions du plan), historique, compteurs, `a_noter`, `lecons_proposees`, `motifs_avis` | — |
-| POST | `/avis/{mid}` | `{valeur: positif|negatif, motif? ≤ 20, texte? ≤ 120}` | avis enregistré | 404, 409 déjà noté ou non terminé, 422 motif |
-| POST | `/decisions/{did}/preparer` | `{choix: valider|refuser|reviser, commentaire? ≤ 200}` | `{jeton, expire_s: 120, libelle, code_requis, code_configure, verrou_restant_s}` | 404 ; 409 déjà traitée, révision impossible ; 422 motif de révision < 3 car. |
+| POST | `/avis/{mid}` | `{valeur: positif\|negatif, motif? ≤ 20, texte? ≤ 120}` | avis enregistré | 404, 409 déjà noté ou non terminé, 422 motif |
+| POST | `/decisions/{did}/preparer` | `{choix: valider\|refuser\|reviser, commentaire? ≤ 200}` | `{jeton, expire_s: 120, libelle, code_requis, code_configure, verrou_restant_s}` | 404 ; 409 déjà traitée, révision impossible ; 422 motif de révision < 3 car. |
 | POST | `/decisions/{did}/confirmer` | `{choix, commentaire?, jeton (10–64), code? ≤ 12, missions: [int] ≤ 50}` | résultat de `pipeline.decider` | 403 code faux / non configuré ; 423 verrou (5 erreurs, 15 min) ; 409 jeton expiré, déjà utilisé, décision concurrente |
 
 L'identité de l'utilisateur provient de `X-Cockpit-Utilisateur` (posé par Caddy, motif `[\w.@-]{1,40}`, sinon `decideur`) et est journalisée (`decideur_action`).

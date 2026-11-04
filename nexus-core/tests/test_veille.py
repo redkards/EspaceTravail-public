@@ -14,7 +14,12 @@ def _schema_veille() -> str:
     f = Path(__file__).resolve().parents[2] / "veille" / "collecteur.py"
     spec = importlib.util.spec_from_file_location("syfer_veille_collecteur_test", f)
     m = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(m)
+    import sys
+    sys.modules[spec.name] = m  # dataclasses du module
+    try:
+        spec.loader.exec_module(m)
+    finally:
+        sys.modules.pop(spec.name, None)
     return m.SCHEMA
 FICHES = [
     ("anj", "Jeu responsable : nouvelles obligations", "L'autorité rappelle la mention jeu responsable obligatoire.", "A"),

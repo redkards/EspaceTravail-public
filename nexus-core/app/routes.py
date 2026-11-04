@@ -124,7 +124,7 @@ def creer_routeur(cockpit: bool = False) -> APIRouter:
 
     def _doublon(cle: str | None, titre: str, consigne: str, projet: str, corps: NouvelleMission) -> int | None:
         """Même demande (titre, consigne, projet, service, niveau, montant, action) en moins de DOUBLON_S s,
-        hors missions refusées ou échouées (une nouvelle demande identique est alors légitime)."""
+        hors missions refusées par le propriétaire (une nouvelle demande identique est alors légitime)."""
         if cle:
             mid = sentinel.lire(f"idem:{cle[:120]}")
             if mid:
@@ -137,7 +137,7 @@ def creer_routeur(cockpit: bool = False) -> APIRouter:
                 Mission.fonctionnement_demande == (corps.fonctionnement or fct.defaut()),
                 Mission.montant_eur == (corps.montant_eur or 0.0),
                 Mission.action.is_(None) if corps.action is None else Mission.action == corps.action,
-                Mission.statut.notin_(("refusee", "echouee", "a_reformuler", "plafond_atteint", "annulee")),
+                Mission.statut.notin_(("refusee", "annulee")),
                 Mission.fantome.is_(False), Mission.cree_le >= depuis).order_by(Mission.id.desc())).scalars().first()
 
     def _creer_mission(corps: NouvelleMission, taches: BackgroundTasks, cle: str | None):

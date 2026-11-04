@@ -772,8 +772,11 @@ class Execution:
                                                   "consigne": "Préparer une note de synthèse courte.",
                                                   "projet": "nexus"})]
         poids = a.get("poids_outils", [3, 3, 1, 1, 1, 1, 1])
-        rpc = lambda nom, args, k: {"jsonrpc": "2.0", "id": f"{ia}-{n}-{k}", "method": "tools/call",
-                                    "params": {"name": nom, "arguments": args}}
+        def rpc(nom, args, k):
+            if nom == "mothership_mission":  # titre unique par appel (y compris dans un lot)
+                args = {**args, "titre": f"CHMCP-{ia}-{n}-{k} synthèse"}
+            return {"jsonrpc": "2.0", "id": f"{ia}-{n}-{k}", "method": "tools/call",
+                    "params": {"name": nom, "arguments": args}}
         while not self.stop.is_set():
             n += 1
             if self.rng.random() < a.get("part_lots", 0.0):
@@ -1174,22 +1177,28 @@ class Execution:
         ch = verifier_chaine(lignes, CLE_LEDGER.encode())
         res["ledger_valide"], res["ledger_entrees"] = ch["valide"], ch["entrees"]
         res["ledger_premiere_erreur"] = ch["premiere_erreur"]
-        missions = c.execute("SELECT id,titre,statut,fonctionnement,niveau,tokens,alertes_bouclier,message "
+        missions = c.execute("SELECT id,titre,statut,fonctionnement,niveau,tokens,alertes_bouclier,fantome "
                              "FROM missions").fetchall()
         res["missions_total"] = len(missions)
-        statuts, par_jeton = {}, {}
-        for mid, titre, st, f, niv, tok, al, msg in missions:
+        statuts, par_jeton, ids_base = {}, {}, set()
+        fantomes = {"total": 0, "actives_a_l_arret": 0}
+        for mid, titre, st, f, niv, tok, al, fan in missions:
             statuts[st] = statuts.get(st, 0) + 1
+            ids_base.add(mid)
+            if fan:  # rejeux du test fantôme (copies de missions archivées) : comptés à part
+                fantomes["total"] += 1
+                fantomes["actives_a_l_arret"] += int(st in STATUTS_ACTIFS)
+                continue
             j = (titre or "").split(" ")[0]
             par_jeton.setdefault(j, []).append(mid)
         res["statuts"] = statuts
-        res["bloquees"] = sum(statuts.get(s, 0) for s in STATUTS_ACTIFS)
+        res["fantomes"] = fantomes
+        res["bloquees"] = sum(1 for _, _, st, *_r, fan in missions if st in STATUTS_ACTIFS and not fan)
         envoyees = self.m.missions
         acceptees = {j: v for j, v in envoyees.items() if v.get("id")}
         res["missions_envoyees"] = len(envoyees)
         res["missions_acceptees_202"] = len(acceptees)
-        res["missions_perdues"] = sum(1 for j, v in acceptees.items()
-                                      if v["id"] not in {i for i in par_jeton.get(j, [])})
+        res["missions_perdues"] = sum(1 for v in acceptees.values() if v["id"] not in ids_base)
         double = {j for j, v in envoyees.items() if v["etiquettes"].get("double")}
         res["doublons"] = sum(len(v) - 1 for j, v in par_jeton.items() if len(v) > 1 and j not in double
                               and j.startswith("CH"))
@@ -1247,11 +1256,17 @@ class Execution:
             for mid in eff:
                 for l in lignes_arch:
                     e = l.get("enregistrement", {})
-                    if e.get("mission_id") == mid and not e.get("efface"):
+                    # contenu réel encore présent : ni pierre tombale, ni contenu déjà remplacé par la mention
+                    if e.get("mission_id") == mid and not e.get("efface") and "(effacée)" not in e.get("titre", ""):
                         restes += 1
                 titre = c.execute("SELECT titre FROM missions WHERE id=?", (mid,)).fetchone()
                 if titre and "(effacée)" not in titre[0]:
                     restes += 1
+            # Événements archivés APRÈS l'effacement (ex. décision N3 prise ensuite) : contenu déjà effacé,
+            # mais la mission reste décidable et réapparaît dans l'archive.
+            res["reapparitions_apres_effacement"] = sum(
+                1 for l in lignes_arch if l.get("enregistrement", {}).get("mission_id") in eff
+                and not l["enregistrement"].get("efface"))
             res["effacements_restes"] = restes
             res["effacements_complets"] = restes == 0
         # Contenus piégés : signalés (alerte bouclier ou N3) ?

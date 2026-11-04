@@ -184,9 +184,9 @@ Schéma dans `nexus-bridge/app/db.py` :
 
 | Table | Rôle | Particularités |
 |---|---|---|
-| `memoires` | mémoire commune | versions chaînées (`racine_id`, `remplace_id`, `remplacee_par`), statut `active|remplacee|archivee` ; le contenu n'est **jamais modifié** |
+| `memoires` | mémoire commune | versions chaînées (`racine_id`, `remplace_id`, `remplacee_par`), statut `active\|remplacee\|archivee` ; le contenu n'est **jamais modifié** |
 | `memoires_fts` | index plein texte | FTS5 `unicode61 remove_diacritics 2`, déclencheurs |
-| `taches`, `taches_notes` | tâches partagées | statut `a_faire|en_cours|a_valider|fait`, verrou `pris_par` |
+| `taches`, `taches_notes` | tâches partagées | statut `a_faire\|en_cours\|a_valider\|fait`, verrou `pris_par` |
 | `messages`, `messages_lus` | messagerie entre IA | lecture par destinataire |
 | `passations` | reprise de travail par projet | résumé, état, prochaines étapes |
 | `journal` | journal sans contenu (qui, outil, objet, résultat) | **append-only** imposé par déclencheurs SQL (`RAISE(ABORT)` sur UPDATE/DELETE) |
@@ -268,16 +268,16 @@ Effacement d'une mission (`POST /cockpit/api/memoire/archive/effacer/{mid}`, **c
 
 ```mermaid
 flowchart LR
-    E["Effacer #mid<br/>(cockpit, motif)"] --> A["Archive jsonl.gz :<br/>pierre tombale,<br/>chaîne intacte"]
+    E["Effacer n° mid<br/>(cockpit, motif)"] --> A["Archive jsonl.gz :<br/>pierre tombale,<br/>chaîne intacte"]
     E --> I["archive_index :<br/>texte vidé, efface=1"]
-    E --> M["connaissances<br/>« livrable #mid » supprimées<br/>(FTS suit)"]
+    E --> M["connaissances<br/>« livrable n° mid » supprimées<br/>(FTS suit)"]
     E --> X["exemples de la mission<br/>supprimés"]
-    E --> L["leçons : id retiré de<br/>sources_json ; leçon jamais<br/>validée née de #mid supprimée"]
+    E --> L["leçons : id retiré de<br/>sources_json, leçon jamais<br/>validée née de n° mid supprimée"]
     E --> V["avis : commentaire effacé"]
     E --> S["étapes : entrée/sortie<br/>remplacées par la mention"]
     E --> MI["mission : titre, consigne,<br/>livrable, message remplacés"]
     E --> D["décisions : résumé remplacé,<br/>commentaire effacé"]
-    E --> F["fichier livrables/…/mid.md<br/>supprimé"]
+    E --> F["fichier livrables/projet/mid.md<br/>supprimé"]
     E --> LG["LEDGER : archive_effacement<br/>(compteurs, demandeur, motif,<br/>sans contenu)"]
 ```
 

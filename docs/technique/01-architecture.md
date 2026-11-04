@@ -27,7 +27,7 @@ flowchart LR
         P34["P3, P4 : libres"]
     end
     D -- "HTTPS + basic auth" --> C
-    IA -- "HTTPS /mcp/<jeton>" --> C
+    IA -- "HTTPS /mcp/{jeton}" --> C
     C -- "/cockpit*, /api/*" --> NC
     C -- "/mcp*, /bridge*" --> NB
     NB -- "API X-Nexus-Key" --> NC
@@ -239,7 +239,7 @@ sequenceDiagram
         G->>E: exécuter
     end
     E->>L: livrable_enregistre (action_externe=false)
-    E->>E: fichier livrables/<projet>/<id>.md, mémoire projet, export QG
+    E->>E: fichier livrables/projet/id.md, mémoire projet, export QG
 ```
 
 ## 7. Décisions d'architecture (ADR courts)

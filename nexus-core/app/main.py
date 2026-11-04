@@ -6,6 +6,8 @@
 - /              : redirige vers /cockpit.
 """
 import asyncio
+import os
+import threading
 import hmac
 import logging
 from contextlib import asynccontextmanager
@@ -85,6 +87,36 @@ def tick_decideur() -> None:
         export_qg.envoyer_en_attente()
     except Exception:
         log.exception("Erreur pendant l'export QG")
+    try:
+        lancer_compaction_nuit()
+    except Exception:
+        log.exception("Erreur pendant la compaction de nuit")
+
+
+_fil_compaction: threading.Thread | None = None
+
+
+def lancer_compaction_nuit(maintenant_utc=None) -> bool:
+    """Dans NEXUS_FENETRE_NUIT, au plus une fois par jour (méta « derniere_nuit » + verrou fichier
+    dans compaction) : compaction tiède/froid, consolidation de la mémoire, entretien SQLite.
+    Fil dédié : la boucle minute n'est jamais bloquée. Désactivable : NEXUS_COMPACTION=0."""
+    global _fil_compaction
+    from . import compaction, memoire
+    from .models import maintenant
+    if os.environ.get("NEXUS_COMPACTION", "1").strip() == "0":
+        return False
+    t = maintenant_utc or maintenant()
+    if not compaction.dans_la_fenetre(t) or (_fil_compaction is not None and _fil_compaction.is_alive()):
+        return False
+
+    def tache():
+        try:
+            compaction.tache_nocturne(t, journal=ledger.journaliser, nexus_db=memoire.chemin_sqlite())
+        except Exception:
+            log.exception("Compaction de nuit en échec")
+    _fil_compaction = threading.Thread(target=tache, name="compaction", daemon=True)
+    _fil_compaction.start()
+    return True
 
 
 async def _boucle_minute() -> None:

@@ -120,7 +120,7 @@ def test_meme_demande_apres_refus_acceptee(client, entetes):
     corps = {"titre": "Note", "consigne": "Prépare une note interne.", "projet": "divers"}
     mid = client.post("/api/missions", headers=entetes, json=corps).json()["id"]
     with session_scope() as s:
-        s.get(Mission, mid).statut = "echouee"
+        s.get(Mission, mid).statut = "refusee"
     assert client.post("/api/missions", headers=entetes, json=corps).status_code == 202
 
 

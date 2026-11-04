@@ -158,11 +158,38 @@ def lignes() -> list[dict]:
     return sorted(res, key=lambda l: l["seq"])
 
 
+def _compaction_active() -> bool:
+    from . import compaction
+    return (compaction.dossier_defaut() / "compaction.db").is_file()
+
+
 def verifier() -> dict:
-    """Recalcule la chaîne et les empreintes de contenu (pierres tombales : empreinte conservée)."""
+    """Recalcule la chaîne et les empreintes de contenu (pierres tombales : empreinte conservée).
+    Mois déjà compactés et retirés : la chaîne reprend au dernier enregistrement compacté
+    (compaction.point_de_reprise), et la compaction est vérifiée elle aussi."""
     prec, n, tombes = GENESE, 0, 0
     cle = ledger.cle_hmac()
-    for l in lignes():
+    toutes = lignes()
+    compaction_res = None
+    if _compaction_active():
+        from . import compaction
+        c = compaction.defaut()
+        if toutes and toutes[0]["prec"] != GENESE:
+            reprise = c.point_de_reprise()
+            if reprise["seq"] == toutes[0]["seq"] - 1:
+                prec = reprise["hash"]
+        compaction_res = c.verifier()
+    res = _verifier_lignes(toutes, prec, cle)
+    if compaction_res is not None:
+        res["compaction"] = compaction_res
+        if not compaction_res.get("valide", True) and res["valide"]:
+            res.update(valide=False, motif="compaction invalide")
+    return res
+
+
+def _verifier_lignes(toutes: list[dict], prec: str, cle) -> dict:
+    n = tombes = 0
+    for l in toutes:
         n += 1
         motif = None
         if l["prec"] != prec:
@@ -206,6 +233,12 @@ def effacer(mid: int, demandeur: str, motif: str = "droit à l'effacement") -> i
             for x in s.execute(select(ArchiveIndex).where(ArchiveIndex.mission_id == mid)).scalars():
                 x.texte, x.efface = "", True
     cascade = _effacer_cascade(mid, demandeur)
+    try:  # enregistrements déjà compactés (paliers tiède / froid) : pierre tombale dans le bloc
+        from . import compaction
+        cascade["compaction"] = compaction.defaut(journal=ledger.journaliser).effacer_mission(
+            mid, "droit à l'effacement", demandeur)
+    except Exception as e:
+        cascade["compaction_erreur"] = type(e).__name__
     if n or any(cascade.values()):
         ledger.journaliser("NEXUS-LEDGER", "archive_effacement", mid, lignes=n, demandeur=demandeur, motif_demande=motif,
                            **cascade)
@@ -216,9 +249,32 @@ def _effacer_cascade(mid: int, demandeur: str) -> dict:
     """Effacement en cascade hors archive : mémoire du projet (résumé du livrable, index FTS par
     déclencheur), exemple, références dans les leçons, commentaire de note, contenu de la mission,
     de ses étapes et fichier du livrable. Le LEDGER garde la trace (sans contenu)."""
-    from .models import Avis, Connaissance, Exemple, Lecon
+    from .models import Avis, Connaissance, Etat, Exemple, Lecon
     mention = f"effacée le {maintenant().strftime('%Y-%m-%d')} à la demande de {demandeur}"
-    res = {"memoire": 0, "exemples": 0, "lecons": 0, "avis": 0, "etapes": 0, "mission": 0, "fichier": 0}
+    res = {"memoire": 0, "exemples": 0, "lecons": 0, "avis": 0, "etapes": 0, "mission": 0, "fichier": 0, "etat": 0}
+    with session_scope() as s:  # fragments à retrouver ailleurs (état clé/valeur : files, plans, tests)
+        m = s.get(Mission, mid)
+        fragments = [x for x in ((m.titre, m.consigne, m.livrable_texte) if m else ()) if x and len(x) >= 6]
+        fragments += [l.strip() for x in fragments[2:] for l in x.splitlines() if len(l.strip()) >= 12]
+        exemples_ids = []
+        for e in s.execute(select(Exemple).where(Exemple.mission_id == mid)).scalars():
+            exemples_ids.append(str(e.id))
+            fragments.append(e.extrait.rstrip("…"))
+        fragments = sorted(set(fragments), key=len, reverse=True)
+        for etat in s.execute(select(Etat)).scalars():
+            v = etat.valeur or ""
+            if etat.cle == "fantome:file" and exemples_ids:
+                try:
+                    jobs = json.loads(v or "[]")
+                    v = json.dumps([j for j in jobs if not (j.get("type") == "exemple" and str(j.get("cible")) in exemples_ids)],
+                                   ensure_ascii=False)
+                except ValueError:
+                    pass
+            for f in fragments:
+                for forme in {f, json.dumps(f, ensure_ascii=False)[1:-1], json.dumps(f)[1:-1]}:
+                    v = v.replace(forme, "[effacé]")
+            if v != (etat.valeur or ""):
+                etat.valeur, res["etat"] = v, res["etat"] + 1
     with session_scope() as s:
         for k in s.execute(select(Connaissance).where(Connaissance.source == f"livrable #{mid}")).scalars():
             s.delete(k)
@@ -265,6 +321,27 @@ def rechercher(q: str, projet: str | None = None, service: str | None = None, li
     if not requete or engine().dialect.name != "sqlite":
         return []
     filtres, params = "", {"m": requete, "n": limite}
+    return _avec_compaction(_rechercher_chaud(requete, projet, service, limite, filtres, params), q, projet,
+                            service, limite)
+
+
+def _avec_compaction(res: list[dict], q: str, projet, service, limite: int) -> list[dict]:
+    """Complète par les paliers compactés (tiède / froid), sans doublon de mission."""
+    if len(res) >= limite or not _compaction_active():
+        return res
+    from . import compaction
+    vues = {r["mission_id"] for r in res}
+    try:
+        for r in compaction.defaut().rechercher(q, projet=projet, service=service, limite=limite):
+            if r.get("mission_id") not in vues and len(res) < limite:
+                vues.add(r.get("mission_id"))
+                res.append(r)
+    except Exception:
+        pass
+    return res
+
+
+def _rechercher_chaud(requete, projet, service, limite, filtres, params) -> list[dict]:
     if projet:
         filtres += " AND a.projet = :p"
         params["p"] = projet

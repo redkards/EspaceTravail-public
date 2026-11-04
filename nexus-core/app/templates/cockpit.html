@@ -156,6 +156,7 @@
   <section id="journal">
     <h2>Journal LEDGER</h2>
     <div class="ligne"><button id="btnVerif" type="button">Vérifier la chaîne</button><span id="verif" class="meta"></span></div>
+    <div class="ligne"><button id="btnCompaction" type="button">Archive et compaction</button><span id="compaction" class="meta"></span></div>
     <div id="listeLed" style="margin-top:8px"></div>
   </section>
 </main>
@@ -299,6 +300,14 @@ async function chargerJournal() {
       ${e.mission_id ? `<span class="meta">mission #${e.mission_id}</span>` : ""}</div>
       <div class="meta">${date(e.horodatage)}</div><div class="mono meta">${esc(e.hash.slice(0, 16))}…</div></div>`).join("");
 }
+function octets(n) { return n == null ? "—" : n < 1e6 ? (n / 1e3).toFixed(1) + " Ko" : (n / 1e6).toFixed(2) + " Mo"; }
+$("#btnCompaction").addEventListener("click", async () => {
+  try { const s = await api("/archive/compaction"); const c = s.compaction;
+    $("#compaction").textContent = `Archive récente : ${octets(s.archive_chaude_octets)}` + (c
+      ? ` · compactée : ${octets(c.avant_octets)} → ${octets(c.apres_octets)} (ratio ${c.ratio ?? "—"}) · effacées : ${c.effaces} · dernière nuit : ${s.derniere_nuit || "jamais"}`
+      : " · compaction pas encore lancée (fenêtre de nuit " + s.fenetre_nuit + ")");
+  } catch (err) { toast(err.message); }
+});
 $("#btnVerif").addEventListener("click", async () => {
   try { const v = await api("/ledger/verifier");
     $("#verif").textContent = v.valide ? `Chaîne intègre (${v.entrees} entrées).` : `ALTÉRATION détectée à l'entrée ${v.premiere_erreur}.`;

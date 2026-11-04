@@ -29,8 +29,8 @@
 ```mermaid
 flowchart TB
     M1["M1 Internet"] --> C["Caddy : TLS, basic auth,<br/>en-têtes, filtrage"]
-    M2["M2 CSRF / clickjacking"] --> G["garde cockpit : X-Cockpit-Auth,<br/>X-Cockpit: 1, JSON, Origin ;<br/>frame-ancestors 'none'"]
-    M3["M3 injection indirecte"] --> B["bouclier : nettoyage, score,<br/>rejet / encapsulation ; plancher N2"]
+    M2["M2 CSRF / clickjacking"] --> G["garde cockpit : X-Cockpit-Auth,<br/>X-Cockpit: 1, JSON, Origin,<br/>frame-ancestors 'none'"]
+    M3["M3 injection indirecte"] --> B["bouclier : nettoyage, score,<br/>rejet / encapsulation, plancher N2"]
     M4["M4 IA détournée"] --> P["passerelle : aucun outil de décision,<br/>clé API sans pouvoir de décider"]
     M5["M5 jeton fuité"] --> J["un jeton par IA, masqué partout,<br/>rotation par install.sh"]
     M6["M6 base copiée"] --> H["HMAC LEDGER/archive<br/>clé hors base"]
@@ -124,7 +124,7 @@ Amélioration identifiée **[PRÉVU]** : la CSP ne restreint que `frame-ancestor
 | `COCKPIT_INTERNAL` | `install.sh` | 64 hex | Caddy, nexus-core | idem |
 | `LEDGER_HMAC_KEY` | `install.sh` | 64 hex | nexus-core (LEDGER, archive, compaction) | **ne pas changer** (chaîne existante) |
 | `COCKPIT_CODE_DECIDEUR` | `install.sh` (une fois, affiché une fois) | 6 chiffres | nexus-core | supprimer la ligne puis `install.sh` |
-| `BRIDGE_TOKEN_CLAUDE|CHATGPT|GEMINI|PROPRIETAIRE` | `install.sh` | 64 hex | nexus-bridge, `bridge-connecteurs.sh` | supprimer la ligne, `install.sh`, recoller l'URL |
+| `BRIDGE_TOKEN_CLAUDE\|CHATGPT\|GEMINI\|PROPRIETAIRE` | `install.sh` | 64 hex | nexus-bridge, `bridge-connecteurs.sh` | supprimer la ligne, `install.sh`, recoller l'URL |
 | `OLLAMA_API_KEY` | saisie masquée (`read -rs`) ou `--cle-fichier` ; enregistrée seulement après un appel authentifié HTTP 200 | ≥ 20 car. | nexus-core | `install.sh --cloud --cle-fichier …` |
 | `ANTHROPIC_API_KEY` | jamais proposé par `install.sh` | — | nexus-core (F4) | manuel |
 | `NEXUS_WEBHOOK_SECRET` | `install.sh` | aléatoire | export QG | manuel |

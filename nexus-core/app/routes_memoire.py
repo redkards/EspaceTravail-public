@@ -4,6 +4,7 @@ Lecture : /api/memoire/* (clé) et /cockpit/api/memoire/* (cockpit).
 Décisions (accepter / rejeter une leçon) et effacement d'archive : COCKPIT UNIQUEMENT (humain,
 anti-CSRF) — ni la clé API, ni la passerelle ne peuvent changer le comportement des agents.
 """
+import os
 from fastapi import APIRouter, HTTPException, Query, Request
 from pydantic import BaseModel, Field
 
@@ -64,6 +65,16 @@ def lecture() -> APIRouter:
     def verifier_archive():
         return archive.verifier()
 
+    @r.get("/archive/compaction")
+    def statistiques_compaction():
+        """Taille et ratio de la compaction (paliers tiède / froid) + archive « chaude » actuelle."""
+        from . import compaction
+        chaud = sum(f.stat().st_size for f in archive.dossier().glob("*.jsonl.gz")) if archive.dossier().is_dir() else 0
+        stats = compaction.defaut().statistiques() if archive._compaction_active() else None
+        derniere = compaction.defaut()._meta("derniere_nuit") if stats is not None else None
+        return {"archive_chaude_octets": chaud, "compaction": stats, "derniere_nuit": derniere,
+                "fenetre_nuit": os.environ.get("NEXUS_FENETRE_NUIT", "01:00-06:00")}
+
     return r
 
 
@@ -119,7 +130,11 @@ def planifier_fantome(corps: Fantome):
 
 @cockpit.post("/archive/effacer/{mid}")
 def effacer(mid: int, corps: Motif, request: Request):
+    from .db import session_scope
+    from .models import Mission
+    with session_scope() as s:
+        existe = s.get(Mission, mid) is not None
     n = archive.effacer(mid, utilisateur(request), corps.motif or "droit à l'effacement")
-    if not n:
-        raise HTTPException(404, "Aucun enregistrement d'archive pour cette mission.")
+    if not n and not existe:
+        raise HTTPException(404, "Mission inconnue : rien à effacer.")
     return {"mission_id": mid, "lignes_effacees": n}

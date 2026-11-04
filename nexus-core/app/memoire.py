@@ -334,3 +334,30 @@ def memoriser_livrable(mid: int, titre: str, projet: str, livrable: str | None) 
                        origine="auto", masquer=True)
     except InjectionRefusee:
         return None
+
+
+# --- Consolidation (compaction) -----------------------------------------------------------------
+
+def chemin_sqlite() -> Path | None:
+    """Fichier SQLite de nexus-core (None si la base n'est pas SQLite)."""
+    from .config import cfg
+    url = cfg().database_url
+    return Path(url[len("sqlite:///"):]) if url.startswith("sqlite:///") and ":memory:" not in url else None
+
+
+def consolider(plafond: int | None = None, appliquer: bool = True) -> dict:
+    """Fusionne les quasi-doublons « auto » et applique le plafond par projet
+    (COMPACTION_PLAFOND_CONNAISSANCES ; 0 = sans plafond). Les connaissances évincées sont
+    archivées dans la compaction (aucune perte) ; « manuel » et « import » ne sont jamais supprimées."""
+    import sqlite3
+    from . import compaction
+    chemin = chemin_sqlite()
+    if chemin is None or not chemin.is_file():
+        return {"indisponible": "base non SQLite"}
+    c = sqlite3.connect(str(chemin), timeout=30)
+    try:
+        res = compaction.defaut(journal=ledger.journaliser).consolider_connaissances(
+            c, plafond=plafond, appliquer=appliquer)
+    finally:
+        c.close()
+    return {k: v for k, v in res.items() if k != "plan"}
