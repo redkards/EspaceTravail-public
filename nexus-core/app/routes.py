@@ -57,6 +57,7 @@ class KillSwitch(BaseModel):
     portee: Literal["grille", "direction", "agent"]
     cible: str | None = None
     actif: bool
+    code: str | None = Field(default=None, max_length=12)  # code Décideur, exigé pour LEVER un arrêt
 
 
 def _mission(m: Mission, etapes: list[Etape] | None = None) -> dict:
@@ -274,6 +275,12 @@ def creer_routeur(cockpit: bool = False) -> APIRouter:
         except PermissionError as e:
             raise HTTPException(409, str(e))
 
+    def _reserve_cockpit(quoi: str) -> None:
+        """Ce qui change le comportement des agents : cockpit seulement (option de test : NEXUS_API_PEUT_DECIDER=1)."""
+        if not cockpit and os.environ.get("NEXUS_API_PEUT_DECIDER", "0").strip() != "1":
+            ledger.journaliser("NEXUS-GATE", "action_api_refusee", None, quoi=quoi)
+            raise HTTPException(403, f"{quoi} est réservée au Décideur via le cockpit.")
+
     def _api_peut_decider() -> None:
         """Valider / refuser / réviser une N3 : réservé au Décideur via le cockpit (X-Cockpit-Auth +
         anti-CSRF ; code pour un risque élevé). La clé API (passerelle IA, n8n) ne décide jamais.
@@ -307,6 +314,20 @@ def creer_routeur(cockpit: bool = False) -> APIRouter:
 
     @r.post("/killswitch")
     def killswitch(corps: KillSwitch):
+        # S'arrêter est toujours sûr (clé API comprise) ; LEVER un arrêt : cockpit + code Décideur.
+        if not corps.actif:
+            if not cockpit:
+                ledger.journaliser("NEXUS-SENTINEL", "levee_arret_api_refusee", None)
+                raise HTTPException(403, "Levée de l'arrêt d'urgence réservée au Décideur via le cockpit "
+                                         "(la clé API peut seulement arrêter).")
+            from . import decideur
+            if decideur.code_configure():
+                try:
+                    decideur.verifier_code(corps.code, "cockpit")
+                except decideur.CodeRefuse as e:
+                    raise HTTPException(e.statut, str(e))
+            else:  # code non configuré : levée possible depuis le cockpit (authentifié), tracée
+                ledger.journaliser("NEXUS-SENTINEL", "levee_arret_sans_code_configure", None)
         if corps.portee != "grille" and not (corps.cible or "").strip():
             raise HTTPException(422, "cible obligatoire pour une direction ou un agent")
         if corps.portee == "agent" and corps.cible not in reg.charger():
@@ -369,12 +390,15 @@ def creer_routeur(cockpit: bool = False) -> APIRouter:
                 raise HTTPException(404, "Mission introuvable")
             m.note = corps.note
         ledger.journaliser("DECIDEUR", "mission_notee", mid, note=corps.note)
-        exemple = exemples.proposer(mid, "note") if corps.note >= exemples.seuil() else None
+        # La note change le comportement des agents (exemple) : promotion seulement depuis le cockpit.
+        promouvoir = cockpit or os.environ.get("NEXUS_API_PEUT_DECIDER", "0").strip() == "1"
+        exemple = exemples.proposer(mid, "note") if promouvoir and corps.note >= exemples.seuil() else None
         return {"mission_id": mid, "note": corps.note, "exemple": exemple}
 
     @r.post("/missions/{mid}/exemple")
     def garder_exemple(mid: int):
         """« Garder comme exemple » (cockpit) : refusé si secret, charte violée ou mission non validée."""
+        _reserve_cockpit("La gestion des exemples")
         try:
             return exemples.proposer(mid, "manuel", manuel=True)
         except exemples.ExempleRefuse as e:
@@ -391,6 +415,7 @@ def creer_routeur(cockpit: bool = False) -> APIRouter:
 
     @r.post("/exemples/{eid}/retirer")
     def retirer_exemple(eid: int):
+        _reserve_cockpit("La gestion des exemples")
         if not exemples.retirer(eid):
             raise HTTPException(404, "Exemple introuvable")
         return {"id": eid, "actif": False}

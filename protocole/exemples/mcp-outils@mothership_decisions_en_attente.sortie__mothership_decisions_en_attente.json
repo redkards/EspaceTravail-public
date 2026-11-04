@@ -10,7 +10,7 @@
    "recommandation": "Valider pour lancer la mission avec les modèles Anthropic (payant). Refuser pour l'abandonner ; relancer en F3 (gratuit) si besoin.",
    "cout_estime_eur": 0.2944,
    "risque": "moyen",
-   "cree_le": "2026-11-03T23:02:11.579823"
+   "cree_le": "2026-11-04T00:12:46.156846"
   },
   {
    "id": 1,
@@ -21,7 +21,7 @@
    "recommandation": "Relire le brouillon puis réaliser l'action manuellement ou via n8n. Motif du classement : montant engagé : 900.0 €",
    "cout_estime_eur": 900.0,
    "risque": "moyen",
-   "cree_le": "2026-11-03T23:02:11.565485"
+   "cree_le": "2026-11-04T00:12:46.143243"
   }
  ],
  "rappel": "Les décisions N3 se valident UNIQUEMENT par le propriétaire, dans le cockpit (https://nexus.exemple.fr/cockpit). Aucun outil de la passerelle ne peut valider, refuser ou réviser."

@@ -7,7 +7,7 @@
  ],
  "projet": "youtube-poker-winner",
  "auteur": "chatgpt",
- "cree_le": "2026-11-03T23:02:12.078059+00:00",
+ "cree_le": "2026-11-04T00:12:46.710999+00:00",
  "version": 1,
  "racine_id": 1,
  "remplace_id": null,
@@ -21,14 +21,14 @@
    "id": 1,
    "version": 1,
    "auteur": "chatgpt",
-   "cree_le": "2026-11-03T23:02:12.078059+00:00",
+   "cree_le": "2026-11-04T00:12:46.710999+00:00",
    "statut": "remplacee"
   },
   {
    "id": 2,
    "version": 2,
    "auteur": "chatgpt",
-   "cree_le": "2026-11-03T23:02:12.082690+00:00",
+   "cree_le": "2026-11-04T00:12:46.715799+00:00",
    "statut": "active"
   }
  ]

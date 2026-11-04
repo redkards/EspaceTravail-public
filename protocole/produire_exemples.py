@@ -17,6 +17,8 @@ from pathlib import Path
 
 sys.dont_write_bytecode = True
 RACINE = Path(__file__).resolve().parent.parent
+COCKPIT_INTERNE = "secret-interne-exemples"
+CODE_DECIDEUR = "246810"  # code Décideur factice (exemples uniquement)
 
 
 def ecrire(sortie: Path, cible: str, nom: str, objet) -> None:
@@ -34,14 +36,14 @@ def core(sortie: Path) -> None:
     os.environ.update({
         "DATABASE_URL": f"sqlite:///{tmp / 'nexus.db'}", "NEXUS_DATA_DIR": str(tmp / "data"),
         "LLM_PROVIDER": "fake", "NEXUS_API_KEY": cle, "NEXUS_TACHES_FOND": "0",
-        "COCKPIT_INTERNAL": "secret-interne-exemples", "NEXUS_HOST": "nexus.exemple.fr",
+        "COCKPIT_INTERNAL": COCKPIT_INTERNE, "COCKPIT_CODE_DECIDEUR": CODE_DECIDEUR, "NEXUS_HOST": "nexus.exemple.fr",
         "BUDGET_TASK_TOKENS": "20000", "LEDGER_HMAC_KEY": "cle-hmac-exemples",
         # F4 « disponible » pour produire une décision de lancement : rien n'est exécuté sans accord.
         "ANTHROPIC_API_KEY": "sk-factice-jamais-appelee", "BUDGET_MONTHLY_EUR": "20",
         "NEXUS_CONNAISSANCES_DIR": str(tmp / "connaissances"),
     })
     for v in ("NTFY_URL", "NTFY_TOPIC", "NEXUS_FONCTIONNEMENT_DEFAUT", "NEXUS_FONCTIONNEMENT_FILE",
-              "NEXUS_MAX_MISSIONS", "NEXUS_PROJETS_FILE", "COCKPIT_CODE_DECIDEUR", "NEXUS_SESSIONS_N3",
+              "NEXUS_MAX_MISSIONS", "NEXUS_PROJETS_FILE", "NEXUS_API_PEUT_DECIDER", "NEXUS_SESSIONS_N3",
               "NEXUS_MEMOIRE_AUTO", "EUR_PAR_USD"):
         os.environ.pop(v, None)
     sys.path.insert(0, str(RACINE / "nexus-core"))
@@ -50,6 +52,8 @@ def core(sortie: Path) -> None:
     from app.main import app
 
     h = {"X-Nexus-Key": cle}
+    # Décisions : uniquement via le cockpit (en-têtes posés par Caddy et par le JavaScript du cockpit).
+    cockpit = {"X-Cockpit-Auth": COCKPIT_INTERNE, "X-Cockpit": "1"}
 
     def ok(r, attendu=200):
         assert r.status_code == attendu, (r.status_code, r.text[:500])
@@ -83,9 +87,14 @@ def core(sortie: Path) -> None:
         devis = next(d for d in decs if d["mission_id"] == ids["devis_n3"])
         ecrire(sortie, "decision", "devis", devis)
         action = {"commentaire": "Accord du propriétaire (exemple)."}
+        # La clé API ne peut jamais décider : 403 « Validation réservée au Décideur ».
+        ecrire(sortie, "decision#refusApi", "valider_cle_api",
+               ok(c.post(f"/api/decisions/{devis['id']}/valider", headers=h, json=action), 403))
+        if devis["risque"] == "eleve" or (devis.get("cout_estime_eur") or 0) > 0:
+            action["code"] = CODE_DECIDEUR  # exigé si risque élevé ou montant ≥ seuil ; sinon ignoré
         ecrire(sortie, "decision#action", "valider", action)
         ecrire(sortie, "decision#actionReponse", "valider",
-               ok(c.post(f"/api/decisions/{devis['id']}/valider", headers=h, json=action)))
+               ok(c.post(f"/cockpit/api/decisions/{devis['id']}/valider", headers=cockpit, json=action)))
         valide = ok(c.get(f"/api/missions/{ids['devis_n3']}", headers=h))
         ecrire(sortie, "mission", "devis_valide", valide)
         ecrire(sortie, "decision#liste", "toutes", ok(c.get("/api/decisions", headers=h)))

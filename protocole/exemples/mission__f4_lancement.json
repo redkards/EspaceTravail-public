@@ -10,8 +10,8 @@
  "montant_eur": 0.0,
  "action": null,
  "message": null,
- "cree_le": "2026-11-03T23:02:11.577681",
- "maj_le": "2026-11-03T23:02:11.577684",
+ "cree_le": "2026-11-04T00:12:46.154856",
+ "maj_le": "2026-11-04T00:12:46.154859",
  "livrable_texte": null,
  "tokens": 0,
  "cout_eur": 0.0,
@@ -26,6 +26,7 @@
  "attente": "lancement_f4",
  "modeles": {},
  "charte_avertissements": [],
+ "alertes_bouclier": [],
  "note": null,
  "etapes": []
 }

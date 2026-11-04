@@ -1,7 +1,7 @@
 [
  {
-  "id": 38,
-  "horodatage": "2026-11-03T23:02:11.623722",
+  "id": 40,
+  "horodatage": "2026-11-04T00:12:46.220954",
   "acteur": "api",
   "action": "connaissance_ajoutee",
   "mission_id": null,
@@ -11,13 +11,28 @@
    "secret_masque": false,
    "source": "exemple protocole"
   },
-  "hash_prec": "ea6d24983fb4089bb83f58b13dd83b897221c204b88c176607b663924eb9790e",
-  "hash": "95cd2cdabf82f9df04f4392703b9a6831b49a7668ec8c29662d73b0c5136305a",
+  "hash_prec": "90dbd7fc72758b9187775d9a4508bb198ca17c7d88e154c6c28f871249854a5f",
+  "hash": "50e7ce535d73410c8bf73628dac10384e8ceb7277ca4d77a85198ad4c9d7c1fe",
   "algo": "hmac"
  },
  {
-  "id": 37,
-  "horodatage": "2026-11-03T23:02:11.614283",
+  "id": 39,
+  "horodatage": "2026-11-04T00:12:46.211136",
+  "acteur": "NEXUS-PRIME",
+  "action": "fantome_planifie",
+  "mission_id": null,
+  "details": {
+   "cible": "1",
+   "service": "REVENUE-CORE/propositions",
+   "type": "exemple"
+  },
+  "hash_prec": "c0298a9ca4778f8990dba187b3081354fb8860396bdf4ceeb7432b46884a6b17",
+  "hash": "90dbd7fc72758b9187775d9a4508bb198ca17c7d88e154c6c28f871249854a5f",
+  "algo": "hmac"
+ },
+ {
+  "id": 38,
+  "horodatage": "2026-11-04T00:12:46.208861",
   "acteur": "NEXUS-PRIME",
   "action": "exemple_retenu",
   "mission_id": 2,
@@ -26,13 +41,13 @@
    "origine": "validation_n3",
    "service": "REVENUE-CORE/propositions"
   },
-  "hash_prec": "9c75e35295adf9e5e23e3ce46dd230f5b61cc1659817bc733e2d3c6a7916e19a",
-  "hash": "ea6d24983fb4089bb83f58b13dd83b897221c204b88c176607b663924eb9790e",
+  "hash_prec": "92fb35c7986e39136166476bc225e65ea5d67697d503785dd1ddfb2866708764",
+  "hash": "c0298a9ca4778f8990dba187b3081354fb8860396bdf4ceeb7432b46884a6b17",
   "algo": "hmac"
  },
  {
-  "id": 36,
-  "horodatage": "2026-11-03T23:02:11.610779",
+  "id": 37,
+  "horodatage": "2026-11-04T00:12:46.204826",
   "acteur": "nexus-core",
   "action": "connaissance_ajoutee",
   "mission_id": null,
@@ -42,58 +57,72 @@
    "secret_masque": false,
    "source": "livrable #2"
   },
-  "hash_prec": "c34c510df738dbe831699321cac339c49c685527c8e0bb655f2bedf662b17e18",
-  "hash": "9c75e35295adf9e5e23e3ce46dd230f5b61cc1659817bc733e2d3c6a7916e19a",
+  "hash_prec": "b36d8cd0f1cf2bd6857f0900b628e3d9b86f3f8bd6c93e55d133f62360bc3f18",
+  "hash": "92fb35c7986e39136166476bc225e65ea5d67697d503785dd1ddfb2866708764",
   "algo": "hmac"
  },
  {
-  "id": 35,
-  "horodatage": "2026-11-03T23:02:11.609213",
+  "id": 36,
+  "horodatage": "2026-11-04T00:12:46.203159",
   "acteur": "REVENUE-CORE-EXECUTOR",
   "action": "livrable_enregistre",
   "mission_id": 2,
   "details": {
    "action_externe": false,
-   "fichier": "/tmp/protocole-core-en6vzqu3/data/livrables/divers/2.md"
+   "fichier": "/tmp/protocole-core-mk3r684d/data/livrables/divers/2.md"
   },
-  "hash_prec": "8a6e9d528b3a4bc907db5b58a6ae8ba403272994277013b1636bea225d135a01",
-  "hash": "c34c510df738dbe831699321cac339c49c685527c8e0bb655f2bedf662b17e18",
+  "hash_prec": "8e3b844b87ffb765bf68ba66dcd6df61dd2005f582fea61f310be699b12a6c52",
+  "hash": "b36d8cd0f1cf2bd6857f0900b628e3d9b86f3f8bd6c93e55d133f62360bc3f18",
   "algo": "hmac"
  },
  {
-  "id": 34,
-  "horodatage": "2026-11-03T23:02:11.605692",
+  "id": 35,
+  "horodatage": "2026-11-04T00:12:46.199726",
   "acteur": "NEXUS-LEDGER",
   "action": "archive_ajout",
   "mission_id": 2,
   "details": {
    "evenement": "decision_validee",
-   "hash": "5036d1387683ebdf7fb8bf212346698ec0b3fd04a0cb5382c29b53aa6ae50070",
+   "hash": "19451b41f8dcde0c94ac20e32d16ad7295e4bca693da65870296677d536729aa",
    "mois": "2026-11",
    "seq": 3
   },
-  "hash_prec": "fb5b33020df3d8f6e336f4a35ed033f5c7977bfaed8240e756338532e163e2b1",
-  "hash": "8a6e9d528b3a4bc907db5b58a6ae8ba403272994277013b1636bea225d135a01",
+  "hash_prec": "210e473793a2adf08e56bef994ce4c94ee1079e69af0fa0df2a924e459917049",
+  "hash": "8e3b844b87ffb765bf68ba66dcd6df61dd2005f582fea61f310be699b12a6c52",
   "algo": "hmac"
  },
  {
-  "id": 33,
-  "horodatage": "2026-11-03T23:02:11.602795",
+  "id": 34,
+  "horodatage": "2026-11-04T00:12:46.196774",
   "acteur": "DECIDEUR",
   "action": "decision_validee",
   "mission_id": 2,
   "details": {
-   "commentaire": "Accord du propriétaire (exemple).",
+   "commentaire": {
+    "empreinte": "0a5c8eadf749e5dd",
+    "longueur": 33
+   },
    "decision_id": 1,
    "objet": "livrable"
   },
-  "hash_prec": "4c4429271993156d9841942ddf8e7f57c0787939fdfbd11d9353fd29058c2964",
-  "hash": "fb5b33020df3d8f6e336f4a35ed033f5c7977bfaed8240e756338532e163e2b1",
+  "hash_prec": "1d88f706dbcd5b6ac536dac83d2335d152b1d8ebfcef524eddf17ada0a32f4a5",
+  "hash": "210e473793a2adf08e56bef994ce4c94ee1079e69af0fa0df2a924e459917049",
+  "algo": "hmac"
+ },
+ {
+  "id": 33,
+  "horodatage": "2026-11-04T00:12:46.176024",
+  "acteur": "NEXUS-GATE",
+  "action": "decision_api_refusee",
+  "mission_id": null,
+  "details": {},
+  "hash_prec": "ac335cf85491ccb88ad403c569112952215906960c455bf5359f3b5c3d038162",
+  "hash": "1d88f706dbcd5b6ac536dac83d2335d152b1d8ebfcef524eddf17ada0a32f4a5",
   "algo": "hmac"
  },
  {
   "id": 32,
-  "horodatage": "2026-11-03T23:02:11.581916",
+  "horodatage": "2026-11-04T00:12:46.158918",
   "acteur": "NEXUS-GATE",
   "action": "decision_en_attente_session",
   "mission_id": 3,
@@ -101,13 +130,13 @@
    "decision_id": 2,
    "session": "2026-11-04 12:30"
   },
-  "hash_prec": "a2a60b91877c42ea24a5e9182eb492633f08c1d848fb809ac68aa7d87b072d7d",
-  "hash": "4c4429271993156d9841942ddf8e7f57c0787939fdfbd11d9353fd29058c2964",
+  "hash_prec": "72bc9cd01ca679a5ef86e87bf4d5d1f9169caac1e247f16fbd68a10a45fb65cb",
+  "hash": "ac335cf85491ccb88ad403c569112952215906960c455bf5359f3b5c3d038162",
   "algo": "hmac"
  },
  {
   "id": 31,
-  "horodatage": "2026-11-03T23:02:11.580809",
+  "horodatage": "2026-11-04T00:12:46.157806",
   "acteur": "NEXUS-GATE",
   "action": "decision_lancement_f4_creee",
   "mission_id": 3,
@@ -115,13 +144,13 @@
    "cout_estime_eur": 0.2944,
    "decision_id": 2
   },
-  "hash_prec": "6e7d641f84b13bc40e1710b90aac1399b7877d3d4aa5ac3eae82e17b3ddcf1d5",
-  "hash": "a2a60b91877c42ea24a5e9182eb492633f08c1d848fb809ac68aa7d87b072d7d",
+  "hash_prec": "e2659bef643182519ff61c207e4b11437a9f556941c5db9887b1ffbb5173ba29",
+  "hash": "72bc9cd01ca679a5ef86e87bf4d5d1f9169caac1e247f16fbd68a10a45fb65cb",
   "algo": "hmac"
  },
  {
   "id": 30,
-  "horodatage": "2026-11-03T23:02:11.578260",
+  "horodatage": "2026-11-04T00:12:46.155378",
   "acteur": "API",
   "action": "mission_recue",
   "mission_id": 3,
@@ -131,37 +160,40 @@
    "projet": "paradoxx",
    "raison": null,
    "service": null,
-   "titre": "Analyse experte"
+   "titre": {
+    "empreinte": "4f2e0930fab92dc0",
+    "longueur": 15
+   }
   },
-  "hash_prec": "43e9055b9a2e4da63b77e8e1ef3d4d7ace1221ab426dbfb6ee2a8904ff139e94",
-  "hash": "6e7d641f84b13bc40e1710b90aac1399b7877d3d4aa5ac3eae82e17b3ddcf1d5",
+  "hash_prec": "d3f577820618fdfaa2db2861096127e05e519cc9c0ea8c16493c84df2d3db1c1",
+  "hash": "e2659bef643182519ff61c207e4b11437a9f556941c5db9887b1ffbb5173ba29",
   "algo": "hmac"
  },
  {
   "id": 29,
-  "horodatage": "2026-11-03T23:02:11.572504",
+  "horodatage": "2026-11-04T00:12:46.149951",
   "acteur": "NEXUS-LEDGER",
   "action": "archive_ajout",
   "mission_id": 2,
   "details": {
    "evenement": "fin_execution",
-   "hash": "e24fbaa5672ea37e18904d7085ed945238f16807e0a27aa4d19fe407465e6c4c",
+   "hash": "a39168d3f290dcff27c17717fd6fa8fe5b02e5b1ad79c3ff3eeb73bad3d4434d",
    "mois": "2026-11",
    "seq": 2
   },
-  "hash_prec": "4f6cd85d95d0909d8e076a0999b56790f56932d45f384487a5ca062ddea900cf",
-  "hash": "43e9055b9a2e4da63b77e8e1ef3d4d7ace1221ab426dbfb6ee2a8904ff139e94",
+  "hash_prec": "19fef79f505e09d5f54b719f4b144082324350fa9a21a1c8eef464a73e7aa214",
+  "hash": "d3f577820618fdfaa2db2861096127e05e519cc9c0ea8c16493c84df2d3db1c1",
   "algo": "hmac"
  },
  {
   "id": 28,
-  "horodatage": "2026-11-03T23:02:11.569447",
+  "horodatage": "2026-11-04T00:12:46.147207",
   "acteur": "NEXUS-BUDGET",
   "action": "mission_bilan",
   "mission_id": 2,
   "details": {
    "cout_eur": 0.0,
-   "duree_s": 0.034,
+   "duree_s": 0.033,
    "fonctionnement": "F2",
    "fonctionnement_demande": "F2",
    "raison": null,
@@ -170,13 +202,13 @@
    "tokens_entree": 709,
    "tokens_sortie": 36
   },
-  "hash_prec": "7b30d966c6b4f19104a8f57dc82bea18d44d2f78af60dca1931d7ec11402f11b",
-  "hash": "4f6cd85d95d0909d8e076a0999b56790f56932d45f384487a5ca062ddea900cf",
+  "hash_prec": "94a5fbe66e2dccbd6e0c118724420ba50ff97635e1665fa7bdaa1c16cc2a157f",
+  "hash": "19fef79f505e09d5f54b719f4b144082324350fa9a21a1c8eef464a73e7aa214",
   "algo": "hmac"
  },
  {
   "id": 27,
-  "horodatage": "2026-11-03T23:02:11.567970",
+  "horodatage": "2026-11-04T00:12:46.145617",
   "acteur": "NEXUS-GATE",
   "action": "decision_en_attente_session",
   "mission_id": 2,
@@ -184,13 +216,13 @@
    "decision_id": 1,
    "session": "2026-11-04 12:30"
   },
-  "hash_prec": "995c7cc6a9810f15040eaf4661b91aec81ee7676e5708f1834e4b3d1b3622a6e",
-  "hash": "7b30d966c6b4f19104a8f57dc82bea18d44d2f78af60dca1931d7ec11402f11b",
+  "hash_prec": "4386db4522d4df34a2cf5bfd58647b2870b672a2f305076c2de2f9c5d996b078",
+  "hash": "94a5fbe66e2dccbd6e0c118724420ba50ff97635e1665fa7bdaa1c16cc2a157f",
   "algo": "hmac"
  },
  {
   "id": 26,
-  "horodatage": "2026-11-03T23:02:11.566206",
+  "horodatage": "2026-11-04T00:12:46.143945",
   "acteur": "NEXUS-GATE",
   "action": "decision_n3_creee",
   "mission_id": 2,
@@ -198,13 +230,13 @@
    "decision_id": 1,
    "risque": "moyen"
   },
-  "hash_prec": "187a65dc4434e9cc155f85b2c3234bff417c6b188ea1ef5ea991a183eb2b8623",
-  "hash": "995c7cc6a9810f15040eaf4661b91aec81ee7676e5708f1834e4b3d1b3622a6e",
+  "hash_prec": "7251fbf1cb7c7d53f688f3b9a7153ceddd82fe89dd72f7a98cb02140f1381126",
+  "hash": "4386db4522d4df34a2cf5bfd58647b2870b672a2f305076c2de2f9c5d996b078",
   "algo": "hmac"
  },
  {
   "id": 25,
-  "horodatage": "2026-11-03T23:02:11.562314",
+  "horodatage": "2026-11-04T00:12:46.139987",
   "acteur": "NEXUS-GATE",
   "action": "classement",
   "mission_id": 2,
@@ -212,13 +244,13 @@
    "motif": "montant engagé : 900.0 €",
    "niveau": "N3"
   },
-  "hash_prec": "9c00dedc16e970807a658fcd61478bfb1c5f3eb5a9f67584d975ed11158e03d5",
-  "hash": "187a65dc4434e9cc155f85b2c3234bff417c6b188ea1ef5ea991a183eb2b8623",
+  "hash_prec": "17ff88f3420a4e3ec6c015eecfafe8277df15fd20b6a90e59c86d66f9db7bb17",
+  "hash": "7251fbf1cb7c7d53f688f3b9a7153ceddd82fe89dd72f7a98cb02140f1381126",
   "algo": "hmac"
  },
  {
   "id": 24,
-  "horodatage": "2026-11-03T23:02:11.561238",
+  "horodatage": "2026-11-04T00:12:46.138827",
   "acteur": "NEXUS-GATE",
   "action": "appel_gate",
   "mission_id": 2,
@@ -232,13 +264,13 @@
    "tokens_entree": 152,
    "tokens_sortie": 2
   },
-  "hash_prec": "a4beee43d28ff4f5a10fd9adadc57e4bdfa4dfcf82761a2ad39adb78849c7ff3",
-  "hash": "9c00dedc16e970807a658fcd61478bfb1c5f3eb5a9f67584d975ed11158e03d5",
+  "hash_prec": "e6209e38df74c17955a8a4a987fae802f63cc9e70c5343c9df73ce68bd524362",
+  "hash": "17ff88f3420a4e3ec6c015eecfafe8277df15fd20b6a90e59c86d66f9db7bb17",
   "algo": "hmac"
  },
  {
   "id": 23,
-  "horodatage": "2026-11-03T23:02:11.558769",
+  "horodatage": "2026-11-04T00:12:46.136369",
   "acteur": "REVENUE-CORE-CHECKER",
   "action": "verdict",
   "mission_id": 2,
@@ -246,13 +278,13 @@
    "ok": true,
    "problemes": []
   },
-  "hash_prec": "ffcad132880be948a27caf82debdb07966dc1e5033b68fc030f1f9d7fbd597f2",
-  "hash": "a4beee43d28ff4f5a10fd9adadc57e4bdfa4dfcf82761a2ad39adb78849c7ff3",
+  "hash_prec": "7a9f1a58fa95d3c8ef4017fe8dc5c0dc1053feeb58376c10467d000e74ecbcdb",
+  "hash": "e6209e38df74c17955a8a4a987fae802f63cc9e70c5343c9df73ce68bd524362",
   "algo": "hmac"
  },
  {
   "id": 22,
-  "horodatage": "2026-11-03T23:02:11.557753",
+  "horodatage": "2026-11-04T00:12:46.135539",
   "acteur": "REVENUE-CORE-CHECKER",
   "action": "appel_checker",
   "mission_id": 2,
@@ -266,13 +298,13 @@
    "tokens_entree": 154,
    "tokens_sortie": 7
   },
-  "hash_prec": "312e387533d51b56ee7d8da3346215811532bbf9d62027aa517d2d0592d07648",
-  "hash": "ffcad132880be948a27caf82debdb07966dc1e5033b68fc030f1f9d7fbd597f2",
+  "hash_prec": "0fd195ba2e81d611bc7a4fdb9a2f0df4cca033a7265a34474dea599467dbf222",
+  "hash": "7a9f1a58fa95d3c8ef4017fe8dc5c0dc1053feeb58376c10467d000e74ecbcdb",
   "algo": "hmac"
  },
  {
   "id": 21,
-  "horodatage": "2026-11-03T23:02:11.553341",
+  "horodatage": "2026-11-04T00:12:46.131543",
   "acteur": "REVENUE-CORE-ANALYST",
   "action": "appel_analyst",
   "mission_id": 2,
@@ -286,42 +318,8 @@
    "tokens_entree": 255,
    "tokens_sortie": 13
   },
-  "hash_prec": "f7a6e2537f510f80e58ed997fae46cf0a4b276d25a5898e4cf73626a2644198f",
-  "hash": "312e387533d51b56ee7d8da3346215811532bbf9d62027aa517d2d0592d07648",
-  "algo": "hmac"
- },
- {
-  "id": 20,
-  "horodatage": "2026-11-03T23:02:11.548971",
-  "acteur": "REVENUE-CORE-COLLECTOR",
-  "action": "appel_collector",
-  "mission_id": 2,
-  "details": {
-   "cout_eur": 0.0,
-   "double_controle": false,
-   "fonctionnement": "F2",
-   "fournisseur": "fake",
-   "modele": null,
-   "tokens": 162,
-   "tokens_entree": 148,
-   "tokens_sortie": 14
-  },
-  "hash_prec": "add84ee7b20e0a5d3b5934dc37f2abc3fb69aefb7e2132fbdc45e30d3d794828",
-  "hash": "f7a6e2537f510f80e58ed997fae46cf0a4b276d25a5898e4cf73626a2644198f",
-  "algo": "hmac"
- },
- {
-  "id": 19,
-  "horodatage": "2026-11-03T23:02:11.546038",
-  "acteur": "NEXUS-PRIME",
-  "action": "routage",
-  "mission_id": 2,
-  "details": {
-   "directeur": "DIR-CROISSANCE",
-   "service": "REVENUE-CORE/propositions"
-  },
-  "hash_prec": "a2882394a7621ffe5895d037717caa243866a41ac9de6ab8620c6964c21c6661",
-  "hash": "add84ee7b20e0a5d3b5934dc37f2abc3fb69aefb7e2132fbdc45e30d3d794828",
+  "hash_prec": "63087accbad060b16e3fa97beaf47d50f35be0a74038a41ea95480986c69aecf",
+  "hash": "0fd195ba2e81d611bc7a4fdb9a2f0df4cca033a7265a34474dea599467dbf222",
   "algo": "hmac"
  }
 ]

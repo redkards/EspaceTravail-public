@@ -11,8 +11,8 @@
   "montant_eur": 0.0,
   "action": null,
   "message": null,
-  "cree_le": "2026-11-03T23:02:11.577681",
-  "maj_le": "2026-11-03T23:02:11.577684",
+  "cree_le": "2026-11-04T00:12:46.154856",
+  "maj_le": "2026-11-04T00:12:46.154859",
   "livrable_texte": null,
   "tokens": 0,
   "cout_eur": 0.0,
@@ -27,6 +27,7 @@
   "attente": "lancement_f4",
   "modeles": {},
   "charte_avertissements": [],
+  "alertes_bouclier": [],
   "note": null
  },
  {
@@ -41,8 +42,8 @@
   "montant_eur": 900.0,
   "action": null,
   "message": "montant engagé : 900.0 €",
-  "cree_le": "2026-11-03T23:02:11.531790",
-  "maj_le": "2026-11-03T23:02:11.568732",
+  "cree_le": "2026-11-04T00:12:46.110922",
+  "maj_le": "2026-11-04T00:12:46.146452",
   "livrable_texte": "# Livrable (brouillon)\n\n- Point 1\n- Point 2\n- Point 3",
   "tokens": 745,
   "cout_eur": 0.0,
@@ -52,7 +53,7 @@
   "repli_f3": true,
   "tokens_entree": 709,
   "tokens_sortie": 36,
-  "duree_s": 0.034,
+  "duree_s": 0.033,
   "revisions": 0,
   "attente": null,
   "modeles": {
@@ -62,6 +63,7 @@
    "gate": "fake:?"
   },
   "charte_avertissements": [],
+  "alertes_bouclier": [],
   "note": null
  },
  {
@@ -75,9 +77,9 @@
   "niveau": "N1",
   "montant_eur": 0.0,
   "action": null,
-  "message": "Livrable enregistré : /tmp/protocole-core-en6vzqu3/data/livrables/nexus/1.md. Aucune action externe exécutée.",
-  "cree_le": "2026-11-03T23:02:11.473732",
-  "maj_le": "2026-11-03T23:02:11.517859",
+  "message": "Livrable enregistré : /tmp/protocole-core-mk3r684d/data/livrables/nexus/1.md. Aucune action externe exécutée.",
+  "cree_le": "2026-11-04T00:12:46.042928",
+  "maj_le": "2026-11-04T00:12:46.097382",
   "livrable_texte": "# Livrable (brouillon)\n\n- Point 1\n- Point 2\n- Point 3",
   "tokens": 743,
   "cout_eur": 0.0,
@@ -87,7 +89,7 @@
   "repli_f3": true,
   "tokens_entree": 707,
   "tokens_sortie": 36,
-  "duree_s": 0.039,
+  "duree_s": 0.049,
   "revisions": 0,
   "attente": null,
   "modeles": {
@@ -97,6 +99,7 @@
    "gate": "fake:?"
   },
   "charte_avertissements": [],
+  "alertes_bouclier": [],
   "note": null
  }
 ]

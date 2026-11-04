@@ -84,6 +84,8 @@
   <button class="urgence" id="btnUrgence" type="button">Arrêt d'urgence</button>
   <div class="confirm carte" id="confirmUrgence" style="flex-basis:100%">
     <div id="texteUrgence">Confirmer l'arrêt de toute la grille ? Les missions en cours seront suspendues.</div>
+    <div id="codeLevee" hidden><label for="codeUrgence">Code Décideur (exigé pour relancer)</label>
+      <input id="codeUrgence" inputmode="numeric" autocomplete="one-time-code" maxlength="12"></div>
     <div class="ligne" style="margin-top:8px">
       <button class="ko" id="btnUrgenceOui" type="button">Confirmer</button>
       <button id="btnUrgenceNon" type="button">Annuler</button>
@@ -337,11 +339,12 @@ let arretActif = false;
 $("#btnUrgence").addEventListener("click", () => {
   $("#texteUrgence").textContent = arretActif ? "Relancer la grille ? Les nouveaux traitements reprendront."
     : "Confirmer l'arrêt de toute la grille ? Les missions en cours seront suspendues.";
+  $("#codeLevee").hidden = !arretActif; $("#codeUrgence").value = "";
   $("#confirmUrgence").classList.add("vis");
 });
 $("#btnUrgenceNon").addEventListener("click", () => $("#confirmUrgence").classList.remove("vis"));
 $("#btnUrgenceOui").addEventListener("click", async () => {
-  try { await api("/killswitch", { method: "POST", body: JSON.stringify({ portee: "grille", actif: !arretActif }) });
+  try { await api("/killswitch", { method: "POST", body: JSON.stringify({ portee: "grille", actif: !arretActif, code: arretActif ? ($("#codeUrgence").value || null) : null }) });
     $("#confirmUrgence").classList.remove("vis"); toast(arretActif ? "Grille relancée." : "Arrêt d'urgence activé."); rafraichir();
   } catch (err) { toast(err.message); }
 });

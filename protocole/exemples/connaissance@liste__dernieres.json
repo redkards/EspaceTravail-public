@@ -5,11 +5,12 @@
   "titre": "Ton éditorial",
   "contenu": "Phrases courtes, tutoiement interdit, exemples concrets.",
   "source": "exemple protocole",
-  "date": "2026-11-03T23:02:11.623046",
+  "date": "2026-11-04T00:12:46.220209",
   "auteur": "api",
   "version": 1,
   "origine": "manuel",
-  "score": null
+  "score": null,
+  "suspect": false
  },
  {
   "id": 1,
@@ -17,10 +18,11 @@
   "titre": "livrable #1 — Checklist de démarrage",
   "contenu": "# Livrable (brouillon) - Point 1 - Point 2 - Point 3",
   "source": "livrable #1",
-  "date": "2026-11-03T23:02:11.515139",
+  "date": "2026-11-04T00:12:46.093735",
   "auteur": "nexus-core",
   "version": 1,
   "origine": "auto",
-  "score": null
+  "score": null,
+  "suspect": false
  }
 ]

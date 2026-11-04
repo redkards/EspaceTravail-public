@@ -10,8 +10,8 @@
  "montant_eur": 900.0,
  "action": null,
  "message": "montant engagé : 900.0 €",
- "cree_le": "2026-11-03T23:02:11.531790",
- "maj_le": "2026-11-03T23:02:11.568732",
+ "cree_le": "2026-11-04T00:12:46.110922",
+ "maj_le": "2026-11-04T00:12:46.146452",
  "livrable_texte": "# Livrable (brouillon)\n\n- Point 1\n- Point 2\n- Point 3",
  "tokens": 745,
  "cout_eur": 0.0,
@@ -21,7 +21,7 @@
  "repli_f3": true,
  "tokens_entree": 709,
  "tokens_sortie": 36,
- "duree_s": 0.034,
+ "duree_s": 0.033,
  "revisions": 0,
  "attente": null,
  "modeles": {
@@ -31,6 +31,7 @@
   "gate": "fake:?"
  },
  "charte_avertissements": [],
+ "alertes_bouclier": [],
  "note": null,
  "etapes": [
   {
@@ -41,7 +42,7 @@
    "sortie": "ELEMENTS:\n- consigne reçue\nMANQUE:\n- aucun élément bloquant",
    "verdict": null,
    "tokens": 162,
-   "cree_le": "2026-11-03T23:02:11.548572"
+   "cree_le": "2026-11-04T00:12:46.126742"
   },
   {
    "id": 8,
@@ -51,7 +52,7 @@
    "sortie": "# Livrable (brouillon)\n\n- Point 1\n- Point 2\n- Point 3",
    "verdict": null,
    "tokens": 268,
-   "cree_le": "2026-11-03T23:02:11.552938"
+   "cree_le": "2026-11-04T00:12:46.131139"
   },
   {
    "id": 9,
@@ -61,7 +62,7 @@
    "sortie": "{\"ok\": true, \"problemes\": []}",
    "verdict": null,
    "tokens": 161,
-   "cree_le": "2026-11-03T23:02:11.557206"
+   "cree_le": "2026-11-04T00:12:46.135161"
   },
   {
    "id": 10,
@@ -71,7 +72,7 @@
    "sortie": "{\"ok\": true, \"problemes\": []}",
    "verdict": "ok",
    "tokens": 0,
-   "cree_le": "2026-11-03T23:02:11.558295"
+   "cree_le": "2026-11-04T00:12:46.136007"
   },
   {
    "id": 11,
@@ -81,7 +82,7 @@
    "sortie": "NIVEAU: N0",
    "verdict": null,
    "tokens": 154,
-   "cree_le": "2026-11-03T23:02:11.560852"
+   "cree_le": "2026-11-04T00:12:46.138388"
   }
  ]
 }

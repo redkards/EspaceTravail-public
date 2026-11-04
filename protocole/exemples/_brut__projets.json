@@ -13,6 +13,7 @@
    "CYBER-FORTRESS/veille"
   ],
   "alias": [],
+  "actif": false,
   "missions": 1,
   "missions_en_cours": 0,
   "decisions_en_attente": 1
@@ -33,6 +34,7 @@
    "syfer",
    "nexus-mothership"
   ],
+  "actif": true,
   "missions": 1,
   "missions_en_cours": 0,
   "decisions_en_attente": 0
@@ -53,6 +55,7 @@
    "poker-vitrine",
    "poker vitrine"
   ],
+  "actif": true,
   "missions": 0,
   "missions_en_cours": 0,
   "decisions_en_attente": 0
@@ -68,6 +71,7 @@
    "LEX-GUARD/droit-france"
   ],
   "alias": [],
+  "actif": true,
   "missions": 0,
   "missions_en_cours": 0,
   "decisions_en_attente": 0
@@ -86,6 +90,7 @@
    "red-card",
    "redcard"
   ],
+  "actif": true,
   "missions": 0,
   "missions_en_cours": 0,
   "decisions_en_attente": 0
@@ -105,6 +110,7 @@
    "solver",
    "pw-solver"
   ],
+  "actif": true,
   "missions": 0,
   "missions_en_cours": 0,
   "decisions_en_attente": 0
@@ -120,6 +126,7 @@
    "LEX-GUARD/droit-france"
   ],
   "alias": [],
+  "actif": false,
   "missions": 0,
   "missions_en_cours": 0,
   "decisions_en_attente": 0
@@ -138,6 +145,7 @@
    "CYBER-FORTRESS/audit"
   ],
   "alias": [],
+  "actif": false,
   "missions": 0,
   "missions_en_cours": 0,
   "decisions_en_attente": 0
@@ -156,6 +164,7 @@
   "alias": [
    "siteesctboxe"
   ],
+  "actif": false,
   "missions": 0,
   "missions_en_cours": 0,
   "decisions_en_attente": 0
@@ -171,6 +180,7 @@
    "OPS-CORE/projets"
   ],
   "alias": [],
+  "actif": false,
   "missions": 0,
   "missions_en_cours": 0,
   "decisions_en_attente": 0
@@ -183,6 +193,7 @@
    "OPS-CORE/projets"
   ],
   "alias": [],
+  "actif": false,
   "missions": 1,
   "missions_en_cours": 0,
   "decisions_en_attente": 0

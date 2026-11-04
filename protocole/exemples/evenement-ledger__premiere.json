@@ -1,14 +1,20 @@
 {
- "id": 19,
- "horodatage": "2026-11-03T23:02:11.546038",
- "acteur": "NEXUS-PRIME",
- "action": "routage",
+ "id": 21,
+ "horodatage": "2026-11-04T00:12:46.131543",
+ "acteur": "REVENUE-CORE-ANALYST",
+ "action": "appel_analyst",
  "mission_id": 2,
  "details": {
-  "directeur": "DIR-CROISSANCE",
-  "service": "REVENUE-CORE/propositions"
+  "cout_eur": 0.0,
+  "double_controle": false,
+  "fonctionnement": "F2",
+  "fournisseur": "fake",
+  "modele": null,
+  "tokens": 268,
+  "tokens_entree": 255,
+  "tokens_sortie": 13
  },
- "hash_prec": "a2882394a7621ffe5895d037717caa243866a41ac9de6ab8620c6964c21c6661",
- "hash": "add84ee7b20e0a5d3b5934dc37f2abc3fb69aefb7e2132fbdc45e30d3d794828",
+ "hash_prec": "63087accbad060b16e3fa97beaf47d50f35be0a74038a41ea95480986c69aecf",
+ "hash": "0fd195ba2e81d611bc7a4fdb9a2f0df4cca033a7265a34474dea599467dbf222",
  "algo": "hmac"
 }

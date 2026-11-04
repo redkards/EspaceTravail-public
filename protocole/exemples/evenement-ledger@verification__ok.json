@@ -1,9 +1,9 @@
 {
  "hmac_actif": true,
  "valide": true,
- "entrees": 38,
+ "entrees": 40,
  "premiere_erreur": null,
  "motif": null,
- "entrees_signees": 38,
+ "entrees_signees": 40,
  "entrees_non_signees": 0
 }

@@ -15,7 +15,7 @@ Version actuelle : voir `VERSION` (**1.0.0**).
 | `mission-creation` / `mission-creation-reponse` | création de mission (POST /api/missions) | `routes.py` NouvelleMission, `creer_mission` |
 | `mission` (+ `#liste`) | état d'une mission (GET /api/missions[/{id}]) | `routes._mission`, `models.Mission` |
 | `etape` | étape du pipeline | `models.Etape` |
-| `decision` (+ `#liste`, `#action`, `#actionReponse`) | décision N3 et action humaine | `routes._decision`, `pipeline.decider` |
+| `decision` (+ `#liste`, `#action`, `#actionReponse`, `#refusApi`) | décision N3, action du Décideur (cockpit) et refus 403 à la clé API | `routes._decision`, `pipeline.decider` |
 | `livrable` | vue normalisée du livrable (porté par la mission en v1) | `Mission.livrable_texte`, outil `mothership_statut` |
 | `connaissance` (+ `#liste`, `#ajout`, `#ajoutReponse`) | mémoire projet | `memoire.py`, `models.Connaissance` |
 | `agent` (+ `#publique`, `#liste`) | fiche YAML d'agent et sa vue GET /api/agents | `agents.py`, `nexus-core/agents/*.yaml` |
@@ -88,7 +88,7 @@ python3 -m pytest -q          # depuis protocole/
 ```
 
 Les tests lancent **nexus-core en local avec le LLM factice** (SQLite temporaire, aucun réseau) dans un
-processus séparé, créent des missions (N1, devis N3 validé, lancement F4 en attente — rien de payant n'est
+processus séparé, créent des missions (N1, devis N3 refusé à la clé API (403) puis validé via le cockpit avec le code Décideur, lancement F4 en attente — rien de payant n'est
 appelé), une connaissance, lisent agents, ledger, santé, fonctionnement ; puis **nexus-bridge** est appelé en
 MCP, ses requêtes vers nexus-core étant servies avec ces réponses réelles. Tout est validé avec les deux
 moteurs. Un test vérifie aussi que les entrées MCP du protocole sont identiques aux schémas servis par la

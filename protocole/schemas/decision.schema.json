@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://protocole.nexus.redkards.local/v1/decision.schema.json",
   "title": "Décision N3",
-  "description": "Élément de GET /api/decisions. Une décision ne se valide que par un humain (cockpit ou API clé).",
+  "description": "Élément de GET /api/decisions. Une décision ne se valide que par le Décideur humain, via le cockpit (la clé API reçoit 403).",
   "type": "object",
   "required": [
     "id",
@@ -102,7 +102,7 @@
   "$defs": {
     "action": {
       "title": "Action sur une décision (requête)",
-      "description": "Corps de POST /api/decisions/{id}/valider|refuser|reviser.",
+      "description": "Corps de POST /cockpit/api/decisions/{id}/valider|refuser|reviser (cockpit uniquement).",
       "type": "object",
       "properties": {
         "commentaire": {
@@ -159,6 +159,20 @@
       "type": "array",
       "items": {
         "$ref": "#"
+      }
+    },
+    "refusApi": {
+      "title": "Décision refusée à la clé API (réponse 403)",
+      "description": "POST /api/decisions/{id}/valider|refuser|reviser avec X-Nexus-Key : toujours 403. Seul le Décideur décide, via /cockpit/api/decisions/{id}/… (X-Cockpit-Auth posé par Caddy, X-Cockpit: 1 anti-CSRF, champ code si risque élevé ou montant ≥ seuil). Le refus est inscrit au LEDGER (decision_api_refusee).",
+      "type": "object",
+      "required": [
+        "detail"
+      ],
+      "properties": {
+        "detail": {
+          "type": "string",
+          "pattern": "^Validation réservée au Décideur"
+        }
       }
     }
   }

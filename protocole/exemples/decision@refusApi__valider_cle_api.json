@@ -1,0 +1,3 @@
+{
+ "detail": "Validation réservée au Décideur via le cockpit (la clé API ne peut ni valider, ni refuser, ni réviser une décision)."
+}

@@ -4,9 +4,10 @@
  "titre": "Ton éditorial",
  "contenu": "Phrases courtes, tutoiement interdit, exemples concrets.",
  "source": "exemple protocole",
- "date": "2026-11-03T23:02:11.623046",
+ "date": "2026-11-04T00:12:46.220209",
  "auteur": "api",
  "version": 1,
  "origine": "manuel",
- "score": 0.7657
+ "score": 0.7657,
+ "suspect": false
 }

@@ -144,7 +144,7 @@ def test_exemples_reels_conformes(reels, moteur):
 @pytest.mark.skipif(not CORE.exists(), reason="nexus-core absent de ce dépôt")
 def test_exemples_reels_couvrent_les_objets(reels):
     cibles = {c for c, _, _ in exemples(reels)}
-    for c in ("mission", "mission-creation", "mission-creation-reponse", "etape", "decision", "decision#actionReponse",
+    for c in ("mission", "mission-creation", "mission-creation-reponse", "etape", "decision", "decision#actionReponse", "decision#refusApi",
               "connaissance", "connaissance#ajoutReponse", "agent#liste", "evenement-ledger", "sante", "fonctionnement"):
         assert c in cibles, c
     m = json.loads((reels / "mission__n1_service.json").read_text())
