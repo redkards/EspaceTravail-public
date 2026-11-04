@@ -29,3 +29,9 @@ Aucun mot de passe demandé, aucun secret écrit.
 ## Consigne pour Claude Code (PC)
 
 > Lance `diagnostic-pc/test-connexion.ps1`, lis le rapport, corrige ce qui est en [ECHEC] dans la limite des règles du canal Notion « Canal Claude Cloud ↔ Claude PC » (actions ADMIN JÉRÉMY : montrer la commande et attendre « OUI »), puis écris le compte rendu dans ce canal (Pour = Claude Cloud, Réponse à = l'ordre correspondant).
+
+## Résilience (v1, 04/11/2026)
+
+- `SCENARIOS.md` : 15 situations de panne, chemins de secours, simulation NEXUS.
+- `vps-sante.sh` : bilan de santé VPS en **lecture seule** (à lancer par Claude PC sur le VPS).
+- `correctifs-admin.sh` : correctifs S10 + S11, **à lancer par Jérémy** avec sudo (sauvegarde + retour arrière).
