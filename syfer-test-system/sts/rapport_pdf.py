@@ -232,7 +232,8 @@ def points_forts(fiche, suites):
         try:
             pr = preuves[a["libelle"]]()
         except Exception:  # noqa: BLE001
-            pr = "composantes : " + ", ".join(f"{k} {_f(v)}" for k, v in a["composantes"].items() if v is not None)
+            pr = "composantes : " + ", ".join(f"{k.replace('_', ' ')} {_f(v)}" for k, v in a["composantes"].items()
+                                              if v is not None and k != "banc_livrable")
         out.append(f"<b>{escape(a['libelle'])} {_f(a['score'])}/100</b> — {escape(pr)}")
     return out
 
