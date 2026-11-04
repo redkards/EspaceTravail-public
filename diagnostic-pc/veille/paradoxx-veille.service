@@ -1,0 +1,8 @@
+[Unit]
+Description=PARADOXX - veille connexion VPS
+After=network-online.target tailscaled.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/paradoxx-veille.sh
+Nice=10

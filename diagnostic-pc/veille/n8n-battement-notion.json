@@ -1,0 +1,72 @@
+{
+  "name": "PARADOXX – Battement VPS → Notion",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "paradoxx-battement",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "name": "Battement reçu",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "paradoxx-battement"
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "https://api.notion.com/v1/pages/40e1ef74283f810797c9fa7314b1b94f",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Notion-Version",
+              "value": "2022-06-28"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({properties:{title:{title:[{text:{content:'Battement VPS — ' + $json.body.heure + ' — ' + $json.body.etat + ' — ' + $json.body.detail}}]}}}) }}",
+        "options": {}
+      },
+      "name": "Mettre à jour Notion",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        260,
+        0
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "",
+          "name": "Notion PARADOXX (à créer)"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Battement reçu": {
+      "main": [
+        [
+          {
+            "node": "Mettre à jour Notion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "active": false
+}
