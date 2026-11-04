@@ -10,6 +10,8 @@
 6. **Gratuit d'abord** : open source et offres gratuites ; toute dépense ou crédit = devis + « OUI » de Jérémy.
 7. **Regrouper** : une seule passe, une seule carte « OUI / NON » ; pas de sous-agent pour une simple question.
 8. **Mesurer** : audit de consommation à chaque fin de version ; on supprime ce qui coûte sans servir.
+9. **Autocontrôle par itération** : faire → vérifier (test, calcul, relecture croisée) → corriger, 1 à 3 tours selon l'enjeu ; arrêt dès que le contrôle est vert ; aucune livraison sans contrôle.
+10. **Scénarios virtuels systématiques** : avant le réel, simuler le cas nominal, les pannes et le pire cas ; étiqueter SIMULÉ tant que non mesuré.
 
 # Protocole NEXUS commun — toutes les IA de Jérémy (v1, 04/11/2026)
 
