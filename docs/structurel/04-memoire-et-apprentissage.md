@@ -20,7 +20,7 @@ Et une sixième, externe : la **veille** (fiches courtes de sources sérieuses, 
 
 ```mermaid
 flowchart LR
-    A["1. ARCHIVE<br/>chaque mission<br/>enregistrée, chaînée"] --> B["2. SIGNAUX<br/>extraits par du code :<br/>refus CHECKER, charte,<br/>refus/révision N3, 👎,<br/>plafonds, relances"]
+    A["1. ARCHIVE<br/>chaque mission<br/>enregistrée, chaînée"] --> B["2. SIGNAUX<br/>extraits par du code :<br/>refus CHECKER, charte,<br/>refus/révision N3, pouce baissé,<br/>plafonds, relances"]
     B --> C["3. LEÇON candidate<br/>regroupée par signature<br/>(service + projet + idée)"]
     C -- "≥ 3 cas<br/>(NEXUS_LECONS_SEUIL)" --> D["4. LEÇON proposée"]
     D --> F["Test fantôme<br/>5 missions rejouées<br/>la nuit, sans effet"]
@@ -37,7 +37,7 @@ flowchart LR
 | # | Étape | Règle exacte | Réglage |
 |---|---|---|---|
 | 1 | **Archive** | Un enregistrement JSON par événement ; fichier compressé par mois, **ajout seulement** ; chaque ligne porte l'empreinte de la précédente (HMAC avec `LEDGER_HMAC_KEY`) ; secrets masqués avant écriture. | `NEXUS_ARCHIVE_DIR` |
-| 2 | **Signaux** | Extraction **déterministe** (pas d'IA) : refus du CHECKER, violations de charte, refus et révisions du Décideur (avec motif), plafonds atteints, relances et reformulations du directeur, avis 👎. | — |
+| 2 | **Signaux** | Extraction **déterministe** (pas d'IA) : refus du CHECKER, violations de charte, refus et révisions du Décideur (avec motif), plafonds atteints, relances et reformulations du directeur, avis « pouce baissé ». | — |
 | 3 | **Regroupement** | Même service, même projet, même idée (signature normalisée). Une mission ne compte qu'**une fois** par leçon. Statut « candidate ». | — |
 | 4 | **Proposition** | Dès **3** missions différentes, la leçon passe « proposée ». | `NEXUS_LECONS_SEUIL=3` |
 | 5 | **Validation** | Lundi dès 8 h : alerte « Leçons de la semaine », carte du Décideur. **Seules** les leçons acceptées s'appliquent. Une leçon n'est **jamais supprimée** : rejetée ou suspendue. Option : transformer la leçon en **terme interdit** de la charte du projet. | — |
@@ -51,7 +51,7 @@ flowchart LR
 | 3 livrables Poker Winners refusés par la charte : « gagnez de l'argent » | « Poker Winners : jamais de promesse de gain ; parler d'apprentissage et de progression. » | L'ANALYST évite la formule dès le premier jet ; moins de corrections. |
 | 3 révisions N3 demandées : « vouvoyez le lecteur » | « Projets publics : vouvoiement systématique. » | Moins de révisions dans le cockpit. |
 | 3 refus du CHECKER en `LEX-GUARD/droit-france` : article cité sans certitude | « Droit : écrire « référence à vérifier » plutôt qu'un numéro d'article incertain. » | Notes juridiques plus prudentes. |
-| 3 avis 👎 « mauvaise marque » sur REDKARDS | Terme ajouté à `chartes_ajouts/redkards.yaml` | Blocage par le code, sans dépendre de l'IA. |
+| 3 avis « pouce baissé » « mauvaise marque » sur REDKARDS | Terme ajouté à `chartes_ajouts/redkards.yaml` | Blocage par le code, sans dépendre de l'IA. |
 
 ## 3. Les exemples (apprentissage par l'exemple)
 
@@ -64,9 +64,9 @@ flowchart LR
 ## 4. La note en un geste
 
 - Sur **une mission terminée sur cinq** (`NEXUS_ECHANTILLON_NOTE=0.2`, tirage stable), dans les
-  14 derniers jours, le Décideur propose **👍 / 👎** et un motif.
+  14 derniers jours, le Décideur propose **pouce levé / pouce baissé** et un motif.
 - Motifs : information fausse ou inventée · incomplet · hors ton · mauvaise marque ou mélange de projets · trop long · autre.
-- **👎** → signal pour les leçons. **👍** → candidat exemple.
+- **pouce baissé** → signal pour les leçons. **pouce levé** → candidat exemple.
 - Statistiques de satisfaction par service, projet, modèle et niveau F.
 
 > **Avis d'expert** (certitude élevée) — Ce geste de 2 secondes est **le carburant** du système. Sans

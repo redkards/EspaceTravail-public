@@ -13,7 +13,7 @@ gantt
     axisFormat  %H:%M
     section Chaque jour
     Sauvegarde (cron)            :03:30, 15m
-    Veille sources (00:17, 06:17, 12:17, 18:17) :06:17, 10m
+    Veille sources (toutes les 6 h) :06:17, 10m
     Session N3 de midi           :12:30, 30m
     Session N3 du soir + bilan   :19:00, 30m
     section Lundi
@@ -46,7 +46,7 @@ gantt
 > un commentaire précis (« retirer la mention de prix », « vouvoyer »). Un refus ne coûte rien ; une
 > validation hâtive peut engager. Ne validez jamais une décision « pour voir ».
 
-**Bonus 30 secondes (facultatif)** : la **note en un geste** (👍 / 👎 + motif) proposée sur une mission
+**Bonus 30 secondes (facultatif)** : la **note en un geste** (pouce levé / pouce baissé + motif) proposée sur une mission
 terminée sur cinq. C'est elle qui nourrit les leçons et les exemples.
 
 ## 2. Routine hebdomadaire

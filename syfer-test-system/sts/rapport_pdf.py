@@ -344,9 +344,9 @@ def produire(base: dict | None, vers: dict | None, precedents: list[dict], cible
         E.append(PageBreak())
         E.append(P("4. Comparaison des 5 versions", "h1"))
         E.append(P("Pour chaque version, les épreuves qui dépendent de la configuration (" +
-                   ", ".join(vers.get("suites_comparees") or []) + ") sont rejouées avec la MÊME graine. Les axes qui "
-                   "ne dépendent pas de la configuration (tests unitaires, attaque, secrets, banc) sont communs et "
-                   "n'entrent pas dans ce classement.", "pp"))
+                   ", ".join(vers.get("suites_comparees") or []) + ") sont rejouées avec la MÊME graine. Les composantes communes à toutes les versions (tests unitaires, "
+                   "attaque, secrets, banc) ne sont pas rejouées : chaque axe est calculé sur ses composantes dépendant "
+                   "de la configuration (couverture partielle, voir syfer_test.json).", "pp"))
         axes_lib = {k: v["libelle"] for k, v in next(iter(vers["versions"].values()))["score"]["axes"].items()}
         E += [Spacer(1, 4), graphique_versions(vers, axes_lib), Spacer(1, 4)]
         codes = vers["classement"]

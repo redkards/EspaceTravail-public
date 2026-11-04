@@ -7,6 +7,7 @@ import threading
 from datetime import timedelta
 
 from fastapi import APIRouter, BackgroundTasks, Header, HTTPException, Query
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 from sqlalchemy import func, select
 
@@ -132,7 +133,7 @@ def creer_routeur(cockpit: bool = False) -> APIRouter:
         with session_scope() as s:
             return s.execute(select(Mission.id).where(
                 Mission.titre == titre, Mission.consigne == consigne, Mission.projet == projet,
-                Mission.service.is_(corps.service) if corps.service is None else Mission.service == corps.service,
+                True if corps.service is None else Mission.service == corps.service,  # sinon choisi par PRIME
                 Mission.fonctionnement_demande == (corps.fonctionnement or fct.defaut()),
                 Mission.montant_eur == (corps.montant_eur or 0.0),
                 Mission.action.is_(None) if corps.action is None else Mission.action == corps.action,
@@ -155,9 +156,12 @@ def creer_routeur(cockpit: bool = False) -> APIRouter:
             ledger.journaliser("API", "mission_doublon_ignoree", existant, cle_idempotence=bool(cle))
             with session_scope() as s:
                 m = s.get(Mission, existant)
-                return {"id": existant, "statut": m.statut, "projet": m.projet, "doublon": True,
-                        "fonctionnement_demande": m.fonctionnement_demande, "fonctionnement": m.fonctionnement,
-                        "message": "Mission identique déjà créée il y a moins de 30 s : aucune nouvelle mission."}
+                # 200 (et non 202) : rien de nouveau n'est accepté, la mission existante est renvoyée.
+                return JSONResponse({"id": existant, "statut": m.statut, "projet": m.projet, "doublon": True,
+                                     "fonctionnement_demande": m.fonctionnement_demande,
+                                     "fonctionnement": m.fonctionnement,
+                                     "message": "Mission identique déjà créée il y a moins de 30 s : "
+                                                "aucune nouvelle mission."}, status_code=200)
         demande = corps.fonctionnement or fct.defaut()
         applique, raison, attente_f4 = demande, None, False
         if demande == "F4":

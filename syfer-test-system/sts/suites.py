@@ -808,7 +808,7 @@ def correspond(rel: str, motifs: list[str]) -> bool:
 def rechercher_secrets(racine: Path, conf: dict | None = None) -> dict:
     """Recherche des secrets dans le dépôt avec les motifs du filtre anti-secret de nexus-core."""
     conf = conf or C.lire_json(C.CONFIG / "secrets_autorises.json", {}) or {}
-    motifs, aff, gab, origine = C.motifs_secrets(racine)
+    motifs, aff, gab, origine = C.motifs_secrets()   # toujours le filtre de nexus-core du dépôt
     marqueurs = [m.lower() for m in conf.get("marqueurs_factices", [])]
     trouves, fichiers = [], 0
     for p in sorted(racine.rglob("*")):

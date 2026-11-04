@@ -179,7 +179,7 @@ async function api(chemin, options = {}) {
   const methode = (options.method || "GET").toUpperCase();
   const corps = methode === "GET" ? undefined : (options.body || "{}");
   const r = await fetch(API + chemin, { ...options, body: corps, credentials: "same-origin",
-    headers: { "Content-Type": "application/json", "X-Cockpit": "1" } });
+    headers: { "Content-Type": "application/json", "X-Cockpit": "1", ...(options.entetes || {}) } });
   const d = await r.json().catch(() => ({}));
   if (!r.ok) throw new Error(d.detail ? (typeof d.detail === "string" ? d.detail : JSON.stringify(d.detail)) : "Erreur " + r.status);
   return d;
@@ -305,14 +305,22 @@ $("#btnVerif").addEventListener("click", async () => {
   } catch (err) { toast(err.message); }
 });
 
+let cleCreation = null;  // clé d'idempotence : la même pour tous les envois d'un même formulaire
+$("#formMission").addEventListener("input", () => { cleCreation = null; });
 $("#formMission").addEventListener("submit", async (e) => {
   e.preventDefault();
+  const bouton = e.target.querySelector("[type=submit]");
+  if (bouton && bouton.disabled) return;  // double clic : un seul envoi
+  cleCreation = cleCreation || (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random());
+  if (bouton) bouton.disabled = true;
   const corps = { titre: $("#titre").value, consigne: $("#consigne").value, service: $("#service").value || null,
     projet: $("#projet").value || null, fonctionnement: niveauChoisi(), repli_f3: $("#repliF3").checked,
     montant_eur: $("#montant").value ? Number($("#montant").value) : null, action: $("#action").value || null };
-  try { const r = await api("/missions", { method: "POST", body: JSON.stringify(corps) });
+  try { const r = await api("/missions", { method: "POST", body: JSON.stringify(corps), entetes: { "Idempotency-Key": cleCreation } });
+    cleCreation = null;
     toast("Mission #" + r.id + " — " + (r.message || "lancée") + " (" + nomProjet(r.projet) + ", " + r.fonctionnement + ")."); e.target.reset(); dessinerNiveaux(); $("#projet").value = projetCourant() || "divers"; document.querySelector('[data-o="missions"]').click();
   } catch (err) { toast(err.message); }
+  finally { if (bouton) bouton.disabled = false; }
 });
 
 // Arrêt d'urgence avec confirmation intégrée à la page

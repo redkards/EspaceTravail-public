@@ -247,7 +247,7 @@ Tests : `tests/test_ledger_hmac.py` (6), `tests/test_pipeline.py::test_ledger_ch
 |---|---|---|---|
 | Leçons apprises | `lecons.py` | signaux déterministes (refus CHECKER, charte, refus/révision Décideur, plafonds, directeur, avis négatifs) → candidate → proposée (≥ `NEXUS_LECONS_SEUIL`) → acceptée/rejetée par le Décideur ; injection ≤ 5 leçons / 800 car. ; suspension automatique si la note du banc baisse de plus de `NEXUS_LECONS_BAISSE` points | [FAIT] (`tests/test_memoire_collective.py`) |
 | Exemples | `exemples.py` | livrable N3 validé, noté ≥ 4/5 ou marqué ; ≤ 3 actifs par service ; filtres secret, charte, bouclier | [FAIT] (`tests/test_exemples.py`) |
-| Note en un geste | `avis.py` | 👍/👎 + motif sur un échantillon stable (20 %) des missions des 14 derniers jours | [FAIT] (`tests/test_avis.py`) |
+| Note en un geste | `avis.py` | avis positif / négatif + motif sur un échantillon stable (20 %) des missions des 14 derniers jours | [FAIT] (`tests/test_avis.py`) |
 | Test fantôme | `fantome.py`, `surcharges.py` | rejoue K=5 missions avant/après une variante (leçon, exemple, charte, modèles), la nuit, sans effet de bord ; gain < 0 → déconseillé | [FAIT] (`tests/test_fantome.py`) |
 | Pilote hebdomadaire | `pilote.py` | lundi 07 h 30, une mission PILOT-CORE/pilotage par projet actif, consolidée en une décision « Plan de la semaine » | [FAIT] (`tests/test_pilote.py`) |
 | Résumé quotidien | `resume.py` | ntfy générique à 19 h | [FAIT] (`tests/test_pwa_resume.py`) |

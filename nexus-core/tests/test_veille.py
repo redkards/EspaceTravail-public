@@ -1,5 +1,6 @@
 """Veille SYFER branchée sur le COLLECTOR (base veille.db factice, aucun appel LLM supplémentaire)."""
 import sqlite3
+from pathlib import Path
 
 import pytest
 
@@ -7,17 +8,14 @@ from app import ledger, pipeline, veille
 from app.llm import FournisseurFactice
 from tests.conftest import creer_mission, lire_mission
 
-SCHEMA = """
-CREATE TABLE fiches (id INTEGER PRIMARY KEY, source_id TEXT NOT NULL, titre TEXT NOT NULL, resume TEXT NOT NULL DEFAULT '',
-  url TEXT NOT NULL, url_canonique TEXT NOT NULL UNIQUE, empreinte TEXT NOT NULL UNIQUE, date TEXT,
-  domaines TEXT NOT NULL DEFAULT '', services TEXT NOT NULL DEFAULT '', projets TEXT NOT NULL DEFAULT '',
-  confiance TEXT NOT NULL, type TEXT NOT NULL DEFAULT '', langue TEXT NOT NULL DEFAULT '',
-  score_injection INTEGER NOT NULL DEFAULT 0, collecte_le TEXT NOT NULL);
-CREATE VIRTUAL TABLE fiches_fts USING fts5(titre, resume, domaines, content='fiches', content_rowid='id',
-  tokenize='unicode61 remove_diacritics 2');
-CREATE TRIGGER fiches_ai AFTER INSERT ON fiches BEGIN
-  INSERT INTO fiches_fts(rowid, titre, resume, domaines) VALUES (new.id, new.titre, new.resume, new.domaines); END;
-"""
+def _schema_veille() -> str:
+    """Schéma de la base tel que le définit le module de veille lui-même (suit ses évolutions)."""
+    import importlib.util
+    f = Path(__file__).resolve().parents[2] / "veille" / "collecteur.py"
+    spec = importlib.util.spec_from_file_location("syfer_veille_collecteur_test", f)
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    return m.SCHEMA
 FICHES = [
     ("anj", "Jeu responsable : nouvelles obligations", "L'autorité rappelle la mention jeu responsable obligatoire.", "A"),
     ("x-poker", "Rumeur tournoi", "Un compte affirme que le tournoi de jeu responsable est annulé.", "D"),
@@ -30,7 +28,7 @@ FICHES = [
 def base(tmp_path, monkeypatch):
     chemin = tmp_path / "veille.db"
     c = sqlite3.connect(chemin)
-    c.executescript(SCHEMA)
+    c.executescript(_schema_veille())
     for i, (src, titre, resume, conf) in enumerate(FICHES, 1):
         c.execute("INSERT INTO fiches (source_id, titre, resume, url, url_canonique, empreinte, date, domaines, services,"
                   " projets, confiance, collecte_le) VALUES (?,?,?,?,?,?,strftime('%Y-%m-%dT%H:%M:%SZ','now'),'jeux','|OPS-CORE/projets|',"

@@ -44,7 +44,7 @@ flowchart LR
     D["Décideur<br/>(téléphone Android)"] -->|HTTPS 443<br/>mot de passe| C[Caddy]
     D -->|appli ntfy| N[(ntfy.sh<br/>alertes génériques)]
     D -->|hPanel > Terminal| V[Console web root]
-    IA["Claude · ChatGPT · Gemini"] -->|/mcp/&lt;jeton&gt;| C
+    IA["Claude · ChatGPT · Gemini"] -->|"/mcp/jeton secret"| C
     C -->|/cockpit, /api| CORE["nexus-core<br/>93 rôles · cockpit · LEDGER"]
     C -->|/mcp, /bridge| BR["nexus-bridge<br/>passerelle MCP"]
     CORE --> OL["ollama local<br/>(secours)"]
