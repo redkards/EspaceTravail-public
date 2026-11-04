@@ -1,6 +1,6 @@
 """File d'exécution des missions : nombre limité de missions simultanées, ordre FIFO.
 
-NEXUS_MAX_MISSIONS (défaut : 1 avec un modèle local, 2 sinon) borne les missions qui tournent
+NEXUS_MAX_MISSIONS (défaut selon NEXUS_PROFIL_MATERIEL ; kvm2 : 1 avec un modèle local, 2 sinon) borne les missions qui tournent
 en même temps ; les suivantes attendent leur tour, statut visible « en_attente_place ».
 """
 import logging
@@ -18,8 +18,9 @@ def capacite() -> int:
             return max(1, int(v))
         except ValueError:
             log.warning("NEXUS_MAX_MISSIONS invalide (%s) : valeur par défaut utilisée.", v)
+    from . import profil
     from .llm import info
-    return 1 if info()["fournisseur"] in ("ollama", "fake") else 2
+    return profil.valeur("missions_local" if info()["fournisseur"] in ("ollama", "fake") else "missions_cloud")
 
 
 class FileMissions:

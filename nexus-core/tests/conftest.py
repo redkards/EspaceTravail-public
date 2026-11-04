@@ -22,6 +22,7 @@ def environnement(tmp_path, monkeypatch):
     monkeypatch.setenv("NEXUS_TACHES_FOND", "0")
     # Tests historiques : décisions par l'API à clé (option de test ; défaut en production = 0 → 403).
     monkeypatch.setenv("NEXUS_API_PEUT_DECIDER", "1")
+    monkeypatch.delenv("NEXUS_PROFIL_MATERIEL", raising=False)
     monkeypatch.setenv("VEILLE_DB", str(tmp_path / "veille-absente.db"))  # aucune vraie base de veille
     monkeypatch.setenv("COCKPIT_INTERNAL", COCKPIT_INTERNE)
     monkeypatch.setenv("NEXUS_HOST", "nexus.exemple.fr")

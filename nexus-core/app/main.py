@@ -183,8 +183,9 @@ def sante_publique():
     from .llm import info
     from .ledger import avertissement
     avert = [a for a in (avertissement(),) if a]
+    from .profil import nom
     return {"statut": "ok", "service": "nexus-core", "llm": info(), "fonctionnement_defaut": defaut(),
-            "ledger_hmac": not avert, "avertissements": avert}
+            "profil_materiel": nom(), "ledger_hmac": not avert, "avertissements": avert}
 
 
 app.include_router(creer_routeur(), prefix="/api", dependencies=[Depends(verifier_cle)])

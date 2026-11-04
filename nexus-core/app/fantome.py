@@ -33,7 +33,8 @@ FILE_CLE = "fantome:file"
 
 def k() -> int:
     try:
-        return max(1, int(os.environ.get("NEXUS_FANTOME_K", "") or 5))
+        from . import profil
+        return max(1, int(os.environ.get("NEXUS_FANTOME_K", "") or profil.valeur("fantome_k")))
     except ValueError:
         return 5
 

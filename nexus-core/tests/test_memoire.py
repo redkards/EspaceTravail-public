@@ -82,8 +82,12 @@ def test_import_idempotent(tmp_path):
     assert "publique" in memoire.rechercher("poker-winners", "beta")[0]["contenu"]
 
 
-def test_import_des_fichiers_du_kit():
-    d = RACINE / "projets"
+def test_import_des_fichiers_du_kit(tmp_path):
+    import shutil  # copie stable : d'autres outils écrivent des .md temporaires dans le dépôt
+    for rel in ("projets", "tests-poker/contexte"):
+        if (RACINE / rel).is_dir():
+            shutil.copytree(RACINE / rel, tmp_path / rel)
+    d = tmp_path / "projets"
     s = memoire.importer(d.parent)  # projets/ et tests-poker/contexte/
     assert s["fichiers"] >= 6 and s["ajoutees"] > 10
     assert memoire.rechercher("redkards", "pitch")  # contexte REDKARDS indexé

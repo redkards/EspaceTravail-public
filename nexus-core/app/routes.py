@@ -14,7 +14,7 @@ from sqlalchemy import func, select
 from . import agents as reg
 from . import budget, ledger, pipeline, sentinel
 from . import fonctionnement as fct
-from . import exemples, memoire
+from . import exemples, memoire, profil
 from .file_missions import FILE
 from . import projets as registre
 from .db import session_scope
@@ -113,6 +113,7 @@ def creer_routeur(cockpit: bool = False) -> APIRouter:
         from .llm import info
         return {"statut": "ok", "service": "nexus-core", "llm": info(), "agents": len(reg.charger()),
                 "fonctionnement_defaut": fct.defaut(),
+                "profil_materiel": profil.nom(),
                 "ledger_hmac": ledger.avertissement() is None,
                 "avertissements": [a for a in (ledger.avertissement(),) if a],
                 "arret_urgence": bool(sentinel.actifs().get("kill:grille"))}
