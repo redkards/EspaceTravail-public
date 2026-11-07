@@ -5,7 +5,7 @@ Aucun mot de passe demandé ni affiché. Rapport : Bureau/diagnostic-paradoxx.tx
 """
 import datetime, os, pathlib, platform, shutil, socket, subprocess
 
-VPS_TS, PORT = "100.109.148.5", 22
+VPS_TS, PORT = os.environ.get("PARADOXX_VPS_IP", "paradoxx-vps"), 22  # IP Tailscale : variable PARADOXX_VPS_IP
 SITES = ["claude.ai", "api.anthropic.com", "github.com", "google.com"]
 WIN = platform.system() == "Windows"
 lignes: list[str] = []

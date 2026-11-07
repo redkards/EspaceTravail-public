@@ -4,7 +4,7 @@
 # Aucun mot de passe demande ni affiche. Rapport : Bureau\diagnostic-paradoxx.txt (+ presse-papiers).
 
 $ErrorActionPreference = 'Continue'
-$VPS_TS   = '100.109.148.5'
+$VPS_TS   = if ($env:PARADOXX_VPS_IP) { $env:PARADOXX_VPS_IP } else { 'paradoxx-vps' }  # IP Tailscale : variable d'environnement PARADOXX_VPS_IP (voir README)
 $VPS_NOM  = 'paradoxx-vps'
 $SITES    = @('claude.ai','api.anthropic.com','github.com','google.com')
 $rapport  = Join-Path ([Environment]::GetFolderPath('Desktop')) 'diagnostic-paradoxx.txt'

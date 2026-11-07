@@ -37,3 +37,14 @@ Aucun mot de passe demandé, aucun secret écrit.
 - `correctifs-admin.sh` : correctifs S10 + S11, **à lancer par Jérémy** avec sudo (sauvegarde + retour arrière).
 - `test-multiscenarios.ps1` : test de stabilité PC → VPS (S1, S2, S4, S5, S7, S9, exposition publique), lecture seule.
 - `SCHEMA-CONFIG.md` + `schema-config.png` : configuration cible (Tailscale, ufw, sshd, fail2ban, pare-feu Hostinger).
+
+## Adresse du VPS (variables d'environnement)
+
+Les scripts ne contiennent plus l'adresse du serveur. Sur le PC, définir une fois (PowerShell) :
+
+```powershell
+[Environment]::SetEnvironmentVariable('PARADOXX_VPS_IP', '<IP Tailscale du VPS>', 'User')        # tailscale ip -4 paradoxx-vps
+[Environment]::SetEnvironmentVariable('PARADOXX_VPS_PUBLIC', '<nom public du VPS>', 'User')
+```
+
+Sans ces variables, les scripts utilisent le nom MagicDNS `paradoxx-vps` (le test « DNS cassé » S1 demande l'IP).
