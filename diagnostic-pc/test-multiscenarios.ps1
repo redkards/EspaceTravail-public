@@ -2,7 +2,8 @@
 # Lancement : powershell -ExecutionPolicy Bypass -File .\test-multiscenarios.ps1  [-Minutes 3]
 # Couvre S1, S2, S4, S5, S9 et l'exposition publique (pare-feu Hostinger + ufw). Rapport : Bureau\multiscenarios-paradoxx.txt
 param([int]$Minutes = 3)
-$VPS_TS = '100.109.148.5'; $VPS_PUB = 'srv2113898.hstgr.cloud'
+$VPS_TS  = if ($env:PARADOXX_VPS_IP) { $env:PARADOXX_VPS_IP } else { 'paradoxx-vps' }
+$VPS_PUB = if ($env:PARADOXX_VPS_PUBLIC) { $env:PARADOXX_VPS_PUBLIC } else { 'vps.example.invalid' }
 $L = New-Object System.Collections.Generic.List[string]
 function Log($t){ Write-Host $t; $L.Add($t) }
 function R($id,$ok,$t){ Log ("[{0}] {1,-4} {2}" -f ($(if($ok){'OK   '}else{'ECHEC'}), $id, $t)) }

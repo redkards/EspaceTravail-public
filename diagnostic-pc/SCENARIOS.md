@@ -12,7 +12,7 @@ Chemins d'accès, du plus rapide au secours ultime :
 
 | # | Situation | Effet attendu | Chemin qui reste | Parade / amélioration | Test réel | Niveau |
 |---|---|---|---|---|---|---|
-| S1 | DNS du PC cassé (ERR_NAME_NOT_RESOLVED) | Claude desktop, GitHub, Notion KO ; Tailscale par IP OK | A (par IP 100.109.148.5) | `ipconfig /flushdns` ; exit node off ; repli `accept-dns=false` | `Resolve-DnsName claude.ai` + `ssh paradoxx` | Sûr |
+| S1 | DNS du PC cassé (ERR_NAME_NOT_RESOLVED) | Claude desktop, GitHub, Notion KO ; Tailscale par IP OK | A (par IP Tailscale du VPS) | `ipconfig /flushdns` ; exit node off ; repli `accept-dns=false` | `Resolve-DnsName claude.ai` + `ssh paradoxx` | Sûr |
 | S2 | MagicDNS ne résout plus `paradoxx-vps` | `ssh paradoxx-vps` KO | A par IP | Alias SSH avec **IP en HostName** (pas le nom) | `ssh -G paradoxx \| findstr hostname` | Sûr |
 | S3 | Box / fibre en panne | Plus d'Internet sur le PC | A depuis le S23 en 4G | Partage de connexion S23 → PC | Termius en 4G (Wi-Fi coupé) | Sûr |
 | S4 | Connexion directe bloquée (NAT, Wi-Fi public) | Ping Tailscale « via DERP » plus lent | B | Rien à faire ; surveiller la latence | `tailscale ping paradoxx-vps` + `tailscale netcheck` | Sûr |
@@ -39,7 +39,7 @@ Chemins d'accès, du plus rapide au secours ultime :
 
 ```
 Host paradoxx
-    HostName 100.109.148.5
+    HostName <IP_TAILSCALE_DU_VPS>   # tailscale ip -4 paradoxx-vps
     User paradoxx
     ServerAliveInterval 30
     ServerAliveCountMax 4
